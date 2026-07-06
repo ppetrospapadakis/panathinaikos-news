@@ -10,6 +10,11 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const parser = new Parser({
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5'
+    },
     customFields: {
         item: [
             ['media:content', 'mediaContent'],
@@ -19,24 +24,75 @@ const parser = new Parser({
     }
 });
 
-// Configure RSS feeds for Panathinaikos
+// Configure RSS feeds for the 6 Greek sports portals
 const RSS_FEEDS = [
     {
-        name: 'Gazzetta Panathinaikos',
-        url: 'https://www.gazzetta.gr/rss/sports/football/panathinaikos',
-        defaultCategory: 'Ποδόσφαιρο'
+        name: 'Gazzetta.gr',
+        url: 'https://www.gazzetta.gr/rss',
+        defaultCategory: 'Ποδόσφαιρο',
+        requiresKeywordFilter: true
     },
     {
-        name: 'Sport24 Panathinaikos',
+        name: 'Sport24.gr',
         url: 'https://www.sport24.gr/rss/panathinaikos',
-        defaultCategory: 'Ποδόσφαιρο'
+        defaultCategory: 'Ποδόσφαιρο',
+        requiresKeywordFilter: false
     },
     {
-        name: 'SDNA',
-        url: 'https://www.sdna.gr/rss',
-        defaultCategory: 'All News'
+        name: 'SDNA.gr',
+        url: 'https://www.sdna.gr/rss.xml',
+        defaultCategory: 'All News',
+        requiresKeywordFilter: true
+    },
+    {
+        name: 'Sportal.gr',
+        url: 'https://www.sportal.gr/rss',
+        defaultCategory: 'All News',
+        requiresKeywordFilter: true
+    },
+    {
+        name: 'Sport-fm.gr',
+        url: 'https://www.sport-fm.gr/rss',
+        defaultCategory: 'All News',
+        requiresKeywordFilter: true
+    },
+    {
+        name: 'Athletiko.gr',
+        url: 'https://athletiko.gr/feed/',
+        defaultCategory: 'All News',
+        requiresKeywordFilter: true
     }
 ];
+
+// Helper to check if an article is relevant to Panathinaikos
+function isPanathinaikosNews(item) {
+    const title = (item.title || '').toLowerCase();
+    const summary = (item.contentSnippet || item.summary || '').toLowerCase();
+    const content = (item.content || '').toLowerCase();
+
+    // Core Panathinaikos keywords (safe for substring matching)
+    const keywords = [
+        'παναθηναϊκός', 'παναθηναϊκού', 'παναθηναϊκό', 'παναθηναϊκή', 'παναθηναϊκά', 'παναθηναϊκές',
+        'παναθηναικος', 'παναθηναικου', 'παναθηναικο', 'παναθηναικη', 'παναθηναικα',
+        'πράσινοι', 'πράσινο', 'πράσινους', 'πράσινης', 'πράσινου', 'πράσινα', 'πρασινοι', 'πρασινο', 'πρασινη',
+        'τριφύλλι', 'τριφύλλια', 'τριφυλλιού', 'τριφυλλι', 'trifili',
+        'panathinaikos', 'gate 13', 'gate13', 'οακα', 'λεωφόρος', 'λεωφορος',
+        'ιωαννίδης', 'σλούκας', 'αταμάν', 'γιούρτσεβεν', 'μπακασέτας', 'τετέ', 'πελίστρι', 'γιεντβάι',
+        'ινγκασον', 'ντραγκόφσκι', 'βαγιαννίδης', 'παπαπέτρου', 'sloukas', 'ionnidis', 'ataman'
+    ];
+
+    const hasKeyword = keywords.some(keyword => 
+        title.includes(keyword) || 
+        summary.includes(keyword) || 
+        content.includes(keyword)
+    );
+
+    if (hasKeyword) return true;
+
+    // Use regex word boundaries for short terms like 'pao' / 'παο' to avoid false positives (e.g. matching 'paok')
+    const textToSearch = `${title} ${summary} ${content}`;
+    return /\b(pao|παο)\b/i.test(textToSearch);
+}
 
 // Helper to extract image URL from RSS item
 function extractImageUrl(item) {
@@ -107,6 +163,11 @@ async function scrapeNews() {
             console.log(`[SCRAPER] Successfully parsed ${parsedFeed.items.length} items from ${feed.name}`);
 
             for (const item of parsedFeed.items) {
+                // If feed is general, filter out articles that don't refer to Panathinaikos
+                if (feed.requiresKeywordFilter && !isPanathinaikosNews(item)) {
+                    continue;
+                }
+
                 totalScraped++;
                 
                 const title = item.title;
