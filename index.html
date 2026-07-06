@@ -427,7 +427,7 @@
                 const featuredSource = extractSourceDomain(featuredArticle.source_url).toUpperCase();
 
                 const featuredHtml = `
-                    <div class="md:col-span-8 group cursor-pointer bg-surface-container p-16 rounded-xl border border-outline-variant/20 flex flex-col justify-between">
+                    <div class="md:col-span-8 group cursor-pointer bg-surface-container p-16 rounded-xl border border-outline-variant/20 flex flex-col justify-between" onclick="window.location.href='article.html?id=${featuredArticle.id}'">
                         <div>
                             <div class="relative aspect-video overflow-hidden rounded-xl mb-6">
                                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${featuredArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhsGnhb89Mr6LU90QOkYs89yrGAXnTtyrPN_Apxq6ePrLsikSQAKLeVpVQHQAOuhaTlqwk8S0RVdPuBV9Kyon32vplAg_R2WdEvlUh5vhSAMvsSp8L_1Ab2bYgAEyHkcFvauYkP1d_VTtz4oFAgOTI1ZS47TuksoJNwSPqNAH6hab4XeeZjR_XhhhcPL7uv1eDN8lXb90zXP4kxXxx6uCq11kQDPA9WclUUS9VrP9AaZToYGgaS_DZtcFYnvNuq437RXh6Jz4I66c'}" />
@@ -435,11 +435,11 @@
                             </div>
                             <span class="font-label text-label text-primary uppercase tracking-widest">${featuredArticle.category || 'Ποδόσφαιρο'} • ${featuredSource} • ${featuredDateStr}</span>
                             <h3 class="font-h2 text-h2 mt-2 group-hover:text-primary transition-colors leading-tight">
-                                <a href="${featuredArticle.source_url}" target="_blank">${featuredArticle.title}</a>
+                                <a href="article.html?id=${featuredArticle.id}" onclick="event.preventDefault()">${featuredArticle.title}</a>
                             </h3>
                             <p class="font-body text-body text-on-surface-variant mt-3 line-clamp-2">${featuredArticle.summary || ''}</p>
                         </div>
-                        <div class="mt-8">
+                        <div class="mt-8" onclick="event.stopPropagation()">
                             ${featuredBulletsHtml}
                             ${featuredRelatedHtml}
                         </div>
@@ -459,14 +459,14 @@
                         const source = extractSourceDomain(art.source_url).toUpperCase();
 
                         sideHtml += `
-                            <div class="group cursor-pointer flex gap-4 items-start bg-surface-container/30 p-8 rounded-lg hover:bg-surface-container/60 transition-colors">
+                            <div class="group cursor-pointer flex gap-4 items-start bg-surface-container/30 p-8 rounded-lg hover:bg-surface-container/60 transition-colors" onclick="window.location.href='article.html?id=${art.id}'">
                                 <div class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden relative">
                                     <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${art.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
                                 </div>
                                 <div>
                                     <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${art.category || 'Ποδόσφαιρο'} • ${source}</span>
                                     <h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-2">
-                                        <a href="${art.source_url}" target="_blank">${art.title}</a>
+                                        <a href="article.html?id=${art.id}" onclick="event.preventDefault()">${art.title}</a>
                                     </h4>
                                     <span class="text-xs text-on-surface-variant/70 mt-2 block">${dateStr}</span>
                                 </div>
@@ -529,18 +529,18 @@
                         }
 
                         const cardHtml = `
-                            <div class="md:col-span-6 lg:col-span-4 group cursor-pointer bg-surface-container/30 p-16 rounded-xl border border-outline-variant/10 flex flex-col justify-between">
+                            <div class="md:col-span-6 lg:col-span-4 group cursor-pointer bg-surface-container/30 p-16 rounded-xl border border-outline-variant/10 flex flex-col justify-between" onclick="window.location.href='article.html?id=${art.id}'">
                                 <div>
                                     <div class="relative aspect-video overflow-hidden rounded-xl mb-4">
                                         <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${art.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
                                     </div>
                                     <span class="font-label text-label text-primary uppercase">${art.category || 'Ποδόσφαιρο'} • ${source} • ${dateStr}</span>
                                     <h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-2">
-                                        <a href="${art.source_url}" target="_blank">${art.title}</a>
+                                        <a href="article.html?id=${art.id}" onclick="event.preventDefault()">${art.title}</a>
                                     </h4>
                                     <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 mt-3">${art.summary || ''}</p>
                                 </div>
-                                <div class="mt-8">
+                                <div class="mt-8" onclick="event.stopPropagation()">
                                     ${bulletsHtml}
                                     ${relatedHtml}
                                 </div>

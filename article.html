@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="dark" lang="el">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Panathinaikos News - Άρθρο</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #111317;
+            color: #e2e2e8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .content-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .content-container::-webkit-scrollbar-thumb {
+            background: #3f4940;
+            border-radius: 10px;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#32a45b",
+                        "outline-variant": "#3f4940",
+                        "surface-tint": "#84d999",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-tertiary": "#3c2f00",
+                        "inverse-surface": "#e2e2e8",
+                        "tertiary": "#ebc23e",
+                        "on-primary-fixed-variant": "#005228",
+                        "error-container": "#93000a",
+                        "background": "#111317",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "error": "#ffb4ab",
+                        "surface": "#111317",
+                        "primary": "#84d999",
+                        "on-error": "#690005",
+                        "surface-dim": "#111317",
+                        "surface-bright": "#37393e",
+                        "on-secondary-container": "#003114",
+                        "surface-container-low": "#1a1c20",
+                        "inverse-primary": "#0f6d39",
+                        "tertiary-fixed": "#ffe087",
+                        "on-background": "#e2e2e8",
+                        "surface-container-highest": "#333539",
+                        "secondary": "#6edd8c",
+                        "primary-fixed-dim": "#84d999",
+                        "on-secondary-fixed-variant": "#005226",
+                        "inverse-on-surface": "#2f3035",
+                        "surface-variant": "#333539",
+                        "outline": "#899488",
+                        "on-tertiary-container": "#4e3d00",
+                        "secondary-fixed-dim": "#6edd8c",
+                        "on-surface": "#e2e2e8",
+                        "on-primary-fixed": "#00210c",
+                        "surface-container-lowest": "#0c0e12",
+                        "surface-container-high": "#282a2e",
+                        "primary-fixed": "#9ff6b4",
+                        "on-secondary": "#003918",
+                        "on-primary": "#00391a",
+                        "surface-container": "#1e2024",
+                        "secondary-fixed": "#8afaa6",
+                        "on-surface-variant": "#bfc9bd",
+                        "on-secondary-fixed": "#00210b",
+                        "tertiary-fixed-dim": "#ebc23e",
+                        "on-primary-container": "#8ce1a1",
+                        "primary-container": "#006633",
+                        "tertiary-container": "#cda721",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "64": "64px",
+                        "16": "16px",
+                        "8": "8px",
+                        "48": "48px",
+                        "96": "96px",
+                        "32": "32px",
+                        "4": "4px",
+                        "24": "24px"
+                    },
+                    "fontFamily": {
+                        "display-xl": ["Geist"], "h2": ["Geist"], "h4": ["Geist"],
+                        "display-l-mobile": ["Geist"], "h3": ["Geist"], "h1": ["Geist"],
+                        "display-l": ["Geist"], "caption": ["Geist"], "body-sm": ["Geist"],
+                        "label": ["Geist"], "body-lg": ["Geist"], "body": ["Geist"]
+                    },
+                    "fontSize": {
+                        "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "h2": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "h4": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "display-l-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "h1": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "display-l": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+                        "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden">
+    <header class="bg-surface fixed top-0 right-0 w-[calc(100%-256px)] h-16 border-b border-outline-variant flex justify-between items-center px-8 z-50">
+        <div class="flex items-center gap-4">
+            <span class="font-h3 text-h3 font-bold text-on-surface cursor-pointer active:opacity-70" onclick="window.location.href='index.html'">PANATHINAIKOS</span>
+            <div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
+            <span class="text-on-surface-variant font-label text-label uppercase tracking-widest" id="header-category">Άρθρο</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="px-6 py-2 bg-secondary-container text-on-secondary-container font-bold rounded-lg flex items-center gap-2" onclick="window.location.href='index.html'">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span>Επιστροφή</span>
+            </button>
+        </div>
+    </header>
+
+    <aside class="h-screen w-[256px] fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col p-4 z-50">
+        <div class="flex flex-col gap-1 mb-8 px-4">
+            <div class="font-h2 text-h2 font-semibold text-primary cursor-pointer" onclick="window.location.href='index.html'">PANATHINAIKOS</div>
+        </div>
+        <nav class="flex-1 flex flex-col gap-2">
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="index.html">
+                <span class="material-symbols-outlined">home</span>
+                <span>Home</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="dashboard.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="roster.html">
+                <span class="material-symbols-outlined">groups</span>
+                <span>Roster</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="editor.html">
+                <span class="material-symbols-outlined">edit_note</span>
+                <span>Article Editor</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-[256px] mt-16 h-[calc(100vh-64px)] flex flex-col overflow-y-auto content-container">
+        <!-- Main Article Area -->
+        <section class="flex-1 py-16 px-8 flex justify-center">
+            <article class="w-full max-w-[800px] bg-transparent space-y-8" id="article-loader-placeholder">
+                <!-- Skeleton Loader -->
+                <div class="animate-pulse space-y-6">
+                    <div class="h-8 bg-surface-container-high w-1/4 rounded"></div>
+                    <div class="h-12 bg-surface-container-high w-3/4 rounded"></div>
+                    <div class="h-64 bg-surface-container-high w-full rounded-xl"></div>
+                    <div class="h-4 bg-surface-container-high w-full rounded"></div>
+                    <div class="h-4 bg-surface-container-high w-5/6 rounded"></div>
+                </div>
+            </article>
+
+            <!-- Dynamic Article Content (Hidden initially) -->
+            <article class="w-full max-w-[800px] bg-transparent space-y-8 hidden" id="article-display-container">
+                <!-- Category and Date -->
+                <div class="flex items-center gap-4 text-xs font-label text-primary uppercase tracking-wider">
+                    <span id="article-category">Κατηγορία</span>
+                    <span>•</span>
+                    <span id="article-date">Ημερομηνία</span>
+                    <span>•</span>
+                    <span id="article-source">Πηγή</span>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="font-display-l text-display-l text-on-surface leading-tight" id="article-title">
+                    Φόρτωση τίτλου...
+                </h1>
+
+                <!-- Article Image Banner -->
+                <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-surface-container-low border border-outline-variant/20 shadow-lg" id="article-image-box">
+                    <img class="w-full h-full object-cover" id="article-image" src="" alt="Article Banner"/>
+                </div>
+
+                <!-- AI Quick-Takes Bullets Box -->
+                <div class="p-24 bg-surface-container-low rounded-2xl border border-primary/20 space-y-16" id="article-bullets-box">
+                    <div class="flex items-center gap-8 text-primary font-bold text-sm uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-[18px]">bolt</span>
+                        <span>F5 Quick-Takes (AI Summary)</span>
+                    </div>
+                    <ul class="list-disc pl-16 space-y-8 text-on-surface-variant leading-relaxed text-body" id="article-bullets-list">
+                        <!-- Bullets go here -->
+                    </ul>
+                </div>
+
+                <!-- Main Summary / Content -->
+                <div class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed space-y-6" id="article-text-body">
+                    <!-- Text content goes here -->
+                </div>
+
+                <!-- Original Link Action Button -->
+                <div class="pt-24 border-t border-outline-variant/30 text-center">
+                    <a class="inline-flex items-center gap-12 px-24 py-16 bg-primary text-on-primary font-h4 text-h4 font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-md" id="article-original-link" href="#" target="_blank">
+                        <span>Διαβάστε το πλήρες ρεπορτάζ στο <span id="article-source-name">Gazzetta</span></span>
+                        <span class="material-symbols-outlined">open_in_new</span>
+                    </a>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <!-- Supabase SDK & Controller -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Helper: format domain name
+        function extractSourceDomain(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return domain.replace('www.', '').split('.')[0];
+            } catch (e) {
+                return 'News';
+            }
+        }
+
+        // Fetch single article
+        async function loadArticle() {
+            try {
+                // Get URL parameter id
+                const urlParams = new URLSearchParams(window.location.search);
+                const articleId = urlParams.get('id');
+
+                if (!articleId) {
+                    throw new Error('Δεν προσδιορίστηκε ID άρθρου.');
+                }
+
+                // Query Supabase for article details
+                const { data: article, error } = await supabaseClient
+                    .from('articles')
+                    .select('*')
+                    .eq('id', articleId)
+                    .single();
+
+                if (error) throw error;
+                if (!article) throw new Error('Το άρθρο δεν βρέθηκε.');
+
+                // Fill details in UI
+                document.getElementById('header-category').textContent = article.category || 'Ποδόσφαιρο';
+                document.getElementById('article-category').textContent = article.category || 'Ποδόσφαιρο';
+                document.getElementById('article-title').textContent = article.title;
+                
+                // Format Date
+                const publishDate = new Date(article.created_at);
+                const formattedDate = publishDate.toLocaleDateString('el-GR', {
+                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                document.getElementById('article-date').textContent = formattedDate;
+
+                // Domain name
+                const domain = extractSourceDomain(article.source_url);
+                document.getElementById('article-source').textContent = domain.toUpperCase();
+                document.getElementById('article-source-name').textContent = domain.toUpperCase();
+                document.getElementById('article-original-link').href = article.source_url;
+
+                // Image Banner
+                if (article.image_url) {
+                    document.getElementById('article-image').src = article.image_url;
+                } else {
+                    document.getElementById('article-image-box').style.display = 'none';
+                }
+
+                // AI Bullets List
+                const bulletsList = document.getElementById('article-bullets-list');
+                bulletsList.innerHTML = '';
+                if (article.bullets && article.bullets.length > 0) {
+                    article.bullets.forEach(bullet => {
+                        const li = document.createElement('li');
+                        li.textContent = bullet;
+                        bulletsList.appendChild(li);
+                    });
+                } else {
+                    document.getElementById('article-bullets-box').style.display = 'none';
+                }
+
+                // Article Content body
+                const textBody = document.getElementById('article-text-body');
+                textBody.innerHTML = '';
+                
+                // Show content if it exists, otherwise fall back to summary
+                const bodyText = article.content || article.summary || '';
+                if (bodyText) {
+                    // Split paragraphs by double newline and render them
+                    const paragraphs = bodyText.split('\n');
+                    paragraphs.forEach(p => {
+                        const trimmed = p.trim();
+                        if (trimmed) {
+                            const pElem = document.createElement('p');
+                            pElem.textContent = trimmed;
+                            textBody.appendChild(pElem);
+                        }
+                    });
+                } else {
+                    textBody.innerHTML = '<p class="italic text-on-surface-variant/70">Δεν υπάρχει διαθέσιμο κείμενο άρθρου.</p>';
+                }
+
+                // Toggle visibility
+                document.getElementById('article-loader-placeholder').style.display = 'none';
+                document.getElementById('article-display-container').classList.remove('hidden');
+
+            } catch (err) {
+                console.error('Error loading article:', err);
+                document.getElementById('article-loader-placeholder').innerHTML = `
+                    <div class="p-32 bg-error-container/20 border border-error/20 text-error rounded-xl text-center font-body space-y-4">
+                        <span class="material-symbols-outlined text-4xl">error</span>
+                        <p class="font-h3">Σφάλμα κατά τη φόρτωση του άρθρου</p>
+                        <p class="text-sm">${err.message}</p>
+                        <button class="mt-8 px-16 py-8 bg-surface-container border border-outline-variant rounded hover:bg-surface-container-high" onclick="window.location.href='index.html'">Επιστροφή στην Αρχική</button>
+                    </div>
+                `;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadArticle);
+    </script>
+</body>
+</html>
