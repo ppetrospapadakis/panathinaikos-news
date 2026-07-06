@@ -92,7 +92,13 @@ async function generateAiBullets(title, text) {
 
     try {
         console.log(`[AI] Generating bullets using Gemini API...`);
-        const cleanContent = (text || '').replace(/<[^>]*>/g, ' ').substring(0, 4000);
+        const cleanContent = (text || '')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/\bσύμφωνα με (τ\w+|το|την|τον)\b/gi, '')
+            .replace(/\b(γράφει|αναφέρει|επισημαίνει|αποκαλύπτει|μεταδίδει)\b/gi, '')
+            .replace(/\b(gazzetta|sport24|sdna|sportal|sport-fm|athletiko|το site|η ιστοσελίδα|το portal|το μέσο)\b/gi, '')
+            .replace(/\s+/g, ' ').trim()
+            .substring(0, 4000);
         
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -102,10 +108,18 @@ async function generateAiBullets(title, text) {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `Αναλύστε το παρακάτω ρεπορτάζ αθλητικών νέων για τον Παναθηναϊκό. Δημιουργήστε ακριβώς 3 σύντομα, δυναμικά bullet points στα Ελληνικά που συνοψίζουν τα βασικά γεγονότα. Επιστρέψτε ΜΟΝΟ ένα JSON array από 3 strings (π.χ. ["bullet 1", "bullet 2", "bullet 3"]). Χωρίς markdown wrappers.
+                            text: `Είσαι in-house αθλητικός συντάκτης για τον Παναθηναϊκό. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points στα Ελληνικά.
 
-Title: ${title}
-Content: ${cleanContent}`
+ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
+- Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη — ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία
+- ΑΠΑΓΟΡΕΥΕΤΑΙ: «Σύμφωνα με...», «Το X γράφει...», «Ανακοίνωσε η ιστοσελίδα...», «Μεταδίδεται από...»
+- Γράφε σε άμεσο, αυθεντικό δημοσιογραφικό ύφος σαν να το ξέρεις ο ίδιος
+- Κάθε bullet πρέπει να είναι συγκεκριμένο και να αποφεύγει γενικολογίες
+
+Επίστρεψε ΜΟΝΟ ένα JSON array από 3 strings. Χωρίς markdown.
+
+Τίτλος: ${title}
+Περιεχόμενο: ${cleanContent}`
                         }]
                     }],
                     generationConfig: { responseMimeType: 'application/json' }
@@ -140,7 +154,12 @@ async function generateLongFormContent(title, text) {
 
     try {
         console.log(`[AI] Generating long-form article using Gemini API...`);
-        const cleanContent = (text || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 5000);
+        const cleanContent = (text || '')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/\bσύμφωνα με (τ\w+|το|την|τον)\b/gi, '')
+            .replace(/\b(gazzetta|sport24|sdna|sportal|sport-fm|athletiko|το site|η ιστοσελίδα|το portal|το μέσο|το ρεπορτάζ προέρχεται)\b/gi, '')
+            .replace(/\s+/g, ' ').trim()
+            .substring(0, 6000);
 
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -150,22 +169,28 @@ async function generateLongFormContent(title, text) {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `Είσαι έμπειρος αθλητικός συντάκτης που καλύπτει τον Παναθηναϊκό. Βάσει του παρακάτω υλικού, γράψε ένα πλήρες, επαγγελματικό αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά. Το άρθρο πρέπει να είναι:
-- Ελάχιστον 4-6 παράγραφοι
-- Εκτενές και αναλυτικό (300-500 λέξεις)
-- Γραμμένο σε δημοσιογραφικό ύφος, ζωηρό και ενημερωτικό
-- Να καλύπτει το κύριο θέμα, τις επιπτώσεις στην ομάδα, και τυχόν ευρύτερο context
-- Να μην περιέχει HTML tags — μόνο καθαρό κείμενο με παραγράφους χωρισμένες με κενές γραμμές
+                            text: `Είσαι in-house αθλητικός αρχισυντάκτης που καλύπτει αποκλειστικά τον Παναθηναϊκό. Η συνταξιακή ομάδα σου δημοσιεύει πρωτότυπα ρεπορτάζ — δεν αναδημοσιεύεις από άλλες πηγές.
+
+Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, αυθεντικό αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+
+ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ — ΑΥΣΤΗΡΑ:
+1. ΠΟΤΕ μην αναφέρεις πού βρέθηκε η πληροφορία (καμία αναφορά σε portal, ιστοσελίδα, ΜΜΕ, «ανακοίνωσε το X»)
+2. ΑΠΑΓΟΡΕΥΟΝΤΑΙ φράσεις: «Σύμφωνα με...», «Όπως μεταδίδει...», «Το Sportal/Gazzetta/Sport24 αναφέρει...», «Γράφεται ότι...», «Σε δημοσίευμα...»
+3. Γράφε σε πρώτο πρόσωπο συνταξιακής ομάδας ή σε τρίτο πρόσωπο για τους αθλητές/ομάδα — ΠΑΝΤΑ αυθεντικά
+4. Ελάχιστον 5-7 παράγραφοι (400-600 λέξεις)
+5. Κάλυψε: κύριο γεγονός, αθλητικό context, επιπτώσεις στην ομάδα, ιστορικό background, προοπτικές
+6. Μόνο καθαρό κείμενο — χωρίς HTML tags, χωρίς markdown, παράγραφοι χωρισμένες με κενή γραμμή
+7. Ύφος: επαγγελματικό, δυναμικό, σαν κορυφαίο αθλητικό ρεπορτάζ
 
 Τίτλος: ${title}
-Πηγαίο υλικό: ${cleanContent}
+Πληροφορίες: ${cleanContent}
 
-Γράψε ΜΟΝΟ το κείμενο του άρθρου, χωρίς τίτλο, χωρίς εισαγωγικά, χωρίς markdown.`
+Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς εισαγωγικά, χωρίς υπογραφή.`
                         }]
                     }],
                     generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 1024
+                        temperature: 0.75,
+                        maxOutputTokens: 2048
                     }
                 })
             }
@@ -279,23 +304,47 @@ function extractImageUrl(item) {
     return null;
 }
 
-// Helper to determine category based on content keywords
+// Helper to determine category based on strict priority keyword rules
 function determineCategory(item, defaultCategory) {
     const textToSearch = `${item.title || ''} ${item.content || ''} ${item.contentSnippet || ''}`.toLowerCase();
-    
-    if (textToSearch.includes('μπάσκετ') || textToSearch.includes('basketball') || textToSearch.includes('sloukas') || textToSearch.includes('σλούκας') || textToSearch.includes('οακα')) {
+
+    // PRIORITY 1: Basketball — checked first (KAE/AKTOR entities are basketball-exclusive)
+    const basketballKeywords = [
+        'μπάσκετ', 'basketball', 'euroleague', 'basket league', 'κae', 'καε',
+        'aktor', 'ακτωρ', 'sloukas', 'σλούκας', 'παπαπέτρου', 'ataman',
+        'ευρωλίγκα', 'super1', 'οακα', 'oaka', 'φεντεξπο', 'βγοστόκ',
+        'αντετοκούνμπο', 'νba', 'real madrid basket', 'fenerbahce basket'
+    ];
+    if (basketballKeywords.some(kw => textToSearch.includes(kw))) {
         return 'Μπάσκετ';
     }
-    if (textToSearch.includes('μεταγραφές') || textToSearch.includes('μεταγραφή') || textToSearch.includes('transfer')) {
+
+    // PRIORITY 2: Football — ΠΑΕ and Super League are football-exclusive
+    const footballKeywords = [
+        'παε', 'super league', 'superleague', 'ποδόσφαιρο', 'ποδοσφαιρο',
+        'τελικό', 'τελικοσ', 'σούπερ λιγκ', 'europa league', 'conference league',
+        'champions league', 'fifa', 'uefa', 'μπακασέτας', 'τετέ', 'πελίστρι',
+        'γιεντβάι', 'ντραγκόφσκι', 'βαγιαννίδης', 'ioannidis', 'ιωαννίδης'
+    ];
+    if (footballKeywords.some(kw => textToSearch.includes(kw))) {
+        return 'Ποδόσφαιρο';
+    }
+
+    // PRIORITY 3: Transfers
+    if (textToSearch.includes('μεταγραφ') || textToSearch.includes('transfer') || textToSearch.includes('μεταγραφέ')) {
         return 'Μεταγραφές';
     }
-    if (textToSearch.includes('opinion') || textToSearch.includes('άποψη') || textToSearch.includes('σχόλιο')) {
-        return 'Opinion';
-    }
-    if (textToSearch.includes('ερασιτέχνης') || textToSearch.includes('ερασιτέχνη') || textToSearch.includes('αο')) {
+
+    // PRIORITY 4: Amateur sports
+    if (textToSearch.includes('ερασιτέχν') || textToSearch.includes('ερασιτεχν')) {
         return 'Ερασιτέχνης';
     }
-    
+
+    // PRIORITY 5: Opinion
+    if (textToSearch.includes('άποψη') || textToSearch.includes('σχόλιο') || textToSearch.includes('opinion')) {
+        return 'Opinion';
+    }
+
     return defaultCategory || 'Ποδόσφαιρο';
 }
 
