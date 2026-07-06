@@ -98,28 +98,22 @@ async function generateAiBullets(title, text) {
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `Analyze the following Greek sports news article. Generate exactly 3 concise, high-impact bullet points in Greek summarizing the key facts for an 'F5 fan' who wants a 5-second update (quick-takes). Output the response as a JSON array of 3 strings (e.g., ["bullet 1", "bullet 2", "bullet 3"]). Output ONLY the JSON array, no markdown wrappers like \`\`\`json.
-                            
+                            text: `Αναλύστε το παρακάτω ρεπορτάζ αθλητικών νέων για τον Παναθηναϊκό. Δημιουργήστε ακριβώς 3 σύντομα, δυναμικά bullet points στα Ελληνικά που συνοψίζουν τα βασικά γεγονότα. Επιστρέψτε ΜΟΝΟ ένα JSON array από 3 strings (π.χ. ["bullet 1", "bullet 2", "bullet 3"]). Χωρίς markdown wrappers.
+
 Title: ${title}
 Content: ${cleanContent}`
                         }]
                     }],
-                    generationConfig: {
-                        responseMimeType: 'application/json'
-                    }
+                    generationConfig: { responseMimeType: 'application/json' }
                 })
             }
         );
 
-        if (!response.ok) {
-            throw new Error(`Gemini API returned status ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Gemini API returned status ${response.status}`);
 
         const data = await response.json();
         const responseText = data.candidates[0].content.parts[0].text.trim();
@@ -133,6 +127,63 @@ Content: ${cleanContent}`
     } catch (error) {
         console.error(`[AI ERROR] Failed to generate AI bullets, using fallback:`, error.message);
         return generateFallbackBullets(title, text);
+    }
+}
+
+// Generate a comprehensive long-form sports article in Greek using Gemini API
+async function generateLongFormContent(title, text) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        console.log(`[AI] GEMINI_API_KEY missing. Skipping long-form content generation.`);
+        return null;
+    }
+
+    try {
+        console.log(`[AI] Generating long-form article using Gemini API...`);
+        const cleanContent = (text || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 5000);
+
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: `Είσαι έμπειρος αθλητικός συντάκτης που καλύπτει τον Παναθηναϊκό. Βάσει του παρακάτω υλικού, γράψε ένα πλήρες, επαγγελματικό αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά. Το άρθρο πρέπει να είναι:
+- Ελάχιστον 4-6 παράγραφοι
+- Εκτενές και αναλυτικό (300-500 λέξεις)
+- Γραμμένο σε δημοσιογραφικό ύφος, ζωηρό και ενημερωτικό
+- Να καλύπτει το κύριο θέμα, τις επιπτώσεις στην ομάδα, και τυχόν ευρύτερο context
+- Να μην περιέχει HTML tags — μόνο καθαρό κείμενο με παραγράφους χωρισμένες με κενές γραμμές
+
+Τίτλος: ${title}
+Πηγαίο υλικό: ${cleanContent}
+
+Γράψε ΜΟΝΟ το κείμενο του άρθρου, χωρίς τίτλο, χωρίς εισαγωγικά, χωρίς markdown.`
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 1024
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) throw new Error(`Gemini API returned status ${response.status}`);
+
+        const data = await response.json();
+        const articleText = data.candidates[0].content.parts[0].text.trim();
+        
+        if (articleText && articleText.length > 100) {
+            console.log(`[AI] Long-form article generated (${articleText.length} chars).`);
+            return articleText;
+        }
+        return null;
+    } catch (error) {
+        console.error(`[AI ERROR] Failed to generate long-form content:`, error.message);
+        return null;
     }
 }
 
@@ -356,16 +407,17 @@ async function scrapeNews() {
                         console.log(`[DEDUPLICATION] No similar article found. Initialized group ${group_id} for "${title}"`);
                     }
 
-                    // 2. AI Summarization logic
+                    // 2. AI Summarization logic (bullets + long-form article)
                     const bullets = await generateAiBullets(title, content || summary);
+                    const longFormContent = await generateLongFormContent(title, content || summary);
 
-                    // Insert the new article with group_id and bullets
+                    // Insert the new article with group_id, bullets, and AI-generated long-form content
                     const { data, error } = await supabase
                         .from('articles')
                         .insert({
                             title,
                             summary,
-                            content,
+                            content: longFormContent || content,
                             source_url,
                             image_url,
                             category,
