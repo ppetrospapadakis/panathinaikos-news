@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="el"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Panathinaikos News - Ρόστερ & Ανάλυση</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#84d999",
+                    "outline": "#899488",
+                    "on-secondary-fixed": "#00210b",
+                    "surface-container-lowest": "#0c0e12",
+                    "primary": "#84d999",
+                    "on-secondary-container": "#003114",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#333539",
+                    "primary-fixed": "#9ff6b4",
+                    "surface-dim": "#111317",
+                    "on-surface": "#e2e2e8",
+                    "on-primary-fixed-variant": "#005228",
+                    "inverse-on-surface": "#2f3035",
+                    "surface-container-high": "#282a2e",
+                    "tertiary-container": "#cda721",
+                    "secondary-fixed-dim": "#6edd8c",
+                    "background": "#111317",
+                    "on-secondary": "#003918",
+                    "on-surface-variant": "#bfc9bd",
+                    "on-error": "#690005",
+                    "on-primary": "#00391a",
+                    "secondary-fixed": "#8afaa6",
+                    "on-error-container": "#ffdad6",
+                    "surface-bright": "#37393e",
+                    "surface-variant": "#333539",
+                    "primary-container": "#006633",
+                    "on-tertiary-container": "#4e3d00",
+                    "tertiary-fixed": "#ffe087",
+                    "on-primary-fixed": "#00210c",
+                    "on-tertiary-fixed-variant": "#574500",
+                    "inverse-primary": "#0f6d39",
+                    "on-secondary-fixed-variant": "#005226",
+                    "on-background": "#e2e2e8",
+                    "secondary": "#6edd8c",
+                    "on-tertiary-fixed": "#241a00",
+                    "surface-container": "#1e2024",
+                    "secondary-container": "#32a45b",
+                    "on-tertiary": "#3c2f00",
+                    "surface": "#111317",
+                    "primary-fixed-dim": "#84d999",
+                    "outline-variant": "#3f4940",
+                    "inverse-surface": "#e2e2e8",
+                    "on-primary-container": "#8ce1a1",
+                    "tertiary": "#ebc23e",
+                    "error": "#ffb4ab",
+                    "tertiary-fixed-dim": "#ebc23e",
+                    "surface-container-low": "#1a1c20"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "64": "64px",
+                    "24": "24px",
+                    "16": "16px",
+                    "96": "96px",
+                    "8": "8px",
+                    "48": "48px",
+                    "32": "32px",
+                    "4": "4px"
+            },
+            "fontFamily": {
+                    "h4": ["Geist"], "h2": ["Geist"], "body": ["Geist"], "display-xl": ["Geist"],
+                    "h3": ["Geist"], "display-l": ["Geist"], "display-l-mobile": ["Geist"],
+                    "label": ["Geist"], "body-sm": ["Geist"], "h1": ["Geist"],
+                    "caption": ["Geist"], "body-lg": ["Geist"]
+            },
+            "fontSize": {
+                    "h4": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-l": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+                    "display-l-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "h1": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0F1115; /* Base Layer */
+            color: #e2e2e8;
+            font-family: 'Geist', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab {
+            color: #84d999;
+            border-bottom: 2px solid #84d999;
+        }
+        .pitch-gradient {
+            background: linear-gradient(180deg, #134e2b 0%, #0d2b18 100%);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .pitch-line {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-card {
+            background: rgba(24, 28, 34, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(137, 148, 136, 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+<header class="fixed top-0 w-full z-50 h-20 bg-background border-b border-outline-variant transition-all duration-300">
+<div class="flex items-center justify-between px-8 max-w-[1440px] mx-auto h-full">
+<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-primary">menu</span>
+<span class="font-h2 text-h2 font-bold tracking-tighter text-primary">PANATHINAIKOS</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-body text-body text-primary hover:text-primary transition-colors" href="#">Home</a>
+<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="#">News</a>
+<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="#">Matches</a>
+<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="#">Transfers</a>
+</nav>
+<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-primary">search</span>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-96 max-w-[1440px] mx-auto px-8">
+<div class="mb-64">
+<h1 class="font-display-l text-display-l text-on-surface mb-8">Ρόστερ</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Το πλήρες ρόστερ του Παναθηναϊκού μαζί με τη δική μας ανάλυση.</p>
+</div>
+<div class="grid grid-cols-12 gap-48">
+<div class="col-span-12 lg:col-span-9">
+<div class="flex items-center gap-32 border-b border-outline-variant mb-48 overflow-x-auto whitespace-nowrap">
+<button class="pb-16 font-h4 text-h4 transition-all active-tab" id="tab-roster" onclick="switchTab('roster')">Πλήρες Ρόστερ</button>
+<button class="pb-16 font-h4 text-h4 transition-all text-on-surface-variant hover:text-primary" id="tab-lineup" onclick="switchTab('lineup')">Η Δική μου Ενδεκάδα</button>
+<button class="pb-16 font-h4 text-h4 transition-all text-on-surface-variant hover:text-primary" id="tab-analysis" onclick="switchTab('analysis')">Η Ανάλυσή μου</button>
+</div>
+<div class="tab-content space-y-64" id="content-roster">
+<div>
+<h2 class="font-h2 text-h2 text-primary mb-32 flex items-center gap-8">
+<span class="w-12 h-1 bg-primary"></span> Τερματοφύλακες
+                        </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-32">
+<div class="group relative bg-surface-container rounded-xl overflow-hidden hover:bg-surface-container-high transition-all duration-300 border border-outline-variant/30">
+<div class="aspect-[4/5] bg-surface-container-low relative">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A professional studio portrait of a confident goalkeeper in a dark green Panathinaikos jersey, lit with dramatic rim lighting against a minimalist charcoal background. The style is premium editorial photography with high contrast and sharp details, reflecting an Athenian heritage vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfQN1ESFnslm-bMLqLJ4-sQO88YJAOqlUi9p3IiFXRsp6Eo0dkdX47WVCzSXRgear26SfR7IxtnG1a1vGo9LPyYkN8G58iWoXzjRT8fwVtZPnSdkoz1w_cdggIBaedZOkocia6ms8BrpbBEAXWrG4rSH-setSRJAWYwPqGKN30qLdWEdpmB3flLhuNmQdX281esv5-Zv4qmRfB33XijkfIle7Cl6tZJ3_m1Gv6vZVVRt_4JNhROpran-I6QVB8iO0QTbbdBWc1bNs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-60"></div>
+<div class="absolute top-16 left-16 bg-primary text-on-primary font-h3 text-h3 px-12 py-4 rounded-lg">69</div>
+</div>
+<div class="p-24">
+<div class="flex justify-between items-start mb-8">
+<h3 class="font-h3 text-h3">Bartłomiej Drągowski</h3>
+<span class="font-label text-label bg-secondary-container/20 text-secondary px-8 py-2 rounded">8.2</span>
+</div>
+<div class="grid grid-cols-2 gap-y-8 mb-24 opacity-70">
+<div class="font-caption text-caption">Ηλικία: 26</div>
+<div class="font-caption text-caption">Εθνικότητα: Πολωνία</div>
+<div class="font-caption text-caption">Πόδι: Δεξί</div>
+<div class="font-caption text-caption">Συμβόλαιο: 2027</div>
+</div>
+<button class="w-full py-12 border border-outline text-on-surface font-label text-label rounded-lg hover:bg-primary hover:text-on-primary hover:border-primary transition-all uppercase tracking-widest">View Profile</button>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h2 class="font-h2 text-h2 text-primary mb-32 flex items-center gap-8">
+<span class="w-12 h-1 bg-primary"></span> Αμυντικοί
+                        </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-32">
+<div class="group relative bg-surface-container rounded-xl overflow-hidden hover:bg-surface-container-high transition-all duration-300 border border-outline-variant/30">
+<div class="aspect-[4/5] bg-surface-container-low relative">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A sleek, high-end editorial portrait of a defender for Panathinaikos, standing strong in a classic dark green kit. Cinematic lighting focuses on the athlete's focused expression. The background is a dark obsidian surface with subtle architectural hints of Athens. Moody, professional, and authoritative atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5tdB8QZYRCaLsRsIpmrcPJ3roT3KgLwyYT__Fvy7nzUESPGT5TQ5XRkrzX0NnZM5BKV4fEMJbwvnQRDTq52xQe7FdrX2bkHtsm1B-NqlRG1ebApyGnDagO9-um1lBcyNOqDOsWdMc3YEx0rzDSuXU7yDZ0M7sqhMZpK8iTl9la2tzkseKb7aQYPqIdG5ltnGs1z9oBGwEnGo1DRBAc0dtDG2xx_8QGEpLgEKWfiPIT-bdX8PLNkZztz2fnuk4V4QrQkWJYwvu9EU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-60"></div>
+<div class="absolute top-16 left-16 bg-primary text-on-primary font-h3 text-h3 px-12 py-4 rounded-lg">21</div>
+</div>
+<div class="p-24">
+<div class="flex justify-between items-start mb-8">
+<h3 class="font-h3 text-h3">Tin Jedvaj</h3>
+<span class="font-label text-label bg-secondary-container/20 text-secondary px-8 py-2 rounded">7.9</span>
+</div>
+<div class="grid grid-cols-2 gap-y-8 mb-24 opacity-70">
+<div class="font-caption text-caption">Ηλικία: 28</div>
+<div class="font-caption text-caption">Εθνικότητα: Κροατία</div>
+<div class="font-caption text-caption">Πόδι: Δεξί</div>
+<div class="font-caption text-caption">Συμβόλαιο: 2027</div>
+</div>
+<button class="w-full py-12 border border-outline text-on-surface font-label text-label rounded-lg hover:bg-primary hover:text-on-primary hover:border-primary transition-all uppercase tracking-widest">View Profile</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="tab-content hidden" id="content-lineup">
+<div class="relative w-full aspect-[4/5] md:aspect-[16/10] pitch-gradient rounded-2xl p-32 overflow-hidden mb-48">
+<div class="absolute inset-8 pitch-line rounded-xl"></div>
+<div class="absolute inset-y-8 left-1/2 -translate-x-1/2 pitch-line w-px"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pitch-line w-48 h-48 rounded-full"></div>
+<div class="relative h-full w-full flex flex-col justify-between py-8">
+<div class="flex justify-center">
+<div class="text-center group">
+<div class="w-16 h-16 md:w-20 md:h-20 bg-primary rounded-full mx-auto mb-4 border-2 border-white/20 overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCg4sVjXy18EuswZurlBPZnoz1_i18pklZgyxmxmBdRzE1J_fldtXhNwOWHMwNbGj27nFMWpYI4A41ORDdGU5_sFzYt099ioLpEGtsk6B1nvdpxBcdusAdwrpQWs5kNkNNgHDWHcHT-Rw_F4tSqW55QmNsM-xJ07KYdurXIjxlcB130epgGJRZBtFz-j8QDqaG59w9KS5poI7uccpVqWbY5VuEHlumpHpsk83d41lmEKpc7YWShzGXQD5mFFewDt3g9ji79tuZTjU"/>
+</div>
+<div class="font-label text-[10px] md:text-label bg-background/80 px-8 py-2 rounded">Ionnidis</div>
+</div>
+</div>
+<div class="flex justify-around">
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-primary-fixed rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Pellistri</div></div>
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-primary-fixed rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Bakasetas</div></div>
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-primary-fixed rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Tete</div></div>
+</div>
+<div class="flex justify-center gap-32">
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-secondary-fixed-dim rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Maksimovic</div></div>
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-secondary-fixed-dim rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Araoz</div></div>
+</div>
+<div class="flex justify-between px-16">
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-surface-bright rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Max</div></div>
+<div class="flex gap-16">
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-surface-bright rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Jedvaj</div></div>
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-surface-bright rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Ingason</div></div>
+</div>
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-surface-bright rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Vagiannidis</div></div>
+</div>
+<div class="flex justify-center">
+<div class="text-center"><div class="w-12 h-12 md:w-16 md:h-16 bg-tertiary rounded-full mx-auto mb-4"></div><div class="font-label text-[10px] bg-background/80 px-4 py-1 rounded">Dragowski</div></div>
+</div>
+</div>
+</div>
+<div class="glass-card p-32 rounded-xl mb-32">
+<h3 class="font-h3 text-h3 text-primary mb-16 underline decoration-2 underline-offset-8">Σημειώσεις Τακτικής</h3>
+<p class="font-body text-body text-on-surface-variant leading-relaxed">
+                            Η επιλογή του 4-2-3-1 βασίζεται στην ανάγκη για άμεσο transition και εκμετάλλευση της ταχύτητας των Pellistri και Tete στις πτέρυγες. Ο Bakasetas λειτουργεί ως ο συνδετικός κρίκος, ενώ το δίδυμο Maksimovic-Araoz προσφέρει την απαραίτητη ισορροπία στις ανακτήσεις μπάλας.
+                        </p>
+</div>
+</div>
+<div class="tab-content hidden prose prose-invert max-w-none" id="content-analysis">
+<div class="space-y-64">
+<section>
+<h2 class="font-h1 text-h1 text-on-surface mb-24">Ανάλυση Ρόστερ 2024/25</h2>
+<p class="font-body-lg text-body-lg leading-loose text-on-surface-variant mb-32">
+                                Φέτος ο Παναθηναϊκός παρουσιάζει ένα από τα πιο ισορροπημένα ρόστερ των τελευταίων ετών. Η επένδυση σε ποιότητα στις πτέρυγες και η διατήρηση του βασικού κορμού στην άμυνα δημιουργούν προσδοκίες για πρωταθλητισμό.
+                            </p>
+<blockquote class="border-l-4 border-primary pl-24 py-8 italic font-h3 text-h3 text-on-surface my-48">
+                                "Η φετινή ομάδα έχει το βάθος να ανταπεξέλθει σε τρεις διοργανώσεις χωρίς να θυσιάσει την ένταση του παιχνιδιού της."
+                            </blockquote>
+</section>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-32">
+<div class="p-32 bg-surface-container rounded-xl border-t-2 border-primary">
+<h3 class="font-h2 text-h2 text-primary mb-16">Δυνατά Σημεία</h3>
+<ul class="space-y-8 font-body text-body text-on-surface-variant list-disc list-inside">
+<li>Ποιότητα στα Wings (Pellistri, Tete)</li>
+<li>Εμπειρία στον άξονα</li>
+<li>Ικανότητα στο build-up από πίσω</li>
+<li>Βάθος στον πάγκο (2 ισάξιοι σε κάθε θέση)</li>
+</ul>
+</div>
+<div class="p-32 bg-surface-container rounded-xl border-t-2 border-error">
+<h3 class="font-h2 text-h2 text-error mb-16">Αδυναμίες</h3>
+<ul class="space-y-8 font-body text-body text-on-surface-variant list-disc list-inside">
+<li>Εξάρτηση από την απόδοση του Ιωαννίδη</li>
+<li>Αργές επιστροφές σε κόντρα επίθεση</li>
+<li>Συγκέντρωση στα τελευταία λεπτά των αγώνων</li>
+</ul>
+</div>
+</div>
+<section class="bg-surface-container-high p-48 rounded-2xl">
+<h3 class="font-h2 text-h2 text-primary mb-24">Μεταγραφικές Προτεραιότητες</h3>
+<p class="font-body text-body mb-32">Με βάση την ανάλυση των αναγκών, η ομάδα θα πρέπει να κινηθεί για:</p>
+<div class="space-y-16">
+<div class="flex items-center gap-16 p-16 bg-background rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary">add_circle</span>
+<span class="font-h4 text-h4">Έναν backup Left Back με επιθετικά χαρακτηριστικά</span>
+</div>
+<div class="flex items-center gap-16 p-16 bg-background rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary">add_circle</span>
+<span class="font-h4 text-h4">Έναν νεαρό δημιουργικό μέσο για εναλλακτική του Bakasetas</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<aside class="col-span-12 lg:col-span-3 space-y-64">
+<div class="bg-surface-container rounded-xl p-24 border border-outline-variant">
+<h4 class="font-label text-label text-on-surface-variant uppercase mb-24 tracking-widest flex items-center gap-8">
+<span class="material-symbols-outlined text-sm">calendar_today</span> Επόμενος Αγώνας
+                    </h4>
+<div class="flex flex-col items-center gap-24">
+<div class="flex items-center justify-between w-full">
+<div class="text-center">
+<div class="w-16 h-16 bg-surface-container-high rounded-full mb-8 flex items-center justify-center">
+<span class="font-bold text-primary">PAO</span>
+</div>
+<div class="font-label text-[10px]">PANATHINAIKOS</div>
+</div>
+<div class="text-center">
+<div class="font-h3 text-h3">20:30</div>
+<div class="font-caption text-caption text-on-surface-variant">24/11</div>
+</div>
+<div class="text-center">
+<div class="w-16 h-16 bg-surface-container-high rounded-full mb-8 flex items-center justify-center">
+<span class="font-bold text-outline">LAM</span>
+</div>
+<div class="font-label text-[10px]">LAMIA FC</div>
+</div>
+</div>
+<button class="w-full py-12 bg-primary text-on-primary font-label text-label rounded-lg hover:opacity-90 transition-all uppercase">Εισιτήρια</button>
+</div>
+</div>
+<div>
+<h4 class="font-label text-label text-on-surface-variant uppercase mb-24 tracking-widest">Τελευταία Νέα</h4>
+<div class="space-y-24">
+<a class="group block" href="#">
+<div class="font-caption text-caption text-primary mb-4">Ομάδα</div>
+<h5 class="font-h4 text-h4 group-hover:text-primary transition-colors mb-8">Επιστροφή στις προπονήσεις για τον Ιωαννίδη</h5>
+<div class="font-caption text-caption text-on-surface-variant">Πριν 2 ώρες</div>
+</a>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant mt-96">
+<div class="flex flex-col items-center justify-center gap-8 max-w-[1440px] mx-auto px-8">
+<div class="font-h4 text-h4 text-on-surface">PANATHINAIKOS EDITORIAL</div>
+<div class="font-caption text-caption text-on-surface-variant flex gap-24">
+<a class="hover:text-primary underline" href="#">Privacy Policy</a>
+<a class="hover:text-primary underline" href="#">Terms of Service</a>
+</div>
+<div class="font-caption text-caption text-secondary">© 2024 Panathinaikos Editorial. All rights reserved.</div>
+</div>
+</footer>
+<script>
+        function switchTab(tabId) {
+            const tabs = ['roster', 'lineup', 'analysis'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    btn.classList.add('active-tab');
+                } else {
+                    btn.classList.remove('active-tab');
+                }
+            });
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.add('hidden'));
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+        }
+    </script>
+</body></html>

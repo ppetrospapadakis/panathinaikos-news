@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Panathinaikos Editorial | CMS Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .editor-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .editor-container::-webkit-scrollbar-thumb {
+            background: #3f4940;
+            border-radius: 10px;
+        }
+        .writing-area:focus {
+            outline: none;
+        }
+        .pull-quote {
+            border-left: 4px solid #84d999;
+            padding-left: 24px;
+            margin: 32px 0;
+            font-style: italic;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#00210c",
+                    "primary-fixed": "#9ff6b4",
+                    "inverse-surface": "#e2e2e8",
+                    "error": "#ffb4ab",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#241a00",
+                    "error-container": "#93000a",
+                    "secondary-fixed": "#8afaa6",
+                    "on-secondary-container": "#003114",
+                    "tertiary-container": "#cda721",
+                    "surface-container-low": "#1a1c20",
+                    "outline": "#899488",
+                    "surface-container-high": "#282a2e",
+                    "surface-bright": "#37393e",
+                    "primary-fixed-dim": "#84d999",
+                    "on-secondary-fixed": "#00210b",
+                    "on-primary-container": "#8ce1a1",
+                    "on-surface-variant": "#bfc9bd",
+                    "surface-tint": "#84d999",
+                    "surface-variant": "#333539",
+                    "surface-dim": "#111317",
+                    "secondary-fixed-dim": "#6edd8c",
+                    "secondary": "#6edd8c",
+                    "secondary-container": "#32a45b",
+                    "on-error": "#690005",
+                    "on-secondary": "#003918",
+                    "on-tertiary-fixed-variant": "#574500",
+                    "surface-container": "#1e2024",
+                    "on-secondary-fixed-variant": "#005226",
+                    "outline-variant": "#3f4940",
+                    "on-primary-fixed-variant": "#005228",
+                    "primary": "#84d999",
+                    "on-surface": "#e2e2e8",
+                    "on-background": "#e2e2e8",
+                    "surface": "#111317",
+                    "tertiary-fixed": "#ffe087",
+                    "on-primary": "#00391a",
+                    "tertiary": "#ebc23e",
+                    "surface-container-lowest": "#0c0e12",
+                    "surface-container-highest": "#333539",
+                    "primary-container": "#006633",
+                    "inverse-on-surface": "#2f3035",
+                    "tertiary-fixed-dim": "#ebc23e",
+                    "inverse-primary": "#0f6d39",
+                    "on-tertiary-container": "#4e3d00",
+                    "on-tertiary": "#3c2f00",
+                    "background": "#111317"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "64": "64px",
+                    "16": "16px",
+                    "8": "8px",
+                    "48": "48px",
+                    "96": "96px",
+                    "32": "32px",
+                    "4": "4px",
+                    "24": "24px"
+            },
+            "fontFamily": {
+                    "display-xl": ["Geist"],
+                    "h2": ["Geist"],
+                    "h4": ["Geist"],
+                    "display-l-mobile": ["Geist"],
+                    "h3": ["Geist"],
+                    "h1": ["Geist"],
+                    "display-l": ["Geist"],
+                    "caption": ["Geist"],
+                    "body-sm": ["Geist"],
+                    "label": ["Geist"],
+                    "body-lg": ["Geist"],
+                    "body": ["Geist"]
+            },
+            "fontSize": {
+                    "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "h2": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "h4": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "display-l-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "h1": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "display-l": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+                    "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden">
+<header class="bg-surface fixed top-0 right-0 w-[calc(100%-16rem)] h-16 border-b border-outline-variant flex justify-between items-center px-8 z-50">
+<div class="flex items-center gap-4">
+<span class="font-h3 text-h3 font-bold text-on-surface">Panathinaikos Editorial</span>
+<div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
+<span class="text-on-surface-variant font-label text-label uppercase tracking-widest">Post Editor</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 text-on-surface-variant hover:text-primary font-body text-body">Save Draft</button>
+<button class="px-6 py-2 bg-primary text-on-primary font-bold rounded-lg">Publish</button>
+</div>
+</header>
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col p-4 z-50">
+<div class="flex flex-col gap-1 mb-8 px-4">
+<div class="font-h2 text-h2 font-semibold text-primary">Editorial</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="#">Dashboard</a>
+<a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg" href="#">Articles</a>
+</nav>
+</aside>
+<main class="ml-64 mt-16 h-[calc(100vh-64px)] flex overflow-hidden">
+<section class="flex-1 overflow-y-auto editor-container flex flex-col items-center py-16 px-8">
+<article class="w-full max-w-[800px] bg-transparent">
+<textarea class="w-full bg-transparent border-none focus:ring-0 font-display-l text-display-l text-on-surface resize-none p-0 mb-8" placeholder="Enter Title..." rows="2">Tactical Analysis: The Rise of the Green Wall</textarea>
+<div class="writing-area font-body-lg text-body-lg text-on-surface-variant leading-relaxed space-y-6 min-h-[600px] outline-none" contenteditable="true">
+<p>The defensive resurgence under the new coaching staff has been nothing short of transformative.</p>
+</div>
+</article>
+</section>
+</main>
+</body></html>
