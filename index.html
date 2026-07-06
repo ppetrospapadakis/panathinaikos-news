@@ -133,7 +133,7 @@
         <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()">
             <span class="material-symbols-outlined text-primary">menu</span>
         </div>
-        <div class="font-h2 text-h2 font-bold tracking-tighter text-primary">PANATHINAIKOS</div>
+        <div class="font-h2 text-h2 font-bold tracking-tighter text-primary cursor-pointer active:opacity-70" onclick="window.location.href='index.html'">PANATHINAIKOS</div>
         <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()">
             <span class="material-symbols-outlined text-primary">search</span>
         </div>
@@ -142,11 +142,11 @@
     <!-- Navigation Drawer (Sidebar) -->
     <aside class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-xl flex flex-col h-full p-6 space-y-4 -translate-x-full transition-transform duration-500 ease-in-out" id="nav-drawer">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="font-h3 text-h3 text-primary">PAO FC</h2>
+            <h2 class="font-h3 text-h3 text-primary" onclick="window.location.href='index.html'" style="cursor: pointer;">PAO FC</h2>
             <button class="material-symbols-outlined text-on-surface-variant" onclick="toggleDrawer()">close</button>
         </div>
         <nav class="flex flex-col gap-2">
-            <a class="flex items-center gap-4 p-4 bg-secondary-container text-on-secondary-container rounded-lg font-body text-body" href="#">
+            <a class="flex items-center gap-4 p-4 bg-secondary-container text-on-secondary-container rounded-lg font-body text-body" href="index.html">
                 <span class="material-symbols-outlined">home</span>
                 <span>Home</span>
             </a>

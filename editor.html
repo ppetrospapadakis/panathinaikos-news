@@ -137,22 +137,36 @@
 <body class="bg-surface text-on-surface font-body overflow-hidden">
 <header class="bg-surface fixed top-0 right-0 w-[calc(100%-16rem)] h-16 border-b border-outline-variant flex justify-between items-center px-8 z-50">
 <div class="flex items-center gap-4">
-<span class="font-h3 text-h3 font-bold text-on-surface">Panathinaikos Editorial</span>
+<span class="font-h3 text-h3 font-bold text-on-surface cursor-pointer active:opacity-70" onclick="window.location.href='index.html'">Panathinaikos Editorial</span>
 <div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
 <span class="text-on-surface-variant font-label text-label uppercase tracking-widest">Post Editor</span>
 </div>
 <div class="flex items-center gap-4">
-<button class="px-4 py-2 text-on-surface-variant hover:text-primary font-body text-body">Save Draft</button>
-<button class="px-6 py-2 bg-primary text-on-primary font-bold rounded-lg">Publish</button>
+<button class="px-4 py-2 text-on-surface-variant hover:text-primary font-body text-body" onclick="alert('Draft saved locally!')">Save Draft</button>
+<button class="px-6 py-2 bg-primary text-on-primary font-bold rounded-lg" onclick="alert('Article published successfully!')">Publish</button>
 </div>
 </header>
 <aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col p-4 z-50">
 <div class="flex flex-col gap-1 mb-8 px-4">
-<div class="font-h2 text-h2 font-semibold text-primary">Editorial</div>
+<div class="font-h2 text-h2 font-semibold text-primary cursor-pointer" onclick="window.location.href='index.html'">Editorial</div>
 </div>
 <nav class="flex-1 flex flex-col gap-2">
-<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="#">Dashboard</a>
-<a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg" href="#">Articles</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="index.html">
+<span class="material-symbols-outlined">article</span>
+<span>Articles</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="roster.html">
+<span class="material-symbols-outlined">groups</span>
+<span>Players</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold" href="editor.html">
+<span class="material-symbols-outlined">edit_note</span>
+<span>Article Editor</span>
+</a>
 </nav>
 </aside>
 <main class="ml-64 mt-16 h-[calc(100vh-64px)] flex overflow-hidden">

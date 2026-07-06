@@ -133,21 +133,48 @@
 <body class="antialiased">
 <header class="fixed top-0 w-full z-50 h-20 bg-background border-b border-outline-variant transition-all duration-300">
 <div class="flex items-center justify-between px-8 max-w-[1440px] mx-auto h-full">
-<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity">
+<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()">
 <span class="material-symbols-outlined text-primary">menu</span>
-<span class="font-h2 text-h2 font-bold tracking-tighter text-primary">PANATHINAIKOS</span>
 </div>
+<div class="font-h2 text-h2 font-bold tracking-tighter text-primary cursor-pointer active:opacity-70" onclick="window.location.href='index.html'">PANATHINAIKOS</div>
 <nav class="hidden md:flex items-center gap-8">
-<a class="font-body text-body text-primary hover:text-primary transition-colors" href="#">Home</a>
-<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="#">News</a>
-<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="#">Matches</a>
-<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="#">Transfers</a>
+<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="index.html">Home</a>
+<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="index.html">News</a>
+<a class="font-body text-body text-on-surface hover:text-primary transition-colors" href="index.html">Matches</a>
+<a class="font-body text-body text-primary hover:text-primary transition-colors" href="roster.html">Roster</a>
 </nav>
 <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity">
 <span class="material-symbols-outlined text-primary">search</span>
 </div>
 </div>
 </header>
+
+<!-- Navigation Drawer (Sidebar) -->
+<aside class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-xl flex flex-col h-full p-6 space-y-4 -translate-x-full transition-transform duration-500 ease-in-out" id="nav-drawer">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="font-h3 text-h3 text-primary cursor-pointer" onclick="window.location.href='index.html'">PAO FC</h2>
+        <button class="material-symbols-outlined text-on-surface-variant" onclick="toggleDrawer()">close</button>
+    </div>
+    <nav class="flex flex-col gap-2">
+        <a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="index.html">
+            <span class="material-symbols-outlined">home</span>
+            <span>Home</span>
+        </a>
+        <a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="dashboard.html">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span>Dashboard</span>
+        </a>
+        <a class="flex items-center gap-4 p-4 bg-secondary-container text-on-secondary-container rounded-lg font-body text-body" href="roster.html">
+            <span class="material-symbols-outlined">groups</span>
+            <span>Roster</span>
+        </a>
+        <a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="editor.html">
+            <span class="material-symbols-outlined">edit_note</span>
+            <span>Article Editor</span>
+        </a>
+    </nav>
+</aside>
+<div class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" id="drawer-overlay" onclick="toggleDrawer()"></div>
 <main class="pt-32 pb-96 max-w-[1440px] mx-auto px-8">
 <div class="mb-64">
 <h1 class="font-display-l text-display-l text-on-surface mb-8">Ρόστερ</h1>
@@ -357,6 +384,18 @@
 </div>
 </footer>
 <script>
+        function toggleDrawer() {
+            try {
+                const drawer = document.getElementById('nav-drawer');
+                const overlay = document.getElementById('drawer-overlay');
+                drawer.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('opacity-0');
+                overlay.classList.toggle('pointer-events-none');
+            } catch (e) {
+                console.error("Error in toggleDrawer:", e);
+            }
+        }
+
         function switchTab(tabId) {
             const tabs = ['roster', 'lineup', 'analysis'];
             tabs.forEach(t => {
