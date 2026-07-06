@@ -310,7 +310,7 @@
         // Supabase configuration
         const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Simple micro-interactions for the dashboard
         document.querySelectorAll('.active\\:scale-95').forEach(button => {
@@ -366,7 +366,7 @@
                 const startOfToday = new Date();
                 startOfToday.setHours(0, 0, 0, 0);
 
-                const { count: countToday, error: errorToday } = await supabase
+                const { count: countToday, error: errorToday } = await supabaseClient
                     .from('articles')
                     .select('*', { count: 'exact', head: true })
                     .gt('created_at', startOfToday.toISOString());
@@ -375,7 +375,7 @@
                 document.getElementById('articles-count-today').textContent = countToday || 0;
 
                 // 2. Count of articles requiring review (opinion category) or total in DB as a healthy metric
-                const { count: countOpinion, error: errorOpinion } = await supabase
+                const { count: countOpinion, error: errorOpinion } = await supabaseClient
                     .from('articles')
                     .select('*', { count: 'exact', head: true })
                     .eq('category', 'Opinion');
@@ -384,7 +384,7 @@
                 document.getElementById('pending-review-count').textContent = countOpinion || 0;
 
                 // 3. Fetch recent 10 imports for activity stream
-                const { data: recentArticles, error: errorRecent } = await supabase
+                const { data: recentArticles, error: errorRecent } = await supabaseClient
                     .from('articles')
                     .select('*')
                     .order('created_at', { ascending: false })
