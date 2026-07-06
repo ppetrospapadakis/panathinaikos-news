@@ -1,451 +1,12 @@
-<!-- News Experience - Mobile -->
 <!DOCTYPE html>
-
-<html class="dark" lang="el"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Panathinaikos News | Premium Editorial</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-        
-        body {
-            font-family: 'Geist', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-
-        .editorial-gradient {
-            background: linear-gradient(180deg, rgba(15, 17, 21, 0) 0%, rgba(15, 17, 21, 0.9) 100%);
-        }
-    </style>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "surface-container-high": "#282a2e",
-                      "surface-dim": "#111317",
-                      "inverse-surface": "#e2e2e8",
-                      "outline": "#899488",
-                      "secondary-fixed-dim": "#6edd8c",
-                      "tertiary-fixed": "#ffe087",
-                      "tertiary": "#ebc23e",
-                      "secondary-fixed": "#8afaa6",
-                      "on-tertiary": "#3c2f00",
-                      "outline-variant": "#3f4940",
-                      "on-secondary-fixed": "#00210b",
-                      "primary-container": "#006633",
-                      "tertiary-fixed-dim": "#ebc23e",
-                      "surface-container-highest": "#333539",
-                      "on-tertiary-fixed-variant": "#574500",
-                      "inverse-primary": "#0f6d39",
-                      "surface-bright": "#37393e",
-                      "error": "#ffb4ab",
-                      "on-secondary-container": "#003114",
-                      "on-tertiary-fixed": "#241a00",
-                      "on-primary-fixed-variant": "#005228",
-                      "on-error-container": "#ffdad6",
-                      "surface-tint": "#84d999",
-                      "surface-container-lowest": "#0c0e12",
-                      "surface-container": "#1e2024",
-                      "on-primary-container": "#8ce1a1",
-                      "secondary-container": "#32a45b",
-                      "primary": "#84d999",
-                      "on-primary-fixed": "#00210c",
-                      "inverse-on-surface": "#2f3035",
-                      "surface-variant": "#333539",
-                      "secondary": "#6edd8c",
-                      "surface-container-low": "#1a1c20",
-                      "primary-fixed-dim": "#84d999",
-                      "on-surface-variant": "#bfc9bd",
-                      "primary-fixed": "#9ff6b4",
-                      "on-primary": "#00391a",
-                      "on-surface": "#e2e2e8",
-                      "surface": "#111317",
-                      "background": "#111317",
-                      "on-background": "#e2e2e8",
-                      "on-secondary-fixed-variant": "#005226",
-                      "error-container": "#93000a",
-                      "on-tertiary-container": "#4e3d00",
-                      "on-error": "#690005",
-                      "tertiary-container": "#cda721",
-                      "on-secondary": "#003918"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.25rem",
-                      "lg": "0.5rem",
-                      "xl": "16px",
-                      "full": "9999px"
-              },
-              "spacing": {
-                      "8": "8px",
-                      "32": "32px",
-                      "24": "24px",
-                      "16": "16px",
-                      "64": "64px",
-                      "48": "48px",
-                      "96": "96px",
-                      "4": "4px"
-              },
-              "fontFamily": {
-                      "display-l": ["Geist"],
-                      "h2": ["Geist"],
-                      "label": ["Geist"],
-                      "display-l-mobile": ["Geist"],
-                      "body-lg": ["Geist"],
-                      "h1": ["Geist"],
-                      "display-xl": ["Geist"],
-                      "body-sm": ["Geist"],
-                      "body": ["Geist"],
-                      "h4": ["Geist"],
-                      "caption": ["Geist"],
-                      "h3": ["Geist"]
-              },
-              "fontSize": {
-                      "display-l": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
-                      "h2": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                      "label": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
-                      "display-l-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
-                      "h1": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
-                      "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
-                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                      "body": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                      "h4": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
-                      "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400"}],
-                      "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
-              }
-            },
-          },
-        }
-      </script>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background text-on-background selection:bg-primary-container selection:text-white">
-<!-- Top Navigation Shell -->
-<header class="fixed top-0 w-full z-50 h-20 bg-background/80 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-16">
-<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity">
-<span class="material-symbols-outlined text-primary text-h2" data-icon="menu">menu</span>
-</div>
-<h1 class="font-h2 text-h2 font-bold tracking-tighter text-primary">PANATHINAIKOS</h1>
-<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity">
-<span class="material-symbols-outlined text-primary text-h2" data-icon="search">search</span>
-</div>
-</header>
-<!-- Content Canvas -->
-<main class="pt-20 pb-32">
-<!-- Sticky Category Filters -->
-<nav class="sticky top-20 z-40 bg-background/90 backdrop-blur-md py-16 overflow-hidden">
-<div class="flex gap-16 px-16 overflow-x-auto no-scrollbar scroll-smooth">
-<button class="bg-primary-container text-on-primary-container px-24 py-8 rounded-full font-label text-label whitespace-nowrap transition-transform active:scale-95">All News</button>
-<button class="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-24 py-8 rounded-full font-label text-label whitespace-nowrap transition-transform active:scale-95">Ποδόσφαιρο</button>
-<button class="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-24 py-8 rounded-full font-label text-label whitespace-nowrap transition-transform active:scale-95">Μπάσκετ</button>
-<button class="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-24 py-8 rounded-full font-label text-label whitespace-nowrap transition-transform active:scale-95">Ερασιτέχνης</button>
-<button class="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-24 py-8 rounded-full font-label text-label whitespace-nowrap transition-transform active:scale-95">Opinion</button>
-<button class="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-24 py-8 rounded-full font-label text-label whitespace-nowrap transition-transform active:scale-95">Μεταγραφές</button>
-</div>
-</nav>
-<!-- News Feed Section -->
-<section class="px-16 flex flex-col gap-32">
-<!-- Dynamic Articles Feed Container -->
-<div class="flex flex-col gap-48 w-full" id="articles-feed-container">
-<!-- Featured Large Card (Skeleton) -->
-<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl aspect-[4/5] w-full p-24 justify-end">
-    <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
-    <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
-    <div class="h-4 bg-surface-container-high w-full rounded"></div>
-</div>
-</div>
-</section>
-<!-- Skeleton Loading Pattern (Visual Hint) -->
-<section class="px-16 mt-48 animate-pulse opacity-20">
-<div class="w-full h-200 bg-surface-container rounded-xl mb-16"></div>
-<div class="h-24 bg-surface-container w-3/4 rounded-full mb-8"></div>
-<div class="h-16 bg-surface-container w-full rounded-full"></div>
-</section>
-</main>
-<!-- Floating Search Button -->
-<div class="fixed bottom-32 right-32 z-50">
-<button class="w-64 h-64 bg-primary-container text-white rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 active:bg-primary">
-<span class="material-symbols-outlined text-h2" data-icon="search">search</span>
-</button>
-</div>
-<!-- Mobile Navigation Shell -->
-<nav class="fixed bottom-0 w-full z-50 bg-surface-container-low/95 backdrop-blur-md md:hidden">
-<div class="flex items-center justify-around h-20 py-8">
-<div class="flex flex-col items-center gap-4 text-primary">
-<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
-<span class="font-caption text-caption">Home</span>
-</div>
-<div class="flex flex-col items-center gap-4 text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="article">article</span>
-<span class="font-caption text-caption">News</span>
-</div>
-<div class="flex flex-col items-center gap-4 text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="sports_soccer">sports_soccer</span>
-<span class="font-caption text-caption">Matches</span>
-</div>
-<div class="flex flex-col items-center gap-4 text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
-<span class="font-caption text-caption">Opinion</span>
-</div>
-</div>
-</nav>
-<!-- Navigation Drawer (Hidden by default, triggered by JS) -->
-<aside class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low -translate-x-full transition-transform duration-500 ease-in-out shadow-xl flex flex-col p-6 space-y-4" id="nav-drawer">
-<div class="flex items-center justify-between mb-8">
-<h2 class="font-h3 text-h3 text-primary">PAO FC</h2>
-<button class="text-on-surface" onclick="toggleDrawer()">
-<span class="material-symbols-outlined" data-icon="close">close</span>
-</button>
-</div>
-<div class="space-y-4">
-<div class="flex items-center gap-16 p-16 bg-secondary-container text-on-secondary-container rounded-lg cursor-pointer">
-<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
-<span class="font-body text-body">Home</span>
-</div>
-<div class="flex items-center gap-16 p-16 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors">
-<span class="material-symbols-outlined" data-icon="article">article</span>
-<span class="font-body text-body">News</span>
-</div>
-<div class="flex items-center gap-16 p-16 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors">
-<span class="material-symbols-outlined" data-icon="sports_soccer">sports_soccer</span>
-<span class="font-body text-body">Matches</span>
-</div>
-<div class="flex items-center gap-16 p-16 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors">
-<span class="material-symbols-outlined" data-icon="swap_horiz">swap_horiz</span>
-<span class="font-body text-body">Transfers</span>
-</div>
-<div class="flex items-center gap-16 p-16 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors">
-<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
-<span class="font-body text-body">Opinion</span>
-</div>
-</div>
-<div class="mt-auto border-t border-outline-variant pt-16">
-<p class="font-caption text-caption text-on-surface-variant">© 2024 Panathinaikos Editorial</p>
-</div>
-</aside>
-<div class="fixed inset-0 bg-black/50 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" id="drawer-overlay" onclick="toggleDrawer()"></div>
-<!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // Supabase configuration
-        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        function toggleDrawer() {
-            const drawer = document.getElementById('nav-drawer');
-            const overlay = document.getElementById('drawer-overlay');
-            drawer.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('opacity-0');
-            overlay.classList.toggle('pointer-events-none');
-        }
-
-        // Add event listener to the menu icon in TopAppBar
-        document.querySelector('[data-icon="menu"]').parentElement.onclick = toggleDrawer;
-
-        // Micro-interactions for scrolling and parallax-like effect
-        window.addEventListener('scroll', () => {
-            const scroll = window.scrollY;
-            const header = document.querySelector('header');
-            if (scroll > 20) {
-                header.classList.add('shadow-lg');
-            } else {
-                header.classList.remove('shadow-lg');
-            }
-        });
-
-        // Date time-ago formatter helper
-        function formatTimeAgo(dateString) {
-            const now = new Date();
-            const date = new Date(dateString);
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffHours < 24) return `${diffHours}h ago`;
-            return `${diffDays}d ago`;
-        }
-
-        // Source domain name extractor helper
-        function extractSourceDomain(url) {
-            try {
-                const domain = new URL(url).hostname;
-                return domain.replace('www.', '').split('.')[0];
-            } catch (e) {
-                return 'News';
-            }
-        }
-
-        // Fetch articles from Supabase and render in index.html
-        async function fetchAndRenderArticles() {
-            try {
-                const { data: articles, error } = await supabase
-                    .from('articles')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                const feedContainer = document.getElementById('articles-feed-container');
-                if (!feedContainer) return;
-                feedContainer.innerHTML = '';
-
-                if (!articles || articles.length === 0) {
-                    feedContainer.innerHTML = '<div class="text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
-                    return;
-                }
-
-                // Group articles by group_id
-                const groups = {};
-                articles.forEach(article => {
-                    const gid = article.group_id || 'ungrouped-' + article.id;
-                    if (!groups[gid]) {
-                        groups[gid] = [];
-                    }
-                    groups[gid].push(article);
-                });
-
-                let index = 0;
-                for (const gid of Object.keys(groups)) {
-                    const groupArticles = groups[gid];
-                    groupArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-                    const mainArticle = groupArticles[0];
-                    const subArticles = groupArticles.slice(1);
-
-                    const dateString = formatTimeAgo(mainArticle.created_at);
-                    const sourceName = extractSourceDomain(mainArticle.source_url).toUpperCase();
-
-                    let bulletsHtml = '';
-                    if (mainArticle.bullets && mainArticle.bullets.length > 0) {
-                        bulletsHtml = `
-                            <div class="mt-16 p-16 bg-surface-container-low/60 rounded-xl border border-outline-variant/20 space-y-8">
-                                <div class="text-xs uppercase tracking-widest text-primary font-bold">F5 Quick-Takes</div>
-                                <ul class="list-disc pl-16 space-y-4 text-sm text-on-surface-variant leading-relaxed">
-                                    ${mainArticle.bullets.map(b => `<li>${b}</li>`).join('')}
-                                </ul>
-                            </div>
-                        `;
-                    }
-
-                    let relatedHtml = '';
-                    if (subArticles.length > 0) {
-                        relatedHtml = `
-                            <div class="mt-12 pt-12 border-t border-outline-variant/30">
-                                <div class="text-xs font-semibold text-on-surface-variant mb-8">Related Coverage:</div>
-                                <div class="space-y-4">
-                                    ${subArticles.map(sub => `
-                                        <a href="${sub.source_url}" target="_blank" class="flex items-center gap-8 text-sm text-primary hover:underline">
-                                            <span class="material-symbols-outlined text-[14px]">link</span>
-                                            <span class="font-semibold text-xs opacity-80 uppercase">${extractSourceDomain(sub.source_url)}:</span>
-                                            <span class="line-clamp-1">${sub.title}</span>
-                                        </a>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    if (index === 0) {
-                        const cardHtml = `
-                            <article class="relative w-full rounded-xl overflow-hidden group bg-surface-container border border-outline-variant/20">
-                                <div class="relative w-full aspect-[4/5] overflow-hidden">
-                                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6yvIuumL_SR6W4w77wEmGi1RECiKv5EuO-GlQDxtHLh8Ccuqibzi9eBOWqAuX0xpChCHCcF647smjeC9DZGVzpyWP8_1MTB8Hm3cDN-oFfcn5WyQMQWD3DsEwEeoF5QyVkAS2lHyVt_xc_N5GpJLdS93LLiHUrVAIylCC4lwaKHdTjSU96vrvxOvFZvtpUrTmU-FGbNunhpON8_uzZaUvS9SMgnLfN_cLVFx04G_fy0DSHv16WL3ta3oHE9y71cUnKYsOHc42PZc'}')"></div>
-                                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-transparent opacity-95 z-0"></div>
-                                    <div class="absolute inset-0 editorial-gradient flex flex-col justify-end p-24 z-10">
-                                        <div class="flex items-center gap-8 mb-16">
-                                            <span class="bg-tertiary text-on-tertiary px-8 py-4 rounded font-label text-label uppercase tracking-widest">Featured</span>
-                                            <span class="text-white/70 font-caption text-caption">${sourceName} • ${dateString}</span>
-                                        </div>
-                                        <h2 class="font-h1 text-h1 text-white leading-tight mb-8 hover:text-primary transition-colors">
-                                            <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
-                                        </h2>
-                                        <p class="font-body text-body text-white/80 line-clamp-2">${mainArticle.summary || ''}</p>
-                                    </div>
-                                </div>
-                                <div class="p-24 bg-surface-container">
-                                    ${bulletsHtml}
-                                    ${relatedHtml}
-                                </div>
-                            </article>
-                        `;
-                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
-                    } else {
-                        const cardHtml = `
-                            <article class="flex flex-col gap-16 group bg-surface-container/30 p-16 rounded-xl border border-outline-variant/10">
-                                <div class="w-full aspect-video rounded-xl overflow-hidden relative">
-                                    <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
-                                    <span class="absolute top-16 left-16 bg-background/60 backdrop-blur-md text-primary border border-primary/20 px-12 py-4 rounded-full font-label text-label">${mainArticle.category || 'Ποδόσφαιρο'}</span>
-                                </div>
-                                <div class="flex flex-col gap-8">
-                                    <div class="flex items-center justify-between text-on-surface-variant">
-                                        <span class="font-label text-label uppercase tracking-wider">${sourceName} • ${dateString}</span>
-                                        <a href="${mainArticle.source_url}" target="_blank" class="material-symbols-outlined text-body hover:text-primary transition-colors">open_in_new</a>
-                                    </div>
-                                    <h3 class="font-h3 text-h3 group-hover:text-primary transition-colors leading-tight">
-                                        <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
-                                    </h3>
-                                    <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">${mainArticle.summary || ''}</p>
-                                    ${bulletsHtml}
-                                    ${relatedHtml}
-                                </div>
-                            </article>
-                        `;
-                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
-                    }
-                    index++;
-                }
-            } catch (err) {
-                console.error('Error fetching articles from Supabase:', err);
-                const feedContainer = document.getElementById('articles-feed-container');
-                if (feedContainer) {
-                    feedContainer.innerHTML = `<div class="text-center py-24 text-error font-body">Σφάλμα κατά τη φόρτωση των ειδήσεων: ${err.message}</div>`;
-                }
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', fetchAndRenderArticles);
-    </script>
-</body></html>
-
-<!-- Mobile App Shell - Panathinaikos News -->
-<!DOCTYPE html>
-
-<html class="dark" lang="el"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Panathinaikos News - Premium Editorial</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
+<html class="dark" lang="el">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Panathinaikos News - Premium Editorial</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style>
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
         
         body {
@@ -472,7 +33,7 @@
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
         }
     </style>
-<script id="tailwind-config">
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -565,212 +126,212 @@
             },
         }
     </script>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
+</head>
 <body class="bg-background text-on-surface overflow-x-hidden">
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 h-20 bg-background border-b border-outline-variant flex items-center justify-between px-8 max-w-[1440px] mx-auto">
-<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()">
-<span class="material-symbols-outlined text-primary">menu</span>
-</div>
-<div class="font-h2 text-h2 font-bold tracking-tighter text-primary">PANATHINAIKOS</div>
-<div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()">
-<span class="material-symbols-outlined text-primary">search</span>
-</div>
-</header>
-<!-- Navigation Drawer (Sidebar) -->
-<aside class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-xl flex flex-col h-full p-6 space-y-4 -translate-x-full transition-transform duration-500 ease-in-out" id="nav-drawer">
-<div class="flex items-center justify-between mb-8">
-<h2 class="font-h3 text-h3 text-primary">PAO FC</h2>
-<button class="material-symbols-outlined text-on-surface-variant" onclick="toggleDrawer()">close</button>
-</div>
-<nav class="flex flex-col gap-2">
-<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="#">
-<span class="material-symbols-outlined">home</span>
-<span>Home</span>
-</a>
-<a class="flex items-center gap-4 p-4 bg-secondary-container text-on-secondary-container rounded-lg font-body text-body" href="#">
-<span class="material-symbols-outlined">article</span>
-<span>News</span>
-</a>
-<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="#">
-<span class="material-symbols-outlined">sports_soccer</span>
-<span>Matches</span>
-</a>
-<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="#">
-<span class="material-symbols-outlined">swap_horiz</span>
-<span>Transfers</span>
-</a>
-<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="#">
-<span class="material-symbols-outlined">edit_note</span>
-<span>Opinion</span>
-</a>
-</nav>
-</aside>
-<div class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" id="drawer-overlay" onclick="toggleDrawer()"></div>
-<!-- Search Overlay -->
-<div class="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col opacity-0 pointer-events-none search-reveal" id="search-overlay">
-<div class="p-8 flex items-center justify-between border-b border-outline-variant">
-<input class="bg-transparent border-none text-h2 font-h2 text-primary focus:ring-0 w-full placeholder:text-on-surface-variant/40" placeholder="Search news, players, matches..." type="text"/>
-<button class="material-symbols-outlined text-on-surface-variant text-4xl" onclick="toggleSearch()">close</button>
-</div>
-<div class="p-8">
-<p class="font-label text-label text-on-surface-variant uppercase tracking-widest mb-4">Trending Topics</p>
-<div class="flex flex-wrap gap-4">
-<span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#OAKA</span>
-<span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#Basketball_Euroleague</span>
-<span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#Transfers</span>
-<span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#Gate13</span>
-</div>
-</div>
-</div>
-<main class="mt-20">
-<!-- Hero Section -->
-<section class="relative w-full h-[530px] min-h-[400px] flex flex-col justify-end px-8 pb-16 overflow-hidden">
-<div class="absolute inset-0 z-0">
-<div class="w-full h-full bg-cover bg-center scale-105 animate-pulse-slow" data-alt="A cinematic, high-contrast photograph of the Apostolos Nikolaidis Stadium at dusk, bathed in deep green and obsidian tones. The lighting is dramatic, with sharp shadows and vibrant green highlights illuminating the structure. The mood is authoritative and historic, reflecting the premium editorial style of a prestigious football club journal." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY')"></div>
-<div class="absolute inset-0 premium-gradient-overlay"></div>
-</div>
-<div class="relative z-10 max-w-[1440px] mx-auto w-full">
-<nav class="flex items-center gap-2 mb-4 text-on-surface-variant/60 font-caption text-caption">
-<span class="hover:text-primary transition-colors cursor-pointer">Αρχική</span>
-<span class="material-symbols-outlined text-[12px]">chevron_right</span>
-<span class="text-primary font-bold">Ειδήσεις</span>
-</nav>
-<h1 class="font-display-l-mobile text-display-l-mobile md:text-display-l text-primary mb-4 max-w-2xl leading-tight">Ειδήσεις</h1>
-<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">Η καθημερινή σας ενημέρωση για όλα τα νέα του Παναθηναϊκού. Αναλύσεις, ρεπορτάζ και αποκλειστικά θέματα από την καρδιά του συλλόγου.</p>
-</div>
-</section>
-<!-- Content Area -->
-<section class="max-w-[1440px] mx-auto px-8 py-24 space-y-24">
-<!-- Latest News (Bento-style Grid) -->
-<div>
-<div class="flex items-end justify-between mb-12">
-<div>
-<span class="font-label text-label text-primary uppercase tracking-[0.2em]">Live Stream</span>
-<h2 class="font-h1 text-h1">Τελευταία Νέα</h2>
-</div>
-<a class="font-body text-body text-primary hover:underline transition-all" href="#">View All</a>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-<!-- Bento Grid Dynamic Feed Container -->
-<div class="md:col-span-12 flex flex-col gap-16" id="articles-feed-container-app">
-<!-- Featured Article (Skeleton) -->
-<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl aspect-video w-full p-24 justify-end">
-    <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
-    <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
-    <div class="h-4 bg-surface-container-high w-full rounded"></div>
-</div>
-</div>
-</div>
-</div>
-<!-- Upcoming Matches Widget -->
-<div class="bg-surface-container p-12 rounded-2xl border border-outline-variant/30">
-<div class="flex items-center justify-between mb-8">
-<h2 class="font-h2 text-h2">Πρόγραμμα Αγώνων</h2>
-<span class="material-symbols-outlined text-primary">calendar_month</span>
-</div>
-<div class="space-y-6">
-<!-- Match Card -->
-<div class="flex items-center justify-between py-6 border-b border-outline-variant/20 group hover:bg-surface-container-high px-4 -mx-4 rounded-lg transition-colors">
-<div class="flex items-center gap-4 flex-1">
-<div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center font-bold text-lg">☘️</div>
-<span class="font-h4 text-h4 hidden sm:inline">PANATHINAIKOS</span>
-<span class="font-h4 text-h4 sm:hidden">PAO</span>
-</div>
-<div class="flex flex-col items-center gap-1 px-8 text-center border-x border-outline-variant/20">
-<span class="font-label text-label text-primary">SUNDAY 20:30</span>
-<span class="font-h3 text-h3 text-on-surface-variant">VS</span>
-<span class="font-caption text-caption text-on-surface-variant/60 italic">Super League</span>
-</div>
-<div class="flex items-center gap-4 flex-1 justify-end">
-<span class="font-h4 text-h4 hidden sm:inline">OPPONENT TEAM</span>
-<span class="font-h4 text-h4 sm:hidden">OPP</span>
-<div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center font-bold text-lg opacity-40">🛡️</div>
-</div>
-</div>
-</div>
-<button class="w-full mt-8 py-4 bg-primary text-on-primary font-h4 text-h4 rounded-lg hover:opacity-90 active:scale-[0.98] transition-all">Tickets &amp; Info</button>
-</div>
-</section>
-</main>
-<!-- Footer -->
-<footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant flex flex-col items-center justify-center gap-8 max-w-[1440px] mx-auto px-8 mt-24">
-<div class="font-h4 text-h4 text-on-surface font-bold tracking-tighter">PANATHINAIKOS EDITORIAL</div>
-<div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
-<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Privacy Policy</a>
-<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Terms of Service</a>
-<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Contact</a>
-<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">About Us</a>
-</div>
-<div class="flex gap-6">
-<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">
-<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
-</a>
-<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">
-<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg>
-</a>
-<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">
-<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913a5.885 5.885 0 001.384 2.126A5.868 5.868 0 004.14 23.37c.766.296 1.636.499 2.913.558 1.28.06 1.687.072 4.947.072s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558a5.898 5.898 0 002.126-1.384 5.86 5.86 0 001.384-2.126c.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.148-.558-2.913a5.89 5.89 0 00-1.384-2.126A5.847 5.847 0 0019.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36.164.415 1.227.055 1.265.07 1.648.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.415-1.266.055-1.64.07-4.84.07s-3.58.016-4.84-.07c-1.17-.055-1.805-.249-2.227-.415a3.484 3.484 0 01-1.382-.899 3.49 3.49 0 01-.896-1.38c-.164-.42-.359-1.065-.415-2.235-.055-1.265-.07-1.64-.07-4.84s.016-3.58.07-4.84c.055-1.17.249-1.805.415-2.227.217-.562.477-.96.896-1.382.42-.419.82-.679 1.381-.896.422-.164 1.065-.359 2.227-.415 1.265-.055 1.648-.07 4.85-.07zM12 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405a1.441 1.441 0 11-2.882 0 1.441 1.441 0 012.882 0z"></path></svg>
-</a>
-</div>
-<p class="font-caption text-caption text-on-surface-variant/40 mt-8">© 2024 Panathinaikos Editorial. All rights reserved.</p>
-</footer>
-<!-- Interactive Elements Scripts -->
-<!-- Supabase SDK & App Script -->
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 h-20 bg-background border-b border-outline-variant flex items-center justify-between px-8 max-w-[1440px] mx-auto">
+        <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()">
+            <span class="material-symbols-outlined text-primary">menu</span>
+        </div>
+        <div class="font-h2 text-h2 font-bold tracking-tighter text-primary">PANATHINAIKOS</div>
+        <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()">
+            <span class="material-symbols-outlined text-primary">search</span>
+        </div>
+    </header>
+
+    <!-- Navigation Drawer (Sidebar) -->
+    <aside class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-xl flex flex-col h-full p-6 space-y-4 -translate-x-full transition-transform duration-500 ease-in-out" id="nav-drawer">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="font-h3 text-h3 text-primary">PAO FC</h2>
+            <button class="material-symbols-outlined text-on-surface-variant" onclick="toggleDrawer()">close</button>
+        </div>
+        <nav class="flex flex-col gap-2">
+            <a class="flex items-center gap-4 p-4 bg-secondary-container text-on-secondary-container rounded-lg font-body text-body" href="#">
+                <span class="material-symbols-outlined">home</span>
+                <span>Home</span>
+            </a>
+            <a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="dashboard.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="roster.html">
+                <span class="material-symbols-outlined">groups</span>
+                <span>Roster</span>
+            </a>
+            <a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high transition-colors font-body text-body" href="editor.html">
+                <span class="material-symbols-outlined">edit_note</span>
+                <span>Article Editor</span>
+            </a>
+        </nav>
+    </aside>
+    <div class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" id="drawer-overlay" onclick="toggleDrawer()"></div>
+
+    <!-- Search Overlay -->
+    <div class="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col opacity-0 pointer-events-none search-reveal" id="search-overlay">
+        <div class="p-8 flex items-center justify-between border-b border-outline-variant">
+            <input class="bg-transparent border-none text-h2 font-h2 text-primary focus:ring-0 w-full placeholder:text-on-surface-variant/40" placeholder="Search news, players, matches..." type="text"/>
+            <button class="material-symbols-outlined text-on-surface-variant text-4xl" onclick="toggleSearch()">close</button>
+        </div>
+        <div class="p-8">
+            <p class="font-label text-label text-on-surface-variant uppercase tracking-widest mb-4">Trending Topics</p>
+            <div class="flex flex-wrap gap-4">
+                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#OAKA</span>
+                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#Basketball_Euroleague</span>
+                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#Transfers</span>
+                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors">#Gate13</span>
+            </div>
+        </div>
+    </div>
+
+    <main class="mt-20">
+        <!-- Hero Section -->
+        <section class="relative w-full h-[530px] min-h-[400px] flex flex-col justify-end px-8 pb-16 overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <div class="w-full h-full bg-cover bg-center scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY')"></div>
+                <div class="absolute inset-0 premium-gradient-overlay"></div>
+            </div>
+            <div class="relative z-10 max-w-[1440px] mx-auto w-full">
+                <nav class="flex items-center gap-2 mb-4 text-on-surface-variant/60 font-caption text-caption">
+                    <span class="hover:text-primary transition-colors cursor-pointer">Αρχική</span>
+                    <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                    <span class="text-primary font-bold">Ειδήσεις</span>
+                </nav>
+                <h1 class="font-display-l-mobile text-display-l-mobile md:text-display-l text-primary mb-4 max-w-2xl leading-tight">Ειδήσεις</h1>
+                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">Η καθημερινή σας ενημέρωση για όλα τα νέα του Παναθηναϊκού. Αναλύσεις, ρεπορτάζ και αποκλειστικά θέματα από την καρδιά του συλλόγου.</p>
+            </div>
+        </section>
+
+        <!-- Content Area -->
+        <section class="max-w-[1440px] mx-auto px-8 py-24 space-y-24">
+            <!-- Latest News -->
+            <div>
+                <div class="flex items-end justify-between mb-12">
+                    <div>
+                        <span class="font-label text-label text-primary uppercase tracking-[0.2em]">Live Stream</span>
+                        <h2 class="font-h1 text-h1">Τελευταία Νέα</h2>
+                    </div>
+                    <a class="font-body text-body text-primary hover:underline transition-all" href="#">View All</a>
+                </div>
+                
+                <!-- Dynamic Bento Grid Container -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8" id="articles-feed-container">
+                    <!-- Featured Article (Skeleton) -->
+                    <div class="md:col-span-8 animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl aspect-video w-full p-24 justify-end">
+                        <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
+                        <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
+                        <div class="h-4 bg-surface-container-high w-full rounded"></div>
+                    </div>
+                    <!-- Secondary Column (Skeleton) -->
+                    <div class="md:col-span-4 flex flex-col gap-8">
+                        <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-8 rounded-lg">
+                            <div class="w-32 h-32 bg-surface-container-high rounded-lg shrink-0"></div>
+                            <div class="space-y-3 w-full">
+                                <div class="h-4 bg-surface-container-high w-1/3 rounded"></div>
+                                <div class="h-4 bg-surface-container-high w-3/4 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Matches Widget -->
+            <div class="bg-surface-container p-12 rounded-2xl border border-outline-variant/30">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="font-h2 text-h2">Πρόγραμμα Αγώνων</h2>
+                    <span class="material-symbols-outlined text-primary">calendar_month</span>
+                </div>
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between py-6 border-b border-outline-variant/20 group hover:bg-surface-container-high px-4 -mx-4 rounded-lg transition-colors">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center font-bold text-lg">☘️</div>
+                            <span class="font-h4 text-h4 hidden sm:inline">PANATHINAIKOS</span>
+                            <span class="font-h4 text-h4 sm:hidden">PAO</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 px-8 text-center border-x border-outline-variant/20">
+                            <span class="font-label text-label text-primary">SUNDAY 20:30</span>
+                            <span class="font-h3 text-h3 text-on-surface-variant">VS</span>
+                            <span class="font-caption text-caption text-on-surface-variant/60 italic">Super League</span>
+                        </div>
+                        <div class="flex items-center gap-4 flex-1 justify-end">
+                            <span class="font-h4 text-h4 hidden sm:inline">OPPONENT TEAM</span>
+                            <span class="font-h4 text-h4 sm:hidden">OPP</span>
+                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center font-bold text-lg opacity-40">🛡️</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="w-full mt-8 py-4 bg-primary text-on-primary font-h4 text-h4 rounded-lg hover:opacity-90 active:scale-[0.98] transition-all">Tickets &amp; Info</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant flex flex-col items-center justify-center gap-8 max-w-[1440px] mx-auto px-8 mt-24">
+        <div class="font-h4 text-h4 text-on-surface font-bold tracking-tighter">PANATHINAIKOS EDITORIAL</div>
+        <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+            <a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Privacy Policy</a>
+            <a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Terms of Service</a>
+            <a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Contact</a>
+            <a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">About Us</a>
+        </div>
+        <div class="flex gap-6">
+            <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">
+                <svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
+            </a>
+            <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">
+                <svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg>
+            </a>
+        </div>
+        <p class="font-caption text-caption text-on-surface-variant/40 mt-8">© 2024 Panathinaikos Editorial. All rights reserved.</p>
+    </footer>
+
+    <!-- Supabase SDK & App Script -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase configuration
+        // Production Supabase configuration
         const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         function toggleDrawer() {
-            const drawer = document.getElementById('nav-drawer');
-            const overlay = document.getElementById('drawer-overlay');
-            const isOpen = drawer.classList.contains('translate-x-0');
-
-            if (isOpen) {
-                drawer.classList.remove('translate-x-0');
-                drawer.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0', 'pointer-events-none');
-            } else {
-                drawer.classList.remove('-translate-x-full');
-                drawer.classList.add('translate-x-0');
-                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            try {
+                const drawer = document.getElementById('nav-drawer');
+                const overlay = document.getElementById('drawer-overlay');
+                drawer.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('opacity-0');
+                overlay.classList.toggle('pointer-events-none');
+            } catch (e) {
+                console.error("Error in toggleDrawer:", e);
             }
         }
 
         function toggleSearch() {
-            const search = document.getElementById('search-overlay');
-            const isHidden = search.classList.contains('opacity-0');
-
-            if (isHidden) {
-                search.classList.remove('opacity-0', 'pointer-events-none', 'scale-105');
-                search.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
-            } else {
-                search.classList.add('opacity-0', 'pointer-events-none', 'scale-105');
-                search.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            try {
+                const search = document.getElementById('search-overlay');
+                search.classList.toggle('opacity-0');
+                search.classList.toggle('pointer-events-none');
+            } catch (e) {
+                console.error("Error in toggleSearch:", e);
             }
         }
 
         // Date time-ago formatter helper
         function formatTimeAgo(dateString) {
-            const now = new Date();
-            const date = new Date(dateString);
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
+            try {
+                const now = new Date();
+                const date = new Date(dateString);
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
 
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffHours < 24) return `${diffHours}h ago`;
-            return `${diffDays}d ago`;
+                if (isNaN(date.getTime())) return 'Recently';
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                return `${diffDays}d ago`;
+            } catch (e) {
+                return 'Recently';
+            }
         }
 
         // Source domain name extractor helper
@@ -783,8 +344,8 @@
             }
         }
 
-        // Fetch and Render Articles in Mobile App Shell
-        async function fetchAndRenderArticlesApp() {
+        // Fetch and Render Articles in Bento Grid
+        async function fetchAndRenderArticles() {
             try {
                 const { data: articles, error } = await supabase
                     .from('articles')
@@ -793,12 +354,12 @@
 
                 if (error) throw error;
 
-                const feedContainer = document.getElementById('articles-feed-container-app');
+                const feedContainer = document.getElementById('articles-feed-container');
                 if (!feedContainer) return;
                 feedContainer.innerHTML = '';
 
                 if (!articles || articles.length === 0) {
-                    feedContainer.innerHTML = '<div class="text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
+                    feedContainer.innerHTML = '<div class="col-span-12 text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
                     return;
                 }
 
@@ -812,75 +373,170 @@
                     groups[gid].push(article);
                 });
 
-                let index = 0;
-                for (const gid of Object.keys(groups)) {
+                // Convert groups to sorted array of sports events
+                const sortedGroups = Object.keys(groups).map(gid => {
                     const groupArticles = groups[gid];
                     groupArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    return {
+                        gid,
+                        main: groupArticles[0],
+                        related: groupArticles.slice(1)
+                    };
+                });
 
-                    const mainArticle = groupArticles[0];
-                    const subArticles = groupArticles.slice(1);
+                if (sortedGroups.length === 0) return;
 
-                    const dateString = formatTimeAgo(mainArticle.created_at);
-                    const sourceName = extractSourceDomain(mainArticle.source_url).toUpperCase();
+                // 1. Featured Card (Index 0)
+                const featuredGroup = sortedGroups[0];
+                const featuredArticle = featuredGroup.main;
+                const featuredRelated = featuredGroup.related;
 
-                    let bulletsHtml = '';
-                    if (mainArticle.bullets && mainArticle.bullets.length > 0) {
-                        bulletsHtml = `
-                            <div class="mt-16 p-16 bg-surface-container-low/60 rounded-xl border border-outline-variant/20 space-y-8">
-                                <div class="text-xs uppercase tracking-widest text-primary font-bold">F5 Quick-Takes</div>
-                                <ul class="list-disc pl-16 space-y-4 text-sm text-on-surface-variant leading-relaxed font-body">
-                                    ${mainArticle.bullets.map(b => `<li>${b}</li>`).join('')}
-                                </ul>
+                let featuredBulletsHtml = '';
+                if (featuredArticle.bullets && featuredArticle.bullets.length > 0) {
+                    featuredBulletsHtml = `
+                        <div class="mt-16 p-16 bg-surface-container-low/60 rounded-xl border border-outline-variant/20 space-y-8">
+                            <div class="text-xs uppercase tracking-widest text-primary font-bold">F5 Quick-Takes</div>
+                            <ul class="list-disc pl-16 space-y-4 text-sm text-on-surface-variant leading-relaxed">
+                                ${featuredArticle.bullets.map(b => `<li>${b}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                let featuredRelatedHtml = '';
+                if (featuredRelated.length > 0) {
+                    featuredRelatedHtml = `
+                        <div class="mt-12 pt-12 border-t border-outline-variant/30">
+                            <div class="text-xs font-semibold text-on-surface-variant mb-8">Related Coverage:</div>
+                            <div class="space-y-4">
+                                ${featuredRelated.map(sub => `
+                                    <a href="${sub.source_url}" target="_blank" class="flex items-center gap-8 text-sm text-primary hover:underline">
+                                        <span class="material-symbols-outlined text-[14px]">link</span>
+                                        <span class="font-semibold text-xs opacity-80 uppercase">${extractSourceDomain(sub.source_url)}:</span>
+                                        <span class="line-clamp-1">${sub.title}</span>
+                                    </a>
+                                `).join('')}
                             </div>
-                        `;
-                    }
+                        </div>
+                    `;
+                }
 
-                    let relatedHtml = '';
-                    if (subArticles.length > 0) {
-                        relatedHtml = `
-                            <div class="mt-12 pt-12 border-t border-outline-variant/30 font-body">
-                                <div class="text-xs font-semibold text-on-surface-variant mb-8">Related Coverage:</div>
-                                <div class="space-y-4">
-                                    ${subArticles.map(sub => `
-                                        <a href="${sub.source_url}" target="_blank" class="flex items-center gap-8 text-sm text-primary hover:underline">
-                                            <span class="material-symbols-outlined text-[14px]">link</span>
-                                            <span class="font-semibold text-xs opacity-80 uppercase">${extractSourceDomain(sub.source_url)}:</span>
-                                            <span class="line-clamp-1">${sub.title}</span>
-                                        </a>
-                                    `).join('')}
+                const featuredDateStr = formatTimeAgo(featuredArticle.created_at);
+                const featuredSource = extractSourceDomain(featuredArticle.source_url).toUpperCase();
+
+                const featuredHtml = `
+                    <div class="md:col-span-8 group cursor-pointer bg-surface-container p-16 rounded-xl border border-outline-variant/20 flex flex-col justify-between">
+                        <div>
+                            <div class="relative aspect-video overflow-hidden rounded-xl mb-6">
+                                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${featuredArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhsGnhb89Mr6LU90QOkYs89yrGAXnTtyrPN_Apxq6ePrLsikSQAKLeVpVQHQAOuhaTlqwk8S0RVdPuBV9Kyon32vplAg_R2WdEvlUh5vhSAMvsSp8L_1Ab2bYgAEyHkcFvauYkP1d_VTtz4oFAgOTI1ZS47TuksoJNwSPqNAH6hab4XeeZjR_XhhhcPL7uv1eDN8lXb90zXP4kxXxx6uCq11kQDPA9WclUUS9VrP9AaZToYGgaS_DZtcFYnvNuq437RXh6Jz4I66c'}" />
+                                <div class="absolute top-4 left-4 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded">BREAKING</div>
+                            </div>
+                            <span class="font-label text-label text-primary uppercase tracking-widest">${featuredArticle.category || 'Ποδόσφαιρο'} • ${featuredSource} • ${featuredDateStr}</span>
+                            <h3 class="font-h2 text-h2 mt-2 group-hover:text-primary transition-colors leading-tight">
+                                <a href="${featuredArticle.source_url}" target="_blank">${featuredArticle.title}</a>
+                            </h3>
+                            <p class="font-body text-body text-on-surface-variant mt-3 line-clamp-2">${featuredArticle.summary || ''}</p>
+                        </div>
+                        <div class="mt-8">
+                            ${featuredBulletsHtml}
+                            ${featuredRelatedHtml}
+                        </div>
+                    </div>
+                `;
+
+                // 2. Side Column Groups (Indices 1 to 3)
+                const sideGroups = sortedGroups.slice(1, 4);
+                let sideHtml = `
+                    <div class="md:col-span-4 flex flex-col gap-8">
+                `;
+
+                if (sideGroups.length > 0) {
+                    sideGroups.forEach(group => {
+                        const art = group.main;
+                        const dateStr = formatTimeAgo(art.created_at);
+                        const source = extractSourceDomain(art.source_url).toUpperCase();
+
+                        sideHtml += `
+                            <div class="group cursor-pointer flex gap-4 items-start bg-surface-container/30 p-8 rounded-lg hover:bg-surface-container/60 transition-colors">
+                                <div class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden relative">
+                                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${art.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
+                                </div>
+                                <div>
+                                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${art.category || 'Ποδόσφαιρο'} • ${source}</span>
+                                    <h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-2">
+                                        <a href="${art.source_url}" target="_blank">${art.title}</a>
+                                    </h4>
+                                    <span class="text-xs text-on-surface-variant/70 mt-2 block">${dateStr}</span>
                                 </div>
                             </div>
                         `;
-                    }
+                    });
+                } else {
+                    sideHtml += `
+                        <div class="text-center py-8 text-on-surface-variant font-body text-xs">Καμία επιπλέον είδηση.</div>
+                    `;
+                }
+                sideHtml += `</div>`;
 
-                    if (index === 0) {
-                        const cardHtml = `
-                            <div class="md:col-span-12 group cursor-pointer bg-surface-container p-16 rounded-xl border border-outline-variant/20">
-                                <div class="relative aspect-video overflow-hidden rounded-xl mb-6">
-                                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhsGnhb89Mr6LU90QOkYs89yrGAXnTtyrPN_Apxq6ePrLsikSQAKLeVpVQHQAOuhaTlqwk8S0RVdPuBV9Kyon32vplAg_R2WdEvlUh5vhSAMvsSp8L_1Ab2bYgAEyHkcFvauYkP1d_VTtz4oFAgOTI1ZS47TuksoJNwSPqNAH6hab4XeeZjR_XhhhcPL7uv1eDN8lXb90zXP4kxXxx6uCq11kQDPA9WclUUS9VrP9AaZToYGgaS_DZtcFYnvNuq437RXh6Jz4I66c'}" />
-                                    <div class="absolute top-4 left-4 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded">FEATURED</div>
+                feedContainer.innerHTML = featuredHtml + sideHtml;
+
+                // 3. Remaining Groups (Indices 4+)
+                const remainingGroups = sortedGroups.slice(4);
+                if (remainingGroups.length > 0) {
+                    const dividerHtml = `
+                        <div class="col-span-12 mt-16 pt-16 border-t border-outline-variant/30">
+                            <h3 class="font-h2 text-h2 mb-12">Περισσότερες Ειδήσεις</h3>
+                        </div>
+                    `;
+                    feedContainer.insertAdjacentHTML('beforeend', dividerHtml);
+
+                    remainingGroups.forEach(group => {
+                        const art = group.main;
+                        const related = group.related;
+                        const dateStr = formatTimeAgo(art.created_at);
+                        const source = extractSourceDomain(art.source_url).toUpperCase();
+
+                        let bulletsHtml = '';
+                        if (art.bullets && art.bullets.length > 0) {
+                            bulletsHtml = `
+                                <div class="mt-16 p-16 bg-surface-container-low/60 rounded-xl border border-outline-variant/20 space-y-8">
+                                    <div class="text-xs uppercase tracking-widest text-primary font-bold">F5 Quick-Takes</div>
+                                    <ul class="list-disc pl-16 space-y-4 text-sm text-on-surface-variant leading-relaxed">
+                                        ${art.bullets.map(b => `<li>${b}</li>`).join('')}
+                                    </ul>
                                 </div>
-                                <span class="font-label text-label text-primary uppercase tracking-widest">${mainArticle.category || 'Ποδόσφαιρο'} • ${sourceName} • ${dateString}</span>
-                                <h3 class="font-h2 text-h2 mt-2 group-hover:text-primary transition-colors">
-                                    <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
-                                </h3>
-                                <p class="font-body text-body text-on-surface-variant mt-3 line-clamp-2">${mainArticle.summary || ''}</p>
-                                ${bulletsHtml}
-                                ${relatedHtml}
-                            </div>
-                        `;
-                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
-                    } else {
+                            `;
+                        }
+
+                        let relatedHtml = '';
+                        if (related.length > 0) {
+                            relatedHtml = `
+                                <div class="mt-12 pt-12 border-t border-outline-variant/30">
+                                    <div class="text-xs font-semibold text-on-surface-variant mb-8">Related Coverage:</div>
+                                    <div class="space-y-4">
+                                        ${related.map(sub => `
+                                            <a href="${sub.source_url}" target="_blank" class="flex items-center gap-8 text-sm text-primary hover:underline">
+                                                <span class="material-symbols-outlined text-[14px]">link</span>
+                                                <span class="font-semibold text-xs opacity-80 uppercase">${extractSourceDomain(sub.source_url)}:</span>
+                                                <span class="line-clamp-1">${sub.title}</span>
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+
                         const cardHtml = `
-                            <div class="md:col-span-6 group cursor-pointer bg-surface-container/40 p-16 rounded-xl border border-outline-variant/10 flex flex-col justify-between">
+                            <div class="md:col-span-6 lg:col-span-4 group cursor-pointer bg-surface-container/30 p-16 rounded-xl border border-outline-variant/10 flex flex-col justify-between">
                                 <div>
                                     <div class="relative aspect-video overflow-hidden rounded-xl mb-4">
-                                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
+                                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${art.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
                                     </div>
-                                    <span class="font-label text-label text-primary uppercase">${mainArticle.category || 'Ποδόσφαιρο'} • ${sourceName} • ${dateString}</span>
+                                    <span class="font-label text-label text-primary uppercase">${art.category || 'Ποδόσφαιρο'} • ${source} • ${dateStr}</span>
                                     <h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-2">
-                                        <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
+                                        <a href="${art.source_url}" target="_blank">${art.title}</a>
                                     </h4>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 mt-3">${art.summary || ''}</p>
                                 </div>
                                 <div class="mt-8">
                                     ${bulletsHtml}
@@ -889,54 +545,20 @@
                             </div>
                         `;
                         feedContainer.insertAdjacentHTML('beforeend', cardHtml);
-                    }
-                    index++;
+                    });
                 }
             } catch (err) {
-                console.error('Error fetching articles from Supabase in App view:', err);
-                const feedContainer = document.getElementById('articles-feed-container-app');
+                console.error('Error fetching articles from Supabase:', err);
+                const feedContainer = document.getElementById('articles-feed-container');
                 if (feedContainer) {
-                    feedContainer.innerHTML = `<div class="text-center py-24 text-error font-body">Σφάλμα κατά τη φόρτωση των ειδήσεων: ${err.message}</div>`;
+                    feedContainer.innerHTML = `<div class="col-span-12 text-center py-24 text-error font-body">Σφάλμα κατά τη φόρτωση των ειδήσεων: ${err.message}</div>`;
                 }
             }
         }
 
-        window.addEventListener('DOMContentLoaded', fetchAndRenderArticlesApp);
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchAndRenderArticles().catch(err => console.error("DOMContentLoaded error:", err));
+        });
     </script>
-</body></html>
-
-<!-- Football Hub - Desktop -->
-<!DOCTYPE html>
-
-<html class="dark" lang="el"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Panathinaikos FC | Ποδόσφαιρο</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-        
-        body {
-            font-family: 'Geist', sans-serif;
-            background-color: #0F1115;
-            color: #e2e2e8;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .glass-card {
-            background: rgba(24, 28, 34, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(63, 73, 64, 0.2);
-        }
-    </style>
-</head>
-<body>
-    <!-- (Note: Desktop layout template was truncated during initial system import) -->
 </body>
 </html>
