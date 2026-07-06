@@ -129,13 +129,15 @@
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden">
     <!-- TopAppBar -->
-    <header class="fixed top-0 w-full z-50 h-20 bg-background border-b border-outline-variant flex items-center justify-between px-8 max-w-[1440px] mx-auto">
-        <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()">
-            <span class="material-symbols-outlined text-primary">menu</span>
-        </div>
-        <div class="font-h2 text-h2 font-bold tracking-tighter text-primary cursor-pointer active:opacity-70" onclick="window.location.href='index.html'">PANATHINAIKOS</div>
-        <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()">
-            <span class="material-symbols-outlined text-primary">search</span>
+    <header class="fixed top-0 left-0 w-full z-50 h-20 bg-background border-b border-outline-variant">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
+            <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()">
+                <span class="material-symbols-outlined text-primary">menu</span>
+            </div>
+            <div class="font-h2 text-h2 font-bold tracking-tighter text-primary cursor-pointer active:opacity-70" onclick="window.location.href='index.html'">PANATHINAIKOS</div>
+            <div class="flex items-center gap-4 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()">
+                <span class="material-symbols-outlined text-primary">search</span>
+            </div>
         </div>
     </header>
 
