@@ -312,19 +312,24 @@ function determineCategory(item, defaultCategory) {
     const basketballKeywords = [
         'μπάσκετ', 'basketball', 'euroleague', 'basket league', 'κae', 'καε',
         'aktor', 'ακτωρ', 'sloukas', 'σλούκας', 'παπαπέτρου', 'ataman',
-        'ευρωλίγκα', 'super1', 'οακα', 'oaka', 'φεντεξπο', 'βγοστόκ',
-        'αντετοκούνμπο', 'νba', 'real madrid basket', 'fenerbahce basket'
+        'ευρωλίγκα', 'super1', 'οακα', 'oaka', 'mundobasket', 'μουντομπάσκετ',
+        'γιούρτσεβεν', 'yurtseven', 'σενγκούν', 'λούντζης', 'μιτόγλου',
+        'λαρεντζάκης', 'βουγιούκας', 'fiba', 'προκριματικά μπάσκετ',
+        'βόλεϊ', 'volleyball', 'volley', 'αντετοκούνμπο', 'nba',
+        'μπάλον', 'fenerbahce basket', 'real madrid basket', 'panathinaikos bc'
     ];
     if (basketballKeywords.some(kw => textToSearch.includes(kw))) {
         return 'Μπάσκετ';
     }
 
-    // PRIORITY 2: Football — ΠΑΕ and Super League are football-exclusive
+    // PRIORITY 2: Football — use only football-exclusive terms
     const footballKeywords = [
         'παε', 'super league', 'superleague', 'ποδόσφαιρο', 'ποδοσφαιρο',
-        'τελικό', 'τελικοσ', 'σούπερ λιγκ', 'europa league', 'conference league',
-        'champions league', 'fifa', 'uefa', 'μπακασέτας', 'τετέ', 'πελίστρι',
-        'γιεντβάι', 'ντραγκόφσκι', 'βαγιαννίδης', 'ioannidis', 'ιωαννίδης'
+        'σούπερ λιγκ', 'europa league', 'conference league', 'παγκόσμιο κύπελλο',
+        'mundial', 'μουντιάλ', 'euro 2028', 'ποδοσφαιρ',
+        'μπακασέτας', 'τετέ', 'πελίστρι', 'ντραγκόφσκι',
+        'βαγιαννίδης', 'ioannidis', 'ιωαννίδης', 'τερματοφύλακας',
+        'γκολ', 'offside', 'πέναλτι', 'φάουλ'
     ];
     if (footballKeywords.some(kw => textToSearch.includes(kw))) {
         return 'Ποδόσφαιρο';
