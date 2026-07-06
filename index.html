@@ -169,65 +169,14 @@
 </nav>
 <!-- News Feed Section -->
 <section class="px-16 flex flex-col gap-32">
-<!-- Featured Large Card -->
-<article class="relative w-full aspect-[4/5] rounded-xl overflow-hidden group">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="A cinematic, high-contrast action shot of a Panathinaikos football player celebrating under stadium lights, captured with a professional sports photography aesthetic. The scene is dominated by deep obsidian tones and vibrant emerald green highlights, with soft bokeh from the crowd in the background. The lighting is dramatic and moody, reflecting a premium editorial style for a sports journal." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC6yvIuumL_SR6W4w77wEmGi1RECiKv5EuO-GlQDxtHLh8Ccuqibzi9eBOWqAuX0xpChCHCcF647smjeC9DZGVzpyWP8_1MTB8Hm3cDN-oFfcn5WyQMQWD3DsEwEeoF5QyVkAS2lHyVt_xc_N5GpJLdS93LLiHUrVAIylCC4lwaKHdTjSU96vrvxOvFZvtpUrTmU-FGbNunhpON8_uzZaUvS9SMgnLfN_cLVFx04G_fy0DSHv16WL3ta3oHE9y71cUnKYsOHc42PZc')"></div>
-<div class="absolute inset-0 editorial-gradient flex flex-col justify-end p-24">
-<div class="flex items-center gap-8 mb-16">
-<span class="bg-tertiary text-on-tertiary px-8 py-4 rounded font-label text-label uppercase tracking-widest">Breaking</span>
-<span class="text-white/70 font-caption text-caption">PAO FC • 5m ago</span>
+<!-- Dynamic Articles Feed Container -->
+<div class="flex flex-col gap-48 w-full" id="articles-feed-container">
+<!-- Featured Large Card (Skeleton) -->
+<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl aspect-[4/5] w-full p-24 justify-end">
+    <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
+    <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
+    <div class="h-4 bg-surface-container-high w-full rounded"></div>
 </div>
-<h2 class="font-h1 text-h1 text-white leading-tight mb-8">Η επόμενη μέρα στο «τριφύλλι» μετά την ευρωπαϊκή βραδιά</h2>
-<p class="font-body text-body text-white/80 line-clamp-2">Αναλυτική προσέγγιση στις στρατηγικές κινήσεις του προπονητή και το πλάνο για το ντέρμπι που ακολουθεί.</p>
-</div>
-</article>
-<!-- Standard Editorial News Cards -->
-<div class="flex flex-col gap-48">
-<!-- Card Item 1 -->
-<article class="flex flex-col gap-16 group">
-<div class="w-full aspect-video rounded-xl overflow-hidden relative">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A wide-angle lens capture of the OAKA basketball arena interior, bathed in intense green lighting and filled with a passionate Panathinaikos crowd. The aesthetic is clean and modern, focusing on the architectural beauty of the stadium and the cinematic atmosphere of a high-stakes match. Deep blacks and vivid greens dominate the palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqnJrsK0DyNvZ7_xrFrJUlfHhhD57J2Hnw8BWqS_0JV_ryQ7ysjjqliSlAh8fK52b01ziGeaX99MyGz8LB5aTgd4D2KijVFDUvTuHFwWciR8BRhVgbMrdhECngkXh1XWMq3nEsTVYUOkz5iar2B8UI-O3PberxzLN6trANNy7OJGIc3R7jwXYlqm9ad05a__5wa08MeLuEt4l_dFOnzRJ6yjwl0jGj5OXUZtQjQFGNU4-_dUxRbZoQ1-O4PgmmDR8wBeUPMwkFo-s"/>
-<span class="absolute top-16 left-16 bg-background/60 backdrop-blur-md text-primary border border-primary/20 px-12 py-4 rounded-full font-label text-label">Μπάσκετ</span>
-</div>
-<div class="flex flex-col gap-8">
-<div class="flex items-center justify-between text-on-surface-variant">
-<span class="font-label text-label uppercase tracking-wider">SDNA • 45m ago</span>
-<span class="material-symbols-outlined text-body" data-icon="bookmark">bookmark</span>
-</div>
-<h3 class="font-h3 text-h3 group-hover:text-primary transition-colors">Ο Σλούκας δείχνει τον δρόμο για το Final Four</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">Ο αρχηγός του «Εξάστερου» μιλάει αποκλειστικά για την προετοιμασία της ομάδας και την ψυχολογία στα αποδυτήρια πριν την κρίσιμη αναμέτρηση.</p>
-</div>
-</article>
-<!-- Card Item 2 -->
-<article class="flex flex-col gap-16 group">
-<div class="w-full aspect-video rounded-xl overflow-hidden relative">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A sophisticated close-up portrait of a veteran sports journalist writing on a digital tablet in a dimly lit, high-end studio setting. The lighting is soft and directional, creating elegant shadows that emphasize a premium editorial atmosphere. The environment is minimalist, reflecting a serious, intellectual approach to sports commentary." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjjQuS0UGgKrakVWJAkYnwaNMeSeWGodhXit71yhj8qY9hmX4zTSX7CkQyMItgX4BrFev8LRzlszpYvLoABINdCxiBT2vFjeIsElE_1quPdvMUTifo44-dBicwzHHe5BzE_y2yr3b_H_AmW-qqZIoOyKsRy6VerSqzl7uLy13A38ILdN9YTk1YNE6AIkpkz6dIjA4ejmo1MZk-OiLfh5qNQtM8alHnNp0kA0oGxxNFaRXiw43aXl9cMDewtWVl0UV_hesZ3kpNJcA"/>
-<span class="absolute top-16 left-16 bg-background/60 backdrop-blur-md text-tertiary border border-tertiary/20 px-12 py-4 rounded-full font-label text-label">Opinion</span>
-</div>
-<div class="flex flex-col gap-8">
-<div class="flex items-center justify-between text-on-surface-variant">
-<span class="font-label text-label uppercase tracking-wider">PAnathinaikos Press • 2h ago</span>
-<span class="material-symbols-outlined text-body" data-icon="bookmark">bookmark</span>
-</div>
-<h3 class="font-h3 text-h3 group-hover:text-primary transition-colors">Η κουλτούρα της νίκης επιστρέφει στην Λεωφόρο</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">Μια βαθιά ανάλυση στην αλλαγή νοοτροπίας που έχει εμφυσήσει η νέα διοίκηση σε όλα τα τμήματα του συλλόγου.</p>
-</div>
-</article>
-<!-- Card Item 3 (Transfer Rumor) -->
-<article class="flex flex-col gap-16 group">
-<div class="w-full aspect-video rounded-xl overflow-hidden relative">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A minimalist architectural shot of the Panathinaikos training ground at dawn. The morning mist settles over the perfectly manicured green grass, with the modern facilities silhouetted against a cool, blue-hour sky. The aesthetic is calm, professional, and high-end, focusing on the elite infrastructure of the club." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4mFEFIH1xjWFFvvCUEiXYsvUjheTrvdbfk3nrSFoONAPo6bDPxIp06ZDYuHHws52ELNyr3mM4t7LDHqEVQAbpNf08Xfhj9mw9deZcnJ8HLqAT1UJo-IDgvJGRa6JBBX0GfG2MhgDIq8EZ3w0yNv7tAWgek_XG_w1l-BxVVwthuFwxMiG0VgoNlh93FlXApIOK-NZObXeV7GhrkNx7bNW6HVhWS7-EwwYeIbJn_G3da0AF1SmXX6MbH3pNTF31ZRcCBLutiz3AZ84"/>
-<span class="absolute top-16 left-16 bg-background/60 backdrop-blur-md text-secondary border border-secondary/20 px-12 py-4 rounded-full font-label text-label">Transfers</span>
-</div>
-<div class="flex flex-col gap-8">
-<div class="flex items-center justify-between text-on-surface-variant">
-<span class="font-label text-label uppercase tracking-wider">GAZZETTA • 4h ago</span>
-<span class="material-symbols-outlined text-body" data-icon="bookmark">bookmark</span>
-</div>
-<h3 class="font-h3 text-h3 group-hover:text-primary transition-colors">Στο στόχαστρο ο επόμενος «πράσινος» επιθετικός</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">Οι τελευταίες πληροφορίες από το εξωτερικό για τις επαφές που βρίσκονται σε εξέλιξη για την ενίσχυση της γραμμής κρούσης.</p>
-</div>
-</article>
 </div>
 </section>
 <!-- Skeleton Loading Pattern (Visual Hint) -->
@@ -299,7 +248,14 @@
 </div>
 </aside>
 <div class="fixed inset-0 bg-black/50 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" id="drawer-overlay" onclick="toggleDrawer()"></div>
-<script>
+<!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         function toggleDrawer() {
             const drawer = document.getElementById('nav-drawer');
             const overlay = document.getElementById('drawer-overlay');
@@ -321,6 +277,161 @@
                 header.classList.remove('shadow-lg');
             }
         });
+
+        // Date time-ago formatter helper
+        function formatTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+
+        // Source domain name extractor helper
+        function extractSourceDomain(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return domain.replace('www.', '').split('.')[0];
+            } catch (e) {
+                return 'News';
+            }
+        }
+
+        // Fetch articles from Supabase and render in index.html
+        async function fetchAndRenderArticles() {
+            try {
+                const { data: articles, error } = await supabase
+                    .from('articles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const feedContainer = document.getElementById('articles-feed-container');
+                if (!feedContainer) return;
+                feedContainer.innerHTML = '';
+
+                if (!articles || articles.length === 0) {
+                    feedContainer.innerHTML = '<div class="text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
+                    return;
+                }
+
+                // Group articles by group_id
+                const groups = {};
+                articles.forEach(article => {
+                    const gid = article.group_id || 'ungrouped-' + article.id;
+                    if (!groups[gid]) {
+                        groups[gid] = [];
+                    }
+                    groups[gid].push(article);
+                });
+
+                let index = 0;
+                for (const gid of Object.keys(groups)) {
+                    const groupArticles = groups[gid];
+                    groupArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                    const mainArticle = groupArticles[0];
+                    const subArticles = groupArticles.slice(1);
+
+                    const dateString = formatTimeAgo(mainArticle.created_at);
+                    const sourceName = extractSourceDomain(mainArticle.source_url).toUpperCase();
+
+                    let bulletsHtml = '';
+                    if (mainArticle.bullets && mainArticle.bullets.length > 0) {
+                        bulletsHtml = `
+                            <div class="mt-16 p-16 bg-surface-container-low/60 rounded-xl border border-outline-variant/20 space-y-8">
+                                <div class="text-xs uppercase tracking-widest text-primary font-bold">F5 Quick-Takes</div>
+                                <ul class="list-disc pl-16 space-y-4 text-sm text-on-surface-variant leading-relaxed">
+                                    ${mainArticle.bullets.map(b => `<li>${b}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    let relatedHtml = '';
+                    if (subArticles.length > 0) {
+                        relatedHtml = `
+                            <div class="mt-12 pt-12 border-t border-outline-variant/30">
+                                <div class="text-xs font-semibold text-on-surface-variant mb-8">Related Coverage:</div>
+                                <div class="space-y-4">
+                                    ${subArticles.map(sub => `
+                                        <a href="${sub.source_url}" target="_blank" class="flex items-center gap-8 text-sm text-primary hover:underline">
+                                            <span class="material-symbols-outlined text-[14px]">link</span>
+                                            <span class="font-semibold text-xs opacity-80 uppercase">${extractSourceDomain(sub.source_url)}:</span>
+                                            <span class="line-clamp-1">${sub.title}</span>
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    if (index === 0) {
+                        const cardHtml = `
+                            <article class="relative w-full rounded-xl overflow-hidden group bg-surface-container border border-outline-variant/20">
+                                <div class="relative w-full aspect-[4/5] overflow-hidden">
+                                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6yvIuumL_SR6W4w77wEmGi1RECiKv5EuO-GlQDxtHLh8Ccuqibzi9eBOWqAuX0xpChCHCcF647smjeC9DZGVzpyWP8_1MTB8Hm3cDN-oFfcn5WyQMQWD3DsEwEeoF5QyVkAS2lHyVt_xc_N5GpJLdS93LLiHUrVAIylCC4lwaKHdTjSU96vrvxOvFZvtpUrTmU-FGbNunhpON8_uzZaUvS9SMgnLfN_cLVFx04G_fy0DSHv16WL3ta3oHE9y71cUnKYsOHc42PZc'}')"></div>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-transparent opacity-95 z-0"></div>
+                                    <div class="absolute inset-0 editorial-gradient flex flex-col justify-end p-24 z-10">
+                                        <div class="flex items-center gap-8 mb-16">
+                                            <span class="bg-tertiary text-on-tertiary px-8 py-4 rounded font-label text-label uppercase tracking-widest">Featured</span>
+                                            <span class="text-white/70 font-caption text-caption">${sourceName} • ${dateString}</span>
+                                        </div>
+                                        <h2 class="font-h1 text-h1 text-white leading-tight mb-8 hover:text-primary transition-colors">
+                                            <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
+                                        </h2>
+                                        <p class="font-body text-body text-white/80 line-clamp-2">${mainArticle.summary || ''}</p>
+                                    </div>
+                                </div>
+                                <div class="p-24 bg-surface-container">
+                                    ${bulletsHtml}
+                                    ${relatedHtml}
+                                </div>
+                            </article>
+                        `;
+                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
+                    } else {
+                        const cardHtml = `
+                            <article class="flex flex-col gap-16 group bg-surface-container/30 p-16 rounded-xl border border-outline-variant/10">
+                                <div class="w-full aspect-video rounded-xl overflow-hidden relative">
+                                    <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
+                                    <span class="absolute top-16 left-16 bg-background/60 backdrop-blur-md text-primary border border-primary/20 px-12 py-4 rounded-full font-label text-label">${mainArticle.category || 'Ποδόσφαιρο'}</span>
+                                </div>
+                                <div class="flex flex-col gap-8">
+                                    <div class="flex items-center justify-between text-on-surface-variant">
+                                        <span class="font-label text-label uppercase tracking-wider">${sourceName} • ${dateString}</span>
+                                        <a href="${mainArticle.source_url}" target="_blank" class="material-symbols-outlined text-body hover:text-primary transition-colors">open_in_new</a>
+                                    </div>
+                                    <h3 class="font-h3 text-h3 group-hover:text-primary transition-colors leading-tight">
+                                        <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
+                                    </h3>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">${mainArticle.summary || ''}</p>
+                                    ${bulletsHtml}
+                                    ${relatedHtml}
+                                </div>
+                            </article>
+                        `;
+                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
+                    }
+                    index++;
+                }
+            } catch (err) {
+                console.error('Error fetching articles from Supabase:', err);
+                const feedContainer = document.getElementById('articles-feed-container');
+                if (feedContainer) {
+                    feedContainer.innerHTML = `<div class="text-center py-24 text-error font-body">Σφάλμα κατά τη φόρτωση των ειδήσεων: ${err.message}</div>`;
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', fetchAndRenderArticles);
     </script>
 </body></html>
 
@@ -546,44 +657,13 @@
 <a class="font-body text-body text-primary hover:underline transition-all" href="#">View All</a>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-<!-- Featured Article -->
-<div class="md:col-span-8 group cursor-pointer">
-<div class="relative aspect-video overflow-hidden rounded-xl mb-6">
-<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A focused close-up shot of a professional football player in a green Panathinaikos jersey during a match, sweat glistening under stadium lights. The aesthetic is gritty yet elegant, using deep obsidian shadows and a high-contrast green palette. The player's expression is one of intense determination, capturing a high-stakes moment in an editorial style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhsGnhb89Mr6LU90QOkYs89yrGAXnTtyrPN_Apxq6ePrLsikSQAKLeVpVQHQAOuhaTlqwk8S0RVdPuBV9Kyon32vplAg_R2WdEvlUh5vhSAMvsSp8L_1Ab2bYgAEyHkcFvauYkP1d_VTtz4oFAgOTI1ZS47TuksoJNwSPqNAH6hab4XeeZjR_XhhhcPL7uv1eDN8lXb90zXP4kxXxx6uCq11kQDPA9WclUUS9VrP9AaZToYGgaS_DZtcFYnvNuq437RXh6Jz4I66c"/>
-<div class="absolute top-4 left-4 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded">BREAKING</div>
-</div>
-<span class="font-label text-label text-primary uppercase tracking-widest">Football</span>
-<h3 class="font-h2 text-h2 mt-2 group-hover:text-primary transition-colors">Η επόμενη μέρα μετά τη μεγάλη νίκη στο ντέρμπι: Ανάλυση και στατιστικά.</h3>
-<p class="font-body text-body text-on-surface-variant mt-3 line-clamp-2">Οι πράσινοι έδειξαν χαρακτήρα και ποιότητα στο γήπεδο, παίρνοντας τους τρεις βαθμούς που τους κρατούν στην κορυφή της βαθμολογίας...</p>
-</div>
-<!-- Secondary Articles -->
-<div class="md:col-span-4 flex flex-col gap-8">
-<div class="group cursor-pointer flex gap-4 items-start">
-<div class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A minimalist architectural shot of the OAKA arena interior, showing geometric patterns of the seating and structure under cool, professional lighting. The color scheme is predominantly dark greys and deep greens, maintaining a sophisticated and calm intellectual environment for football supporters." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM"/>
-</div>
-<div>
-<span class="font-label text-label text-on-surface-variant/60 uppercase">OAKA</span>
-<h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">Εργασίες αναβάθμισης στις κερκίδες του ΟΑΚΑ.</h4>
-</div>
-</div>
-<div class="group cursor-pointer flex gap-4 items-start">
-<div class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A professional portrait of a football manager dressed in a sharp dark suit, gesturing towards a tactical whiteboard. The scene is lit with soft, cinematic lighting that highlights the textures of the fabric and the intensity of the strategy session. The style is premium editorial, focusing on the intellectual side of the sport." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3cMRQLdwVajvMbbUULzpaSjaY2BVesczE18oqeVHNua3Y9_6_tv1iPqsM0xUVwRyEvpjUEsI5tnKhzNoWsewD02L7w0L7e4VmzJiOBubnGOFOJEluN3InsZabLVdrgt7l9y9sP1rADDQna-kiesrSmJaJ-fmmqtS_lFKAuuf3i76HrEH76D8fw3M1x55PsxIfzpbFSihfuAEj1GgLZiY0KbD4tJrMUz3MsqLGSTFMRfl0nKDe-612mBxvWvpFiniYGqbVb3A3d4E"/>
-</div>
-<div>
-<span class="font-label text-label text-on-surface-variant/60 uppercase">Strategy</span>
-<h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">Το πλάνο του προπονητή για τον επερχόμενο αγώνα.</h4>
-</div>
-</div>
-<div class="group cursor-pointer flex gap-4 items-start">
-<div class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Close-up of a football boot making contact with a ball on perfectly manicured green grass, with motion blur capturing the dynamic action. High contrast lighting emphasizes the green blades of grass and the sleek design of the sports equipment against a dark stadium background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrf0v3Pcu3Sc0oQeCI96OMDCo2zKfIcXDKAsRdtNJI4Thf-i_wZ-YKuv0_Z_sprQBBEmose3iut6C1Wt7RjU651zuT8-X6YXGzaTdWxSJ5i4KBP7fsbBbf5eYY7KDRoAoNyL2WmAakaQ29xXQjYtT6Uj5ERfYw4ZrfPRk41p4nZwIDD0_E32G42ktyI2XkQtC7_6YmIid2mSabHLfDjoEwyRyDJ50bqGrNiN_F4bowo3UAXvLuBZrY2OvfkndLuRIHNWoQN-nytUI"/>
-</div>
-<div>
-<span class="font-label text-label text-on-surface-variant/60 uppercase">Transfers</span>
-<h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">Νέα ονόματα στη λίστα για την ενίσχυση του Ιανουαρίου.</h4>
-</div>
+<!-- Bento Grid Dynamic Feed Container -->
+<div class="md:col-span-12 flex flex-col gap-16" id="articles-feed-container-app">
+<!-- Featured Article (Skeleton) -->
+<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl aspect-video w-full p-24 justify-end">
+    <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
+    <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
+    <div class="h-4 bg-surface-container-high w-full rounded"></div>
 </div>
 </div>
 </div>
@@ -641,7 +721,14 @@
 <p class="font-caption text-caption text-on-surface-variant/40 mt-8">© 2024 Panathinaikos Editorial. All rights reserved.</p>
 </footer>
 <!-- Interactive Elements Scripts -->
-<script>
+<!-- Supabase SDK & App Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         function toggleDrawer() {
             const drawer = document.getElementById('nav-drawer');
             const overlay = document.getElementById('drawer-overlay');
@@ -670,6 +757,151 @@
                 search.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
             }
         }
+
+        // Date time-ago formatter helper
+        function formatTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+
+        // Source domain name extractor helper
+        function extractSourceDomain(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return domain.replace('www.', '').split('.')[0];
+            } catch (e) {
+                return 'News';
+            }
+        }
+
+        // Fetch and Render Articles in Mobile App Shell
+        async function fetchAndRenderArticlesApp() {
+            try {
+                const { data: articles, error } = await supabase
+                    .from('articles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const feedContainer = document.getElementById('articles-feed-container-app');
+                if (!feedContainer) return;
+                feedContainer.innerHTML = '';
+
+                if (!articles || articles.length === 0) {
+                    feedContainer.innerHTML = '<div class="text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
+                    return;
+                }
+
+                // Group articles by group_id
+                const groups = {};
+                articles.forEach(article => {
+                    const gid = article.group_id || 'ungrouped-' + article.id;
+                    if (!groups[gid]) {
+                        groups[gid] = [];
+                    }
+                    groups[gid].push(article);
+                });
+
+                let index = 0;
+                for (const gid of Object.keys(groups)) {
+                    const groupArticles = groups[gid];
+                    groupArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                    const mainArticle = groupArticles[0];
+                    const subArticles = groupArticles.slice(1);
+
+                    const dateString = formatTimeAgo(mainArticle.created_at);
+                    const sourceName = extractSourceDomain(mainArticle.source_url).toUpperCase();
+
+                    let bulletsHtml = '';
+                    if (mainArticle.bullets && mainArticle.bullets.length > 0) {
+                        bulletsHtml = `
+                            <div class="mt-16 p-16 bg-surface-container-low/60 rounded-xl border border-outline-variant/20 space-y-8">
+                                <div class="text-xs uppercase tracking-widest text-primary font-bold">F5 Quick-Takes</div>
+                                <ul class="list-disc pl-16 space-y-4 text-sm text-on-surface-variant leading-relaxed font-body">
+                                    ${mainArticle.bullets.map(b => `<li>${b}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    let relatedHtml = '';
+                    if (subArticles.length > 0) {
+                        relatedHtml = `
+                            <div class="mt-12 pt-12 border-t border-outline-variant/30 font-body">
+                                <div class="text-xs font-semibold text-on-surface-variant mb-8">Related Coverage:</div>
+                                <div class="space-y-4">
+                                    ${subArticles.map(sub => `
+                                        <a href="${sub.source_url}" target="_blank" class="flex items-center gap-8 text-sm text-primary hover:underline">
+                                            <span class="material-symbols-outlined text-[14px]">link</span>
+                                            <span class="font-semibold text-xs opacity-80 uppercase">${extractSourceDomain(sub.source_url)}:</span>
+                                            <span class="line-clamp-1">${sub.title}</span>
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    if (index === 0) {
+                        const cardHtml = `
+                            <div class="md:col-span-12 group cursor-pointer bg-surface-container p-16 rounded-xl border border-outline-variant/20">
+                                <div class="relative aspect-video overflow-hidden rounded-xl mb-6">
+                                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhsGnhb89Mr6LU90QOkYs89yrGAXnTtyrPN_Apxq6ePrLsikSQAKLeVpVQHQAOuhaTlqwk8S0RVdPuBV9Kyon32vplAg_R2WdEvlUh5vhSAMvsSp8L_1Ab2bYgAEyHkcFvauYkP1d_VTtz4oFAgOTI1ZS47TuksoJNwSPqNAH6hab4XeeZjR_XhhhcPL7uv1eDN8lXb90zXP4kxXxx6uCq11kQDPA9WclUUS9VrP9AaZToYGgaS_DZtcFYnvNuq437RXh6Jz4I66c'}" />
+                                    <div class="absolute top-4 left-4 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded">FEATURED</div>
+                                </div>
+                                <span class="font-label text-label text-primary uppercase tracking-widest">${mainArticle.category || 'Ποδόσφαιρο'} • ${sourceName} • ${dateString}</span>
+                                <h3 class="font-h2 text-h2 mt-2 group-hover:text-primary transition-colors">
+                                    <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
+                                </h3>
+                                <p class="font-body text-body text-on-surface-variant mt-3 line-clamp-2">${mainArticle.summary || ''}</p>
+                                ${bulletsHtml}
+                                ${relatedHtml}
+                            </div>
+                        `;
+                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
+                    } else {
+                        const cardHtml = `
+                            <div class="md:col-span-6 group cursor-pointer bg-surface-container/40 p-16 rounded-xl border border-outline-variant/10 flex flex-col justify-between">
+                                <div>
+                                    <div class="relative aspect-video overflow-hidden rounded-xl mb-4">
+                                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${mainArticle.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM'}" />
+                                    </div>
+                                    <span class="font-label text-label text-primary uppercase">${mainArticle.category || 'Ποδόσφαιρο'} • ${sourceName} • ${dateString}</span>
+                                    <h4 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-2">
+                                        <a href="${mainArticle.source_url}" target="_blank">${mainArticle.title}</a>
+                                    </h4>
+                                </div>
+                                <div class="mt-8">
+                                    ${bulletsHtml}
+                                    ${relatedHtml}
+                                </div>
+                            </div>
+                        `;
+                        feedContainer.insertAdjacentHTML('beforeend', cardHtml);
+                    }
+                    index++;
+                }
+            } catch (err) {
+                console.error('Error fetching articles from Supabase in App view:', err);
+                const feedContainer = document.getElementById('articles-feed-container-app');
+                if (feedContainer) {
+                    feedContainer.innerHTML = `<div class="text-center py-24 text-error font-body">Σφάλμα κατά τη φόρτωση των ειδήσεων: ${err.message}</div>`;
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', fetchAndRenderArticlesApp);
     </script>
 </body></html>
 

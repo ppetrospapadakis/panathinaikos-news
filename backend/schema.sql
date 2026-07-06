@@ -58,3 +58,12 @@ CREATE POLICY "Allow service role write access to articles"
     TO service_role 
     USING (true) 
     WITH CHECK (true);
+
+-- Allow anonymous key write access to articles (necessary for scraper using anon key)
+DROP POLICY IF EXISTS "Allow anon write access to articles" ON public.articles;
+CREATE POLICY "Allow anon write access to articles" 
+    ON public.articles 
+    FOR ALL 
+    TO anon 
+    USING (true) 
+    WITH CHECK (true);
