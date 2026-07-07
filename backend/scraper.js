@@ -352,7 +352,12 @@ async function generateAiBullets(title, text) {
         });
 
         let textResponse = response.text.trim();
-        textResponse = textResponse.replace(/^\`\`\`json/i, '').replace(/\`\`\`$/, '').trim();
+        // Extract array substring to bypass conversational wrappers
+        const startIdx = textResponse.indexOf('[');
+        const endIdx = textResponse.lastIndexOf(']');
+        if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+            textResponse = textResponse.substring(startIdx, endIdx + 1);
+        }
         const bullets = JSON.parse(textResponse);
         if (Array.isArray(bullets) && bullets.length === 3) return bullets;
         throw new Error('Bad response format');
