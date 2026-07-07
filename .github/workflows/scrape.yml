@@ -2,8 +2,8 @@ name: 🤖 Autonomous News Ingestion
 
 on:
   schedule:
-    # Run every 15 minutes, 24/7
-    - cron: '*/15 * * * *'
+    # Run every 30 minutes, 24/7 (GitHub min interval is 5min, but 30min is safer for free tier)
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     # Allow manual trigger from GitHub Actions UI
     inputs:
@@ -20,7 +20,7 @@ jobs:
   scrape:
     name: Scrape & Ingest News
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: 📥 Checkout repository
@@ -34,6 +34,19 @@ jobs:
 
       - name: 📦 Install dependencies
         run: npm ci --prefer-offline
+
+      - name: 🔍 Verify secrets are set
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then echo "❌ SUPABASE_URL is not set!"; exit 1; fi
+          if [ -z "$SUPABASE_KEY" ]; then echo "❌ SUPABASE_KEY is not set!"; exit 1; fi
+          if [ -z "$GEMINI_API_KEY" ]; then echo "❌ GEMINI_API_KEY is not set!"; exit 1; fi
+          echo "✅ All secrets present"
+          echo "SUPABASE_URL: ${SUPABASE_URL:0:40}..."
+          echo "GEMINI_API_KEY starts with: ${GEMINI_API_KEY:0:5}..."
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: 🗞️ Run scraper (live)
         if: ${{ github.event.inputs.dry_run != 'true' }}

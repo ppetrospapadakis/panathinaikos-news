@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Panathinaikos News — Direct HTML Scraper
  *
  * Architecture: Direct URL scraping with axios + cheerio (no RSS).
@@ -365,10 +365,41 @@ function getAiClient() {
     return aiClientInstance;
 }
 
+// ─── Quota exhaustion tracker ──────────────────────────────────────────────────
+// If we hit the daily limit, stop wasting time on further API calls this run
+let quotaExhausted = false;
+
+// ─── Retry helper for 429 rate limits (per-minute throttle, not daily limit) ──
+async function retryWithBackoff(fn, maxRetries = 2) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            const is429 = err.status === 429 || (err.message && err.message.includes('429'));
+            if (!is429) throw err; // non-quota error — bubble up immediately
+
+            // Check if it's a daily limit (cannot retry) vs per-minute throttle (can retry)
+            const isDailyLimit = err.message && err.message.includes('per_day');
+            if (isDailyLimit) {
+                quotaExhausted = true;
+                throw err;
+            }
+
+            if (attempt < maxRetries) {
+                const waitMs = (attempt + 1) * 30000; // 30s, 60s
+                console.log(`    [AI] Rate limit hit — waiting ${waitMs/1000}s before retry ${attempt + 1}/${maxRetries}...`);
+                await sleep(waitMs);
+            } else {
+                throw err;
+            }
+        }
+    }
+}
+
 // ─── Gemini API: bullets ───────────────────────────────────────────────────────
 async function generateAiBullets(title, text) {
     const ai = getAiClient();
-    if (!ai) return generateFallbackBullets(title, text);
+    if (!ai || quotaExhausted) return generateFallbackBullets(title, text);
 
     const cleanText = (text || '')
         .replace(/<[^>]*>/g, ' ')
@@ -377,7 +408,7 @@ async function generateAiBullets(title, text) {
         .replace(/\s+/g, ' ').trim().substring(0, 4000);
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
@@ -390,7 +421,7 @@ async function generateAiBullets(title, text) {
 
 Τίτλος: ${title}
 Κείμενο: ${cleanText}`
-        });
+        }));
 
         const textResponse = response.text.trim();
         const bullets = textResponse.split('\n')
@@ -398,12 +429,11 @@ async function generateAiBullets(title, text) {
             .filter(line => /^[\u2022\-*\s]/.test(line))
             .map(line => line.replace(/^[\u2022\-*\s]+/, '').trim())
             .filter(line => line.length > 5);
-        if (bullets.length >= 3) {
-            return bullets.slice(0, 3);
-        }
+        if (bullets.length >= 3) return bullets.slice(0, 3);
         throw new Error('Found only ' + bullets.length + ' bullets');
     } catch (err) {
-        console.warn("[AI] Bullets fallback error details:", err);
+        if (quotaExhausted) console.warn('[AI] Daily quota exhausted — using fallback bullets.');
+        else console.warn('[AI] Bullets fallback:', err.message?.substring(0, 80));
         return generateFallbackBullets(title, text);
     }
 }
@@ -411,7 +441,7 @@ async function generateAiBullets(title, text) {
 // ─── Gemini API: long-form article ────────────────────────────────────────────
 async function generateLongFormContent(title, text) {
     const ai = getAiClient();
-    if (!ai) return null;
+    if (!ai || quotaExhausted) return null;
 
     const cleanText = (text || '')
         .replace(/<[^>]*>/g, ' ')
@@ -420,7 +450,7 @@ async function generateLongFormContent(title, text) {
         .replace(/\s+/g, ' ').trim().substring(0, 6000);
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News. Η συντακτική σου ομάδα παράγει αποκλειστικό, πρωτότυπο περιεχόμενο.
 Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, 100% αυθεντικό, αυτόνομο αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
@@ -441,7 +471,7 @@ async function generateLongFormContent(title, text) {
                 temperature: 0.8,
                 maxOutputTokens: 2048
             }
-        });
+        }));
 
         const articleText = response.text.trim();
         if (articleText && articleText.length > 100) {
@@ -449,7 +479,8 @@ async function generateLongFormContent(title, text) {
             return articleText;
         }
     } catch (err) {
-        console.warn(`[AI] Long-form fallback: ${err.message}`);
+        if (quotaExhausted) console.warn('[AI] Daily quota exhausted — skipping long-form.');
+        else console.warn(`[AI] Long-form failed: ${err.message?.substring(0, 80)}`);
     }
     return null;
 }
