@@ -346,11 +346,11 @@ function generateFallbackBullets(title, content) {
         .filter(s => s.length > 20 && !s.includes('http'));
     const bullets = [`${title}`];
     for (const s of sentences) {
-        if (bullets.length >= 3) break;
+        if (bullets.length >= 2) break;
         if (!bullets.some(b => b.includes(s.substring(0, 15)))) bullets.push(s);
     }
-    while (bullets.length < 3) bullets.push('Παρακολουθήστε την εξέλιξη στο Panathinaikos News.');
-    return bullets.slice(0, 3);
+    while (bullets.length < 2) bullets.push('Παρακολουθήστε την εξέλιξη στο Panathinaikos News.');
+    return bullets.slice(0, 2);
 }
 
 // ─── Gemini API: SDK Initialization Helper ────────────────────────────────────
@@ -410,14 +410,14 @@ async function generateAiBullets(title, text) {
     try {
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
-            contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+            contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 2 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
 1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να αντιγράψεις αυτούσιες φράσεις από το κείμενο. Κάνε πλήρη αναδιατύπωση των γεγονότων.
 2. Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη. ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία (καμία αναφορά σε άλλα portals, sites, «Σύμφωνα με...»).
-3. Κάθε bullet πρέπει να ξεκινάει με τον χαρακτήρα "•" και να είναι 1-2 προτάσεις.
+3. Κάθε bullet πρέπει να ξεκινάει με τον χαρακτήρα "•" και να αποτελείται ΑΥΣΤΗΡΑ από ακριβώς μία (1) πρόταση.
 
-Έξοδος: Επίστρεψε ΜΟΝΟ τις 3 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
+Έξοδος: Επίστρεψε ΜΟΝΟ τις 2 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
 
 Τίτλος: ${title}
 Κείμενο: ${cleanText}`
@@ -429,7 +429,7 @@ async function generateAiBullets(title, text) {
             .filter(line => /^[\u2022\-*\s]/.test(line))
             .map(line => line.replace(/^[\u2022\-*\s]+/, '').trim())
             .filter(line => line.length > 5);
-        if (bullets.length >= 3) return bullets.slice(0, 3);
+        if (bullets.length >= 2) return bullets.slice(0, 2);
         throw new Error('Found only ' + bullets.length + ' bullets');
     } catch (err) {
         if (quotaExhausted) console.warn('[AI] Daily quota exhausted — using fallback bullets.');
