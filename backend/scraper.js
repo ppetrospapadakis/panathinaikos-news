@@ -343,26 +343,26 @@ async function generateAiBullets(title, text) {
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
 1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να αντιγράψεις αυτούσιες φράσεις από το κείμενο. Κάνε πλήρη αναδιατύπωση των γεγονότων.
 2. Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη. ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία (καμία αναφορά σε άλλα portals, sites, «Σύμφωνα με...»).
-3. Κάθε bullet πρέπει να είναι σύντομο, περιεκτικό, δυναμικό, 1-2 προτάσεις και 100% πρωτότυπο.
+3. Κάθε bullet πρέπει να ξεκινάει με τον χαρακτήρα "•" και να είναι 1-2 προτάσεις.
 
-Επίστρεψε ΜΟΝΟ JSON array από 3 strings, π.χ.: ["bullet 1", "bullet 2", "bullet 3"]
+Έξοδος: Επίστρεψε ΜΟΝΟ τις 3 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
 
 Τίτλος: \${title}
 Κείμενο: \${cleanText}`
         });
 
-        let textResponse = response.text.trim();
-        // Extract array substring to bypass conversational wrappers
-        const startIdx = textResponse.indexOf('[');
-        const endIdx = textResponse.lastIndexOf(']');
-        if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
-            textResponse = textResponse.substring(startIdx, endIdx + 1);
+        const textResponse = response.text.trim();
+        const bullets = textResponse.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.startsWith('•') || line.startsWith('-') || line.startsWith('*'))
+            .map(line => line.replace(/^[•\-*]\s*/, '').trim());
+
+        if (bullets.length >= 3) {
+            return bullets.slice(0, 3);
         }
-        const bullets = JSON.parse(textResponse);
-        if (Array.isArray(bullets) && bullets.length === 3) return bullets;
-        throw new Error('Bad response format');
+        throw new Error('Found only ' + bullets.length + ' bullets');
     } catch (err) {
-        console.warn(`[AI] Bullets fallback: ${err.message}`);
+        console.warn(`[AI] Bullets fallback: \${err.message}`);
         return generateFallbackBullets(title, text);
     }
 }
