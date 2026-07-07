@@ -76,7 +76,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a class="font-h3 text-h3 font-bold text-primary" href="index.html">ΠΑΟ</a>
+            <a class="font-h3 text-h3 font-bold text-primary" href="index.html">panathinaikos</a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
@@ -116,27 +116,38 @@
     <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
 
     <main class="mt-[80px]">
+        <!-- Category Tab Bar -->
+        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
+            <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+                <a id="tab-all" href="index.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">Όλα</a>
+                <a id="tab-football-redirect" href="index.html?cat=football" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball-redirect" href="index.html?cat=basketball" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="index.html?cat=amateur" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">☘️ Ερασιτέχνης</a>
+                <a id="tab-opinion" href="index.html?cat=opinion" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</a>
+                <a id="tab-transfers" href="index.html?cat=transfers" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</a>
+                <a id="tab-matches" href="matches.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap">🏆 Αγώνες</a>
+                <a id="tab-roster" href="roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 Depth Chart</a>
+            </div>
+        </div>
 
         <!-- Hero -->
-        <section class="relative w-full h-[340px] flex flex-col justify-end px-8 pb-12 overflow-hidden">
+        <section class="relative w-full h-[220px] flex flex-col justify-end px-8 pb-8 overflow-hidden">
             <div class="absolute inset-0 z-0">
                 <div class="w-full h-full bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY')"></div>
                 <div class="absolute inset-0 premium-gradient-overlay"></div>
                 <div class="absolute inset-0 bg-background/40"></div>
             </div>
             <div class="relative z-10 max-w-[1440px] mx-auto w-full">
-                <p class="font-label text-label text-primary uppercase tracking-[0.2em] mb-3">Match Center</p>
-                <h1 class="font-display-l-mobile text-display-l-mobile text-on-surface mb-3">Πρόγραμμα &amp; Αποτελέσματα</h1>
-                <p class="font-body-lg text-body-lg text-on-surface-variant">Επερχόμενοι αγώνες και τελευταία αποτελέσματα.</p>
+                <p class="font-label text-label text-primary uppercase tracking-[0.2em] mb-1 text-xs">Match Center</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-on-surface mb-1">Πρόγραμμα &amp; Αποτελέσματα</h1>
+                <p class="text-sm text-on-surface-variant">Επερχόμενοι αγώνες και τελευταία αποτελέσματα.</p>
             </div>
         </section>
 
-        <!-- Tab bar -->
-        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
-            <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 py-3">
-                <button id="tab-football" onclick="switchSport('football')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all">⚽ Ποδόσφαιρο</button>
-                <button id="tab-basketball" onclick="switchSport('basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all">🏀 Μπάσκετ</button>
-            </div>
+        <!-- Sport switcher inside body -->
+        <div class="flex justify-center gap-2 mt-8">
+            <button id="tab-football" onclick="switchSport('football')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all">⚽ Ποδόσφαιρο</button>
+            <button id="tab-basketball" onclick="switchSport('basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all">🏀 Μπάσκετ</button>
         </div>
 
         <div class="max-w-[1440px] mx-auto px-8 py-12 space-y-16">

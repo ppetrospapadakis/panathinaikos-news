@@ -84,7 +84,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a class="font-h3 text-h3 font-bold text-primary" href="index.html">ΠΑΟ</a>
+            <a class="font-h3 text-h3 font-bold text-primary" href="index.html">panathinaikos</a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
@@ -125,6 +125,20 @@
 
     <!-- ═══ MAIN CONTENT ═══ -->
     <main class="mt-[80px] min-h-screen">
+        <!-- Category Tab Bar -->
+        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
+            <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+                <a id="tab-all" href="index.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">Όλα</a>
+                <a id="tab-football" href="index.html?cat=football" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball" href="index.html?cat=basketball" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="index.html?cat=amateur" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">☘️ Ερασιτέχνης</a>
+                <a id="tab-opinion" href="index.html?cat=opinion" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</a>
+                <a id="tab-transfers" href="index.html?cat=transfers" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</a>
+                <a id="tab-matches" href="matches.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
+                <a id="tab-roster" href="roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 Depth Chart</a>
+            </div>
+        </div>
+
         <div class="max-w-[800px] mx-auto px-6 py-16">
 
             <!-- Skeleton Loader -->
@@ -435,6 +449,22 @@
             // Show article, hide skeleton
             document.getElementById('article-skeleton').style.display = 'none';
             document.getElementById('article-display').classList.remove('hidden');
+
+            // Highlight active category tab
+            const tabMap = {
+                'Ποδόσφαιρο': 'tab-football',
+                'Μπάσκετ': 'tab-basketball',
+                'Ερασιτέχνης': 'tab-amateur',
+                'Άποψη': 'tab-opinion',
+                'Μεταγραφές': 'tab-transfers'
+            };
+            const activeTabId = tabMap[article.category];
+            if (activeTabId) {
+                const el = document.getElementById(activeTabId);
+                if (el) {
+                    el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap';
+                }
+            }
         }
 
         function showError(msg) {
