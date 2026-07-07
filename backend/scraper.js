@@ -354,10 +354,9 @@ async function generateAiBullets(title, text) {
         const textResponse = response.text.trim();
         const bullets = textResponse.split('\n')
             .map(line => line.trim())
-            .filter(line => /^[•\-*\s]/.test(line))
-            .map(line => line.replace(/^[•\-*\s]+/, '').trim())
+            .filter(line => /^[\u2022\-*\s]/.test(line))
+            .map(line => line.replace(/^[\u2022\-*\s]+/, '').trim())
             .filter(line => line.length > 5);
-
         if (bullets.length >= 3) {
             return bullets.slice(0, 3);
         }
