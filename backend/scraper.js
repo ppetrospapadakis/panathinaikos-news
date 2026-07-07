@@ -275,10 +275,22 @@ function generateFallbackBullets(title, content) {
     return bullets.slice(0, 3);
 }
 
+// ─── Gemini API: SDK Initialization Helper ────────────────────────────────────
+let aiClientInstance = null;
+function getAiClient() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return null;
+    if (!aiClientInstance) {
+        const { GoogleGenAI } = require('@google/genai');
+        aiClientInstance = new GoogleGenAI({ apiKey });
+    }
+    return aiClientInstance;
+}
+
 // ─── Gemini API: bullets ───────────────────────────────────────────────────────
 async function generateAiBullets(title, text) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return generateFallbackBullets(title, text);
+    const ai = getAiClient();
+    if (!ai) return generateFallbackBullets(title, text);
 
     const cleanText = (text || '')
         .replace(/<[^>]*>/g, ' ')
@@ -286,15 +298,10 @@ async function generateAiBullets(title, text) {
         .replace(/\b(gazzetta|sport24|sdna|sportal|athletiko|sport-fm)\b[\s.,]*/gi, '')
         .replace(/\s+/g, ' ').trim().substring(0, 4000);
 
-    // Support both AIza (REST) and OAuth/other key formats
-    const endpoint = apiKey.startsWith('AIza')
-        ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
-        : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
     try {
-        const res = await http.post(endpoint, {
-            contents: [{ parts: [{ text:
-                `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
 - Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη — ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία
@@ -305,10 +312,14 @@ async function generateAiBullets(title, text) {
 Επίστρεψε ΜΟΝΟ JSON array από 3 strings. Χωρίς markdown.
 
 Τίτλος: ${title}
-Κείμενο: ${cleanText}` }] }],
-            generationConfig: { responseMimeType: 'application/json' }
+Κείμενο: ${cleanText}`,
+            config: {
+                responseMimeType: 'application/json'
+            }
         });
-        const bullets = JSON.parse(res.data.candidates[0].content.parts[0].text.trim());
+
+        const textResponse = response.text.trim();
+        const bullets = JSON.parse(textResponse);
         if (Array.isArray(bullets) && bullets.length === 3) return bullets;
         throw new Error('Bad response format');
     } catch (err) {
@@ -319,8 +330,8 @@ async function generateAiBullets(title, text) {
 
 // ─── Gemini API: long-form article ────────────────────────────────────────────
 async function generateLongFormContent(title, text) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return null;
+    const ai = getAiClient();
+    if (!ai) return null;
 
     const cleanText = (text || '')
         .replace(/<[^>]*>/g, ' ')
@@ -329,11 +340,9 @@ async function generateLongFormContent(title, text) {
         .replace(/\s+/g, ' ').trim().substring(0, 6000);
 
     try {
-        const res = await http.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-            {
-                contents: [{ parts: [{ text:
-                    `Είσαι in-house αρχισυντάκτης που καλύπτει αποκλειστικά τον Παναθηναϊκό. Η συνταξιακή ομάδα σου δημοσιεύει πρωτότυπα ρεπορτάζ — δεν αναδημοσιεύεις από άλλες πηγές.
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Είσαι in-house αρχισυντάκτης που καλύπτει αποκλειστικά τον Παναθηναϊκό. Η συνταξαική ομάδα σου δημοσιεύει πρωτότυπα ρεπορτάζ — δεν αναδημοσιεύεις από άλλες πηγές.
 
 Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, αυθεντικό αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
@@ -349,11 +358,14 @@ async function generateLongFormContent(title, text) {
 Τίτλος: ${title}
 Πληροφορίες: ${cleanText}
 
-Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς υπογραφή.` }] }],
-                generationConfig: { temperature: 0.75, maxOutputTokens: 2048 }
+Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς υπογραφή.`,
+            config: {
+                temperature: 0.75,
+                maxOutputTokens: 2048
             }
-        );
-        const articleText = res.data.candidates[0].content.parts[0].text.trim();
+        });
+
+        const articleText = response.text.trim();
         if (articleText && articleText.length > 100) {
             console.log(`[AI] Long-form generated: ${articleText.length} chars`);
             return articleText;
