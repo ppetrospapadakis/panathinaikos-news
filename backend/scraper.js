@@ -137,12 +137,13 @@ const PAO_KEYWORDS = [
 function isPanathinaikosArticle(title, text) {
     const combined = `${title || ''} ${text || ''}`.toLowerCase();
     
-    // Quick keyword scan
+    // Quick keyword scan of specific keywords
     const hasKeyword = PAO_KEYWORDS.some(kw => combined.includes(kw));
     if (hasKeyword) return true;
 
-    // Strict regex word boundary check for short standalone terms like "παο" or "pao" (to avoid matching "paok" etc.)
-    return /\b(pao|παο)\b/i.test(combined);
+    // Unicode-safe word boundary check for "παο" or "pao" (excludes "παοκ", "παουλίνιο", κλπ)
+    const paoRegex = /(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])(pao|παο)(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])/i;
+    return paoRegex.test(combined);
 }
 
 // ─── Jaccard similarity ────────────────────────────────────────────────────────
@@ -336,7 +337,7 @@ async function generateAiBullets(title, text) {
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-latest',
+            model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
@@ -374,7 +375,7 @@ async function generateLongFormContent(title, text) {
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-latest',
+            model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News. Η συντακτική σου ομάδα παράγει αποκλειστικό, πρωτότυπο περιεχόμενο.
 Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, 100% αυθεντικό, αυτόνομο αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
