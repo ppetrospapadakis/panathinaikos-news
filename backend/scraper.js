@@ -362,7 +362,7 @@ async function generateAiBullets(title, text) {
         }
         throw new Error('Found only ' + bullets.length + ' bullets');
     } catch (err) {
-        console.warn(`[AI] Bullets fallback: \${err.message}`);
+        console.warn("[AI] Bullets fallback error details:", err);
         return generateFallbackBullets(title, text);
     }
 }
