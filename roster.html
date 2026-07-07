@@ -402,6 +402,17 @@
                     <!-- Populated by JS -->
                 </div>
             </div>
+
+            <!-- TACTICAL ANALYSIS -->
+            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; Depth Chart</h2>
+                </div>
+                <div id="analysis-text-football" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
+                    <!-- Dynamically loaded -->
+                </div>
+            </div>
         </div>
 
         <!-- ═══ BASKETBALL VIEW ═══ -->
@@ -455,6 +466,17 @@
                     <!-- Populated by JS -->
                 </div>
             </div>
+
+            <!-- TACTICAL ANALYSIS -->
+            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; Depth Chart</h2>
+                </div>
+                <div id="analysis-text-basketball" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
+                    <!-- Dynamically loaded -->
+                </div>
+            </div>
         </div>
 
     </main>
@@ -468,6 +490,9 @@
 
     <script>
     (function() {
+        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+
         function toggleDrawer() {
             const d = document.getElementById('nav-drawer');
             const o = document.getElementById('drawer-overlay');
@@ -607,6 +632,94 @@
                 </div>
                 <span class="px-3 py-1 bg-surface-container-high rounded-full font-label text-label text-on-surface-variant text-xs uppercase">${p.pos || p.num || ''}</span>
             </div>`).join('');
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // INIT & DYNAMIC SUPABASE LOADING
+        // ─────────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load Supabase script dynamically
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = () => {
+                const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                loadDynamicRoster(db);
+            };
+            script.onerror = () => {
+                // If script fails to load, render fallbacks immediately
+                renderPitchPlayers('pitch-starting', footballStarting);
+                renderPitchPlayers('pitch-bench', footballBench);
+                renderSquadList('squad-rest-football', footballRest);
+                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
+
+                renderCourtPlayers('court-starting', basketballStarting);
+                renderCourtPlayers('court-backup', basketballBackup);
+                renderSquadList('squad-rest-basketball', basketballRest);
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+            };
+            document.head.appendChild(script);
+        });
+
+        async function loadDynamicRoster(db) {
+            try {
+                // Fetch Football Roster
+                const { data: fData } = await db.from('articles')
+                    .select('*')
+                    .eq('source_url', 'opinion://system-roster-football')
+                    .maybeSingle();
+
+                if (fData && fData.bullets && fData.bullets.length >= 3) {
+                    const starting = JSON.parse(fData.bullets[0]);
+                    const bench = JSON.parse(fData.bullets[1]);
+                    const rest = JSON.parse(fData.bullets[2]);
+                    const analysis = fData.content || '';
+
+                    renderPitchPlayers('pitch-starting', starting);
+                    renderPitchPlayers('pitch-bench', bench);
+                    renderSquadList('squad-rest-football', rest);
+                    document.getElementById('analysis-text-football').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                } else {
+                    renderPitchPlayers('pitch-starting', footballStarting);
+                    renderPitchPlayers('pitch-bench', footballBench);
+                    renderSquadList('squad-rest-football', footballRest);
+                    document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
+                }
+
+                // Fetch Basketball Roster
+                const { data: bData } = await db.from('articles')
+                    .select('*')
+                    .eq('source_url', 'opinion://system-roster-basketball')
+                    .maybeSingle();
+
+                if (bData && bData.bullets && bData.bullets.length >= 3) {
+                    const starting = JSON.parse(bData.bullets[0]);
+                    const backup = JSON.parse(bData.bullets[1]);
+                    const rest = JSON.parse(bData.bullets[2]);
+                    const analysis = bData.content || '';
+
+                    renderCourtPlayers('court-starting', starting);
+                    renderCourtPlayers('court-backup', backup);
+                    renderSquadList('squad-rest-basketball', rest);
+                    document.getElementById('analysis-text-basketball').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                } else {
+                    renderCourtPlayers('court-starting', basketballStarting);
+                    renderCourtPlayers('court-backup', basketballBackup);
+                    renderSquadList('squad-rest-basketball', basketballRest);
+                    document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                }
+            } catch (err) {
+                console.error('Error loading dynamic roster:', err);
+                // Fallbacks on error
+                renderPitchPlayers('pitch-starting', footballStarting);
+                renderPitchPlayers('pitch-bench', footballBench);
+                renderSquadList('squad-rest-football', footballRest);
+                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή.</p>';
+
+                renderCourtPlayers('court-starting', basketballStarting);
+                renderCourtPlayers('court-backup', basketballBackup);
+                renderSquadList('squad-rest-basketball', basketballRest);
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη.</p>';
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────

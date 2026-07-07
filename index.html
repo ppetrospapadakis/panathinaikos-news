@@ -334,7 +334,7 @@
             if (feedTitle) feedTitle.textContent = titles[category] || 'Ροή Ειδήσεων';
 
             // Re-render with filtered data
-            const filtered = category ? allArticles.filter(a => a.category === category) : allArticles;
+            const filtered = category ? allArticles.filter(a => a.category && a.category.includes(category)) : allArticles;
             renderFeed(filtered);
         }
         window.filterFeed = filterFeed;

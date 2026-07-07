@@ -458,13 +458,15 @@
                 'Άποψη': 'tab-opinion',
                 'Μεταγραφές': 'tab-transfers'
             };
-            const activeTabId = tabMap[article.category];
-            if (activeTabId) {
-                const el = document.getElementById(activeTabId);
-                if (el) {
-                    el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap';
+            const cat = article.category || '';
+            Object.keys(tabMap).forEach(key => {
+                if (cat.includes(key)) {
+                    const el = document.getElementById(tabMap[key]);
+                    if (el) {
+                        el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap';
+                    }
                 }
-            }
+            });
         }
 
         function showError(msg) {
