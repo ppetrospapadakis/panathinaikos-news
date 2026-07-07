@@ -1,504 +1,502 @@
 /**
- * Panathinaikos News - RSS Scraper Script
- * 
- * Dependencies: rss-parser, @supabase/supabase-js, dotenv
- * Execution: node backend/scraper.js [--dry-run]
+ * Panathinaikos News — Direct HTML Scraper
+ *
+ * Architecture: Direct URL scraping with axios + cheerio (no RSS).
+ * Targets specific Panathinaikos category pages per sport.
+ * Groups related articles via Jaccard similarity → shared group_id.
+ * Generates AI bullets + long-form content via Gemini API.
+ *
+ * Usage:  node backend/scraper.js [--dry-run]
+ * Env:    SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_KEY), GEMINI_API_KEY, DOTENV_PATH
  */
 
-const Parser = require('rss-parser');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
-const crypto = require('crypto');
+'use strict';
 
-const parser = new Parser({
+const axios   = require('axios');
+const cheerio = require('cheerio');
+const { createClient } = require('@supabase/supabase-js');
+const crypto  = require('crypto');
+require('dotenv').config();
+
+// ─── HTTP client ───────────────────────────────────────────────────────────────
+const http = axios.create({
+    timeout: 15000,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5'
+        'Accept-Language': 'el-GR,el;q=0.9,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
     },
-    customFields: {
-        item: [
-            ['media:content', 'mediaContent'],
-            ['enclosure', 'enclosure'],
-            ['image', 'image']
-        ]
-    }
+    maxRedirects: 5,
 });
 
-// Helper to split text into unique normalized words for Jaccard Similarity
+// ─── Target URLs per category ──────────────────────────────────────────────────
+const SCRAPE_TARGETS = [
+    // ── FOOTBALL ──────────────────────────────────────────────────────────────
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'SDNA Football',
+        url: 'https://www.sdna.gr/teams/panathinaikos/podosfairo',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', 'a[href*="/football/"]', 'a[href*="/podosfairo/"]'],
+        baseUrl: 'https://www.sdna.gr',
+    },
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'Sportal Football',
+        url: 'https://www.sportal.gr/podosfairo/panathinaikos-551',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.teaser-title a', '.headline a', 'a[href*="/podosfairo/"]', 'article a'],
+        baseUrl: 'https://www.sportal.gr',
+    },
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'Sport24 Football',
+        url: 'https://www.sport24.gr/football/tag/panathinaikos/',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.story-title a', '.headline a', 'a[href*="/football/"]'],
+        baseUrl: 'https://www.sport24.gr',
+    },
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'Gazzetta Football',
+        url: 'https://www.gazzetta.gr/football/panathinaikos',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'a[href*="/football/"]', 'a[href*="panathinaikos"]'],
+        baseUrl: 'https://www.gazzetta.gr',
+    },
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'Athletiko Football',
+        url: 'https://www.athletiko.gr/panathinaikos-podosfairo',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
+        baseUrl: 'https://www.athletiko.gr',
+    },
+    // ── BASKETBALL ────────────────────────────────────────────────────────────
+    {
+        category: 'Μπάσκετ',
+        name: 'SDNA Basketball',
+        url: 'https://www.sdna.gr/teams/panathinaikos-aktor',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/basket"]'],
+        baseUrl: 'https://www.sdna.gr',
+    },
+    {
+        category: 'Μπάσκετ',
+        name: 'Gazzetta Basketball',
+        url: 'https://www.gazzetta.gr/basketball/panathinaikos',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/basketball/"]', 'a[href*="panathinaikos"]'],
+        baseUrl: 'https://www.gazzetta.gr',
+    },
+    {
+        category: 'Μπάσκετ',
+        name: 'Sport24 Basketball',
+        url: 'https://www.sport24.gr/basket/tag/panathinaikos/',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.story-title a', 'a[href*="/basket/"]'],
+        baseUrl: 'https://www.sport24.gr',
+    },
+    {
+        category: 'Μπάσκετ',
+        name: 'Athletiko Basketball',
+        url: 'https://www.athletiko.gr/panathinaikos-mpasket',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
+        baseUrl: 'https://www.athletiko.gr',
+    },
+    // ── AMATEUR / VOLLEYBALL ─────────────────────────────────────────────────
+    {
+        category: 'Ερασιτέχνης',
+        name: 'Gazzetta Volleyball',
+        url: 'https://www.gazzetta.gr/volleyball/panathinaikos',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/volleyball/"]'],
+        baseUrl: 'https://www.gazzetta.gr',
+    },
+    {
+        category: 'Ερασιτέχνης',
+        name: 'SDNA Volleyball',
+        url: 'https://www.sdna.gr/teams/panathinaikos/bolei',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'article a'],
+        baseUrl: 'https://www.sdna.gr',
+    },
+    {
+        category: 'Ερασιτέχνης',
+        name: 'Gazzetta Polo',
+        url: 'https://www.gazzetta.gr/polo/panathinaikos',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/polo/"]'],
+        baseUrl: 'https://www.gazzetta.gr',
+    },
+];
+
+// ─── Panathinaikos relevance keywords ─────────────────────────────────────────
+const PAO_KEYWORDS = [
+    'παναθηναϊκ', 'panathinaikos', 'pao', 'παο', 'τριφύλλι', 'trifilli',
+    'γκατζόλης', 'ιωαννίδης', 'τετέ', 'σλούκας', 'αταμάν', 'ataman',
+];
+
+function isPanathinaikosArticle(title, text) {
+    const combined = `${title} ${text}`.toLowerCase();
+    return PAO_KEYWORDS.some(kw => combined.includes(kw));
+}
+
+// ─── Jaccard similarity ────────────────────────────────────────────────────────
 function cleanTextToWords(text) {
     const greekStopwords = new Set([
-        'και', 'το', 'του', 'της', 'στον', 'στην', 'από', 'με', 'για', 'στα', 'στις', 'στους', 'ο', 'η', 'οι', 'τα', 'ένα', 'μια', 'στο', 'σε', 'πως', 'ότι', 'που'
+        'και','το','του','της','στον','στην','από','με','για','στα','στις','στους',
+        'ο','η','οι','τα','ένα','μια','στο','σε','πως','ότι','που','αλλά','ωσ',
     ]);
     return new Set(
-        (text || '')
-            .toLowerCase()
+        (text || '').toLowerCase()
             .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'«»]/g, ' ')
             .split(/\s+/)
-            .filter(word => word.length > 2 && !greekStopwords.has(word))
+            .filter(w => w.length > 2 && !greekStopwords.has(w))
     );
 }
 
-// Helper to calculate Jaccard similarity score (word overlap ratio) between two strings
-function calculateJaccardSimilarity(textA, textB) {
-    const wordsA = cleanTextToWords(textA);
-    const wordsB = cleanTextToWords(textB);
-    
-    if (wordsA.size === 0 || wordsB.size === 0) return 0;
-    
-    let intersectionCount = 0;
-    for (const word of wordsA) {
-        if (wordsB.has(word)) {
-            intersectionCount++;
-        }
-    }
-    
-    const unionSize = wordsA.size + wordsB.size - intersectionCount;
-    return intersectionCount / unionSize;
+function jaccardSimilarity(a, b) {
+    const wa = cleanTextToWords(a), wb = cleanTextToWords(b);
+    if (wa.size === 0 || wb.size === 0) return 0;
+    let inter = 0;
+    for (const w of wa) if (wb.has(w)) inter++;
+    return inter / (wa.size + wb.size - inter);
 }
 
-// Heuristic fallback for generating 3 bullet summaries if Gemini API key is not configured or fails
+// ─── Scrape listing page → article URLs ───────────────────────────────────────
+async function scrapeArticleLinks(target) {
+    try {
+        const { data: html } = await http.get(target.url);
+        const $ = cheerio.load(html);
+        const links = new Set();
+
+        for (const sel of target.articleLinkSelectors) {
+            $(sel).each((_, el) => {
+                let href = $(el).attr('href') || '';
+                if (!href) return;
+                // Make absolute
+                if (href.startsWith('/')) href = target.baseUrl + href;
+                if (!href.startsWith('http')) return;
+                // Filter: must be same domain, must look like an article (has numeric or slug segment)
+                try {
+                    const u = new URL(href);
+                    if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
+                    if (u.pathname === '/' || u.pathname === '') return;
+                    links.add(href.split('?')[0].split('#')[0]); // strip query/hash
+                } catch (_) {}
+            });
+        }
+
+        const arr = [...links].slice(0, 25); // max 25 articles per source
+        console.log(`[${target.name}] Found ${arr.length} candidate links on ${target.url}`);
+        return arr;
+    } catch (err) {
+        console.warn(`[${target.name}] Failed to scrape listing page: ${err.message}`);
+        return [];
+    }
+}
+
+// ─── Scrape individual article page ───────────────────────────────────────────
+async function scrapeArticlePage(url, categoryHint) {
+    try {
+        const { data: html } = await http.get(url);
+        const $ = cheerio.load(html);
+
+        // ── Title ──────────────────────────────────────────────────────────────
+        const title = (
+            $('h1').first().text().trim() ||
+            $('meta[property="og:title"]').attr('content') ||
+            $('title').text().split('|')[0].trim() ||
+            ''
+        ).substring(0, 300);
+
+        if (!title || title.length < 10) return null;
+
+        // ── Image ──────────────────────────────────────────────────────────────
+        const imageUrl = (
+            $('meta[property="og:image"]').attr('content') ||
+            $('article img, .article-image img, .featured-image img, figure img').first().attr('src') ||
+            $('img[src*="jpg"], img[src*="jpeg"], img[src*="webp"], img[src*="png"]')
+                .filter((_, el) => {
+                    const src = $(el).attr('src') || '';
+                    return !src.includes('logo') && !src.includes('icon') && !src.includes('1x1');
+                })
+                .first().attr('src') ||
+            null
+        );
+
+        // ── Published date ─────────────────────────────────────────────────────
+        const dateStr = (
+            $('meta[property="article:published_time"]').attr('content') ||
+            $('time').first().attr('datetime') ||
+            $('[class*="date"], [class*="time"]').first().text().trim() ||
+            new Date().toISOString()
+        );
+        const created_at = new Date(dateStr).toISOString().split('Z')[0] + '+00:00';
+
+        // ── Body text ──────────────────────────────────────────────────────────
+        // Try progressively more specific selectors
+        const bodySelectors = [
+            'article .article-body', 'article .content', '.article-content',
+            '.article-body', '.story-body', '.entry-content', '.post-content',
+            '[class*="article-text"]', '[class*="article-content"]',
+            'article p', '.content-area p', 'main p',
+        ];
+        let bodyText = '';
+        for (const sel of bodySelectors) {
+            const els = $(sel);
+            if (els.length > 0) {
+                // Strip scripts, ads, share buttons
+                els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"]').remove();
+                bodyText = els.text().replace(/\s+/g, ' ').trim();
+                if (bodyText.length > 100) break;
+            }
+        }
+
+        // ── Summary (meta description) ─────────────────────────────────────────
+        const summary = (
+            $('meta[name="description"]').attr('content') ||
+            $('meta[property="og:description"]').attr('content') ||
+            bodyText.substring(0, 200) ||
+            title
+        ).substring(0, 500);
+
+        return { title, summary, content: bodyText, imageUrl, created_at, sourceUrl: url };
+    } catch (err) {
+        console.warn(`[SCRAPER] Failed to scrape article ${url}: ${err.message}`);
+        return null;
+    }
+}
+
+// ─── Fallback bullets ──────────────────────────────────────────────────────────
 function generateFallbackBullets(title, content) {
-    const cleanContent = (content || '').replace(/<[^>]*>/g, ' ').trim();
-    const sentences = cleanContent
-        .split(/[.;!]+/g)
+    const clean = (content || '').replace(/<[^>]*>/g, ' ').trim();
+    const sentences = clean.split(/[.;!]+/g)
         .map(s => s.trim())
-        .filter(s => s.length > 20 && !s.includes('http') && !s.includes('www'));
-    
-    const bullets = [];
-    bullets.push(`Νέο ρεπορτάζ: ${title}`);
-    
+        .filter(s => s.length > 20 && !s.includes('http'));
+    const bullets = [`${title}`];
     for (const s of sentences) {
         if (bullets.length >= 3) break;
-        if (!bullets.some(b => b.includes(s.substring(0, 15)))) {
-            bullets.push(s);
-        }
+        if (!bullets.some(b => b.includes(s.substring(0, 15)))) bullets.push(s);
     }
-    
-    while (bullets.length < 3) {
-        bullets.push('Συνεχής ενημέρωση για την εξέλιξη του θέματος.');
-    }
-    
+    while (bullets.length < 3) bullets.push('Παρακολουθήστε την εξέλιξη στο Panathinaikos News.');
     return bullets.slice(0, 3);
 }
 
-// Generate 3 concise bullet points using Gemini API, with automatic fallback
+// ─── Gemini API: bullets ───────────────────────────────────────────────────────
 async function generateAiBullets(title, text) {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        console.log(`[AI] GEMINI_API_KEY missing. Using heuristic fallback bullets.`);
-        return generateFallbackBullets(title, text);
-    }
+    if (!apiKey) return generateFallbackBullets(title, text);
+
+    const cleanText = (text || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\bσύμφωνα με\s+\S+/gi, '')
+        .replace(/\b(gazzetta|sport24|sdna|sportal|athletiko|sport-fm)\b[\s.,]*/gi, '')
+        .replace(/\s+/g, ' ').trim().substring(0, 4000);
+
+    // Support both AIza (REST) and OAuth/other key formats
+    const endpoint = apiKey.startsWith('AIza')
+        ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     try {
-        console.log(`[AI] Generating bullets using Gemini API...`);
-        const cleanContent = (text || '')
-            .replace(/<[^>]*>/g, ' ')
-            .replace(/\bσύμφωνα με (τ\w+|το|την|τον)\b/gi, '')
-            .replace(/\b(γράφει|αναφέρει|επισημαίνει|αποκαλύπτει|μεταδίδει)\b/gi, '')
-            .replace(/\b(gazzetta|sport24|sdna|sportal|sport-fm|athletiko|το site|η ιστοσελίδα|το portal|το μέσο)\b/gi, '')
-            .replace(/\s+/g, ' ').trim()
-            .substring(0, 4000);
-        
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: `Είσαι in-house αθλητικός συντάκτης για τον Παναθηναϊκό. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points στα Ελληνικά.
+        const res = await http.post(endpoint, {
+            contents: [{ parts: [{ text:
+                `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
 - Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη — ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία
-- ΑΠΑΓΟΡΕΥΕΤΑΙ: «Σύμφωνα με...», «Το X γράφει...», «Ανακοίνωσε η ιστοσελίδα...», «Μεταδίδεται από...»
-- Γράφε σε άμεσο, αυθεντικό δημοσιογραφικό ύφος σαν να το ξέρεις ο ίδιος
-- Κάθε bullet πρέπει να είναι συγκεκριμένο και να αποφεύγει γενικολογίες
+- ΑΠΑΓΟΡΕΥΕΤΑΙ: «Σύμφωνα με...», «Το X γράφει...», «Ανακοίνωσε η ιστοσελίδα...»
+- Γράφε σε άμεσο, αυθεντικό δημοσιογραφικό ύφος
+- Κάθε bullet: συγκεκριμένο, δυναμικό, 1-2 προτάσεις
 
-Επίστρεψε ΜΟΝΟ ένα JSON array από 3 strings. Χωρίς markdown.
+Επίστρεψε ΜΟΝΟ JSON array από 3 strings. Χωρίς markdown.
 
 Τίτλος: ${title}
-Περιεχόμενο: ${cleanContent}`
-                        }]
-                    }],
-                    generationConfig: { responseMimeType: 'application/json' }
-                })
-            }
-        );
-
-        if (!response.ok) throw new Error(`Gemini API returned status ${response.status}`);
-
-        const data = await response.json();
-        const responseText = data.candidates[0].content.parts[0].text.trim();
-        const bullets = JSON.parse(responseText);
-        
-        if (Array.isArray(bullets) && bullets.length === 3) {
-            return bullets;
-        } else {
-            throw new Error('Gemini response was not a 3-element JSON array');
-        }
-    } catch (error) {
-        console.error(`[AI ERROR] Failed to generate AI bullets, using fallback:`, error.message);
+Κείμενο: ${cleanText}` }] }],
+            generationConfig: { responseMimeType: 'application/json' }
+        });
+        const bullets = JSON.parse(res.data.candidates[0].content.parts[0].text.trim());
+        if (Array.isArray(bullets) && bullets.length === 3) return bullets;
+        throw new Error('Bad response format');
+    } catch (err) {
+        console.warn(`[AI] Bullets fallback: ${err.message}`);
         return generateFallbackBullets(title, text);
     }
 }
 
-// Generate a comprehensive long-form sports article in Greek using Gemini API
+// ─── Gemini API: long-form article ────────────────────────────────────────────
 async function generateLongFormContent(title, text) {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        console.log(`[AI] GEMINI_API_KEY missing. Skipping long-form content generation.`);
-        return null;
-    }
+    if (!apiKey) return null;
+
+    const cleanText = (text || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\bσύμφωνα με\s+\S+/gi, '')
+        .replace(/\b(gazzetta|sport24|sdna|sportal|athletiko|sport-fm)\b[\s.,]*/gi, '')
+        .replace(/\s+/g, ' ').trim().substring(0, 6000);
 
     try {
-        console.log(`[AI] Generating long-form article using Gemini API...`);
-        const cleanContent = (text || '')
-            .replace(/<[^>]*>/g, ' ')
-            .replace(/\bσύμφωνα με (τ\w+|το|την|τον)\b/gi, '')
-            .replace(/\b(gazzetta|sport24|sdna|sportal|sport-fm|athletiko|το site|η ιστοσελίδα|το portal|το μέσο|το ρεπορτάζ προέρχεται)\b/gi, '')
-            .replace(/\s+/g, ' ').trim()
-            .substring(0, 6000);
-
-        const response = await fetch(
+        const res = await http.post(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: `Είσαι in-house αθλητικός αρχισυντάκτης που καλύπτει αποκλειστικά τον Παναθηναϊκό. Η συνταξιακή ομάδα σου δημοσιεύει πρωτότυπα ρεπορτάζ — δεν αναδημοσιεύεις από άλλες πηγές.
+                contents: [{ parts: [{ text:
+                    `Είσαι in-house αρχισυντάκτης που καλύπτει αποκλειστικά τον Παναθηναϊκό. Η συνταξιακή ομάδα σου δημοσιεύει πρωτότυπα ρεπορτάζ — δεν αναδημοσιεύεις από άλλες πηγές.
 
 Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, αυθεντικό αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
-ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ — ΑΥΣΤΗΡΑ:
-1. ΠΟΤΕ μην αναφέρεις πού βρέθηκε η πληροφορία (καμία αναφορά σε portal, ιστοσελίδα, ΜΜΕ, «ανακοίνωσε το X»)
-2. ΑΠΑΓΟΡΕΥΟΝΤΑΙ φράσεις: «Σύμφωνα με...», «Όπως μεταδίδει...», «Το Sportal/Gazzetta/Sport24 αναφέρει...», «Γράφεται ότι...», «Σε δημοσίευμα...»
-3. Γράφε σε πρώτο πρόσωπο συνταξιακής ομάδας ή σε τρίτο πρόσωπο για τους αθλητές/ομάδα — ΠΑΝΤΑ αυθεντικά
+ΑΥΣΤΗΡΕΣ ΟΔΗΓΙΕΣ:
+1. ΠΟΤΕ μην αναφέρεις πού βρέθηκε η πληροφορία (καμία αναφορά σε portal, ιστοσελίδα, ΜΜΕ)
+2. ΑΠΑΓΟΡΕΥΟΝΤΑΙ: «Σύμφωνα με...», «Όπως μεταδίδει...», «Το Sportal/Gazzetta αναφέρει...»
+3. Γράφε σε τρίτο πρόσωπο για αθλητές/ομάδα — ΠΑΝΤΑ αυθεντικά και άμεσα
 4. Ελάχιστον 5-7 παράγραφοι (400-600 λέξεις)
-5. Κάλυψε: κύριο γεγονός, αθλητικό context, επιπτώσεις στην ομάδα, ιστορικό background, προοπτικές
-6. Μόνο καθαρό κείμενο — χωρίς HTML tags, χωρίς markdown, παράγραφοι χωρισμένες με κενή γραμμή
-7. Ύφος: επαγγελματικό, δυναμικό, σαν κορυφαίο αθλητικό ρεπορτάζ
+5. Κάλυψε: κύριο γεγονός, αθλητικό context, επιπτώσεις, ιστορικό background, προοπτικές
+6. ΜΟΝΟ καθαρό κείμενο — χωρίς HTML tags, χωρίς markdown
+7. Παράγραφοι χωρισμένες με κενή γραμμή
 
 Τίτλος: ${title}
-Πληροφορίες: ${cleanContent}
+Πληροφορίες: ${cleanText}
 
-Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς εισαγωγικά, χωρίς υπογραφή.`
-                        }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.75,
-                        maxOutputTokens: 2048
-                    }
-                })
+Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς υπογραφή.` }] }],
+                generationConfig: { temperature: 0.75, maxOutputTokens: 2048 }
             }
         );
-
-        if (!response.ok) throw new Error(`Gemini API returned status ${response.status}`);
-
-        const data = await response.json();
-        const articleText = data.candidates[0].content.parts[0].text.trim();
-        
+        const articleText = res.data.candidates[0].content.parts[0].text.trim();
         if (articleText && articleText.length > 100) {
-            console.log(`[AI] Long-form article generated (${articleText.length} chars).`);
+            console.log(`[AI] Long-form generated: ${articleText.length} chars`);
             return articleText;
         }
-        return null;
-    } catch (error) {
-        console.error(`[AI ERROR] Failed to generate long-form content:`, error.message);
-        return null;
-    }
-}
-
-// Configure RSS feeds for the 6 Greek sports portals
-const RSS_FEEDS = [
-    {
-        name: 'Gazzetta.gr',
-        url: 'https://www.gazzetta.gr/rss',
-        defaultCategory: 'Ποδόσφαιρο',
-        requiresKeywordFilter: true
-    },
-    {
-        name: 'Sport24.gr',
-        url: 'https://www.sport24.gr/rss/panathinaikos',
-        defaultCategory: 'Ποδόσφαιρο',
-        requiresKeywordFilter: false
-    },
-    {
-        name: 'SDNA.gr',
-        url: 'https://www.sdna.gr/rss.xml',
-        defaultCategory: 'All News',
-        requiresKeywordFilter: true
-    },
-    {
-        name: 'Sportal.gr',
-        url: 'https://www.sportal.gr/rss',
-        defaultCategory: 'All News',
-        requiresKeywordFilter: true
-    },
-    {
-        name: 'Sport-fm.gr',
-        url: 'https://www.sport-fm.gr/rss',
-        defaultCategory: 'All News',
-        requiresKeywordFilter: true
-    },
-    {
-        name: 'Athletiko.gr',
-        url: 'https://athletiko.gr/feed/',
-        defaultCategory: 'All News',
-        requiresKeywordFilter: true
-    }
-];
-
-// Helper to check if an article is relevant to Panathinaikos
-function isPanathinaikosNews(item) {
-    const title = (item.title || '').toLowerCase();
-    const summary = (item.contentSnippet || item.summary || '').toLowerCase();
-    const content = (item.content || '').toLowerCase();
-
-    // Core Panathinaikos keywords (safe for substring matching)
-    const keywords = [
-        'παναθηναϊκός', 'παναθηναϊκού', 'παναθηναϊκό', 'παναθηναϊκή', 'παναθηναϊκά', 'παναθηναϊκές',
-        'παναθηναικος', 'παναθηναικου', 'παναθηναικο', 'παναθηναικη', 'παναθηναικα',
-        'πράσινοι', 'πράσινο', 'πράσινους', 'πράσινης', 'πράσινου', 'πράσινα', 'πρασινοι', 'πρασινο', 'πρασινη',
-        'τριφύλλι', 'τριφύλλια', 'τριφυλλιού', 'τριφυλλι', 'trifili',
-        'panathinaikos', 'gate 13', 'gate13', 'οακα', 'λεωφόρος', 'λεωφορος',
-        'ιωαννίδης', 'σλούκας', 'αταμάν', 'γιούρτσεβεν', 'μπακασέτας', 'τετέ', 'πελίστρι', 'γιεντβάι',
-        'ινγκασον', 'ντραγκόφσκι', 'βαγιαννίδης', 'παπαπέτρου', 'sloukas', 'ionnidis', 'ataman'
-    ];
-
-    const hasKeyword = keywords.some(keyword => 
-        title.includes(keyword) || 
-        summary.includes(keyword) || 
-        content.includes(keyword)
-    );
-
-    if (hasKeyword) return true;
-
-    // Use regex word boundaries for short terms like 'pao' / 'παο' to avoid false positives (e.g. matching 'paok')
-    const textToSearch = `${title} ${summary} ${content}`;
-    return /\b(pao|παο)\b/i.test(textToSearch);
-}
-
-// Helper to extract image URL from RSS item
-function extractImageUrl(item) {
-    // 1. Check enclosure tag
-    if (item.enclosure && item.enclosure.url) {
-        return item.enclosure.url;
-    }
-    // 2. Check custom media:content tag
-    if (item.mediaContent && item.mediaContent.$ && item.mediaContent.$.url) {
-        return item.mediaContent.$.url;
-    }
-    // 3. Try to extract image from content description HTML
-    if (item.content || item.summary) {
-        const text = item.content || item.summary;
-        const imgRegex = /<img[^>]+src=["']([^"']+)["']/i;
-        const match = imgRegex.exec(text);
-        if (match && match[1]) {
-            return match[1];
-        }
+    } catch (err) {
+        console.warn(`[AI] Long-form fallback: ${err.message}`);
     }
     return null;
 }
 
-// Helper to determine category based on strict priority keyword rules
-function determineCategory(item, defaultCategory) {
-    const textToSearch = `${item.title || ''} ${item.content || ''} ${item.contentSnippet || ''}`.toLowerCase();
+// ─── Sleep helper ──────────────────────────────────────────────────────────────
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    // PRIORITY 1: Basketball — checked first (KAE/AKTOR entities are basketball-exclusive)
-    const basketballKeywords = [
-        'μπάσκετ', 'basketball', 'euroleague', 'basket league', 'κae', 'καε',
-        'aktor', 'ακτωρ', 'sloukas', 'σλούκας', 'παπαπέτρου', 'ataman',
-        'ευρωλίγκα', 'super1', 'οακα', 'oaka', 'mundobasket', 'μουντομπάσκετ',
-        'γιούρτσεβεν', 'yurtseven', 'σενγκούν', 'λούντζης', 'μιτόγλου',
-        'λαρεντζάκης', 'βουγιούκας', 'fiba', 'προκριματικά μπάσκετ',
-        'βόλεϊ', 'volleyball', 'volley', 'αντετοκούνμπο', 'nba',
-        'μπάλον', 'fenerbahce basket', 'real madrid basket', 'panathinaikos bc'
-    ];
-    if (basketballKeywords.some(kw => textToSearch.includes(kw))) {
-        return 'Μπάσκετ';
-    }
-
-    // PRIORITY 2: Football — use only football-exclusive terms
-    const footballKeywords = [
-        'παε', 'super league', 'superleague', 'ποδόσφαιρο', 'ποδοσφαιρο',
-        'σούπερ λιγκ', 'europa league', 'conference league', 'παγκόσμιο κύπελλο',
-        'mundial', 'μουντιάλ', 'euro 2028', 'ποδοσφαιρ',
-        'μπακασέτας', 'τετέ', 'πελίστρι', 'ντραγκόφσκι',
-        'βαγιαννίδης', 'ioannidis', 'ιωαννίδης', 'τερματοφύλακας',
-        'γκολ', 'offside', 'πέναλτι', 'φάουλ'
-    ];
-    if (footballKeywords.some(kw => textToSearch.includes(kw))) {
-        return 'Ποδόσφαιρο';
-    }
-
-    // PRIORITY 3: Transfers
-    if (textToSearch.includes('μεταγραφ') || textToSearch.includes('transfer') || textToSearch.includes('μεταγραφέ')) {
-        return 'Μεταγραφές';
-    }
-
-    // PRIORITY 4: Amateur sports
-    if (textToSearch.includes('ερασιτέχν') || textToSearch.includes('ερασιτεχν')) {
-        return 'Ερασιτέχνης';
-    }
-
-    // PRIORITY 5: Opinion
-    if (textToSearch.includes('άποψη') || textToSearch.includes('σχόλιο') || textToSearch.includes('opinion')) {
-        return 'Opinion';
-    }
-
-    return defaultCategory || 'Ποδόσφαιρο';
-}
-
-// Main scrape function
-async function scrapeNews() {
+// ─── Main ──────────────────────────────────────────────────────────────────────
+async function main() {
     const isDryRun = process.argv.includes('--dry-run');
-    console.log(`[SCRAPER] Starting Panathinaikos News Scraper. Mode: ${isDryRun ? 'DRY-RUN' : 'LIVE-SYNC'}`);
+    console.log(`\n[SCRAPER] Panathinaikos Direct Scraper — Mode: ${isDryRun ? 'DRY-RUN' : 'LIVE-SYNC'}`);
+    console.log(`[SCRAPER] Targets: ${SCRAPE_TARGETS.length} sources | ${new Date().toISOString()}\n`);
 
-    let supabase = null;
+    // ── Supabase ──────────────────────────────────────────────────────────────
+    let db = null;
+    let existingUrls = new Set();
+    let existingArticles = [];
+
     if (!isDryRun) {
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-
-        if (!supabaseUrl || !supabaseKey) {
-            console.error('[ERROR] Supabase credentials (SUPABASE_URL and SUPABASE_KEY/SUPABASE_SERVICE_ROLE_KEY) are missing in environment variables.');
+        const url  = process.env.SUPABASE_URL;
+        const key  = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+        if (!url || !key) {
+            console.error('[FATAL] SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
             process.exit(1);
         }
-        supabase = createClient(supabaseUrl, supabaseKey);
+        db = createClient(url, key);
+
+        // Load existing articles for dedup + group matching
+        const { data, error } = await db.from('articles')
+            .select('id, title, source_url, group_id, created_at')
+            .order('created_at', { ascending: false })
+            .limit(500);
+
+        if (error) { console.error('[FATAL] DB error:', error.message); process.exit(1); }
+        existingArticles = data || [];
+        existingUrls = new Set(existingArticles.map(a => a.source_url));
+        console.log(`[DB] Loaded ${existingArticles.length} existing articles for deduplication.\n`);
     }
 
-    let totalScraped = 0;
-    let totalSaved = 0;
+    let totalNew = 0, totalSkipped = 0;
 
-    for (const feed of RSS_FEEDS) {
-        console.log(`\n[SCRAPER] Fetching RSS feed from: ${feed.name} (${feed.url})`);
-        try {
-            const parsedFeed = await parser.parseURL(feed.url);
-            console.log(`[SCRAPER] Successfully parsed ${parsedFeed.items.length} items from ${feed.name}`);
+    // ── Process each source ───────────────────────────────────────────────────
+    for (const target of SCRAPE_TARGETS) {
+        console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
 
-            for (const item of parsedFeed.items) {
-                // If feed is general, filter out articles that don't refer to Panathinaikos
-                if (feed.requiresKeywordFilter && !isPanathinaikosNews(item)) {
-                    continue;
-                }
+        const links = await scrapeArticleLinks(target);
+        if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
 
-                totalScraped++;
-                
-                const title = item.title;
-                const summary = item.contentSnippet || item.summary || '';
-                const content = item.content || item.contentSnippet || '';
-                const source_url = item.link;
-                const image_url = extractImageUrl(item);
-                const category = determineCategory(item, feed.defaultCategory);
-                const created_at = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
+        for (const articleUrl of links) {
+            // Skip if already in DB
+            if (!isDryRun && existingUrls.has(articleUrl)) {
+                totalSkipped++;
+                continue;
+            }
 
-                if (!title || !source_url) {
-                    console.log(`[SCRAPER] Skipping item due to missing title or link.`);
-                    continue;
-                }
+            // Rate limit: 1s between article fetches
+            await sleep(1000);
 
-                if (isDryRun) {
-                    console.log(`\n--- [DRY-RUN ITEM] ---`);
-                    console.log(`Title:    ${title}`);
-                    console.log(`Category: ${category}`);
-                    console.log(`Source:   ${source_url}`);
-                    console.log(`Image:    ${image_url || 'None'}`);
-                    console.log(`Summary:  ${summary.substring(0, 100)}...`);
-                    console.log(`Group ID: ${crypto.randomUUID()}`);
-                    console.log(`Bullets:  ${JSON.stringify(generateFallbackBullets(title, content || summary))}`);
-                } else {
-                    // Check if article already exists in database to avoid duplicate work/calls
-                    const { data: existingArticle, error: fetchError } = await supabase
-                        .from('articles')
-                        .select('id, group_id, bullets')
-                        .eq('source_url', source_url)
-                        .maybeSingle();
+            const scraped = await scrapeArticlePage(articleUrl, target.category);
+            if (!scraped || !scraped.title) { continue; }
 
-                    if (existingArticle) {
-                        console.log(`[SCRAPER] Skipping already existing article: "${title}"`);
-                        continue;
-                    }
+            // Check PAO relevance
+            if (!isPanathinaikosArticle(scraped.title, scraped.content)) {
+                console.log(`  [SKIP] Not PAO-relevant: ${scraped.title.substring(0, 50)}`);
+                continue;
+            }
 
-                    let group_id = null;
+            console.log(`  [NEW] ${scraped.title.substring(0, 70)}`);
 
-                    // 1. Grouping logic (Deduplication)
-                    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-                    const { data: recentArticles, error: recentError } = await supabase
-                        .from('articles')
-                        .select('id, title, group_id, created_at')
-                        .gt('created_at', twoHoursAgo);
+            // ── Group ID via Jaccard ──────────────────────────────────────────
+            let group_id = crypto.randomUUID();
+            const JACCARD_THRESHOLD = 0.35;
 
-                    if (recentArticles && recentArticles.length > 0) {
-                        // Find a highly similar article by title
-                        const similarArticle = recentArticles.find(art => 
-                            calculateJaccardSimilarity(title, art.title) >= 0.35
-                        );
-
-                        if (similarArticle) {
-                            console.log(`[DEDUPLICATION] Similar article found in last 2h: "${similarArticle.title}" (Score: ${calculateJaccardSimilarity(title, similarArticle.title).toFixed(2)})`);
-                            if (similarArticle.group_id) {
-                                group_id = similarArticle.group_id;
-                            } else {
-                                // Assign a new group UUID and update the first article in group
-                                const newGroupId = crypto.randomUUID();
-                                group_id = newGroupId;
-                                
-                                console.log(`[DEDUPLICATION] Creating new group ${newGroupId} for parent "${similarArticle.title}"`);
-                                await supabase
-                                    .from('articles')
-                                    .update({ group_id: newGroupId })
-                                    .eq('id', similarArticle.id);
-                            }
-                        }
-                    }
-
-                    // If no similar article exists, assign a new group ID so subsequent similar articles can group under it
-                    if (!group_id) {
-                        group_id = crypto.randomUUID();
-                        console.log(`[DEDUPLICATION] No similar article found. Initialized group ${group_id} for "${title}"`);
-                    }
-
-                    // 2. AI Summarization logic (bullets + long-form article)
-                    const bullets = await generateAiBullets(title, content || summary);
-                    const longFormContent = await generateLongFormContent(title, content || summary);
-
-                    // Insert the new article with group_id, bullets, and AI-generated long-form content
-                    const { data, error } = await supabase
-                        .from('articles')
-                        .insert({
-                            title,
-                            summary,
-                            content: longFormContent || content,
-                            source_url,
-                            image_url,
-                            category,
-                            created_at,
-                            group_id,
-                            bullets,
-                            updated_at: new Date().toISOString()
-                        })
-                        .select();
-
-                    if (error) {
-                        console.error(`[ERROR] Failed to save article "${title}":`, error.message);
-                    } else {
-                        console.log(`[SUCCESS] Stored new article: "${title}" in group: ${group_id}`);
-                        totalSaved++;
+            if (!isDryRun) {
+                for (const existing of existingArticles) {
+                    const sim = jaccardSimilarity(scraped.title, existing.title);
+                    if (sim >= JACCARD_THRESHOLD) {
+                        group_id = existing.group_id;
+                        console.log(`    → Grouped with existing (sim=${sim.toFixed(2)}): ${existing.title.substring(0, 50)}`);
+                        break;
                     }
                 }
             }
-        } catch (error) {
-            console.error(`[ERROR] Failed to fetch or parse feed ${feed.name}:`, error.message);
+
+            // ── AI Generation ─────────────────────────────────────────────────
+            const bullets = await generateAiBullets(scraped.title, scraped.content || scraped.summary);
+            const longFormContent = await generateLongFormContent(scraped.title, scraped.content || scraped.summary);
+
+            if (isDryRun) {
+                console.log(`    Category:  ${target.category}`);
+                console.log(`    URL:       ${articleUrl}`);
+                console.log(`    Image:     ${scraped.imageUrl || 'none'}`);
+                console.log(`    Summary:   ${scraped.summary.substring(0, 100)}...`);
+                console.log(`    Bullets:   ${JSON.stringify(bullets)}`);
+                console.log(`    Long-form: ${longFormContent ? longFormContent.substring(0, 80) + '...' : 'fallback (no API key)'}`);
+                totalNew++;
+                continue;
+            }
+
+            // ── Insert to DB ──────────────────────────────────────────────────
+            const { data: inserted, error: insertErr } = await db.from('articles').insert({
+                title:      scraped.title,
+                summary:    scraped.summary,
+                content:    longFormContent || scraped.content || scraped.summary,
+                source_url: articleUrl,
+                image_url:  scraped.imageUrl,
+                category:   target.category,
+                created_at: scraped.created_at,
+                group_id,
+                bullets,
+                updated_at: new Date().toISOString(),
+            }).select('id');
+
+            if (insertErr) {
+                // Unique constraint violation = already exists (different URL, same content) → skip
+                if (insertErr.code === '23505') {
+                    console.log(`    → Duplicate content, skipped.`);
+                } else {
+                    console.error(`    → DB insert error: ${insertErr.message}`);
+                }
+                continue;
+            }
+
+            existingUrls.add(articleUrl);
+            existingArticles.unshift({ id: inserted[0].id, title: scraped.title, source_url: articleUrl, group_id, created_at: scraped.created_at });
+            totalNew++;
+            console.log(`    ✅ Inserted (id=${inserted[0].id})`);
+
+            // Rate limit between AI calls
+            await sleep(1500);
         }
     }
 
-    console.log(`\n[SCRAPER] Completed. Total items processed: ${totalScraped}. Total items stored: ${totalSaved}`);
+    console.log(`\n[SCRAPER] Done. New: ${totalNew} | Skipped: ${totalSkipped} | ${new Date().toISOString()}`);
 }
 
-scrapeNews().catch(err => {
-    console.error('[FATAL ERROR] Scraper crashed:', err);
+main().catch(err => {
+    console.error('[FATAL] Scraper crashed:', err.message);
     process.exit(1);
 });
