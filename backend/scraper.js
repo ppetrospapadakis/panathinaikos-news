@@ -347,8 +347,8 @@ async function generateAiBullets(title, text) {
 
 Έξοδος: Επίστρεψε ΜΟΝΟ τις 3 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
 
-Τίτλος: \${title}
-Κείμενο: \${cleanText}`
+Τίτλος: ${title}
+Κείμενο: ${cleanText}`
         });
 
         const textResponse = response.text.trim();
@@ -392,8 +392,8 @@ async function generateLongFormContent(title, text) {
 5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown (bolding, lists, stars κλπ.).
 6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
 
-Τίτλος: \${title}
-Πληροφορίες: \${cleanText}
+Τίτλος: ${title}
+Πληροφορίες: ${cleanText}
 
 Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς υπογραφή.`,
             config: {
