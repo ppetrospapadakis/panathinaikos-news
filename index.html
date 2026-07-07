@@ -444,7 +444,32 @@
             try {
                 const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false }).limit(60);
                 if (error) throw error;
-                allArticles = data || [];
+                allArticles = (data || []).map(a => {
+                    let imageUrl = a.image_url || '';
+                    if (imageUrl) {
+                        try {
+                            const u = new URL(imageUrl);
+                            const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+                            const pathLower = u.pathname.toLowerCase();
+                            const brandingIndicators = [
+                                'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                                'share', 'social', 'default-image', 'default_image', 'facebook', 'twitter',
+                                'sportal', 'sdna', 'gazzetta', 'sport24', 'athletiko', 'sport-fm', 'sportfm',
+                                'og-image', 'og_image', 'site-logo'
+                            ];
+                            let isBranding = brandingIndicators.some(ind => filename.includes(ind));
+                            if (pathLower.includes('/default_images') || pathLower.includes('/default-images') || pathLower.includes('/logos') || pathLower.includes('/brand') || pathLower.includes('/assets/images')) {
+                                isBranding = true;
+                            }
+                            if (isBranding) {
+                                a.image_url = DEFAULT_IMG;
+                            }
+                        } catch (_) {}
+                    } else {
+                        a.image_url = DEFAULT_IMG;
+                    }
+                    return a;
+                });
                 renderFeed(allArticles);
             } catch(err) {
                 console.error('Feed error:', err);

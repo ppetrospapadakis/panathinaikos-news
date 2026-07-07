@@ -262,16 +262,32 @@ async function scrapeArticlePage(url, categoryHint) {
         // Validate image: Bypass generic competitor logos, default shares, and watermark placeholders
         let imageUrl = DEFAULT_STADIUM_IMG;
         if (scrapedImg && typeof scrapedImg === 'string' && scrapedImg.startsWith('http')) {
-            const lowerImg = scrapedImg.toLowerCase();
-            const brandingIndicators = [
-                'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                'sportal_logo', 'sdna_logo', 'gazzetta_logo', 'sport24_logo', 'default_image',
-                'facebook_share', 'og_image_default', 'default-share', 'site-logo', 'author'
-            ];
-            const isBranding = brandingIndicators.some(ind => lowerImg.includes(ind));
-            if (!isBranding) {
-                imageUrl = scrapedImg;
-            }
+            try {
+                const u = new URL(scrapedImg);
+                const pathParts = u.pathname.toLowerCase().split('/');
+                const filename = pathParts[pathParts.length - 1] || '';
+                const parentPath = pathParts.slice(0, -1).join('/');
+
+                const brandingIndicators = [
+                    'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                    'share', 'social', 'default-image', 'default_image', 'facebook', 'twitter',
+                    'sportal', 'sdna', 'gazzetta', 'sport24', 'athletiko', 'sport-fm', 'sportfm',
+                    'og-image', 'og_image', 'site-logo', 'author'
+                ];
+
+                let isBranding = brandingIndicators.some(ind => filename.includes(ind));
+                if (parentPath.includes('/default_images') || 
+                    parentPath.includes('/default-images') || 
+                    parentPath.includes('/logos') || 
+                    parentPath.includes('/brand') || 
+                    parentPath.includes('/assets/images')) {
+                    isBranding = true;
+                }
+
+                if (!isBranding) {
+                    imageUrl = scrapedImg;
+                }
+            } catch (_) {}
         }
         
         // ── Published date ─────────────────────────────────────────────────────

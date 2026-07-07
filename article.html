@@ -315,9 +315,34 @@
             // Title
             document.getElementById('article-title').textContent = article.title;
 
-            // ② Hero Image — shown FIRST
-            if (article.image_url) {
-                document.getElementById('article-image').src = article.image_url;
+            // ② Hero Image
+            let imageUrl = article.image_url || '';
+            const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM';
+            if (imageUrl) {
+                try {
+                    const u = new URL(imageUrl);
+                    const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+                    const pathLower = u.pathname.toLowerCase();
+                    const brandingIndicators = [
+                        'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                        'share', 'social', 'default-image', 'default_image', 'facebook', 'twitter',
+                        'sportal', 'sdna', 'gazzetta', 'sport24', 'athletiko', 'sport-fm', 'sportfm',
+                        'og-image', 'og_image', 'site-logo'
+                    ];
+                    let isBranding = brandingIndicators.some(ind => filename.includes(ind));
+                    if (pathLower.includes('/default_images') || pathLower.includes('/default-images') || pathLower.includes('/logos') || pathLower.includes('/brand') || pathLower.includes('/assets/images')) {
+                        isBranding = true;
+                    }
+                    if (isBranding) {
+                        imageUrl = DEFAULT_STADIUM_IMG;
+                    }
+                } catch (_) {}
+            } else {
+                imageUrl = DEFAULT_STADIUM_IMG;
+            }
+
+            if (imageUrl) {
+                document.getElementById('article-image').src = imageUrl;
                 document.getElementById('article-image').alt = article.title;
                 document.getElementById('article-image-box').classList.remove('hidden');
             }
@@ -347,7 +372,7 @@
                     .replace(/\bσύμφωνα με\s+\S+/gi, '')
                     .replace(/\b(gazzetta|sport24|sdna|sportal|sport-fm|athletiko)\b[\s.,·]*/gi, '')
                     .replace(/\bτο (site|portal|μέσο|ρεπορτάζ)\s+\S+/gi, '')
-                    .replace(/\s{2,}/g, ' ')
+                    .replace(/[ \t]+/g, ' ')
                     .trim();
             }
 
