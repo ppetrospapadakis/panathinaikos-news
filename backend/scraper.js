@@ -217,18 +217,42 @@ async function scrapeArticlePage(url, categoryHint) {
         if (!title || title.length < 10) return null;
 
         // ── Image ──────────────────────────────────────────────────────────────
-        const imageUrl = (
+        const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM';
+        
+        let scrapedImg = (
             $('meta[property="og:image"]').attr('content') ||
+            $('meta[name="twitter:image"]').attr('content') ||
             $('article img, .article-image img, .featured-image img, figure img').first().attr('src') ||
             $('img[src*="jpg"], img[src*="jpeg"], img[src*="webp"], img[src*="png"]')
                 .filter((_, el) => {
                     const src = $(el).attr('src') || '';
-                    return !src.includes('logo') && !src.includes('icon') && !src.includes('1x1');
+                    return !src.includes('logo') && !src.includes('icon') && !src.includes('1x1') && !src.includes('avatar');
                 })
                 .first().attr('src') ||
             null
         );
 
+        if (scrapedImg && scrapedImg.startsWith('/')) {
+            try {
+                scrapedImg = new URL(url).origin + scrapedImg;
+            } catch (_) {}
+        }
+
+        // Validate image: Bypass generic competitor logos, default shares, and watermark placeholders
+        let imageUrl = DEFAULT_STADIUM_IMG;
+        if (scrapedImg && typeof scrapedImg === 'string' && scrapedImg.startsWith('http')) {
+            const lowerImg = scrapedImg.toLowerCase();
+            const brandingIndicators = [
+                'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                'sportal_logo', 'sdna_logo', 'gazzetta_logo', 'sport24_logo', 'default_image',
+                'facebook_share', 'og_image_default', 'default-share', 'site-logo', 'author'
+            ];
+            const isBranding = brandingIndicators.some(ind => lowerImg.includes(ind));
+            if (!isBranding) {
+                imageUrl = scrapedImg;
+            }
+        }
+        
         // ── Published date ─────────────────────────────────────────────────────
         const dateStr = (
             $('meta[property="article:published_time"]').attr('content') ||
@@ -312,25 +336,22 @@ async function generateAiBullets(title, text) {
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-flash-latest',
             contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 3 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
-- Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη — ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία
-- ΑΠΑΓΟΡΕΥΕΤΑΙ: «Σύμφωνα με...», «Το X γράφει...», «Ανακοίνωσε η ιστοσελίδα...»
-- Γράφε σε άμεσο, αυθεντικό δημοσιογραφικό ύφος
-- Κάθε bullet: συγκεκριμένο, δυναμικό, 1-2 προτάσεις
+1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να αντιγράψεις αυτούσιες φράσεις από το κείμενο. Κάνε πλήρη αναδιατύπωση των γεγονότων.
+2. Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη. ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία (καμία αναφορά σε άλλα portals, sites, «Σύμφωνα με...»).
+3. Κάθε bullet πρέπει να είναι σύντομο, περιεκτικό, δυναμικό, 1-2 προτάσεις και 100% πρωτότυπο.
 
-Επίστρεψε ΜΟΝΟ JSON array από 3 strings. Χωρίς markdown.
+Επίστρεψε ΜΟΝΟ JSON array από 3 strings, π.χ.: ["bullet 1", "bullet 2", "bullet 3"]
 
-Τίτλος: ${title}
-Κείμενο: ${cleanText}`,
-            config: {
-                responseMimeType: 'application/json'
-            }
+Τίτλος: \${title}
+Κείμενο: \${cleanText}`
         });
 
-        const textResponse = response.text.trim();
+        let textResponse = response.text.trim();
+        textResponse = textResponse.replace(/^\`\`\`json/i, '').replace(/\`\`\`$/, '').trim();
         const bullets = JSON.parse(textResponse);
         if (Array.isArray(bullets) && bullets.length === 3) return bullets;
         throw new Error('Bad response format');
@@ -353,26 +374,24 @@ async function generateLongFormContent(title, text) {
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `Είσαι in-house αρχισυντάκτης που καλύπτει αποκλειστικά τον Παναθηναϊκό. Η συνταξαική ομάδα σου δημοσιεύει πρωτότυπα ρεπορτάζ — δεν αναδημοσιεύεις από άλλες πηγές.
+            model: 'gemini-flash-latest',
+            contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News. Η συντακτική σου ομάδα παράγει αποκλειστικό, πρωτότυπο περιεχόμενο.
+Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, 100% αυθεντικό, αυτόνομο αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
-Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, αυθεντικό αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+ΚΑΝΟΝΕΣ ZERO-TOLERANCE ΓΙΑ COPY-PASTE (ΑΥΣΤΗΡΑ):
+1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΡΗΤΑ να αντιγράψεις αυτούσιες προτάσεις, φράσεις ή παραγράφους από το πηγαίο υλικό.
+2. Διάβασε το πηγαίο κείμενο, κράτησε ΜΟΝΟ τα βασικά γεγονότα (ποιος, τι, πότε, πού, γιατί) και γράψε ένα εντελώς νέο άρθρο από το μηδέν με δικό σου ύφος, εναλλακτικό λεξιλόγιο και διαφορετική δομή προτάσεων.
+3. ΠΟΤΕ μην αναφέρεις την αρχική πηγή ή άλλα μέσα ενημέρωσης. Απαγορεύονται φράσεις όπως «Σύμφωνα με...», «Το Sportal/Gazzetta/SDNA αναφέρει...», «Όπως γράφεται...».
+4. Το κείμενο πρέπει να είναι εκτενές (5-7 παράγραφοι, 400-600 λέξεις) και να αναλύει σε βάθος το θέμα, τις επιπτώσεις στην ομάδα, το context και το ιστορικό background.
+5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown (bolding, lists, stars κλπ.).
+6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
 
-ΑΥΣΤΗΡΕΣ ΟΔΗΓΙΕΣ:
-1. ΠΟΤΕ μην αναφέρεις πού βρέθηκε η πληροφορία (καμία αναφορά σε portal, ιστοσελίδα, ΜΜΕ)
-2. ΑΠΑΓΟΡΕΥΟΝΤΑΙ: «Σύμφωνα με...», «Όπως μεταδίδει...», «Το Sportal/Gazzetta αναφέρει...»
-3. Γράφε σε τρίτο πρόσωπο για αθλητές/ομάδα — ΠΑΝΤΑ αυθεντικά και άμεσα
-4. Ελάχιστον 5-7 παράγραφοι (400-600 λέξεις)
-5. Κάλυψε: κύριο γεγονός, αθλητικό context, επιπτώσεις, ιστορικό background, προοπτικές
-6. ΜΟΝΟ καθαρό κείμενο — χωρίς HTML tags, χωρίς markdown
-7. Παράγραφοι χωρισμένες με κενή γραμμή
-
-Τίτλος: ${title}
-Πληροφορίες: ${cleanText}
+Τίτλος: \${title}
+Πληροφορίες: \${cleanText}
 
 Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς υπογραφή.`,
             config: {
-                temperature: 0.75,
+                temperature: 0.8,
                 maxOutputTokens: 2048
             }
         });
