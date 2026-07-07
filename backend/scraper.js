@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Panathinaikos News — Direct HTML Scraper
  *
  * Architecture: Direct URL scraping with axios + cheerio (no RSS).
@@ -260,6 +260,8 @@ async function scrapeArticlePage(url, categoryHint) {
         }
 
         // Validate image: Bypass generic competitor logos, default shares, and watermark placeholders
+        // NOTE: Do NOT block by site name (sdna/sportal etc.) in the filename — that kills real article images.
+        // Instead only block known generic branding filenames and paths.
         let imageUrl = DEFAULT_STADIUM_IMG;
         if (scrapedImg && typeof scrapedImg === 'string' && scrapedImg.startsWith('http')) {
             try {
@@ -268,20 +270,23 @@ async function scrapeArticlePage(url, categoryHint) {
                 const filename = pathParts[pathParts.length - 1] || '';
                 const parentPath = pathParts.slice(0, -1).join('/');
 
-                const brandingIndicators = [
+                // Only generic/structural branding keywords in the FILENAME itself
+                const filenameBrandingIndicators = [
                     'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                    'share', 'social', 'default-image', 'default_image', 'facebook', 'twitter',
-                    'sportal', 'sdna', 'gazzetta', 'sport24', 'athletiko', 'sport-fm', 'sportfm',
-                    'og-image', 'og_image', 'site-logo', 'author'
+                    'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
+                    'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
                 ];
 
-                let isBranding = brandingIndicators.some(ind => filename.includes(ind));
-                if (parentPath.includes('/default_images') || 
-                    parentPath.includes('/default-images') || 
-                    parentPath.includes('/logos') || 
-                    parentPath.includes('/brand') || 
-                    parentPath.includes('/assets/images')) {
-                    isBranding = true;
+                // Structural branding PARENT PATHS that indicate non-article images
+                const pathBrandingIndicators = [
+                    '/logos/', '/logo/', '/brand/', '/branding/',
+                    '/default_images/', '/default-images/',
+                    '/assets/images/', '/site-assets/'
+                ];
+
+                let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
+                if (!isBranding) {
+                    isBranding = pathBrandingIndicators.some(p => ('/' + parentPath + '/').includes(p));
                 }
 
                 if (!isBranding) {
@@ -512,6 +517,19 @@ async function main() {
                 continue;
             }
 
+            // Cross-category URL guard: prevent basketball articles leaking into football source and vice versa
+            const urlLower = articleUrl.toLowerCase();
+            const isBasketUrl = /\/(mpasket|basket|basketball)\//.test(urlLower);
+            const isFootballUrl = /\/(podosfairo|football|soccer)\//.test(urlLower);
+            if (target.category === 'Ποδόσφαιρο' && isBasketUrl) {
+                console.log(`  [SKIP] Basketball URL in football source: ${scraped.title.substring(0, 50)}`);
+                continue;
+            }
+            if (target.category === 'Μπάσκετ' && isFootballUrl) {
+                console.log(`  [SKIP] Football URL in basketball source: ${scraped.title.substring(0, 50)}`);
+                continue;
+            }
+
             console.log(`  [NEW] ${scraped.title.substring(0, 70)}`);
 
             // ── Group ID via Jaccard ──────────────────────────────────────────
@@ -539,8 +557,14 @@ async function main() {
                 console.log(`    Image:     ${scraped.imageUrl || 'none'}`);
                 console.log(`    Summary:   ${scraped.summary.substring(0, 100)}...`);
                 console.log(`    Bullets:   ${JSON.stringify(bullets)}`);
-                console.log(`    Long-form: ${longFormContent ? longFormContent.substring(0, 80) + '...' : 'fallback (no API key)'}`);
+                console.log(`    Long-form: ${longFormContent ? longFormContent.substring(0, 80) + '...' : 'AI unavailable'}`);
                 totalNew++;
+                continue;
+            }
+
+            // If AI failed (quota exceeded), skip to avoid storing verbatim source text
+            if (!longFormContent) {
+                console.log(`    [SKIP] AI generation failed — skipping to avoid verbatim content.`);
                 continue;
             }
 
@@ -548,7 +572,7 @@ async function main() {
             const { data: inserted, error: insertErr } = await db.from('articles').insert({
                 title:      scraped.title,
                 summary:    scraped.summary,
-                content:    longFormContent || scraped.content || scraped.summary,
+                content:    longFormContent,
                 source_url: articleUrl,
                 image_url:  scraped.imageUrl,
                 category:   target.category,
@@ -559,7 +583,6 @@ async function main() {
             }).select('id');
 
             if (insertErr) {
-                // Unique constraint violation = already exists (different URL, same content) → skip
                 if (insertErr.code === '23505') {
                     console.log(`    → Duplicate content, skipped.`);
                 } else {

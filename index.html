@@ -79,7 +79,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a class="font-h3 text-h3 font-bold text-primary" href="index.html">PAO FC</a>
+            <a class="font-h3 text-h3 font-bold text-primary" href="index.html">ΠΑΟ</a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
 
@@ -98,6 +98,10 @@
             <a id="nav-basketball" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="#" onclick="filterFeed('Μπάσκετ','nav-basketball'); toggleDrawer(); return false;">
                 <span class="material-symbols-outlined">sports_basketball</span>
                 <span>Μπάσκετ</span>
+            </a>
+            <a id="nav-amateur" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="#" onclick="filterFeed('Ερασιτέχνης','nav-amateur'); toggleDrawer(); return false;">
+                <span class="material-symbols-outlined">sports</span>
+                <span>Ερασιτέχνης</span>
             </a>
             <a id="nav-matches" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="matches.html">
                 <span class="material-symbols-outlined">sports_score</span>
@@ -155,6 +159,7 @@
                 <button id="tab-football" onclick="filterFeed('Ποδόσφαιρο','nav-football')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">⚽ Ποδόσφαιρο</button>
                 <button id="tab-basketball" onclick="filterFeed('Μπάσκετ','nav-basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏀 Μπάσκετ</button>
                 <button id="tab-transfers" onclick="filterFeed('Μεταγραφές','nav-all')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</button>
+                <button id="tab-amateur" onclick="filterFeed('Ερασιτέχνης','nav-amateur')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">☘️ Ερασιτέχνης</button>
                 <a href="matches.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
             </div>
         </div>
@@ -283,8 +288,8 @@
             activeCategory = category;
 
             // Update tab bar styles
-            const tabs = ['tab-all','tab-football','tab-basketball','tab-transfers'];
-            const tabMap = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Μεταγραφές':'tab-transfers'};
+            const tabs = ['tab-all','tab-football','tab-basketball','tab-transfers','tab-amateur'];
+            const tabMap = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Μεταγραφές':'tab-transfers','Ερασιτέχνης':'tab-amateur'};
             tabs.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
@@ -297,7 +302,7 @@
             }
 
             // Update hero title
-            const titles = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Μεταγραφές':'Μεταγραφές'};
+            const titles = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Μεταγραφές':'Μεταγραφές','Ερασιτέχνης':'Ερασιτέχνης'};
             const feedTitle = document.getElementById('feed-title');
             if (feedTitle) feedTitle.textContent = titles[category] || 'Ροή Ειδήσεων';
 
@@ -382,25 +387,26 @@
                 </div>
             </div>`;
 
-            // ─ Side column ─
-            const sideGroups = sorted.slice(1, 4);
-            let sideHtml = '<div class="md:col-span-4 flex flex-col gap-4">';
+            // ─ Side column (20 articles, 5 visible, rest scrollable) ─
+            const sideGroups = sorted.slice(1, 21);
+            let sideHtml = '<div class="md:col-span-4 flex flex-col gap-0">';
+            sideHtml += '<div style="max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color: var(--color-primary,#2e7d32) transparent;" class="pr-1">';
             sideGroups.forEach(g => {
                 const a = g.main;
                 sideHtml += `
                 <div class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10"
                      onclick="window.location.href='article.html?id=${a.id}'">
-                    <div class="w-[88px] h-[88px] flex-shrink-0 rounded-lg overflow-hidden">
+                    <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     </div>
                     <div class="flex-1 min-w-0">
                         <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'}</span>
-                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-3">${a.title}</h3>
+                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
                         <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                     </div>
                 </div>`;
             });
-            sideHtml += '</div>';
+            sideHtml += '</div></div>';
 
             container.innerHTML = featuredHtml + sideHtml;
 
@@ -451,16 +457,14 @@
                             const u = new URL(imageUrl);
                             const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
                             const pathLower = u.pathname.toLowerCase();
-                            const brandingIndicators = [
+                            const filenameBrandingIndicators = [
                                 'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                                'share', 'social', 'default-image', 'default_image', 'facebook', 'twitter',
-                                'sportal', 'sdna', 'gazzetta', 'sport24', 'athletiko', 'sport-fm', 'sportfm',
-                                'og-image', 'og_image', 'site-logo'
+                                'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
+                                'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
                             ];
-                            let isBranding = brandingIndicators.some(ind => filename.includes(ind));
-                            if (pathLower.includes('/default_images') || pathLower.includes('/default-images') || pathLower.includes('/logos') || pathLower.includes('/brand') || pathLower.includes('/assets/images')) {
-                                isBranding = true;
-                            }
+                            const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
+                            let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
+                            if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + u.pathname.toLowerCase() + '/').includes(p));
                             if (isBranding) {
                                 a.image_url = DEFAULT_IMG;
                             }
@@ -471,6 +475,14 @@
                     return a;
                 });
                 renderFeed(allArticles);
+
+                // Apply category filter from URL query param (e.g. index.html?cat=basketball)
+                const params = new URLSearchParams(window.location.search);
+                const catParam = params.get('cat');
+                if (catParam === 'football') filterFeed('Ποδόσφαιρο', 'nav-football');
+                else if (catParam === 'basketball') filterFeed('Μπάσκετ', 'nav-basketball');
+                else if (catParam === 'amateur') filterFeed('Ερασιτέχνης', 'nav-amateur');
+                else if (catParam === 'transfers') filterFeed('Μεταγραφές', 'nav-all');
             } catch(err) {
                 console.error('Feed error:', err);
                 const c = document.getElementById('articles-feed-container');
