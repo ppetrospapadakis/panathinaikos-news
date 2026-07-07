@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html class="dark" lang="el">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Η Άποψή Μου – Panathinaikos News</title>
+    <meta name="description" content="Γράψε τη δική σου άποψη για τον Παναθηναϊκό."/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
+        .card-hover:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
+
+        /* Lock Screen */
+        #lock-screen { position:fixed; inset:0; z-index:200; background:#111317; display:flex; align-items:center; justify-content:center; }
+        .lock-card { background:#1a1c20; border:1px solid #3f4940; border-radius:24px; padding:48px; max-width:420px; width:100%; text-align:center; }
+        .lock-card .icon { font-size:56px; color:#84d999; margin-bottom:24px; }
+        .lock-card h1 { font-size:28px; font-weight:700; color:#e2e2e8; margin-bottom:8px; }
+        .lock-card p { color:#bfc9bd; margin-bottom:32px; font-size:15px; }
+        .lock-input { width:100%; background:#111317; border:1.5px solid #3f4940; border-radius:12px; padding:14px 18px; color:#e2e2e8; font-size:16px; outline:none; transition:border-color 0.2s; text-align:center; letter-spacing:4px; font-family:'Geist',sans-serif; }
+        .lock-input:focus { border-color:#84d999; }
+        .lock-btn { margin-top:16px; width:100%; background:#84d999; color:#00391a; font-weight:700; font-size:15px; padding:14px; border-radius:12px; border:none; cursor:pointer; transition:background 0.2s, transform 0.1s; }
+        .lock-btn:hover { background:#a8e6b8; }
+        .lock-btn:active { transform:scale(0.98); }
+        .lock-error { color:#ffb4ab; font-size:13px; margin-top:10px; min-height:20px; }
+
+        /* Editor */
+        .editor-input { background:#1a1c20; border:1.5px solid #3f4940; border-radius:12px; padding:16px 20px; color:#e2e2e8; font-size:15px; font-family:'Geist',sans-serif; width:100%; outline:none; transition:border-color 0.2s; resize:none; }
+        .editor-input:focus { border-color:#84d999; }
+        .editor-input::placeholder { color:#5a6360; }
+
+        /* Toolbar */
+        .toolbar-btn { background:#1e2024; border:1px solid #3f4940; border-radius:8px; padding:6px 10px; color:#bfc9bd; cursor:pointer; font-size:13px; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; }
+        .toolbar-btn:hover { background:#2a2d31; border-color:#84d999; color:#84d999; }
+
+        /* Word count */
+        .word-count { font-size:12px; color:#5a6360; }
+
+        /* Article cards */
+        .opinion-card { background:#1a1c20; border:1px solid #3f4940; border-radius:16px; overflow:hidden; cursor:pointer; transition:all 0.2s; }
+        .opinion-card:hover { border-color:#84d999; transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
+
+        /* Status badge */
+        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:full; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+        .status-success { background:rgba(132,217,153,0.12); color:#84d999; border:1px solid rgba(132,217,153,0.3); border-radius:999px; }
+        .status-error { background:rgba(255,180,171,0.12); color:#ffb4ab; border:1px solid rgba(255,180,171,0.3); border-radius:999px; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:#3f4940; border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:#84d999; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{
+                extend:{
+                    colors:{
+                        "secondary-container":"#32a45b","outline-variant":"#3f4940","surface-tint":"#84d999",
+                        "on-tertiary":"#3c2f00","inverse-surface":"#e2e2e8","tertiary":"#ebc23e",
+                        "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
+                        "surface":"#111317","primary":"#84d999","on-error":"#690005",
+                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20",
+                        "inverse-primary":"#0f6d39","on-background":"#e2e2e8",
+                        "on-surface":"#e2e2e8","secondary":"#a0cfaa","on-secondary":"#003918",
+                        "on-primary":"#00391a","surface-container":"#1e2024",
+                        "on-surface-variant":"#bfc9bd","on-primary-container":"#8ce1a1",
+                        "primary-container":"#006633","tertiary-container":"#cda721","on-error-container":"#ffdad6"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden">
+
+<!-- ═══ LOCK SCREEN ═══ -->
+<div id="lock-screen">
+    <div class="lock-card">
+        <div class="icon material-symbols-outlined">lock</div>
+        <h1>Editor Πρόσβασης</h1>
+        <p>Εισάγετε τον κωδικό για να αποκτήσετε πρόσβαση στον editor άρθρων.</p>
+        <input class="lock-input" id="lock-password" type="password" placeholder="••••••••" maxlength="30"
+               onkeydown="if(event.key==='Enter') checkPassword()"/>
+        <button class="lock-btn" onclick="checkPassword()">
+            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">arrow_forward</span>
+            Είσοδος
+        </button>
+        <div class="lock-error" id="lock-error"></div>
+        <p style="margin-top:24px;font-size:12px;color:#3f4940">Panathinaikos News · Private Editor</p>
+    </div>
+</div>
+
+<!-- ═══ TOP HEADER ═══ -->
+<header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
+    <div class="max-w-[1200px] mx-auto h-full flex items-center justify-between px-8">
+        <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
+            <span class="material-symbols-outlined text-primary">menu</span>
+        </button>
+        <a class="font-bold tracking-tighter text-primary text-xl" href="index.html">PANATHINAIKOS</a>
+        <a href="index.html" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-sm">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+            Πίσω
+        </a>
+    </div>
+</header>
+
+<!-- ═══ NAVIGATION DRAWER ═══ -->
+<aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
+    <div class="flex items-center justify-between mb-8">
+        <a class="font-h3 text-h3 font-bold text-primary" href="index.html">ΠΑΟ</a>
+        <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
+    </div>
+    <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
+    <nav class="flex flex-col gap-1">
+        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="index.html">
+            <span class="material-symbols-outlined">feed</span><span>Ροή Ειδήσεων</span>
+        </a>
+        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="index.html?cat=football">
+            <span class="material-symbols-outlined">sports_soccer</span><span>Ποδόσφαιρο</span>
+        </a>
+        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="index.html?cat=basketball">
+            <span class="material-symbols-outlined">sports_basketball</span><span>Μπάσκετ</span>
+        </a>
+        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="index.html?cat=amateur">
+            <span class="material-symbols-outlined">sports</span><span>Ερασιτέχνης</span>
+        </a>
+        <a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all" href="opinion.html">
+            <span class="material-symbols-outlined">edit_note</span><span>Η Άποψή Μου</span>
+        </a>
+        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="matches.html">
+            <span class="material-symbols-outlined">sports_score</span><span>Πρόγραμμα &amp; Αποτελέσματα</span>
+        </a>
+        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="roster.html">
+            <span class="material-symbols-outlined">groups</span><span>Depth Chart &amp; Ανάλυση</span>
+        </a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/30">
+        <p class="font-caption text-caption text-on-surface-variant/50 text-center">© 2024 Panathinaikos Editorial</p>
+    </div>
+</aside>
+<div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="mt-[80px] min-h-screen">
+    <div class="max-w-[1200px] mx-auto px-6 py-12">
+
+        <!-- Page Header -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
+                    <h1 class="text-3xl font-bold text-on-surface">Η Άποψή Μου</h1>
+                </div>
+            </div>
+            <p class="text-on-surface-variant max-w-xl">Γράψε τη δική σου αθλητική ανάλυση, άποψη ή σχόλιο για τον Παναθηναϊκό. Τα άρθρα σου εμφανίζονται στη ροή ειδήσεων με την κατηγορία <span class="text-primary font-semibold">✍️ Άποψη</span>.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- ── LEFT: EDITOR ── -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+
+                <!-- Title -->
+                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">Τίτλος Άρθρου</label>
+                    <input id="op-title" type="text" class="editor-input text-xl font-semibold" placeholder="π.χ. Γιατί ο Ατάμαν είναι η καλύτερη επιλογή για τον ΠΑΟ..." maxlength="250"/>
+                    <div class="flex justify-between mt-2">
+                        <span class="word-count" id="title-count">0 / 250</span>
+                    </div>
+                </div>
+
+                <!-- Content Editor -->
+                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">Κείμενο Άρθρου</label>
+
+                    <!-- Toolbar -->
+                    <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b border-outline-variant/30">
+                        <button class="toolbar-btn" onclick="insertFormat('\n\n')" title="Νέα Παράγραφος">
+                            <span class="material-symbols-outlined" style="font-size:16px">format_paragraph</span> Παράγραφος
+                        </button>
+                        <button class="toolbar-btn" onclick="insertText('⚽ ')" title="Football emoji">⚽</button>
+                        <button class="toolbar-btn" onclick="insertText('🏀 ')" title="Basketball emoji">🏀</button>
+                        <button class="toolbar-btn" onclick="insertText('🔥 ')" title="Fire emoji">🔥</button>
+                        <button class="toolbar-btn" onclick="insertText('💚 ')" title="Heart emoji">💚</button>
+                        <button class="toolbar-btn" onclick="insertText('📊 ')" title="Stats emoji">📊</button>
+                        <button class="toolbar-btn" onclick="insertText('⭐ ')" title="Star emoji">⭐</button>
+                        <button class="toolbar-btn" onclick="clearContent()" title="Καθαρισμός" style="margin-left:auto; color:#ffb4ab;">
+                            <span class="material-symbols-outlined" style="font-size:14px">delete</span> Καθαρισμός
+                        </button>
+                    </div>
+
+                    <textarea id="op-content" class="editor-input" rows="16"
+                        placeholder="Γράψε το άρθρο σου εδώ. Χρησιμοποίησε κενές γραμμές για να διαχωρίσεις τις παραγράφους.&#10;&#10;π.χ.&#10;Η επιστροφή του Ατάμαν στον πάγκο του Παναθηναϊκού AKTOR αποτελεί μια από τις πιο σημαντικές κινήσεις της δεκαετίας...&#10;&#10;Η εμπειρία του στη EuroLeague, σε συνδυασμό με την ικανότητά του να αξιοποιεί ταλέντα, τον καθιστά ιδανική επιλογή..."
+                        oninput="updateWordCount()"></textarea>
+                    <div class="flex justify-between mt-2">
+                        <span class="word-count" id="word-count">0 λέξεις</span>
+                        <span class="word-count" id="char-count">0 χαρακτήρες</span>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">
+                        Σύνοψη <span class="text-on-surface-variant font-normal normal-case tracking-normal">(εμφανίζεται στις κάρτες ειδήσεων)</span>
+                    </label>
+                    <textarea id="op-summary" class="editor-input" rows="3"
+                        placeholder="Μια σύντομη περιγραφή του άρθρου σου (1-2 προτάσεις)..." maxlength="400" oninput="updateSummaryCount()"></textarea>
+                    <div class="flex justify-between mt-2">
+                        <span class="word-count" id="summary-count">0 / 400</span>
+                    </div>
+                </div>
+
+                <!-- Image URL -->
+                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">
+                        URL Εικόνας <span class="text-on-surface-variant font-normal normal-case tracking-normal">(προαιρετικό)</span>
+                    </label>
+                    <input id="op-image" type="url" class="editor-input" placeholder="https://..." oninput="previewImage()"/>
+                    <div id="image-preview-wrap" class="mt-4 hidden">
+                        <p class="text-xs text-on-surface-variant mb-2">Προεπισκόπηση:</p>
+                        <img id="image-preview" src="" alt="preview" class="w-full max-h-[220px] object-cover rounded-xl border border-outline-variant/30"
+                             onerror="this.parentElement.classList.add('hidden')"/>
+                    </div>
+                    <p class="text-xs text-on-surface-variant/60 mt-3">Άν δεν βάλεις εικόνα, θα χρησιμοποιηθεί η προεπιλεγμένη εικόνα ΟΑΚΑ.</p>
+                </div>
+
+                <!-- Publish Button -->
+                <div class="flex gap-4 items-center">
+                    <button id="publish-btn" onclick="publishArticle()"
+                        class="flex-1 bg-primary text-on-primary font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 hover:bg-[#a8e6b8] transition-all text-base">
+                        <span class="material-symbols-outlined">publish</span>
+                        Δημοσίευση Άρθρου
+                    </button>
+                    <button onclick="previewArticle()"
+                        class="bg-surface-container border border-outline-variant text-on-surface-variant font-semibold py-4 px-6 rounded-2xl hover:border-primary hover:text-primary transition-all text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined" style="font-size:18px">preview</span>
+                        Προεπισκόπηση
+                    </button>
+                </div>
+
+                <!-- Status -->
+                <div id="publish-status" class="hidden text-center py-4"></div>
+            </div>
+
+            <!-- ── RIGHT: SIDEBAR ── -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+
+                <!-- Tips Card -->
+                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                    <p class="text-xs uppercase tracking-widest text-primary font-bold mb-4">📝 Οδηγίες Γραφής</p>
+                    <ul class="flex flex-col gap-3 text-sm text-on-surface-variant">
+                        <li class="flex gap-3"><span class="text-primary mt-0.5">•</span><span>Χρησιμοποίησε <strong class="text-on-surface">κενές γραμμές</strong> μεταξύ παραγράφων</span></li>
+                        <li class="flex gap-3"><span class="text-primary mt-0.5">•</span><span>Ο τίτλος πρέπει να είναι <strong class="text-on-surface">περιεκτικός</strong> και προσελκυστικός</span></li>
+                        <li class="flex gap-3"><span class="text-primary mt-0.5">•</span><span>Η σύνοψη εμφανίζεται <strong class="text-on-surface">στις κάρτες</strong> της αρχικής σελίδας</span></li>
+                        <li class="flex gap-3"><span class="text-primary mt-0.5">•</span><span>Μην ξεχάσεις να προσθέσεις <strong class="text-on-surface">εικόνα</strong> για καλύτερη εμφάνιση</span></li>
+                        <li class="flex gap-3"><span class="text-primary mt-0.5">•</span><span>Στόχευσε σε <strong class="text-on-surface">300-600 λέξεις</strong> για βέλτιστη ανάγνωση</span></li>
+                    </ul>
+                </div>
+
+                <!-- Preview Card (updates live) -->
+                <div id="preview-card" class="bg-surface-container rounded-2xl border border-outline-variant/30 overflow-hidden hidden">
+                    <div class="relative aspect-video overflow-hidden bg-surface-container-low">
+                        <img id="preview-img" src="" alt="" class="w-full h-full object-cover"/>
+                        <div class="absolute top-3 left-3 px-3 py-1 bg-primary/20 backdrop-blur text-primary text-xs font-bold rounded-full border border-primary/30">✍️ Άποψη</div>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-xs text-primary uppercase tracking-widest font-bold mb-2">Άποψη • Μόλις τώρα</p>
+                        <h3 id="preview-title" class="font-bold text-base leading-tight text-on-surface line-clamp-3 mb-2"></h3>
+                        <p id="preview-summary" class="text-sm text-on-surface-variant line-clamp-2"></p>
+                    </div>
+                </div>
+
+                <!-- Published Opinions -->
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-primary font-bold mb-4 px-1">Δημοσιευμένα Άρθρα</p>
+                    <div id="opinions-list" class="flex flex-col gap-3">
+                        <div class="text-sm text-on-surface-variant/50 text-center py-6 animate-pulse">Φόρτωση...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- ═══ PREVIEW MODAL ═══ -->
+<div id="preview-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 hidden">
+    <div class="bg-surface-container rounded-2xl border border-outline-variant max-w-[720px] w-full max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-6 border-b border-outline-variant/30 sticky top-0 bg-surface-container z-10">
+            <p class="text-sm font-bold text-primary uppercase tracking-widest">Προεπισκόπηση Άρθρου</p>
+            <button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="material-symbols-outlined text-on-surface-variant hover:text-primary">close</button>
+        </div>
+        <div class="p-6">
+            <p class="text-xs text-primary uppercase tracking-widest font-bold mb-3">✍️ Άποψη</p>
+            <h2 id="modal-title" class="text-2xl font-bold mb-4 leading-tight"></h2>
+            <div id="modal-image-wrap" class="hidden mb-6">
+                <img id="modal-image" src="" class="w-full rounded-xl object-cover max-h-[300px]" alt=""/>
+            </div>
+            <div id="modal-body" class="text-on-surface-variant leading-relaxed text-base" style="font-size:16px;line-height:1.8"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+
+// ⚠️  CHANGE THIS PASSWORD to something only you know
+const EDITOR_PASSWORD = 'pao1908';
+
+const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM';
+
+let db = null;
+
+// ── Auth ────────────────────────────────────────────────────────────────────
+function checkPassword() {
+    const input = document.getElementById('lock-password').value;
+    const err = document.getElementById('lock-error');
+    if (input === EDITOR_PASSWORD) {
+        sessionStorage.setItem('op_auth', '1');
+        document.getElementById('lock-screen').style.display = 'none';
+        initEditor();
+    } else {
+        err.textContent = 'Λάθος κωδικός. Δοκίμασε ξανά.';
+        document.getElementById('lock-password').value = '';
+        document.getElementById('lock-password').focus();
+        setTimeout(() => { err.textContent = ''; }, 3000);
+    }
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+function initEditor() {
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    loadOpinionArticles();
+    updateWordCount();
+    updateSummaryCount();
+    document.getElementById('op-title').addEventListener('input', () => {
+        const v = document.getElementById('op-title').value;
+        document.getElementById('title-count').textContent = `${v.length} / 250`;
+        updatePreviewCard();
+    });
+    document.getElementById('op-content').addEventListener('input', () => {
+        updateWordCount();
+        updatePreviewCard();
+    });
+    document.getElementById('op-summary').addEventListener('input', () => {
+        updateSummaryCount();
+        updatePreviewCard();
+    });
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function toggleDrawer() {
+    const drawer = document.getElementById('nav-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    const isOpen = !drawer.classList.contains('-translate-x-full');
+    drawer.classList.toggle('-translate-x-full', isOpen);
+    overlay.classList.toggle('opacity-0', isOpen);
+    overlay.classList.toggle('pointer-events-none', isOpen);
+}
+
+function updateWordCount() {
+    const text = document.getElementById('op-content').value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    document.getElementById('word-count').textContent = `${words} λέξεις`;
+    document.getElementById('char-count').textContent = `${text.length} χαρακτήρες`;
+}
+
+function updateSummaryCount() {
+    const len = document.getElementById('op-summary').value.length;
+    document.getElementById('summary-count').textContent = `${len} / 400`;
+}
+
+function insertFormat(txt) {
+    const ta = document.getElementById('op-content');
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const val = ta.value;
+    ta.value = val.substring(0, start) + txt + val.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + txt.length;
+    ta.focus();
+    updateWordCount();
+}
+
+function insertText(txt) { insertFormat(txt); }
+
+function clearContent() {
+    if (confirm('Θέλεις σίγουρα να διαγράψεις το κείμενο;')) {
+        document.getElementById('op-content').value = '';
+        updateWordCount();
+    }
+}
+
+function previewImage() {
+    const url = document.getElementById('op-image').value.trim();
+    const wrap = document.getElementById('image-preview-wrap');
+    const img = document.getElementById('image-preview');
+    if (url) {
+        img.src = url;
+        wrap.classList.remove('hidden');
+    } else {
+        wrap.classList.add('hidden');
+    }
+    updatePreviewCard();
+}
+
+function updatePreviewCard() {
+    const title = document.getElementById('op-title').value.trim();
+    const summary = document.getElementById('op-summary').value.trim();
+    const imageUrl = document.getElementById('op-image').value.trim() || DEFAULT_IMG;
+    const card = document.getElementById('preview-card');
+    if (title) {
+        card.classList.remove('hidden');
+        document.getElementById('preview-title').textContent = title;
+        document.getElementById('preview-summary').textContent = summary || 'Δεν υπάρχει σύνοψη ακόμα.';
+        document.getElementById('preview-img').src = imageUrl;
+    } else {
+        card.classList.add('hidden');
+    }
+}
+
+function previewArticle() {
+    const title = document.getElementById('op-title').value.trim();
+    const content = document.getElementById('op-content').value.trim();
+    const imageUrl = document.getElementById('op-image').value.trim();
+    if (!title && !content) { alert('Δεν υπάρχει περιεχόμενο για προεπισκόπηση.'); return; }
+
+    document.getElementById('modal-title').textContent = title || '(Χωρίς τίτλο)';
+    const imgWrap = document.getElementById('modal-image-wrap');
+    const img = document.getElementById('modal-image');
+    if (imageUrl) { img.src = imageUrl; imgWrap.classList.remove('hidden'); }
+    else imgWrap.classList.add('hidden');
+
+    // Render paragraphs
+    const body = document.getElementById('modal-body');
+    const paragraphs = content.split(/\n{2,}/).map(p => p.replace(/\n/g,' ').trim()).filter(Boolean);
+    body.innerHTML = paragraphs.map(p => `<p style="margin-bottom:1.4em">${p}</p>`).join('');
+
+    document.getElementById('preview-modal').classList.remove('hidden');
+}
+
+// ── Publish ─────────────────────────────────────────────────────────────────
+async function publishArticle() {
+    const title = document.getElementById('op-title').value.trim();
+    const content = document.getElementById('op-content').value.trim();
+    const summary = document.getElementById('op-summary').value.trim();
+    const imageUrl = document.getElementById('op-image').value.trim() || DEFAULT_IMG;
+
+    if (!title) { showStatus('error', 'Ο τίτλος είναι υποχρεωτικός.'); return; }
+    if (!content || content.length < 50) { showStatus('error', 'Το κείμενο πρέπει να έχει τουλάχιστον 50 χαρακτήρες.'); return; }
+
+    const btn = document.getElementById('publish-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="animation:spin 1s linear infinite">refresh</span> Δημοσίευση...';
+
+    const { data, error } = await db.from('articles').insert({
+        title,
+        summary: summary || content.substring(0, 300),
+        content,
+        source_url: `opinion://manual-${Date.now()}`,
+        image_url: imageUrl,
+        category: 'Άποψη',
+        group_id: crypto.randomUUID(),
+        bullets: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }).select('id');
+
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined">publish</span> Δημοσίευση Άρθρου';
+
+    if (error) {
+        showStatus('error', `Σφάλμα δημοσίευσης: ${error.message}`);
+    } else {
+        showStatus('success', `✅ Το άρθρο δημοσιεύτηκε επιτυχώς! (id: ${data[0].id.substring(0,8)}...)`);
+        // Clear form
+        document.getElementById('op-title').value = '';
+        document.getElementById('op-content').value = '';
+        document.getElementById('op-summary').value = '';
+        document.getElementById('op-image').value = '';
+        document.getElementById('image-preview-wrap').classList.add('hidden');
+        document.getElementById('preview-card').classList.add('hidden');
+        document.getElementById('title-count').textContent = '0 / 250';
+        updateWordCount();
+        updateSummaryCount();
+        // Reload list
+        loadOpinionArticles();
+    }
+}
+
+function showStatus(type, msg) {
+    const el = document.getElementById('publish-status');
+    el.classList.remove('hidden');
+    el.innerHTML = `<span class="status-badge status-${type === 'success' ? 'success' : 'error'}">${msg}</span>`;
+    setTimeout(() => el.classList.add('hidden'), 6000);
+}
+
+// ── Load published opinions ──────────────────────────────────────────────────
+async function loadOpinionArticles() {
+    const list = document.getElementById('opinions-list');
+    if (!db) return;
+    const { data, error } = await db.from('articles')
+        .select('id, title, created_at, image_url, summary')
+        .eq('category', 'Άποψη')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+    if (error || !data || data.length === 0) {
+        list.innerHTML = '<div class="text-sm text-on-surface-variant/50 text-center py-6">Δεν υπάρχουν δημοσιευμένα άρθρα ακόμα.</div>';
+        return;
+    }
+
+    list.innerHTML = data.map(a => {
+        const date = new Date(a.created_at);
+        const dateStr = date.toLocaleDateString('el-GR', { day:'numeric', month:'short', year:'numeric' });
+        const img = a.image_url || DEFAULT_IMG;
+        return `
+        <div class="opinion-card group" onclick="window.location.href='article.html?id=${a.id}'">
+            <div class="flex gap-3 items-start p-4">
+                <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+                    <img src="${img}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='${DEFAULT_IMG}'"/>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-primary font-bold uppercase tracking-wider mb-1">✍️ ${dateStr}</p>
+                    <h4 class="text-sm font-semibold leading-snug line-clamp-2 text-on-surface group-hover:text-primary transition-colors">${a.title}</h4>
+                </div>
+                <button onclick="event.stopPropagation(); deleteOpinion('${a.id}')" class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-all opacity-0 group-hover:opacity-100" title="Διαγραφή">
+                    <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function deleteOpinion(id) {
+    if (!confirm('Διαγραφή αυτού του άρθρου;')) return;
+    await db.from('articles').delete().eq('id', id);
+    loadOpinionArticles();
+}
+
+// ── Auto-spin animation ──────────────────────────────────────────────────────
+const style = document.createElement('style');
+style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+document.head.appendChild(style);
+
+// ── On load: check session auth ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('op_auth') === '1') {
+        document.getElementById('lock-screen').style.display = 'none';
+        initEditor();
+    } else {
+        setTimeout(() => document.getElementById('lock-password').focus(), 200);
+    }
+});
+</script>
+</body>
+</html>

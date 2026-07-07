@@ -103,6 +103,10 @@
                 <span class="material-symbols-outlined">sports</span>
                 <span>Ερασιτέχνης</span>
             </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="opinion.html">
+                <span class="material-symbols-outlined">edit_note</span>
+                <span>Η Άποψή Μου</span>
+            </a>
             <a id="nav-matches" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="matches.html">
                 <span class="material-symbols-outlined">sports_score</span>
                 <span>Πρόγραμμα &amp; Αποτελέσματα</span>
@@ -160,6 +164,7 @@
                 <button id="tab-basketball" onclick="filterFeed('Μπάσκετ','nav-basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏀 Μπάσκετ</button>
                 <button id="tab-transfers" onclick="filterFeed('Μεταγραφές','nav-all')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</button>
                 <button id="tab-amateur" onclick="filterFeed('Ερασιτέχνης','nav-amateur')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">☘️ Ερασιτέχνης</button>
+                <button id="tab-opinion" onclick="filterFeed('Άποψη','nav-opinion')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</button>
                 <a href="matches.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
             </div>
         </div>
@@ -288,8 +293,8 @@
             activeCategory = category;
 
             // Update tab bar styles
-            const tabs = ['tab-all','tab-football','tab-basketball','tab-transfers','tab-amateur'];
-            const tabMap = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Μεταγραφές':'tab-transfers','Ερασιτέχνης':'tab-amateur'};
+            const tabs = ['tab-all','tab-football','tab-basketball','tab-transfers','tab-amateur','tab-opinion'];
+            const tabMap = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Μεταγραφές':'tab-transfers','Ερασιτέχνης':'tab-amateur','Άποψη':'tab-opinion'};
             tabs.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
@@ -302,7 +307,7 @@
             }
 
             // Update hero title
-            const titles = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Μεταγραφές':'Μεταγραφές','Ερασιτέχνης':'Ερασιτέχνης'};
+            const titles = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Μεταγραφές':'Μεταγραφές','Ερασιτέχνης':'Ερασιτέχνης','Άποψη':'✍️ Η Άποψή Μου'};
             const feedTitle = document.getElementById('feed-title');
             if (feedTitle) feedTitle.textContent = titles[category] || 'Ροή Ειδήσεων';
 
@@ -483,6 +488,7 @@
                 else if (catParam === 'basketball') filterFeed('Μπάσκετ', 'nav-basketball');
                 else if (catParam === 'amateur') filterFeed('Ερασιτέχνης', 'nav-amateur');
                 else if (catParam === 'transfers') filterFeed('Μεταγραφές', 'nav-all');
+                else if (catParam === 'opinion') filterFeed('Άποψη', 'nav-opinion');
             } catch(err) {
                 console.error('Feed error:', err);
                 const c = document.getElementById('articles-feed-container');
