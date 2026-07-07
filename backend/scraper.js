@@ -135,15 +135,35 @@ const PAO_KEYWORDS = [
 ];
 
 function isPanathinaikosArticle(title, text) {
-    const combined = `${title || ''} ${text || ''}`.toLowerCase();
+    const combinedTitle = (title || '').toLowerCase();
+    const combinedText = (text || '').toLowerCase();
     
-    // Quick keyword scan of specific keywords
-    const hasKeyword = PAO_KEYWORDS.some(kw => combined.includes(kw));
-    if (hasKeyword) return true;
-
-    // Unicode-safe word boundary check for "παο" or "pao" (excludes "παοκ", "παουλίνιο", κλπ)
+    // Unicode-safe word boundary check for "παο" or "pao"
     const paoRegex = /(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])(pao|παο)(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])/i;
-    return paoRegex.test(combined);
+
+    // 1. Check title relevance first (highest authority)
+    const titleHasKeyword = PAO_KEYWORDS.some(kw => combinedTitle.includes(kw));
+    if (titleHasKeyword || paoRegex.test(combinedTitle)) {
+        return true;
+    }
+
+    // 2. If title doesn't have keywords, require at least 3 occurrences in the body (to filter out promo links)
+    let matchCount = 0;
+    
+    for (const kw of PAO_KEYWORDS) {
+        let idx = combinedText.indexOf(kw);
+        while (idx !== -1) {
+            matchCount++;
+            idx = combinedText.indexOf(kw, idx + kw.length);
+        }
+    }
+    
+    const matches = combinedText.match(new RegExp(paoRegex.source, 'gi'));
+    if (matches) {
+        matchCount += matches.length;
+    }
+
+    return matchCount >= 3;
 }
 
 // ─── Jaccard similarity ────────────────────────────────────────────────────────
