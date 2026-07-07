@@ -122,15 +122,27 @@ const SCRAPE_TARGETS = [
     },
 ];
 
-// ─── Panathinaikos relevance keywords ─────────────────────────────────────────
+// ─── Panathinaikos relevance keywords (strict matching) ───────────────────────
 const PAO_KEYWORDS = [
-    'παναθηναϊκ', 'panathinaikos', 'pao', 'παο', 'τριφύλλι', 'trifilli',
-    'γκατζόλης', 'ιωαννίδης', 'τετέ', 'σλούκας', 'αταμάν', 'ataman',
+    'παναθηναϊκ', 'panathinaikos', 'pao fc', 'pao bc', 'καε παναθηναϊκός', 'παε παναθηναϊκός',
+    'τριφύλλι', 'trifilli', 'οακα', 'oaka', 'λεωφόρος', 'leoforos', 'βοτανικός', 'votanikos',
+    'αταμάν', 'ataman', 'σλούκας', 'sloukas', 'ιωαννίδης', 'ioannidis', 'τετέ', 'tete',
+    'μπακασέτας', 'bakasetas', 'πελίστρι', 'pellistri', 'νίστρουπ', 'neestrup', 'μαξίμοβιτς',
+    'μπαλτσερόφσκι', 'ναν', 'kendrick nunn', 'lessort', 'λεσόρ', 'grant', 'γκραντ',
+    'γκριγκόνις', 'grigonis', 'ερνανγκόμεθ', 'hernangomez', 'χουάντσο', 'papapetrou',
+    'παπαπέτρου', 'μητογλου', 'mitoglou', 'καλαϊτζάκης', 'kalaitzakis', 'γιούρτσεβεν',
+    'yurtseven', 'osman', 'όσμαν', 'green heretics', 'θύρα 13', 'gate 13', 'πράσινοι', 'πράσινους'
 ];
 
 function isPanathinaikosArticle(title, text) {
-    const combined = `${title} ${text}`.toLowerCase();
-    return PAO_KEYWORDS.some(kw => combined.includes(kw));
+    const combined = `${title || ''} ${text || ''}`.toLowerCase();
+    
+    // Quick keyword scan
+    const hasKeyword = PAO_KEYWORDS.some(kw => combined.includes(kw));
+    if (hasKeyword) return true;
+
+    // Strict regex word boundary check for short standalone terms like "παο" or "pao" (to avoid matching "paok" etc.)
+    return /\b(pao|παο)\b/i.test(combined);
 }
 
 // ─── Jaccard similarity ────────────────────────────────────────────────────────
