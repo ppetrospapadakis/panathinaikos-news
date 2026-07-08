@@ -6,7 +6,7 @@
     <title>Panathinaikos News - Ειδήσεις</title>
     <meta name="description" content="Όλα τα νέα του Παναθηναϊκού. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ."/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap&v=2.0.2" rel="stylesheet"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
         body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
@@ -251,7 +251,7 @@
     </footer>
 
     <!-- ═══ SUPABASE + APP LOGIC ═══ -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=2.0.2"></script>
     <script>
     (function() {
         // ── Supabase init (single declaration, IIFE-scoped) ──
@@ -535,9 +535,11 @@
 
         // ── Fetch ──
         async function fetchArticles() {
+            try {
                 const { data, error } = await db.from('articles')
                     .select('*')
-                    .not('category', 'ilike', '%systemroster%')
+                    .not('category', 'eq', 'SystemRoster')
+                    .not('category', 'eq', 'SYSTEMROSTER')
                     .order('created_at', { ascending: false })
                     .limit(200);
                 if (error) throw error;
@@ -576,14 +578,14 @@
                 else if (catParam === 'transfers') filterFeed('Μεταγραφές', 'nav-all');
                 else if (catParam === 'opinion') filterFeed('Άποψη', 'nav-opinion');
             } catch(err) {
-                console.error('Feed error:', err);
+                console.error("Frontend Fetch Error:", err);
                 const c = document.getElementById('articles-feed-container');
                 if (c) c.innerHTML = `<div class="col-span-1 md:col-span-12 text-center py-24 text-error font-body">Σφάλμα φόρτωσης: ${err.message}</div>`;
             }
         }
 
         window.addEventListener('DOMContentLoaded', fetchArticles);
-    })();
+        })();
     </script>
 </body>
 </html>
