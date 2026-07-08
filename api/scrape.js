@@ -12,16 +12,17 @@ module.exports = async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     // Envs validation check
-    const missingEnvs = [];
-    if (!process.env.SUPABASE_URL) missingEnvs.push('SUPABASE_URL');
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_KEY) missingEnvs.push('SUPABASE_SERVICE_ROLE_KEY');
-    if (!process.env.GEMINI_API_KEY) missingEnvs.push('GEMINI_API_KEY');
-
-    if (missingEnvs.length > 0) {
-        return res.status(500).json({
-            success: false,
-            error: `Missing environment variables on Vercel: ${missingEnvs.join(', ')}. Please add them in Vercel Dashboard > Settings > Environment Variables.`
-        });
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+    
+    if (!supabaseUrl || !supabaseUrl.startsWith('http')) {
+        return res.status(500).json({ error: "Vercel Context Missing SUPABASE_URL. Read value is: " + supabaseUrl });
+    }
+    if (!supabaseKey) {
+        return res.status(500).json({ error: "Vercel Context Missing SUPABASE_KEY/SUPABASE_SERVICE_ROLE_KEY." });
+    }
+    if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: "Vercel Context Missing GEMINI_API_KEY." });
     }
 
     // Sanitize process.env variables to prevent any formatting/quotes issues
