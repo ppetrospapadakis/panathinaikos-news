@@ -11,7 +11,18 @@ module.exports = async (req, res) => {
     if (token !== 'pao1908_secure') {
         return res.status(401).json({ error: 'Unauthorized' });
     }
+    // Envs validation check
+    const missingEnvs = [];
+    if (!process.env.SUPABASE_URL) missingEnvs.push('SUPABASE_URL');
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_KEY) missingEnvs.push('SUPABASE_SERVICE_ROLE_KEY');
+    if (!process.env.GEMINI_API_KEY) missingEnvs.push('GEMINI_API_KEY');
 
+    if (missingEnvs.length > 0) {
+        return res.status(500).json({
+            success: false,
+            error: `Missing environment variables on Vercel: ${missingEnvs.join(', ')}. Please add them in Vercel Dashboard > Settings > Environment Variables.`
+        });
+    }
     try {
         console.log('[API SCRAPE] Ingestion triggered via Serverless API Route');
         // Execute the main scraper loop (not a dry run)

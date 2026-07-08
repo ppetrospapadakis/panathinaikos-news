@@ -563,8 +563,7 @@ async function main() {
         const url  = process.env.SUPABASE_URL;
         const key  = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
         if (!url || !key) {
-            console.error('[FATAL] SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
-            process.exit(1);
+            throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
         }
         db = createClient(url, key);
 
@@ -574,7 +573,9 @@ async function main() {
             .order('created_at', { ascending: false })
             .limit(500);
 
-        if (error) { console.error('[FATAL] DB error:', error.message); process.exit(1); }
+        if (error) {
+            throw new Error(`DB error: ${error.message}`);
+        }
         existingArticles = data || [];
         existingUrls = new Set(existingArticles.map(a => a.source_url));
         console.log(`[DB] Loaded ${existingArticles.length} existing articles for deduplication.\n`);
