@@ -489,38 +489,21 @@ async function saveRoster(sport) {
         const sourceUrl = `opinion://system-roster-${sport}`;
         const title = `${isFb ? 'Football' : 'Basketball'} Roster Data`;
 
-        const { data: existing } = await db.from('articles')
-            .select('id')
-            .eq('source_url', sourceUrl)
-            .maybeSingle();
+        const { error } = await db.from('articles')
+            .upsert({
+                source_url: sourceUrl,
+                title: title,
+                summary: `${sport.toUpperCase()} starting squad and tactical analysis.`,
+                content: analysis,
+                bullets: [JSON.stringify(starting), JSON.stringify(benchOrBackup), JSON.stringify(rest)],
+                category: 'SystemRoster',
+                created_at: '1970-01-01T00:00:00.000Z',
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'source_url'
+            });
 
-        let saveErr = null;
-        if (existing && existing.id) {
-            const { error } = await db.from('articles')
-                .update({
-                    content: analysis,
-                    bullets: [JSON.stringify(starting), JSON.stringify(benchOrBackup), JSON.stringify(rest)],
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', existing.id);
-            saveErr = error;
-        } else {
-            const { error } = await db.from('articles')
-                .insert({
-                    title: title,
-                    summary: `${sport.toUpperCase()} starting squad and tactical analysis.`,
-                    content: analysis,
-                    bullets: [JSON.stringify(starting), JSON.stringify(benchOrBackup), JSON.stringify(rest)],
-                    source_url: sourceUrl,
-                    category: 'SystemRoster',
-                    group_id: crypto.randomUUID(),
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                });
-            saveErr = error;
-        }
-
-        if (saveErr) throw saveErr;
+        if (error) throw error;
 
         statusEl.className = 'text-center text-sm font-semibold text-green-400 mt-4';
         statusEl.textContent = '✅ Αποθηκεύτηκε επιτυχώς!';

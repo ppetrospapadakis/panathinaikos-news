@@ -494,8 +494,7 @@
 
             // ─ Side column (20 articles, stretches dynamically, styled scroll track) ─
             const sideGroups = sorted.slice(1, 21);
-            let sideHtml = '<div class="md:col-span-4 flex flex-col h-full min-h-0">';
-            sideHtml += '<div style="flex:1; min-height:0; max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color: #2e7d32 transparent;" class="pr-1">';
+            let sideHtml = '<div class="md:col-span-4 pr-1" style="height:100%; overflow-y:auto; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color:#2e7d32 transparent;">';
             sideGroups.forEach(g => {
                 const a = g.main;
                 sideHtml += `
@@ -511,7 +510,7 @@
                     </div>
                 </div>`;
             });
-            sideHtml += '</div></div>';
+            sideHtml += '</div>';
 
             container.innerHTML = featuredHtml + sideHtml;
 
@@ -536,8 +535,11 @@
 
         // ── Fetch ──
         async function fetchArticles() {
-            try {
-                const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false }).limit(200);
+                const { data, error } = await db.from('articles')
+                    .select('*')
+                    .not('category', 'ilike', '%systemroster%')
+                    .order('created_at', { ascending: false })
+                    .limit(200);
                 if (error) throw error;
                 allArticles = (data || []).map(a => {
                     let imageUrl = a.image_url || '';
