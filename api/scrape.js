@@ -1,4 +1,4 @@
-const { main } = require('../backend/scraper.js');
+const axios = require('axios');
 
 module.exports = async (req, res) => {
     // Only allow GET requests
@@ -11,48 +11,41 @@ module.exports = async (req, res) => {
     if (token !== 'pao1908_secure') {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-    // Envs validation check
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-    
-    if (!supabaseUrl || !supabaseUrl.startsWith('http')) {
-        return res.status(500).json({ error: "Vercel Context Missing SUPABASE_URL. Read value is: " + supabaseUrl });
-    }
-    if (!supabaseKey) {
-        return res.status(500).json({ error: "Vercel Context Missing SUPABASE_KEY/SUPABASE_SERVICE_ROLE_KEY." });
-    }
-    if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ error: "Vercel Context Missing GEMINI_API_KEY." });
+
+    // Read GITHUB_PAT or GITHUB_TOKEN
+    const pat = process.env.GITHUB_PAT || process.env.GITHUB_TOKEN;
+    if (!pat) {
+        return res.status(500).json({ error: 'Missing GITHUB_PAT or GITHUB_TOKEN environment variable in Vercel.' });
     }
 
-    // Sanitize process.env variables to prevent any formatting/quotes issues
-    if (process.env.SUPABASE_URL) {
-        process.env.SUPABASE_URL = process.env.SUPABASE_URL.trim().replace(/^['"]|['"]$/g, '');
-    }
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY.trim().replace(/^['"]|['"]$/g, '');
-    }
-    if (process.env.SUPABASE_KEY) {
-        process.env.SUPABASE_KEY = process.env.SUPABASE_KEY.trim().replace(/^['"]|['"]$/g, '');
-    }
-    if (process.env.GEMINI_API_KEY) {
-        process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '');
-    }
     try {
-        console.log('[API SCRAPE] Ingestion triggered via Serverless API Route');
-        // Execute the main scraper loop (not a dry run)
-        const stats = await main();
+        console.log('[API SCRAPE] Triggering GitHub Repository Dispatch...');
         
+        const response = await axios.post(
+            'https://api.github.com/repos/ppetrospapadakis/panathinaikos-news/dispatches',
+            {
+                event_type: 'trigger-scrape'
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${pat.trim()}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28',
+                    'User-Agent': 'Vercel-Serverless-Scrape'
+                }
+            }
+        );
+
         return res.status(200).json({
             success: true,
-            message: 'Ingestion completed successfully',
-            stats
+            message: 'Repository dispatch triggered successfully.',
+            status: response.status
         });
     } catch (err) {
-        console.error('[API SCRAPE] Scraper error:', err);
+        console.error('[API SCRAPE] GitHub API dispatch error:', err.response ? err.response.data : err.message);
         return res.status(500).json({
             success: false,
-            error: err.message
+            error: err.response ? err.response.data : err.message
         });
     }
 };
