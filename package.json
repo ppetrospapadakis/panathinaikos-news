@@ -4,6 +4,7 @@
   "description": "Panathinaikos News sports RSS aggregator and CMS dashboard",
   "main": "backend/scraper.js",
   "scripts": {
+    "build": "echo 'Static build success'",
     "scrape": "node backend/scraper.js",
     "scrape:dry": "node backend/scraper.js --dry-run"
   },
