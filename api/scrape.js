@@ -23,6 +23,20 @@ module.exports = async (req, res) => {
             error: `Missing environment variables on Vercel: ${missingEnvs.join(', ')}. Please add them in Vercel Dashboard > Settings > Environment Variables.`
         });
     }
+
+    // Sanitize process.env variables to prevent any formatting/quotes issues
+    if (process.env.SUPABASE_URL) {
+        process.env.SUPABASE_URL = process.env.SUPABASE_URL.trim().replace(/^['"]|['"]$/g, '');
+    }
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY.trim().replace(/^['"]|['"]$/g, '');
+    }
+    if (process.env.SUPABASE_KEY) {
+        process.env.SUPABASE_KEY = process.env.SUPABASE_KEY.trim().replace(/^['"]|['"]$/g, '');
+    }
+    if (process.env.GEMINI_API_KEY) {
+        process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '');
+    }
     try {
         console.log('[API SCRAPE] Ingestion triggered via Serverless API Route');
         // Execute the main scraper loop (not a dry run)

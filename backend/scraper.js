@@ -560,8 +560,10 @@ async function main() {
     let existingArticles = [];
 
     if (!isDryRun) {
-        const url  = process.env.SUPABASE_URL;
-        const key  = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+        const rawUrl = process.env.SUPABASE_URL;
+        const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+        const url = rawUrl ? rawUrl.trim().replace(/^['"]|['"]$/g, '') : '';
+        const key = rawKey ? rawKey.trim().replace(/^['"]|['"]$/g, '') : '';
         if (!url || !key) {
             throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
         }
@@ -686,11 +688,13 @@ async function main() {
             totalNew++;
             console.log(`    ✅ Inserted (id=${inserted[0].id})`);
 
-            // Rate limit between AI calls
-            await sleep(1500);
+            // Rate limit between AI calls (skip in Vercel serverless environment to prevent timeouts)
+            if (!process.env.VERCEL) {
+                await sleep(1500);
+            }
         }
-        // After finishing all articles for this source, stagger before next target (skip in dry‑run)
-        if (!isDryRun) {
+        // After finishing all articles for this source, stagger before next target (skip in dry‑run or Vercel serverless environment)
+        if (!isDryRun && !process.env.VERCEL) {
             console.log(`[STAGGER] Pausing ${TARGET_STAGGER_MS/1000}s before next source to regulate Gemini API traffic`);
             await new Promise(resolve => setTimeout(resolve, TARGET_STAGGER_MS));
         }
