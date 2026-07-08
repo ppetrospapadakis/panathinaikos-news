@@ -696,10 +696,14 @@ async function main() {
     }
 
     console.log(`\n[SCRAPER] Done. New: ${totalNew} | Skipped: ${totalSkipped} | ${new Date().toISOString()}`);
+    return { totalNew, totalSkipped };
 }
 
-main().catch(err => {
-    console.error('[FATAL] Scraper crashed:', err.message);
-    process.exit(1);
-});
-// Force production build trigger - July 8, 2026
+if (require.main === module) {
+    main().catch(err => {
+        console.error('[FATAL] Scraper crashed:', err.message);
+        process.exit(1);
+    });
+}
+
+module.exports = { main };
