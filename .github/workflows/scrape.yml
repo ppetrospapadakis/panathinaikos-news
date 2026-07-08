@@ -1,6 +1,9 @@
 name: 🤖 Autonomous News Ingestion
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     # Run every 30 minutes, 24/7 (GitHub min interval is 5min, but 30min is safer for free tier)
     - cron: '*/15 * * * *'
