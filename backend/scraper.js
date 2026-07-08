@@ -702,3 +702,4 @@ main().catch(err => {
     console.error('[FATAL] Scraper crashed:', err.message);
     process.exit(1);
 });
+// Force production build trigger - July 8, 2026
