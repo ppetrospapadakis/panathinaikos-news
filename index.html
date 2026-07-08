@@ -359,11 +359,84 @@
         // ── Default hero image ──
         const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM';
 
+        let currentFilteredArticles = [];
+        let displayedCount = 20;
+        let observer = null;
+
+        function renderMoreCards(groupsList, containerElement) {
+            groupsList.forEach(g => {
+                const a = g.main;
+                let bHtml = '';
+                if (a.bullets && a.bullets.length > 0) {
+                    bHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
+                        <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ Quick-Takes</div>
+                        <ul class="list-disc pl-4 space-y-1 text-xs text-on-surface-variant leading-relaxed">
+                            ${a.bullets.map(b => `<li>${b}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+                containerElement.insertAdjacentHTML('beforeend', `
+                <div class="group cursor-pointer bg-surface-container/30 rounded-xl border border-outline-variant/10 flex flex-col overflow-hidden card-hover"
+                     onclick="window.location.href='article.html?id=${a.id}'">
+                    <div class="relative aspect-video overflow-hidden">
+                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} • ${timeAgo(a.created_at)}</span>
+                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
+                        <div class="mt-auto" onclick="event.stopPropagation()">${bHtml}</div>
+                    </div>
+                </div>`);
+            });
+        }
+
+        function setupInfiniteScroll(allRemaining, gridContainer) {
+            const sentinel = document.getElementById('feed-sentinel');
+            const loader = document.getElementById('sentinel-loader');
+            if (!sentinel) return;
+
+            sentinel.classList.remove('hidden');
+
+            observer = new IntersectionObserver(async (entries) => {
+                const entry = entries[0];
+                if (entry.isIntersecting) {
+                    if (loader) loader.classList.remove('hidden');
+
+                    // Small delay for smooth scroll visual cue
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    const nextBatch = allRemaining.slice(displayedCount, displayedCount + 10);
+                    renderMoreCards(nextBatch, gridContainer);
+                    displayedCount += nextBatch.length;
+
+                    if (displayedCount >= allRemaining.length) {
+                        observer.disconnect();
+                        sentinel.classList.add('hidden');
+                    }
+
+                    if (loader) loader.classList.add('hidden');
+                }
+            }, {
+                rootMargin: '150px'
+            });
+
+            observer.observe(sentinel);
+        }
+
         // ── Render ──
         function renderFeed(articles) {
             const container = document.getElementById('articles-feed-container');
             if (!container) return;
             container.innerHTML = '';
+
+            const sentinel = document.getElementById('feed-sentinel');
+            if (sentinel) sentinel.classList.add('hidden');
+
+            if (observer) {
+                observer.disconnect();
+                observer = null;
+            }
 
             if (!articles || articles.length === 0) {
                 container.innerHTML = '<div class="col-span-1 md:col-span-12 text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
@@ -384,6 +457,9 @@
 
             if (sorted.length === 0) return;
 
+            currentFilteredArticles = sorted;
+            displayedCount = 20;
+
             // ─ Featured card ─
             const fg = sorted[0], fa = fg.main;
             const fDate = timeAgo(fa.created_at);
@@ -398,8 +474,6 @@
                     </ul>
                 </div>`;
             }
-            // No 'Κάλυψη από' links — source portals not exposed on public cards
-            const relHtml = '';
 
             const featuredHtml = `
             <div class="md:col-span-8 group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover"
@@ -413,15 +487,15 @@
                     <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${fa.title}</h2>
                     <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${fa.summary || ''}</p>
                     <div class="mt-auto" onclick="event.stopPropagation()">
-                        ${bulletsHtml}${relHtml}
+                        ${bulletsHtml}
                     </div>
                 </div>
             </div>`;
 
-            // ─ Side column (20 articles, 5 visible, rest scrollable) ─
+            // ─ Side column (20 articles, stretches dynamically, styled scroll track) ─
             const sideGroups = sorted.slice(1, 21);
-            let sideHtml = '<div class="md:col-span-4 flex flex-col gap-0">';
-            sideHtml += '<div style="max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color: var(--color-primary,#2e7d32) transparent;" class="pr-1">';
+            let sideHtml = '<div class="md:col-span-4 flex flex-col h-full min-h-0">';
+            sideHtml += '<div style="flex:1; min-height:0; max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color: #2e7d32 transparent;" class="pr-1">';
             sideGroups.forEach(g => {
                 const a = g.main;
                 sideHtml += `
@@ -441,38 +515,22 @@
 
             container.innerHTML = featuredHtml + sideHtml;
 
-            // ─ Remaining grid ─
-            const remaining = sorted.slice(4);
-            if (remaining.length > 0) {
+            // ─ Remaining bottom grid ─
+            const bottomGridArticles = sorted.slice(21);
+            if (bottomGridArticles.length > 0) {
                 container.insertAdjacentHTML('beforeend', `
                 <div class="col-span-1 md:col-span-12 mt-8 pt-8 border-t border-outline-variant/30">
                     <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
+                </div>
+                <div class="col-span-1 md:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bottom-grid-cards">
                 </div>`);
-                remaining.forEach(g => {
-                    const a = g.main;
-                    let bHtml = '';
-                    if (a.bullets && a.bullets.length > 0) {
-                        bHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
-                            <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ Quick-Takes</div>
-                            <ul class="list-disc pl-4 space-y-1 text-xs text-on-surface-variant leading-relaxed">
-                                ${a.bullets.map(b => `<li>${b}</li>`).join('')}
-                            </ul>
-                        </div>`;
-                    }
-                    container.insertAdjacentHTML('beforeend', `
-                    <div class="md:col-span-6 lg:col-span-4 group cursor-pointer bg-surface-container/30 rounded-xl border border-outline-variant/10 flex flex-col overflow-hidden card-hover"
-                         onclick="window.location.href='article.html?id=${a.id}'">
-                        <div class="relative aspect-video overflow-hidden">
-                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                        </div>
-                        <div class="p-5 flex flex-col flex-1">
-                            <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} • ${timeAgo(a.created_at)}</span>
-                            <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
-                            <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
-                            <div class="mt-auto" onclick="event.stopPropagation()">${bHtml}</div>
-                        </div>
-                    </div>`);
-                });
+
+                const gridCardsContainer = document.getElementById('bottom-grid-cards');
+                renderMoreCards(bottomGridArticles.slice(0, displayedCount), gridCardsContainer);
+
+                if (bottomGridArticles.length > displayedCount) {
+                    setupInfiniteScroll(bottomGridArticles, gridCardsContainer);
+                }
             }
         }
 
