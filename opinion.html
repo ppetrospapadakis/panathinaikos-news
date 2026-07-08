@@ -54,6 +54,188 @@
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:#3f4940; border-radius:3px; }
         ::-webkit-scrollbar-thumb:hover { background:#84d999; }
+    /* Football Pitch Styles for Admin Visual Editor */
+    .admin-pitch-canvas {
+        background: #0b3d0b;
+        border: 3px solid rgba(255,255,255,0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    .admin-pitch-canvas::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 3px solid rgba(255,255,255,0.3);
+        margin: 12px;
+        pointer-events: none;
+    }
+    .pitch-centre-circle {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px; height: 80px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+    }
+    .pitch-centre-line {
+        position: absolute;
+        top: 50%; left: 12px; right: 12px;
+        height: 2px;
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-50%);
+    }
+    .pitch-penalty-top, .pitch-penalty-bottom {
+        position: absolute;
+        left: 50%; transform: translateX(-50%);
+        width: 55%; height: 18%;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+    .pitch-penalty-top { top: 12px; }
+    .pitch-penalty-bottom { bottom: 12px; }
+    .pitch-goal-top, .pitch-goal-bottom {
+        position: absolute;
+        left: 50%; transform: translateX(-50%);
+        width: 28%; height: 6%;
+        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.04);
+    }
+    .pitch-goal-top { top: 12px; }
+    .pitch-goal-bottom { bottom: 12px; }
+
+    /* Basketball Court Styles for Admin Visual Editor */
+    .court {
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+        border: 3px solid rgba(255,255,255,0.20);
+        position: relative;
+        overflow: hidden;
+    }
+    .court::before {
+        content: '';
+        position: absolute;
+        inset: 12px;
+        border: 2px solid rgba(255,255,255,0.25);
+        pointer-events: none;
+    }
+    .court-centre-circle {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 72px; height: 72px;
+        border: 2px solid rgba(255,255,255,0.25);
+        border-radius: 50%;
+    }
+    .court-centre-line {
+        position: absolute;
+        top: 50%; left: 12px; right: 12px;
+        height: 2px;
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-50%);
+    }
+    .court-arc-top, .court-arc-bottom {
+        position: absolute;
+        left: 50%; transform: translateX(-50%);
+        width: 80%; height: 38%;
+        border: 2px solid rgba(255,255,255,0.25);
+        border-radius: 0 0 50% 50%;
+    }
+    .court-arc-top { top: 12px; border-radius: 0 0 50% 50%; }
+    .court-arc-bottom { bottom: 12px; border-radius: 50% 50% 0 0; }
+    .court-key-top, .court-key-bottom {
+        position: absolute;
+        left: 50%; transform: translateX(-50%);
+        width: 32%; height: 28%;
+        border: 2px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.03);
+    }
+    .court-key-top { top: 12px; }
+    .court-key-bottom { bottom: 12px; }
+
+    /* Draggable Player Tokens */
+    .draggable-player {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        cursor: grab;
+        z-index: 10;
+        user-select: none;
+    }
+    .draggable-player.dragging {
+        cursor: grabbing;
+        z-index: 100;
+        opacity: 0.8;
+    }
+    .draggable-player.selected .avatar {
+        border-color: #ebc23e !important;
+        box-shadow: 0 0 16px rgba(235,194,62,0.6) !important;
+    }
+    .draggable-player .avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2.5px solid #84d999;
+        background: #006633;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #84d999;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+        position: relative;
+    }
+    .draggable-player.basketball .avatar {
+        background: #1a4a1a;
+    }
+    .draggable-player .name-tag {
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(4px);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .draggable-player .badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ebc23e;
+        color: #2a1800;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        font-size: 8px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .draggable-player.football .badge {
+        background: #84d999;
+        color: #003300;
+    }
+
+    /* Player edit popover modal */
+    .player-popover {
+        position: absolute;
+        z-index: 150;
+        width: 200px;
+        background: #1e2024;
+        border: 1px solid #3f4940;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
     </style>
     <script>
         tailwind.config = {
@@ -359,7 +541,7 @@
                             </button>
                         </div>
                         <p class="text-xs text-on-surface-variant/70">Σύρε τους παίκτες για να αλλάξεις τη θέση τους. Κάνε κλικ σε έναν παίκτη για επεξεργασία στοιχείων ή διαγραφή.</p>
-                        <div class="pitch rounded-2xl w-full" style="height:520px;" id="admin-pitch-starting">
+                        <div class="pitch admin-pitch-canvas rounded-2xl w-full" style="height:520px;" id="admin-pitch-starting">
                             <div class="pitch-centre-line"></div>
                             <div class="pitch-centre-circle"></div>
                             <div class="pitch-penalty-top"></div>
@@ -377,7 +559,7 @@
                                 <span class="material-symbols-outlined" style="font-size:16px">add</span> Προσθήκη Αναπληρωματικού
                             </button>
                         </div>
-                        <div class="pitch rounded-2xl w-full" style="height:420px;" id="admin-pitch-bench">
+                        <div class="pitch admin-pitch-canvas rounded-2xl w-full" style="height:420px;" id="admin-pitch-bench">
                             <div class="pitch-centre-line"></div>
                             <div class="pitch-centre-circle"></div>
                             <div class="pitch-penalty-top"></div>
@@ -401,26 +583,26 @@
                     </div>
                 </div>
 
-                <!-- Advanced mode toggle -->
-                <div class="border-t border-outline-variant/20 pt-4 mt-4">
-                    <button onclick="document.getElementById('adv-editor-football').classList.toggle('hidden')" class="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1">
+                <!-- Advanced mode details disclosure panel -->
+                <details class="border-t border-outline-variant/20 pt-4 mt-4 text-xs font-semibold text-on-surface-variant cursor-pointer select-none">
+                    <summary class="hover:text-primary transition-colors flex items-center gap-1">
                         <span class="material-symbols-outlined" style="font-size:16px">code</span> Advanced / Developer JSON Editors
-                    </button>
-                    <div id="adv-editor-football" class="hidden flex flex-col gap-4 mt-4">
+                    </summary>
+                    <div class="flex flex-col gap-4 mt-4 cursor-default">
                         <div class="flex flex-col gap-2">
                             <label class="text-xs uppercase tracking-widest text-primary font-bold">Starting XI (JSON)</label>
-                            <textarea id="roster-football-starting" class="editor-input font-mono text-xs" rows="6" oninput="syncTextareaToState('football', 'starting')"></textarea>
+                            <textarea id="roster-football-starting" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('football', 'starting')"></textarea>
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="text-xs uppercase tracking-widest text-primary font-bold">Bench (JSON)</label>
-                            <textarea id="roster-football-bench" class="editor-input font-mono text-xs" rows="6" oninput="syncTextareaToState('football', 'bench')"></textarea>
+                            <textarea id="roster-football-bench" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('football', 'bench')"></textarea>
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="text-xs uppercase tracking-widest text-primary font-bold">Squad (JSON)</label>
-                            <textarea id="roster-football-rest" class="editor-input font-mono text-xs" rows="6" oninput="syncTextareaToState('football', 'rest')"></textarea>
+                            <textarea id="roster-football-rest" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('football', 'rest')"></textarea>
                         </div>
                     </div>
-                </div>
+                </details>
 
                 <button id="save-football-roster-btn" onclick="saveRoster('football')" class="bg-primary text-on-primary font-bold py-3.5 px-6 rounded-xl hover:bg-[#a8e6b8] transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">save</span> Αποθήκευση Roster Ποδοσφαίρου
@@ -495,26 +677,26 @@
                     </div>
                 </div>
 
-                <!-- Advanced mode toggle -->
-                <div class="border-t border-outline-variant/20 pt-4 mt-4">
-                    <button onclick="document.getElementById('adv-editor-basketball').classList.toggle('hidden')" class="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1">
+                <!-- Advanced mode details disclosure panel -->
+                <details class="border-t border-outline-variant/20 pt-4 mt-4 text-xs font-semibold text-on-surface-variant cursor-pointer select-none">
+                    <summary class="hover:text-primary transition-colors flex items-center gap-1">
                         <span class="material-symbols-outlined" style="font-size:16px">code</span> Advanced / Developer JSON Editors
-                    </button>
-                    <div id="adv-editor-basketball" class="hidden flex flex-col gap-4 mt-4">
+                    </summary>
+                    <div class="flex flex-col gap-4 mt-4 cursor-default">
                         <div class="flex flex-col gap-2">
                             <label class="text-xs uppercase tracking-widest text-primary font-bold">Starting 5 (JSON)</label>
-                            <textarea id="roster-basketball-starting" class="editor-input font-mono text-xs" rows="6" oninput="syncTextareaToState('basketball', 'starting')"></textarea>
+                            <textarea id="roster-basketball-starting" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('basketball', 'starting')"></textarea>
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="text-xs uppercase tracking-widest text-primary font-bold">Rotation (JSON)</label>
-                            <textarea id="roster-basketball-backup" class="editor-input font-mono text-xs" rows="6" oninput="syncTextareaToState('basketball', 'backup')"></textarea>
+                            <textarea id="roster-basketball-backup" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('basketball', 'backup')"></textarea>
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="text-xs uppercase tracking-widest text-primary font-bold">Squad (JSON)</label>
-                            <textarea id="roster-basketball-rest" class="editor-input font-mono text-xs" rows="6" oninput="syncTextareaToState('basketball', 'rest')"></textarea>
+                            <textarea id="roster-basketball-rest" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('basketball', 'rest')"></textarea>
                         </div>
                     </div>
-                </div>
+                </details>
 
                 <button id="save-basketball-roster-btn" onclick="saveRoster('basketball')" class="bg-primary text-on-primary font-bold py-3.5 px-6 rounded-xl hover:bg-[#a8e6b8] transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">save</span> Αποθήκευση Roster Μπάσκετ

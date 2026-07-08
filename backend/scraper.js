@@ -22,9 +22,9 @@ require('dotenv').config();
 const http = axios.create({
     timeout: 15000,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'el-GR,el;q=0.9,en;q=0.5',
+        'Accept-Language': 'el-GR,el;q=0.9,en;q=0.8',
         'Accept-Encoding': 'gzip, deflate, br',
         'Cache-Control': 'no-cache',
     },
@@ -120,6 +120,23 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/polo/"]'],
         baseUrl: 'https://www.gazzetta.gr',
     },
+    // ── OFFICIAL PORTALS ───────────────────────────────────────────────────────
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'PAO Official',
+        url: 'https://www.pao.gr/',
+        articleLinkSelectors: ['.latest-news a', 'h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/news/"]', '.news-item a'],
+        baseUrl: 'https://www.pao.gr',
+        isOfficial: true,
+    },
+    {
+        category: 'Ερασιτέχνης',
+        name: 'PAO1908 Official',
+        url: 'https://www.pao1908.com/category/nea/',
+        articleLinkSelectors: ['.post a', 'h2 a', 'h3 a', '.entry-title a', 'article a'],
+        baseUrl: 'https://www.pao1908.com',
+        isOfficial: true,
+    },
 ];
 
 // ─── Panathinaikos relevance keywords (strict matching) ───────────────────────
@@ -191,29 +208,42 @@ function jaccardSimilarity(a, b) {
 // ─── Scrape listing page → article URLs ───────────────────────────────────────
 async function scrapeArticleLinks(target) {
     try {
-        const { data: html } = await http.get(target.url);
+        const response = await http.get(target.url);
+        console.log(`[HTTP GET] ${target.url} | Status: ${response.status}`);
+        const html = response.data;
         const $ = cheerio.load(html);
         const links = new Set();
 
         for (const sel of target.articleLinkSelectors) {
-            $(sel).each((_, el) => {
-                let href = $(el).attr('href') || '';
-                if (!href) return;
-                // Make absolute
-                if (href.startsWith('/')) href = target.baseUrl + href;
-                if (!href.startsWith('http')) return;
-                // Filter: must be same domain, must look like an article (has numeric or slug segment)
-                try {
-                    const u = new URL(href);
-                    if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
-                    if (u.pathname === '/' || u.pathname === '') return;
-                    links.add(href.split('?')[0].split('#')[0]); // strip query/hash
-                } catch (_) {}
-            });
+            try {
+                const elements = $(sel);
+                if (elements.length === 0) {
+                    console.log(`  [PARSING WARNING] Selector '${sel}' returned no elements on ${target.url}`);
+                }
+                elements.each((_, el) => {
+                    let href = $(el).attr('href') || '';
+                    if (!href) {
+                        console.log(`  [PARSING WARNING] Element matched by '${sel}' is missing href attribute`);
+                        return;
+                    }
+                    // Make absolute
+                    if (href.startsWith('/')) href = target.baseUrl + href;
+                    if (!href.startsWith('http')) return;
+                    // Filter: must be same domain, must look like an article (has numeric or slug segment)
+                    try {
+                        const u = new URL(href);
+                        if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
+                        if (u.pathname === '/' || u.pathname === '') return;
+                        links.add(href.split('?')[0].split('#')[0]); // strip query/hash
+                    } catch (_) {}
+                });
+            } catch (selErr) {
+                console.error(`  [PARSING ERROR] Selector '${sel}' failed: ${selErr.message}`);
+            }
         }
 
         const arr = [...links].slice(0, 25); // max 25 articles per source
-        console.log(`[${target.name}] Found ${arr.length} candidate links on ${target.url}`);
+        console.log(`[${target.name}] Found ${arr.length} candidate links on ${target.url} (Total URLs extracted: ${arr.length})`);
         return arr;
     } catch (err) {
         console.warn(`[${target.name}] Failed to scrape listing page: ${err.message}`);
@@ -221,51 +251,59 @@ async function scrapeArticleLinks(target) {
     }
 }
 
+// ─── Programmatic Image Watermark Sanitizer ──────────────────────────────────
+function sanitizeImageUrl(scrapedImg) {
+    if (!scrapedImg || typeof scrapedImg !== 'string') return '';
+    let cleaned = scrapedImg.trim();
+    // Strip dynamic watermark folders: e.g. /thumbnails/, /wm/
+    cleaned = cleaned.replace(/\/(wm|thumbnails)\//gi, '/');
+    // Strip query parameters
+    cleaned = cleaned.split('?')[0];
+    return cleaned;
+}
+
 // ─── Scrape individual article page ───────────────────────────────────────────
 async function scrapeArticlePage(url, categoryHint) {
     try {
-        const { data: html } = await http.get(url);
+        const response = await http.get(url);
+        console.log(`[HTTP GET] ${url} | Status: ${response.status}`);
+        const html = response.data;
         const $ = cheerio.load(html);
 
         // ── Title ──────────────────────────────────────────────────────────────
-        const title = (
-            $('h1').first().text().trim() ||
-            $('meta[property="og:title"]').attr('content') ||
-            $('title').text().split('|')[0].trim() ||
-            ''
-        ).substring(0, 300);
+        let title = '';
+        try {
+            title = (
+                $('h1').first().text().trim() ||
+                $('meta[property="og:title"]').attr('content') ||
+                $('title').text().split('|')[0].trim() ||
+                ''
+            ).substring(0, 300);
+            if (!title) {
+                console.log(`  [PARSING WARNING] Title element resolved to empty string for ${url}`);
+            }
+        } catch (e) {
+            console.error(`  [PARSING ERROR] Title extraction failed for ${url}: ${e.message}`);
+        }
 
         if (!title || title.length < 10) return null;
 
         // ── Image ──────────────────────────────────────────────────────────────
-        const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM';
-        
-        let scrapedImg = (
+        const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_';
+
+        // ── Build image URL (Node-safe, no DOM dependencies) ───────────────────
+        const scrapedImg = (
             $('meta[property="og:image"]').attr('content') ||
             $('meta[name="twitter:image"]').attr('content') ||
-            $('article img, .article-image img, .featured-image img, figure img').first().attr('src') ||
-            $('img[src*="jpg"], img[src*="jpeg"], img[src*="webp"], img[src*="png"]')
-                .filter((_, el) => {
-                    const src = $(el).attr('src') || '';
-                    return !src.includes('logo') && !src.includes('icon') && !src.includes('1x1') && !src.includes('avatar');
-                })
-                .first().attr('src') ||
-            null
+            $('article img').first().attr('src') ||
+            $('img').first().attr('src') ||
+            ''
         );
-
-        if (scrapedImg && scrapedImg.startsWith('/')) {
-            try {
-                scrapedImg = new URL(url).origin + scrapedImg;
-            } catch (_) {}
-        }
-
-        // Validate image: Bypass generic competitor logos, default shares, and watermark placeholders
-        // NOTE: Do NOT block by site name (sdna/sportal etc.) in the filename — that kills real article images.
-        // Instead only block known generic branding filenames and paths.
         let imageUrl = DEFAULT_STADIUM_IMG;
-        if (scrapedImg && typeof scrapedImg === 'string' && scrapedImg.startsWith('http')) {
+        const cleanedImg = sanitizeImageUrl(scrapedImg);
+        if (cleanedImg && cleanedImg.startsWith('http')) {
             try {
-                const u = new URL(scrapedImg);
+                const u = new URL(cleanedImg);
                 const pathParts = u.pathname.toLowerCase().split('/');
                 const filename = pathParts[pathParts.length - 1] || '';
                 const parentPath = pathParts.slice(0, -1).join('/');
@@ -290,7 +328,9 @@ async function scrapeArticlePage(url, categoryHint) {
                 }
 
                 if (!isBranding) {
-                    imageUrl = scrapedImg;
+                    imageUrl = cleanedImg;
+                } else {
+                    console.log(`  [PARSING INFO] Extracted image '${cleanedImg}' detected as branding; using fallback.`);
                 }
             } catch (_) {}
         }
@@ -314,13 +354,21 @@ async function scrapeArticlePage(url, categoryHint) {
         ];
         let bodyText = '';
         for (const sel of bodySelectors) {
-            const els = $(sel);
-            if (els.length > 0) {
-                // Strip scripts, ads, share buttons
-                els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"]').remove();
-                bodyText = els.text().replace(/\s+/g, ' ').trim();
-                if (bodyText.length > 100) break;
+            try {
+                const els = $(sel);
+                if (els.length > 0) {
+                    // Strip scripts, ads, share buttons
+                    els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"]').remove();
+                    bodyText = els.text().replace(/\s+/g, ' ').trim();
+                    if (bodyText.length > 100) break;
+                }
+            } catch (e) {
+                console.error(`  [PARSING ERROR] Body parsing failed for selector '${sel}': ${e.message}`);
             }
+        }
+
+        if (!bodyText) {
+            console.log(`  [PARSING WARNING] Body text is empty for ${url}`);
         }
 
         // ── Summary (meta description) ─────────────────────────────────────────
@@ -397,7 +445,7 @@ async function retryWithBackoff(fn, maxRetries = 2) {
 }
 
 // ─── Gemini API: bullets ───────────────────────────────────────────────────────
-async function generateAiBullets(title, text) {
+async function generateAiBullets(title, text, isOfficial = false) {
     const ai = getAiClient();
     if (!ai || quotaExhausted) return generateFallbackBullets(title, text);
 
@@ -407,6 +455,10 @@ async function generateAiBullets(title, text) {
         .replace(/\b(gazzetta|sport24|sdna|sportal|athletiko|sport-fm)\b[\s.,]*/gi, '')
         .replace(/\s+/g, ' ').trim().substring(0, 4000);
 
+    const toneInstruction = isOfficial 
+        ? 'Επειδή πρόκειται για επίσημη πηγή της ομάδας, διατήρησε ένα απόλυτα έγκυρο, επίσημο ύφος δελτίου τύπου του συλλόγου (authoritative, official club press-release tone).' 
+        : 'Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη. ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία (καμία αναφορά σε άλλα portals, sites, «Σύμφωνα με...»).';
+
     try {
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
@@ -414,7 +466,7 @@ async function generateAiBullets(title, text) {
 
 ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
 1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να αντιγράψεις αυτούσιες φράσεις από το κείμενο. Κάνε πλήρη αναδιατύπωση των γεγονότων.
-2. Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη. ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία (καμία αναφορά σε άλλα portals, sites, «Σύμφωνα με...»).
+2. ${toneInstruction}
 3. Κάθε bullet πρέπει να ξεκινάει με τον χαρακτήρα "•" και να αποτελείται ΑΥΣΤΗΡΑ από ακριβώς μία (1) πρόταση.
 
 Έξοδος: Επίστρεψε ΜΟΝΟ τις 2 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
@@ -439,7 +491,7 @@ async function generateAiBullets(title, text) {
 }
 
 // ─── Gemini API: long-form article ────────────────────────────────────────────
-async function generateLongFormContent(title, text) {
+async function generateLongFormContent(title, text, isOfficial = false) {
     const ai = getAiClient();
     if (!ai || quotaExhausted) return null;
 
@@ -448,6 +500,10 @@ async function generateLongFormContent(title, text) {
         .replace(/\bσύμφωνα με\s+\S+/gi, '')
         .replace(/\b(gazzetta|sport24|sdna|sportal|athletiko|sport-fm)\b[\s.,]*/gi, '')
         .replace(/\s+/g, ' ').trim().substring(0, 6000);
+
+    const toneInstruction = isOfficial 
+        ? 'Επειδή πρόκειται για επίσημη πηγή της ομάδας, διατήρησε ένα απόλυτα έγκυρο, επίσημο ύφος δελτίου τύπου του συλλόγου (authoritative, official club press-release tone).' 
+        : 'ΠΟΤΕ μην αναφέρεις την αρχική πηγή ή άλλα μέσα ενημέρωσης. Απαγορεύονται φράσεις όπως «Σύμφωνα με...», «Το Sportal/Gazzetta/SDNA αναφέρει...», «Όπως γράφεται...».';
 
     try {
         const response = await retryWithBackoff(() => ai.models.generateContent({
@@ -458,7 +514,7 @@ async function generateLongFormContent(title, text) {
 ΚΑΝΟΝΕΣ ZERO-TOLERANCE ΓΙΑ COPY-PASTE (ΑΥΣΤΗΡΑ):
 1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΡΗΤΑ να αντιγράψεις αυτούσιες προτάσεις, φράσεις ή παραγράφους από το πηγαίο υλικό.
 2. Διάβασε το πηγαίο κείμενο, κράτησε ΜΟΝΟ τα βασικά γεγονότα (ποιος, τι, πότε, πού, γιατί) και γράψε ένα εντελώς νέο άρθρο από το μηδέν με δικό σου ύφος, εναλλακτικό λεξιλόγιο και διαφορετική δομή προτάσεων.
-3. ΠΟΤΕ μην αναφέρεις την αρχική πηγή ή άλλα μέσα ενημέρωσης. Απαγορεύονται φράσεις όπως «Σύμφωνα με...», «Το Sportal/Gazzetta/SDNA αναφέρει...», «Όπως γράφεται...».
+3. ${toneInstruction}
 4. Το κείμενο πρέπει να είναι εκτενές (5-7 παράγραφοι, 400-600 λέξεις) και να αναλύει σε βάθος το θέμα, τις επιπτώσεις στην ομάδα, το context και το ιστορικό background.
 5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown (bolding, lists, stars κλπ.).
 6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
@@ -487,6 +543,10 @@ async function generateLongFormContent(title, text) {
 
 // ─── Sleep helper ──────────────────────────────────────────────────────────────
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+// ─── Staggering configuration ───────────────────────────────────────────────────────
+// Wait 2 minutes (120,000 ms) between processing each source target to avoid rate‑limit spikes.
+// Skipped during dry‑run for faster testing.
+const TARGET_STAGGER_MS = 120000;
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
@@ -563,24 +623,16 @@ async function main() {
 
             console.log(`  [NEW] ${scraped.title.substring(0, 70)}`);
 
-            // ── Group ID via Jaccard ──────────────────────────────────────────
-            let group_id = crypto.randomUUID();
-            const JACCARD_THRESHOLD = 0.35;
-
-            if (!isDryRun) {
-                for (const existing of existingArticles) {
-                    const sim = jaccardSimilarity(scraped.title, existing.title);
-                    if (sim >= JACCARD_THRESHOLD) {
-                        group_id = existing.group_id;
-                        console.log(`    → Grouped with existing (sim=${sim.toFixed(2)}): ${existing.title.substring(0, 50)}`);
-                        break;
-                    }
-                }
-            }
+            // ── Group ID via Jaccard (disabled) ──────────────────────────
+            // Previously, articles could be grouped by similarity. The new production requirement is to ingest EVERY new article without grouping.
+            // We assign a fresh unique group_id for each article.
+            const group_id = crypto.randomUUID();
+            // The JACCARD_THRESHOLD and similarity loop have been removed.
+            // This ensures each article is treated as a distinct story.
 
             // ── AI Generation ─────────────────────────────────────────────────
-            const bullets = await generateAiBullets(scraped.title, scraped.content || scraped.summary);
-            const longFormContent = await generateLongFormContent(scraped.title, scraped.content || scraped.summary);
+            const bullets = await generateAiBullets(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+            const longFormContent = await generateLongFormContent(scraped.title, scraped.content || scraped.summary, target.isOfficial);
 
             if (isDryRun) {
                 console.log(`    Category:  ${target.category}`);
@@ -600,7 +652,7 @@ async function main() {
             }
 
             // ── Insert to DB ──────────────────────────────────────────────────
-            const { data: inserted, error: insertErr } = await db.from('articles').insert({
+            const dbPayload = {
                 title:      scraped.title,
                 summary:    scraped.summary,
                 content:    longFormContent,
@@ -611,15 +663,21 @@ async function main() {
                 group_id,
                 bullets,
                 updated_at: new Date().toISOString(),
-            }).select('id');
+            };
+            console.log(`[DB PAYLOAD] Inserting to Supabase:`, JSON.stringify(dbPayload, null, 2));
+
+            const { data: inserted, error: insertErr } = await db.from('articles').insert(dbPayload).select('id');
 
             if (insertErr) {
+                console.error(`[DB ERROR] Supabase insert failed:`, JSON.stringify(insertErr, null, 2));
                 if (insertErr.code === '23505') {
                     console.log(`    → Duplicate content, skipped.`);
                 } else {
                     console.error(`    → DB insert error: ${insertErr.message}`);
                 }
                 continue;
+            } else {
+                console.log(`[DB RESPONSE] Insert success:`, JSON.stringify(inserted, null, 2));
             }
 
             existingUrls.add(articleUrl);
@@ -629,6 +687,11 @@ async function main() {
 
             // Rate limit between AI calls
             await sleep(1500);
+        }
+        // After finishing all articles for this source, stagger before next target (skip in dry‑run)
+        if (!isDryRun) {
+            console.log(`[STAGGER] Pausing ${TARGET_STAGGER_MS/1000}s before next source to regulate Gemini API traffic`);
+            await new Promise(resolve => setTimeout(resolve, TARGET_STAGGER_MS));
         }
     }
 
