@@ -305,7 +305,15 @@
         // ─── Main loader ───
         async function loadArticle() {
             const params = new URLSearchParams(window.location.search);
-            const articleId = params.get('id');
+            let articleId = params.get('id');
+
+            if (!articleId) {
+                // Fallback: extract from path, e.g. /podosfairo/slug-id=123
+                const match = window.location.pathname.match(/-id=([^/&?]+)/);
+                if (match) {
+                    articleId = match[1];
+                }
+            }
 
             if (!articleId) {
                 showError('Δεν βρέθηκε ID άρθρου στη διεύθυνση URL.');

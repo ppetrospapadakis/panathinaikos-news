@@ -185,43 +185,28 @@ function isPanathinaikosArticle(title, text) {
         'μπαλτσερόφσκι', 'balcerowski', 'ναν', 'nunn', 'lessort', 'λεσόρ', 'grant', 'γκραντ',
         'γκριγκόνις', 'grigonis', 'ερνανγκόμεθ', 'hernangomez', 'χουάντσο', 'juancho', 'papapetrou',
         'παπαπέτρου', 'μητογλου', 'mitoglou', 'καλαϊτζάκης', 'kalaitzakis', 'γιούρτσεβεν',
-        'yurtseven', 'osman', 'όσμαν', 'alonzo', 'alonza', 'αλονζο', 'αλονζα'
+        'yurtseven', 'osman', 'όσμαν', 'alonzo', 'alonza', 'αλονζο', 'αλονζα', 'κρίστιανσεν',
+        'christiansen', 'ντε φράι', 'de vrij'
     ];
 
     const isWordMatch = (word, text) => {
-        // Unicode-safe word boundary matching
         const regex = new RegExp(`(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])${word}(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])`, 'i');
         return regex.test(text);
     };
 
-    // 1. Strict Title Check
-    // A title is relevant if:
-    // - It contains a core keyword as a substring (e.g. "παναθηναϊκ")
-    // - It contains any personnel keyword or short term ("παο", "pao") as a strict whole word
-    const titleHasCore = coreKeywords.some(kw => combinedTitle.includes(kw));
-    const titleHasPersonnel = personnelKeywords.some(kw => {
-        if (kw.length <= 4) {
-            return isWordMatch(kw, combinedTitle);
-        }
-        return combinedTitle.includes(kw);
-    });
-    const titleHasPao = isWordMatch('παο', combinedTitle) || isWordMatch('pao', combinedTitle);
+    // Helper to check match in a string
+    const checkMatch = (str) => {
+        const hasCore = coreKeywords.some(kw => str.includes(kw));
+        const hasPersonnel = personnelKeywords.some(kw => {
+            if (kw.length <= 4) return isWordMatch(kw, str);
+            return str.includes(kw);
+        });
+        const hasPao = isWordMatch('παο', str) || isWordMatch('pao', str);
+        return hasCore || hasPersonnel || hasPao;
+    };
 
-    if (!titleHasCore && !titleHasPersonnel && !titleHasPao) {
-        return false;
-    }
-
-    // 2. Body Check: the body must contain at least one mention of the core identifiers or team personnel to guard against false matches
-    const bodyHasCore = coreKeywords.some(kw => combinedText.includes(kw));
-    const bodyHasPersonnel = personnelKeywords.some(kw => {
-        if (kw.length <= 4) {
-            return isWordMatch(kw, combinedText);
-        }
-        return combinedText.includes(kw);
-    });
-    const bodyHasPao = isWordMatch('παο', combinedText) || isWordMatch('pao', combinedText);
-
-    return bodyHasCore || bodyHasPersonnel || bodyHasPao;
+    // If either Title or Body matches, it passes this pre-filter.
+    return checkMatch(combinedTitle) || checkMatch(combinedText);
 }
 
 // ─── Jaccard similarity ────────────────────────────────────────────────────────
@@ -551,9 +536,15 @@ async function generateLongFormContent(title, text, isOfficial = false) {
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News.
-Βάσει των παρακάτω πληροφοριών, γράψε ένα αντικειμενικό, υψηλής ποιότητας, αναδιατυπωμένο άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+Βάσει των παρακάτω πληροφοριών, αξιολόγησε τη σχετικότητα του θέματος με τον Παναθηναϊκό (ποδόσφαιρο, μπάσκετ, ερασιτέχνη, διοίκηση, μεταγραφές κλπ.) και γράψε ένα αντικειμενικό, υψηλής ποιότητας, αναδιατυπωμένο άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
-ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ:
+ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
+{
+  "is_panathinaikos_relevant": true ή false (βάλε false αν το άρθρο αφορά γενική διεθνή ειδησεογραφία, άλλα αθλήματα/ομάδες χωρίς καμία σύνδεση με τον Παναθηναϊκό, ή άσχετα παγκόσμια γεγονότα),
+  "content": "το αναδιατυπωμένο άρθρο"
+}
+
+ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΟ content:
 1. Μορφή & Μήκος: Γράψε μια συμπαγή, φυσική σύνοψη ακριβώς δύο (2) παραγράφων που να αντιπροσωπεύει περίπου το 60% των βασικών γεγονότων του αρχικού κειμένου. Αποέφυγε τη μονολεκτική ή μονογραμμική υπερ-συμπίεση, αλλά και τις περιττές σάλτσες (filler/fluff). Πρέπει να διαβάζεται στρωτά ως 2 ολοκληρωμένες παράγραφοι.
 2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά, ονόματα, νούμερα και δεδομένα. Απαγορεύεται αυστηρά η οποιαδήποτε προσθήκη μη επιβεβαιωμένων πληροφοριών ή φανταστικών στοιχείων (hallucinations).
 3. Αναδιατύπωση: Το άρθρο πρέπει να είναι πλήρως ξαναγραμμένο με δικές σου λέξεις και διαφορετική δομή προτάσεων. Απαγορεύεται το copy-paste αυτούσιων φράσεων.
@@ -562,19 +553,26 @@ async function generateLongFormContent(title, text, isOfficial = false) {
 6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
 
 Τίτλος: ${title}
-Πληροφορίες: ${cleanText}
-
-Γράψε ΜΟΝΟ το άρθρο, χωρίς τίτλο, χωρίς υπογραφή.`,
+Πληροφορίες: ${cleanText}`,
             config: {
                 temperature: 0.8,
                 maxOutputTokens: 2048
             }
         }));
 
-        const articleText = response.text.trim();
+        const rawResponse = response.text.trim();
+        const jsonString = rawResponse.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/, '').trim();
+        const parsed = JSON.parse(jsonString);
+
+        if (parsed.is_panathinaikos_relevant === false) {
+            console.log(`  [AI EVALUATION] Article determined NOT relevant: "${title}"`);
+            return { isRelevant: false, content: null };
+        }
+
+        const articleText = (parsed.content || '').trim();
         if (articleText && articleText.length > 100) {
-            console.log(`[AI] Long-form generated: ${articleText.length} chars`);
-            return articleText;
+            console.log(`  [AI] Long-form generated: ${articleText.length} chars`);
+            return { isRelevant: true, content: articleText };
         }
     } catch (err) {
         if (quotaExhausted) console.warn('[AI] Daily quota exhausted — skipping long-form.');
@@ -728,7 +726,7 @@ async function main() {
 
             // ── AI Generation ─────────────────────────────────────────────────
             const bullets = await generateAiBullets(scraped.title, scraped.content || scraped.summary, target.isOfficial);
-            const longFormContent = await generateLongFormContent(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+            const aiResult = await generateLongFormContent(scraped.title, scraped.content || scraped.summary, target.isOfficial);
 
             if (isDryRun) {
                 console.log(`    Category:  ${target.category}`);
@@ -736,16 +734,22 @@ async function main() {
                 console.log(`    Image:     ${scraped.imageUrl || 'none'}`);
                 console.log(`    Summary:   ${scraped.summary.substring(0, 100)}...`);
                 console.log(`    Bullets:   ${JSON.stringify(bullets)}`);
-                console.log(`    Long-form: ${longFormContent ? longFormContent.substring(0, 80) + '...' : 'AI unavailable'}`);
+                console.log(`    Long-form: ${aiResult ? (aiResult.isRelevant ? aiResult.content.substring(0, 80) + '...' : 'Irrelevant article') : 'AI unavailable'}`);
                 totalNew++;
                 continue;
             }
 
-            // If AI failed (quota exceeded), skip to avoid storing verbatim source text
-            if (!longFormContent) {
-                console.log(`    [SKIP] AI generation failed — skipping to avoid verbatim content.`);
+            // If AI failed or determined irrelevant
+            if (!aiResult) {
+                console.log(`    [SKIP] AI generation failed — skipping.`);
                 continue;
             }
+            if (aiResult.isRelevant === false) {
+                console.log(`    [SKIP] AI evaluated article as NOT relevant: "${scraped.title}"`);
+                continue;
+            }
+
+            const longFormContent = aiResult.content;
 
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
