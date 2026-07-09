@@ -212,27 +212,7 @@
 
         <!-- Quick links bar -->
         <section class="max-w-[1440px] mx-auto px-8 pb-16">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="matches.html" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
-                    <span class="material-symbols-outlined text-primary text-3xl">sports_score</span>
-                    <span class="font-h4 text-h4 group-hover:text-primary transition-colors">Αγώνες</span>
-                    <span class="font-caption text-caption text-on-surface-variant">Πρόγραμμα & Αποτελέσματα</span>
-                </a>
-                <a href="roster.html" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
-                    <span class="material-symbols-outlined text-primary text-3xl">groups</span>
-                    <span class="font-h4 text-h4 group-hover:text-primary transition-colors">Ρόστερ</span>
-                    <span class="font-caption text-caption text-on-surface-variant">Depth Chart & Ανάλυση</span>
-                </a>
-                <button onclick="filterFeed('Ποδόσφαιρο','nav-football'); window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
-                    <span class="material-symbols-outlined text-primary text-3xl">sports_soccer</span>
-                    <span class="font-h4 text-h4 group-hover:text-primary transition-colors">Ποδόσφαιρο</span>
-                    <span class="font-caption text-caption text-on-surface-variant">Τελευταία ρεπορτάζ</span>
-                </button>
-                <button onclick="filterFeed('Μπάσκετ','nav-basketball'); window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
-                    <span class="material-symbols-outlined text-primary text-3xl">sports_basketball</span>
-                    <span class="font-h4 text-h4 group-hover:text-primary transition-colors">Μπάσκετ</span>
-                    <span class="font-caption text-caption text-on-surface-variant">Euroleague & Super1</span>
-                </button>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="quick-links-container">
             </div>
         </section>
     </main>
@@ -283,6 +263,18 @@
         }
         window.toggleSearch = toggleSearch;
 
+        window.toggleDrawer = toggleDrawer;
+
+        function toggleSearch() {
+            const el = document.getElementById('search-overlay');
+            el.classList.toggle('opacity-0');
+            el.classList.toggle('pointer-events-none');
+            if (!el.classList.contains('opacity-0')) {
+                setTimeout(() => document.getElementById('search-input').focus(), 100);
+            }
+        }
+        window.toggleSearch = toggleSearch;
+
         function extractDomain(url) {
             try { return new URL(url).hostname.replace('www.','').split('.')[0]; }
             catch(e) { return 'News'; }
@@ -300,10 +292,84 @@
             } catch(e) { return 'Πρόσφατα'; }
         }
 
+        // ── Clean SEO URL helpers ──
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '') // preserve Greek characters
+                .replace(/--+/g, '-')
+                .replace(/^-+/, '')
+                .replace(/-+$/, '');
+        }
+
+        function getCategoryCleanName(category) {
+            const cat = (category || '').toLowerCase();
+            if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
+            if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
+            if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitechnis';
+            if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
+            if (cat.includes('μεταγραφές') || cat.includes('transfers')) return 'metagrafes';
+            return 'pao';
+        }
+
+        function getCategoryPath(category) {
+            if (!category) return '/';
+            const catName = getCategoryCleanName(category);
+            return `/${catName}`;
+        }
+
+        const ALL_LINKS = [
+            { name: 'Όλα', category: null, icon: 'feed', url: '/' },
+            { name: '⚽ Ποδόσφαιρο', category: 'Ποδόσφαιρο', icon: 'sports_soccer', url: '/podosfairo' },
+            { name: '🏀 Μπάσκετ', category: 'Μπάσκετ', icon: 'sports_basketball', url: '/basket' },
+            { name: '☘️ Ερασιτέχνης', category: 'Ερασιτέχνης', icon: 'sports', url: '/erasitechnis' },
+            { name: '✍️ Άποψη', category: 'Άποψη', icon: 'rate_review', url: '/apopsi' },
+            { name: '📋 Μεταγραφές', category: 'Μεταγραφές', icon: 'transfer_within_a_station', url: '/metagrafes' },
+            { name: '🏆 Αγώνες', category: 'Matches', icon: 'sports_score', url: 'matches.html' },
+            { name: '📊 Depth Chart', category: 'Roster', icon: 'groups', url: 'roster.html' }
+        ];
+
+        function renderQuickLinks() {
+            const container = document.getElementById('quick-links-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const filtered = ALL_LINKS.filter(link => {
+                if (link.category === null && activeCategory === null) return false;
+                return link.category !== activeCategory;
+            });
+            
+            filtered.forEach(link => {
+                let tag = '';
+                if (link.url.endsWith('.html')) {
+                    tag = `<a href="${link.url}" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
+                        <span class="material-symbols-outlined text-primary text-3xl">${link.icon}</span>
+                        <span class="font-h4 text-h4 group-hover:text-primary transition-colors">${link.name}</span>
+                    </a>`;
+                } else {
+                    tag = `<a href="${link.url}" target="_blank" rel="noopener noreferrer" onclick="event.preventDefault(); filterFeed(${link.category ? `'${link.category}'` : 'null'}); window.scrollTo({top:0,behavior:'smooth'});" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
+                        <span class="material-symbols-outlined text-primary text-3xl">${link.icon}</span>
+                        <span class="font-h4 text-h4 group-hover:text-primary transition-colors">${link.name}</span>
+                    </a>`;
+                }
+                container.insertAdjacentHTML('beforeend', tag);
+            });
+        }
+
         // ── Category Filter ──
         function filterFeed(category, navId) {
             activeCategory = category;
 
+            // Update browser URL path cleanly
+            const newPath = getCategoryPath(category);
+            window.history.pushState({ category }, '', newPath);
+
+            filterFeedWithoutPush(category);
+        }
+        window.filterFeed = filterFeed;
+
+        function filterFeedWithoutPush(category) {
             // Update tab bar styles
             const tabs = ['tab-all','tab-football','tab-basketball','tab-transfers','tab-amateur','tab-opinion'];
             const tabMap = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Μεταγραφές':'tab-transfers','Ερασιτέχνης':'tab-amateur','Άποψη':'tab-opinion'};
@@ -340,8 +406,14 @@
             // Re-render with filtered data
             const filtered = category ? allArticles.filter(a => a.category && a.category.includes(category)) : allArticles;
             renderFeed(filtered);
+            renderQuickLinks();
         }
-        window.filterFeed = filterFeed;
+
+        window.addEventListener('popstate', (event) => {
+            const cat = event.state && event.state.category ? event.state.category : null;
+            activeCategory = cat;
+            filterFeedWithoutPush(cat);
+        });
 
         // ── Search ──
         function handleSearch(query) {
@@ -375,9 +447,13 @@
                         </ul>
                     </div>`;
                 }
+                const slug = slugify(a.title);
+                const catPath = getCategoryCleanName(a.category);
+                const articleCleanUrl = `/${catPath}/${slug}-id=${a.id}`;
+
                 containerElement.insertAdjacentHTML('beforeend', `
-                <div class="group cursor-pointer bg-surface-container/30 rounded-xl border border-outline-variant/10 flex flex-col overflow-hidden card-hover"
-                     onclick="window.location.href='article.html?id=${a.id}'">
+                <a class="group cursor-pointer bg-surface-container/30 rounded-xl border border-outline-variant/10 flex flex-col overflow-hidden card-hover"
+                     href="${articleCleanUrl}" target="_blank" rel="noopener noreferrer">
                     <div class="relative aspect-video overflow-hidden">
                         <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     </div>
@@ -387,7 +463,7 @@
                         <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
                         <div class="mt-auto" onclick="event.stopPropagation()">${bHtml}</div>
                     </div>
-                </div>`);
+                </a>`);
             });
         }
 
@@ -403,7 +479,6 @@
                 if (entry.isIntersecting) {
                     if (loader) loader.classList.remove('hidden');
 
-                    // Small delay for smooth scroll visual cue
                     await new Promise(resolve => setTimeout(resolve, 300));
 
                     const nextBatch = allRemaining.slice(displayedCount, displayedCount + 10);
@@ -443,7 +518,6 @@
                 return;
             }
 
-            // Group by group_id
             const groups = {};
             articles.forEach(a => {
                 const gid = a.group_id || ('solo-' + a.id);
@@ -475,9 +549,13 @@
                 </div>`;
             }
 
+            const mainSlug = slugify(fa.title);
+            const mainCatPath = getCategoryCleanName(fa.category);
+            const mainCleanUrl = `/${mainCatPath}/${mainSlug}-id=${fa.id}`;
+
             const featuredHtml = `
-            <div class="md:col-span-8 group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover"
-                 onclick="window.location.href='article.html?id=${fa.id}'">
+            <a class="md:col-span-8 group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover"
+                 href="${mainCleanUrl}" target="_blank" rel="noopener noreferrer">
                 <div class="relative aspect-video overflow-hidden">
                     <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${fa.image_url || DEFAULT_IMG}" alt="${fa.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     <div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold">BREAKING</div>
@@ -490,16 +568,20 @@
                         ${bulletsHtml}
                     </div>
                 </div>
-            </div>`;
+            </a>`;
 
-            // ─ Side column (20 articles, stretches dynamically, styled scroll track) ─
+            // ─ Side column (20 articles initially, stretches dynamically, infinite scroll) ─
             const sideGroups = sorted.slice(1, 21);
-            let sideHtml = '<div class="md:col-span-4 pr-1" style="max-height:620px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color:#2e7d32 transparent;">';
+            let sideHtml = '<div id="right-side-feed" class="md:col-span-4 pr-1" style="overflow-y:auto; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin; scrollbar-color:#2e7d32 transparent;">';
             sideGroups.forEach(g => {
                 const a = g.main;
+                const sideSlug = slugify(a.title);
+                const sideCatPath = getCategoryCleanName(a.category);
+                const sideCleanUrl = `/${sideCatPath}/${sideSlug}-id=${a.id}`;
+
                 sideHtml += `
-                <div class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10"
-                     onclick="window.location.href='article.html?id=${a.id}'">
+                <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
+                     href="${sideCleanUrl}" target="_blank" rel="noopener noreferrer">
                     <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     </div>
@@ -508,11 +590,56 @@
                         <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
                         <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                     </div>
-                </div>`;
+                </a>`;
             });
             sideHtml += '</div>';
 
             container.innerHTML = featuredHtml + sideHtml;
+
+            // Sync right-side feed height to match left breaking card height on desktop
+            const rightSide = document.getElementById('right-side-feed');
+            if (rightSide) {
+                const syncHeight = () => {
+                    const leftCard = container.querySelector('.md\\:col-span-8');
+                    if (leftCard && window.innerWidth >= 768) {
+                        rightSide.style.maxHeight = `${leftCard.clientHeight}px`;
+                    } else {
+                        rightSide.style.maxHeight = 'none';
+                    }
+                };
+                setTimeout(syncHeight, 50);
+                window.addEventListener('resize', syncHeight);
+
+                // Right Column Infinite Scroll / Lazy Loading
+                let sideLoadedCount = 20;
+                rightSide.addEventListener('scroll', () => {
+                    if (rightSide.scrollTop + rightSide.clientHeight >= rightSide.scrollHeight - 50) {
+                        const nextBatch = sorted.slice(sideLoadedCount + 1, sideLoadedCount + 11);
+                        if (nextBatch.length > 0) {
+                            nextBatch.forEach(g => {
+                                const a = g.main;
+                                const scrollSlug = slugify(a.title);
+                                const scrollCatPath = getCategoryCleanName(a.category);
+                                const scrollCleanUrl = `/${scrollCatPath}/${scrollSlug}-id=${a.id}`;
+
+                                rightSide.insertAdjacentHTML('beforeend', `
+                                <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
+                                     href="${scrollCleanUrl}" target="_blank" rel="noopener noreferrer">
+                                    <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
+                                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'}</span>
+                                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
+                                        <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
+                                    </div>
+                                </a>`);
+                            });
+                            sideLoadedCount += nextBatch.length;
+                        }
+                    }
+                });
+            }
 
             // ─ Remaining bottom grid ─
             const bottomGridArticles = sorted.slice(21);
@@ -567,16 +694,29 @@
                     }
                     return a;
                 });
-                renderFeed(allArticles);
 
-                // Apply category filter from URL query param (e.g. index.html?cat=basketball)
-                const params = new URLSearchParams(window.location.search);
-                const catParam = params.get('cat');
-                if (catParam === 'football') filterFeed('Ποδόσφαιρο', 'nav-football');
-                else if (catParam === 'basketball') filterFeed('Μπάσκετ', 'nav-basketball');
-                else if (catParam === 'amateur') filterFeed('Ερασιτέχνης', 'nav-amateur');
-                else if (catParam === 'transfers') filterFeed('Μεταγραφές', 'nav-all');
-                else if (catParam === 'opinion') filterFeed('Άποψη', 'nav-opinion');
+                // Apply initial category filter from URL path (Clean SEO URLs) or query parameters
+                const path = window.location.pathname;
+                let catParam = null;
+                if (path === '/podosfairo') catParam = 'football';
+                else if (path === '/basket') catParam = 'basketball';
+                else if (path === '/erasitechnis') catParam = 'amateur';
+                else if (path === '/apopsi') catParam = 'opinion';
+                else if (path === '/metagrafes') catParam = 'transfers';
+
+                if (!catParam) {
+                    const params = new URLSearchParams(window.location.search);
+                    catParam = params.get('cat');
+                }
+
+                if (catParam === 'football') filterFeedWithoutPush('Ποδόσφαιρο');
+                else if (catParam === 'basketball') filterFeedWithoutPush('Μπάσκετ');
+                else if (catParam === 'amateur') filterFeedWithoutPush('Ερασιτέχνης');
+                else if (catParam === 'transfers') filterFeedWithoutPush('Μεταγραφές');
+                else if (catParam === 'opinion') filterFeedWithoutPush('Άποψη');
+                else {
+                    filterFeedWithoutPush(null);
+                }
             } catch(err) {
                 console.error("Frontend Fetch Error:", err);
                 const c = document.getElementById('articles-feed-container');

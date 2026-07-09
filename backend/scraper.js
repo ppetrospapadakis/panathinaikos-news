@@ -151,6 +151,23 @@ const PAO_KEYWORDS = [
     'yurtseven', 'osman', 'όσμαν', 'green heretics', 'θύρα 13', 'gate 13', 'πράσινοι', 'πράσινους'
 ];
 
+function getSourceNameFromUrl(url) {
+    try {
+        const hostname = new URL(url).hostname.toLowerCase();
+        if (hostname.includes('sdna.gr')) return 'SDNA';
+        if (hostname.includes('sportal.gr')) return 'Sportal';
+        if (hostname.includes('sport24.gr')) return 'Sport24';
+        if (hostname.includes('gazzetta.gr')) return 'Gazzetta';
+        if (hostname.includes('athletiko.gr')) return 'Athletiko';
+        if (hostname.includes('pao.gr')) return 'PAO Official';
+        if (hostname.includes('pao1908.com')) return 'PAO1908 Official';
+        const parts = hostname.replace('www.', '').split('.');
+        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+    } catch (_) {
+        return 'News';
+    }
+}
+
 function isPanathinaikosArticle(title, text) {
     const combinedTitle = (title || '').toLowerCase();
     const combinedText = (text || '').toLowerCase();
@@ -158,29 +175,19 @@ function isPanathinaikosArticle(title, text) {
     // Unicode-safe word boundary check for "παο" or "pao"
     const paoRegex = /(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])(pao|παο)(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])/i;
 
-    // 1. Check title relevance first (highest authority)
+    // 1. Strict Title Check: The title MUST contain one of the core keywords or the PAO abbreviation as a word.
     const titleHasKeyword = PAO_KEYWORDS.some(kw => combinedTitle.includes(kw));
-    if (titleHasKeyword || paoRegex.test(combinedTitle)) {
-        return true;
+    const titleHasPao = paoRegex.test(combinedTitle);
+    
+    if (!titleHasKeyword && !titleHasPao) {
+        return false;
     }
 
-    // 2. If title doesn't have keywords, require at least 3 occurrences in the body (to filter out promo links)
-    let matchCount = 0;
+    // 2. Body sanity check: The body content must also mention a core keyword or PAO at least once (to confirm relevance and avoid false title matches)
+    const bodyHasKeyword = PAO_KEYWORDS.some(kw => combinedText.includes(kw));
+    const bodyHasPao = paoRegex.test(combinedText);
     
-    for (const kw of PAO_KEYWORDS) {
-        let idx = combinedText.indexOf(kw);
-        while (idx !== -1) {
-            matchCount++;
-            idx = combinedText.indexOf(kw, idx + kw.length);
-        }
-    }
-    
-    const matches = combinedText.match(new RegExp(paoRegex.source, 'gi'));
-    if (matches) {
-        matchCount += matches.length;
-    }
-
-    return matchCount >= 3;
+    return bodyHasKeyword || bodyHasPao;
 }
 
 // ─── Jaccard similarity ────────────────────────────────────────────────────────
@@ -508,14 +515,14 @@ async function generateLongFormContent(title, text, isOfficial = false) {
     try {
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
-            contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News. Η συντακτική σου ομάδα παράγει αποκλειστικό, πρωτότυπο περιεχόμενο.
-Βάσει των παρακάτω πληροφοριών, γράψε ένα πλήρες, 100% αυθεντικό, αυτόνομο αθλητικό άρθρο ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+            contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News.
+Βάσει των παρακάτω πληροφοριών, γράψε ένα αντικειμενικό, υψηλής ποιότητας, αναδιατυπωμένο άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
-ΚΑΝΟΝΕΣ ZERO-TOLERANCE ΓΙΑ COPY-PASTE (ΑΥΣΤΗΡΑ):
-1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΡΗΤΑ να αντιγράψεις αυτούσιες προτάσεις, φράσεις ή παραγράφους από το πηγαίο υλικό.
-2. Διάβασε το πηγαίο κείμενο, κράτησε ΜΟΝΟ τα βασικά γεγονότα (ποιος, τι, πότε, πού, γιατί) και γράψε ένα εντελώς νέο άρθρο από το μηδέν με δικό σου ύφος, εναλλακτικό λεξιλόγιο και διαφορετική δομή προτάσεων.
-3. ${toneInstruction}
-4. Το κείμενο πρέπει να είναι εκτενές (5-7 παράγραφοι, 400-600 λέξεις) και να αναλύει σε βάθος το θέμα, τις επιπτώσεις στην ομάδα, το context και το ιστορικό background.
+ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ:
+1. Μήκος: Το κείμενο πρέπει να είναι συνοπτικό και συμπυκνωμένο, με έκταση αυστηρά περίπου στο 60% του αρχικού κειμένου. Απαγορεύεται η προσθήκη περιττών επεξηγήσεων ή «σάλτσας» (filler text).
+2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά, ονόματα, νούμερα και δεδομένα. Απαγορεύεται αυστηρά η οποιαδήποτε προσθήκη μη επιβεβαιωμένων πληροφοριών ή φανταστικών στοιχείων (hallucinations).
+3. Αναδιατύπωση: Το άρθρο πρέπει να είναι πλήρως ξαναγραμμένο με δικές σου λέξεις και διαφορετική δομή προτάσεων. Απαγορεύεται το copy-paste αυτούσιων φράσεων.
+4. ${toneInstruction}
 5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown (bolding, lists, stars κλπ.).
 6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
 
@@ -626,12 +633,63 @@ async function main() {
 
             console.log(`  [NEW] ${scraped.title.substring(0, 70)}`);
 
-            // ── Group ID via Jaccard (disabled) ──────────────────────────
-            // Previously, articles could be grouped by similarity. The new production requirement is to ingest EVERY new article without grouping.
-            // We assign a fresh unique group_id for each article.
+            // ── Cross-Source Cross-Publishing Deduplication ──────────────────
+            const currentScrapedTime = new Date(scraped.created_at);
+            const duplicateArticle = existingArticles.find(art => {
+                const dbTime = new Date(art.created_at);
+                const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
+                if (timeDiffMinutes > 45) return false;
+                
+                const similarity = jaccardSimilarity(scraped.title, art.title);
+                if (similarity < 0.35) return false;
+                
+                const scrapedDomain = getSourceNameFromUrl(articleUrl);
+                const dbDomain = getSourceNameFromUrl(art.source_url);
+                return scrapedDomain !== dbDomain;
+            });
+
+            if (duplicateArticle) {
+                console.log(`  [DEDUPLICATION] Merging duplicate: "${scraped.title.substring(0, 50)}" with existing ID: ${duplicateArticle.id}`);
+                if (!isDryRun) {
+                    const { data: dbArt, error: fetchErr } = await db.from('articles')
+                        .select('content')
+                        .eq('id', duplicateArticle.id)
+                        .single();
+                    
+                    if (!fetchErr && dbArt) {
+                        let newContent = dbArt.content || '';
+                        const sourceName = getSourceNameFromUrl(articleUrl);
+                        const existingSourceName = getSourceNameFromUrl(duplicateArticle.source_url);
+                        
+                        if (newContent.includes('Πηγές:')) {
+                            const match = newContent.match(/Πηγές:\s*(.+)$/i);
+                            if (match) {
+                                const currentSources = match[1].split(',').map(s => s.trim());
+                                if (!currentSources.includes(sourceName)) {
+                                    currentSources.push(sourceName);
+                                    newContent = newContent.replace(/Πηγές:\s*(.+)$/i, `Πηγές: ${currentSources.join(', ')}`);
+                                }
+                            }
+                        } else {
+                            newContent = `${newContent}\n\nΠηγές: ${existingSourceName}, ${sourceName}`;
+                        }
+                        
+                        const { error: updateErr } = await db.from('articles')
+                            .update({ content: newContent, updated_at: new Date().toISOString() })
+                            .eq('id', duplicateArticle.id);
+                            
+                        if (updateErr) {
+                            console.error(`  [DB ERROR] Failed to update merged sources:`, updateErr.message);
+                        } else {
+                            console.log(`  ✅ Merged successfully (appended source ${sourceName})`);
+                        }
+                    }
+                }
+                totalSkipped++;
+                continue;
+            }
+
             const group_id = crypto.randomUUID();
-            // The JACCARD_THRESHOLD and similarity loop have been removed.
-            // This ensures each article is treated as a distinct story.
 
             // ── AI Generation ─────────────────────────────────────────────────
             const bullets = await generateAiBullets(scraped.title, scraped.content || scraped.summary, target.isOfficial);

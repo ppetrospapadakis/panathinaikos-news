@@ -1,0 +1,11 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/podosfairo", "destination": "/index.html?cat=football" },
+    { "source": "/basket", "destination": "/index.html?cat=basketball" },
+    { "source": "/erasitechnis", "destination": "/index.html?cat=amateur" },
+    { "source": "/apopsi", "destination": "/index.html?cat=opinion" },
+    { "source": "/metagrafes", "destination": "/index.html?cat=transfers" },
+    { "source": "/:category/:slug-id=:id", "destination": "/article.html?id=:id" }
+  ]
+}
