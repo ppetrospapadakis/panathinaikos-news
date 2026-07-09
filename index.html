@@ -388,9 +388,8 @@
             const feedTitle = document.getElementById('feed-title');
             if (feedTitle) feedTitle.textContent = titles[category] || 'Ροή Ειδήσεων';
 
-            // Re-render with filtered data
-            const filtered = category ? allArticles.filter(a => a.category && a.category.includes(category)) : allArticles;
-            renderFeed(filtered);
+            activeCategory = category;
+            fetchArticles(true);
             renderQuickLinks();
         }
 
@@ -683,6 +682,7 @@
                 else if (activeCategory === 'Άποψη') apiCat = 'opinion';
                 else if (activeCategory === 'Μεταγραφές') apiCat = 'transfers';
 
+                console.log("[Frontend] Initiating fetch to /api/articles", { category: apiCat, page: currentPage });
                 const response = await fetch(`/api/articles?category=${apiCat}&page=${currentPage}`);
                 if (!response.ok) throw new Error('API request failed');
                 const data = await response.json();
@@ -725,7 +725,7 @@
                 renderFeed(allArticles);
                 currentPage++;
             } catch(err) {
-                console.error("Frontend Fetch Error:", err);
+                console.error("[Frontend] Fetch error:", err);
                 const c = document.getElementById('articles-feed-container');
                 if (c && reset) c.innerHTML = `<div class="col-span-1 md:col-span-12 text-center py-24 text-error font-body">Σφάλμα φόρτωσης: ${err.message}</div>`;
             } finally {
