@@ -215,13 +215,8 @@
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
     (function() {
-        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
-        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         function toggleDrawer() {
             const drawer = document.getElementById('nav-drawer');
             const overlay = document.getElementById('drawer-overlay');
@@ -321,13 +316,14 @@
             }
 
             try {
-                const { data: article, error } = await db
-                    .from('articles')
-                    .select('*')
-                    .eq('id', articleId)
-                    .single();
-
-                if (error) throw error;
+                const response = await fetch(`/api/articles?id=${articleId}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Το άρθρο δεν βρέθηκε στη βάση δεδομένων.');
+                    }
+                    throw new Error('Αποτυχία φόρτωσης άρθρου.');
+                }
+                const article = await response.json();
                 if (!article) throw new Error('Το άρθρο δεν βρέθηκε στη βάση δεδομένων.');
 
                 renderArticle(article);
