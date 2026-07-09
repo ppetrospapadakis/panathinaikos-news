@@ -68,8 +68,7 @@ module.exports = async (req, res) => {
             .select('*')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
-            .order('created_at', { ascending: false })
-            .range(from, to);
+            .order('created_at', { ascending: false });
           
         if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
           const categoryMap = {
@@ -84,6 +83,8 @@ module.exports = async (req, res) => {
           const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
           query = query.eq('category', dbCategory);
         }
+
+        query = query.range(from, to);
         
         const { data, error } = await query;
         if (error) throw error;
