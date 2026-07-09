@@ -235,6 +235,7 @@
     (function() {
         // ── State ──
         let allArticles = [];
+        let ownArticles = [];
         let activeCategory = null;
         let currentPage = 1;
         let hasMore = true;
@@ -421,6 +422,13 @@
         }
         window.handleSearch = handleSearch;
 
+        window.scrollCarousel = function(direction) {
+            const container = document.getElementById('own-carousel-container');
+            if (!container) return;
+            const scrollAmount = direction === 'left' ? -380 : 380;
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        };
+
         // ── Default hero image ──
         const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
 
@@ -534,13 +542,15 @@
             let scraperArticles = [];
 
             if (activeCategory === null) {
+                // Populate ownArticlesAll from the separate global ownArticles array
+                ownArticlesAll = ownArticles.map(a => ({ main: a, related: [] }));
+                
+                // Filter out any manual articles from scraperArticles to avoid duplicates
                 sorted.forEach(g => {
                     const a = g.main;
                     const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
                                   (a.source_url || '').toLowerCase().includes('opinion://manual');
-                    if (isOwn) {
-                        ownArticlesAll.push(g);
-                    } else {
+                    if (!isOwn) {
                         scraperArticles.push(g);
                     }
                 });
@@ -597,7 +607,15 @@
             </a>`;
 
             // ─ Side column (20 articles initially, stretches dynamically, infinite scroll) ─
-            const sideCandidates = scraperArticles.slice(1);
+            let sideCandidates = [];
+            if (activeCategory === null) {
+                sideCandidates = [
+                    ...scraperArticles.slice(1),
+                    ...ownArticlesAll
+                ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
+            } else {
+                sideCandidates = scraperArticles.slice(1);
+            }
             const sideGroups = sideCandidates.slice(0, 20);
             let sideHtml = '<div id="right-side-feed" class="md:col-span-4 pr-1" style="max-height: 700px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: thin; scrollbar-color: #2e7d32 transparent;">';
             sideGroups.forEach(g => {
@@ -606,6 +624,12 @@
                 const sideCatPath = getCategoryCleanName(a.category);
                 const sideCleanUrl = `/${sideCatPath}/${sideSlug}-id=${a.id}`;
 
+                const sideIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                                  (a.source_url || '').toLowerCase().includes('opinion://manual');
+                const sideBadgeHtml = sideIsOwn 
+                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                    : '';
+
                 sideHtml += `
                 <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
                      href="${sideCleanUrl}">
@@ -613,7 +637,7 @@
                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'}</span>
+                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'} ${sideBadgeHtml}</span>
                         <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
                         <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                     </div>
@@ -656,6 +680,12 @@
                                 const scrollCatPath = getCategoryCleanName(a.category);
                                 const scrollCleanUrl = `/${scrollCatPath}/${scrollSlug}-id=${a.id}`;
 
+                                const scrollIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                                                    (a.source_url || '').toLowerCase().includes('opinion://manual');
+                                const scrollBadgeHtml = scrollIsOwn 
+                                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                                    : '';
+
                                 rightSide.insertAdjacentHTML('beforeend', `
                                 <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
                                      href="${scrollCleanUrl}">
@@ -663,7 +693,7 @@
                                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'}</span>
+                                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'} ${scrollBadgeHtml}</span>
                                         <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
                                         <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                                     </div>
@@ -676,28 +706,60 @@
             }
 
             // 4. "PanathinaikosNews - Αρθρογραφία" Section:
-            // Display the 3 latest own articles (ONLY on Homepage)
-            const ownArticlesSectionCount = activeCategory === null ? Math.min(3, ownArticlesAll.length) : 0;
-            if (ownArticlesSectionCount > 0) {
-                const ownSectionArticles = ownArticlesAll.slice(0, 3);
+            // Display all own articles in a horizontal carousel row (ONLY on Homepage)
+            if (activeCategory === null && ownArticlesAll.length > 0) {
+                let carouselCardsHtml = '';
+                ownArticlesAll.forEach(g => {
+                    const a = g.main;
+                    const slug = slugify(a.title);
+                    const catPath = getCategoryCleanName(a.category);
+                    const articleCleanUrl = `/${catPath}/${slug}-id=${a.id}`;
+                    
+                    const cardBorder = 'border-primary/30 bg-primary/5';
+                    const badgeHtml = `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`;
+
+                    carouselCardsHtml += `
+                    <div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
+                        <a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover h-full ${cardBorder}"
+                             href="${articleCleanUrl}">
+                            <div class="relative aspect-video overflow-hidden">
+                                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                            </div>
+                            <div class="p-5 flex flex-col flex-1">
+                                <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} ${badgeHtml} • ${timeAgo(a.created_at)}</span>
+                                <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors line-clamp-2">${a.title}</h3>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
+                            </div>
+                        </a>
+                    </div>`;
+                });
+
                 container.insertAdjacentHTML('beforeend', `
                 <div class="col-span-1 md:col-span-12 mt-12 pt-8 border-t border-outline-variant/30">
                     <h2 class="font-h2 text-h2 mb-6">PanathinaikosNews - Αρθρογραφία</h2>
-                </div>
-                <div class="col-span-1 md:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-8" id="own-section-cards">
+                    <div class="relative group/carousel">
+                        <!-- Left Arrow -->
+                        <button onclick="scrollCarousel('left')" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        
+                        <!-- Scroll Container -->
+                        <div id="own-carousel-container" class="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory py-4" style="scrollbar-width: none; -ms-overflow-style: none;">
+                            ${carouselCardsHtml}
+                        </div>
+                        
+                        <!-- Right Arrow -->
+                        <button onclick="scrollCarousel('right')" class="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
                 </div>`);
-                const ownSectionContainer = document.getElementById('own-section-cards');
-                renderMoreCards(ownSectionArticles, ownSectionContainer);
             }
 
             // 5. Remaining bottom grid (Περισσότερες Ειδήσεις):
-            // Displays remaining own + remaining scraper articles (sorted chronologically)
-            const remainingOwn = activeCategory === null ? ownArticlesAll.slice(3) : [];
+            // Displays remaining non-manual scraper articles
             const bottomGridArticles = activeCategory === null 
-                ? [
-                    ...remainingOwn,
-                    ...sideCandidates
-                  ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at))
+                ? scraperArticles.slice(1) 
                 : sideCandidates;
 
             if (bottomGridArticles.length > 0) {
@@ -749,6 +811,40 @@
             isFetching = true;
 
             try {
+                if (activeCategory === null && ownArticles.length === 0) {
+                    try {
+                        const resOwn = await fetch('/api/articles?opinionOnly=true');
+                        if (resOwn.ok) {
+                            const rawOwn = await resOwn.json();
+                            ownArticles = (rawOwn || []).map(a => {
+                                let imageUrl = a.image_url || '';
+                                if (imageUrl) {
+                                    try {
+                                        const u = new URL(imageUrl);
+                                        const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+                                        const filenameBrandingIndicators = [
+                                            'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                                            'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
+                                            'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
+                                        ];
+                                        const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
+                                        let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
+                                        if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + u.pathname.toLowerCase() + '/').includes(p));
+                                        if (isBranding) {
+                                            a.image_url = DEFAULT_IMG;
+                                        }
+                                    } catch (_) {}
+                                } else {
+                                    a.image_url = DEFAULT_IMG;
+                                }
+                                return a;
+                            });
+                        }
+                    } catch (e) {
+                        console.error("[Frontend] Failed to fetch own articles:", e);
+                    }
+                }
+
                 let apiCat = '';
                 if (activeCategory === 'Ποδόσφαιρο') apiCat = 'football';
                 else if (activeCategory === 'Μπάσκετ') apiCat = 'basket';

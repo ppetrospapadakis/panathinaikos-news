@@ -80,6 +80,16 @@ module.exports = async (req, res) => {
                 .eq('id', id)
                 .single();
             if (error) throw error;
+        }
+
+        // 1b. Fetch all own opinion articles (for dedicated section)
+        if (req.query.opinionOnly === 'true') {
+            const { data, error } = await supabase
+                .from('articles')
+                .select('*')
+                .or('source_url.ilike.%manual%,source_url.ilike.%opinion://manual%')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
             return res.status(200).json(data);
         }
 
