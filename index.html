@@ -435,14 +435,23 @@
                 const catPath = getCategoryCleanName(a.category);
                 const articleCleanUrl = `/${catPath}/${slug}-id=${a.id}`;
 
+                const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                              (a.source_url || '').toLowerCase().includes('opinion://manual');
+                const badgeHtml = isOwn 
+                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                    : '';
+                const cardBorder = isOwn
+                    ? 'border-primary/30 bg-primary/5'
+                    : 'border-outline-variant/10 bg-surface-container/30';
+
                 containerElement.insertAdjacentHTML('beforeend', `
-                <a class="group cursor-pointer bg-surface-container/30 rounded-xl border border-outline-variant/10 flex flex-col overflow-hidden card-hover"
+                <a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${cardBorder}"
                      href="${articleCleanUrl}">
                     <div class="relative aspect-video overflow-hidden">
                         <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     </div>
                     <div class="p-5 flex flex-col flex-1">
-                        <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} • ${timeAgo(a.created_at)}</span>
+                        <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} ${badgeHtml} • ${timeAgo(a.created_at)}</span>
                         <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
                         <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
                         <div class="mt-auto" onclick="event.stopPropagation()">${bHtml}</div>
@@ -511,7 +520,34 @@
             currentFilteredArticles = sorted;
 
             // ─ Featured card ─
-            const fg = sorted[0], fa = fg.main;
+            const now = new Date();
+            const ownArticles12h = [];
+            const ownArticlesOlder = [];
+            const scraperArticles = [];
+
+            sorted.forEach(g => {
+                const a = g.main;
+                const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                              (a.source_url || '').toLowerCase().includes('opinion://manual');
+                const ageHrs = (now - new Date(a.created_at)) / (1000 * 60 * 60);
+                if (isOwn) {
+                    if (ageHrs <= 12) {
+                        ownArticles12h.push(g);
+                    } else {
+                        ownArticlesOlder.push(g);
+                    }
+                } else {
+                    scraperArticles.push(g);
+                }
+            });
+
+            // Featured Hero Card is always selected from scraperArticles (so own articles never go here)
+            let featuredGroup = scraperArticles.length > 0 
+                ? scraperArticles[0] 
+                : (ownArticlesOlder.length > 0 ? ownArticlesOlder[0] : ownArticles12h[0]);
+            
+            if (!featuredGroup) return; // safety
+            const fa = featuredGroup.main;
             const fDate = timeAgo(fa.created_at);
 
             let bulletsHtml = '';
@@ -547,13 +583,24 @@
             </a>`;
 
             // ─ Side column (20 articles initially, stretches dynamically, infinite scroll) ─
-            const sideGroups = sorted.slice(1, 21);
+            const sideCandidates = [
+                ...(scraperArticles.length > 0 ? scraperArticles.slice(1) : []),
+                ...ownArticlesOlder
+            ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
+
+            const sideGroups = sideCandidates.slice(0, 20);
             let sideHtml = '<div id="right-side-feed" class="md:col-span-4 pr-1" style="max-height: 700px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: thin; scrollbar-color: #2e7d32 transparent;">';
             sideGroups.forEach(g => {
                 const a = g.main;
                 const sideSlug = slugify(a.title);
                 const sideCatPath = getCategoryCleanName(a.category);
                 const sideCleanUrl = `/${sideCatPath}/${sideSlug}-id=${a.id}`;
+
+                const sideIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                                  (a.source_url || '').toLowerCase().includes('opinion://manual');
+                const sideBadgeHtml = sideIsOwn 
+                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                    : '';
 
                 sideHtml += `
                 <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
@@ -562,7 +609,7 @@
                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'}</span>
+                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'} ${sideBadgeHtml}</span>
                         <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
                         <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                     </div>
@@ -597,13 +644,19 @@
                 let sideLoadedCount = 20;
                 rightSide.addEventListener('scroll', () => {
                     if (rightSide.scrollTop + rightSide.clientHeight >= rightSide.scrollHeight - 50) {
-                        const nextBatch = sorted.slice(sideLoadedCount + 1, sideLoadedCount + 11);
+                        const nextBatch = sideCandidates.slice(sideLoadedCount, sideLoadedCount + 10);
                         if (nextBatch.length > 0) {
                             nextBatch.forEach(g => {
                                 const a = g.main;
                                 const scrollSlug = slugify(a.title);
                                 const scrollCatPath = getCategoryCleanName(a.category);
                                 const scrollCleanUrl = `/${scrollCatPath}/${scrollSlug}-id=${a.id}`;
+
+                                const scrollIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                                                    (a.source_url || '').toLowerCase().includes('opinion://manual');
+                                const scrollBadgeHtml = scrollIsOwn 
+                                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                                    : '';
 
                                 rightSide.insertAdjacentHTML('beforeend', `
                                 <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
@@ -612,7 +665,7 @@
                                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'}</span>
+                                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'} ${scrollBadgeHtml}</span>
                                         <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
                                         <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                                     </div>
@@ -625,7 +678,11 @@
             }
 
             // ─ Remaining bottom grid ─
-            const bottomGridArticles = sorted.slice(21);
+            const bottomGridArticles = [
+                ...ownArticles12h,
+                ...sideCandidates
+            ];
+
             if (bottomGridArticles.length > 0) {
                 container.insertAdjacentHTML('beforeend', `
                 <div class="col-span-1 md:col-span-12 mt-8 pt-8 border-t border-outline-variant/30">
