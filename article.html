@@ -2,6 +2,7 @@
 <html class="dark" lang="el">
 <head>
     <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" href="/favicon.png"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title id="page-title">Panathinaikos News - Άρθρο</title>
     <meta name="description" content="Ανάλυση και ρεπορτάζ από τον κόσμο του Παναθηναϊκού."/>
@@ -73,7 +74,7 @@
             <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a class="font-h2 text-h2 font-bold tracking-tighter text-primary" href="/">PanathinaikosNews</a>
+            <a href="/" class="flex items-center"><img src="/logo.jpg" alt="PanathinaikosNews" class="h-10 w-auto object-contain"/></a>
             <a href="/" class="flex items-center gap-2 px-5 py-2 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span class="text-sm">Επιστροφή</span>
@@ -84,7 +85,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a class="font-h3 text-h3 font-bold text-primary" href="/">PanathinaikosNews</a>
+            <a href="/" class="flex items-center px-4"><img src="/logo.jpg" alt="PanathinaikosNews" class="h-12 w-auto object-contain"/></a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
@@ -465,6 +466,13 @@
                              categoryStr.includes('apopsi');
             if (isManual) {
                 if (sourceContainer) sourceContainer.style.display = 'none';
+                
+                const logoBlock = `
+                <div class="flex flex-col items-center justify-center py-12 border-t border-outline-variant/30 mt-12 space-y-4">
+                    <img src="/logo.jpg" alt="PanathinaikosNews" class="h-28 w-auto object-contain rounded-xl opacity-90 shadow-2xl transition-transform hover:scale-105 duration-300"/>
+                    <p class="text-xs uppercase tracking-[0.25em] text-primary/80 font-bold">PanathinaikosNews Editorial</p>
+                </div>`;
+                body.insertAdjacentHTML('beforeend', logoBlock);
             } else {
                 if (sourceContainer) sourceContainer.style.display = 'block';
                 const domainInfo = (() => {
