@@ -51,9 +51,12 @@ module.exports = async (req, res) => {
     }
 
     // 2. Feed pagination & filtering query
-    const page = parseInt(req.query.page, 10) || 1;
+    let pageNum = parseInt(req.query.page, 10);
+    if (isNaN(pageNum) || pageNum < 1) {
+        pageNum = 1;
+    }
     const limit = 20;
-    const from = (page - 1) * limit;
+    const from = (pageNum - 1) * limit;
     const to = from + limit - 1;
 
     let categoryParam = req.query.category || '';
@@ -76,7 +79,7 @@ module.exports = async (req, res) => {
     const isCategoryEmpty = !categoryParam || categoryParam === 'all' || categoryParam === 'null' || categoryParam === 'undefined';
 
     try {
-        console.log("[api/articles] Querying category:", dbCategory || (isCategoryEmpty ? "ALL" : categoryParam), "Page:", page, "From:", from, "To:", to);
+        console.log("[api/articles] Querying category:", dbCategory || (isCategoryEmpty ? "ALL" : categoryParam), "PageNum:", pageNum, "From:", from, "To:", to);
 
         let query = supabase
             .from('articles')
@@ -94,8 +97,25 @@ module.exports = async (req, res) => {
             }
         }
 
-        const { data, error } = await query;
+        let { data, error } = await query;
         console.log("[api/articles] Supabase response rows count:", data ? data.length : 0, "Error:", error);
+
+        // Emergency Fallback: if data is empty on page 1, fetch top 20 rows ignoring filters
+        if ((!data || data.length === 0) && pageNum === 1 && !error) {
+            console.warn("[api/articles] Emergency fallback triggered: no rows found for page 1 under active filters. Fetching raw top 20 rows.");
+            const fallbackQuery = supabase
+                .from('articles')
+                .select('*')
+                .not('category', 'eq', 'SystemRoster')
+                .not('category', 'eq', 'SYSTEMROSTER')
+                .order('created_at', { ascending: false })
+                .range(0, 19);
+            const fallbackRes = await fallbackQuery;
+            if (!fallbackRes.error && fallbackRes.data) {
+                data = fallbackRes.data;
+                console.log("[api/articles] Emergency fallback loaded rows:", data.length);
+            }
+        }
 
         if (error) {
             return res.status(500).json({ error: error.message });
