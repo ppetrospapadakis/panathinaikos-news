@@ -74,7 +74,7 @@
             <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a href="/" class="flex items-center"><img src="/logo.jpg" alt="PanathinaikosNews" class="h-10 w-auto object-contain"/></a>
+            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-14 md:h-16 w-auto object-contain"/></a>
             <a href="/" class="flex items-center gap-2 px-5 py-2 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span class="text-sm">Επιστροφή</span>
@@ -85,7 +85,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a href="/" class="flex items-center px-4"><img src="/logo.jpg" alt="PanathinaikosNews" class="h-12 w-auto object-contain"/></a>
+            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-16 md:h-20 w-auto object-contain"/></a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
@@ -468,8 +468,8 @@
                 if (sourceContainer) sourceContainer.style.display = 'none';
                 
                 const logoBlock = `
-                <div class="flex flex-col items-center justify-center py-12 border-t border-outline-variant/30 mt-12 space-y-4">
-                    <img src="/logo.jpg" alt="PanathinaikosNews" class="h-28 w-auto object-contain rounded-xl opacity-90 shadow-2xl transition-transform hover:scale-105 duration-300"/>
+                <div class="flex flex-col items-center justify-center py-10 border-t border-outline-variant/30 mt-12 space-y-3">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-12 md:h-14 w-auto object-contain opacity-90 transition-transform hover:scale-105 duration-300"/>
                     <p class="text-xs uppercase tracking-[0.25em] text-primary/80 font-bold">PanathinaikosNews Editorial</p>
                 </div>`;
                 body.insertAdjacentHTML('beforeend', logoBlock);
