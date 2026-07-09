@@ -737,7 +737,10 @@
 
                 container.insertAdjacentHTML('beforeend', `
                 <div class="col-span-1 md:col-span-12 mt-12 pt-8 border-t border-outline-variant/30">
-                    <h2 class="font-h2 text-h2 mb-6">PanathinaikosNews - Αρθρογραφία</h2>
+                    <h2 class="font-h2 text-h2 mb-6 flex items-center gap-3 flex-wrap">
+                        <img src="/logo.png" alt="PanathinaikosNews" class="h-8 md:h-10 w-auto object-contain"/>
+                        <span class="text-on-surface/90 font-semibold">- Αρθρογραφία</span>
+                    </h2>
                     <div class="relative group/carousel">
                         <!-- Left Arrow -->
                         <button onclick="scrollCarousel('left')" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
