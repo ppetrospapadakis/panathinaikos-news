@@ -17,13 +17,16 @@ module.exports = async (req, res) => {
     // Set high-performance Edge caching headers
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
 
-    const rawUrl = process.env.SUPABASE_URL;
-    const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+    const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const url = rawUrl ? rawUrl.trim().replace(/^['"]|['"]$/g, '') : '';
     const key = rawKey ? rawKey.trim().replace(/^['"]|['"]$/g, '') : '';
 
     if (!url || !key) {
-        return res.status(500).json({ error: 'Database configuration missing.' });
+        return res.status(500).json({ 
+            error: "Missing Supabase Environment Variables on Vercel Settings",
+            details: { hasUrl: !!url, hasKey: !!key }
+        });
     }
 
     const supabase = createClient(url, key);
