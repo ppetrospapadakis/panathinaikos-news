@@ -16,11 +16,19 @@ module.exports = async (req, res) => {
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
 
     // Supabase URL & Anon Key with fallback values
-    const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rctltbuiitdnqlxizlym.supabase.co';
+    const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rctltbuiltdnqlxizlym.supabase.co';
     const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
     
     let url = rawUrl.trim().replace(/^['"]|['"]$/g, '');
     const key = rawKey.trim().replace(/^['"]|['"]$/g, '');
+
+    // Failsafe: Correct copy-pasted markdown links
+    if (url.includes('](')) {
+        const match = url.match(/\((https?:\/\/[^\)]+)\)/);
+        if (match) {
+            url = match[1];
+        }
+    }
 
     // Failsafe: Correct protocol typos automatically
     if (url.startsWith('s://')) {
