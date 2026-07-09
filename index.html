@@ -456,7 +456,7 @@
                 const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
                               (a.source_url || '').toLowerCase().includes('opinion://manual');
                 const badgeHtml = isOwn 
-                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`
                     : '';
                 const cardBorder = isOwn
                     ? 'border-primary/30 bg-primary/5'
@@ -628,7 +628,7 @@
                 const sideIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
                                   (a.source_url || '').toLowerCase().includes('opinion://manual');
                 const sideBadgeHtml = sideIsOwn 
-                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`
                     : '';
 
                 sideHtml += `
@@ -684,7 +684,7 @@
                                 const scrollIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
                                                     (a.source_url || '').toLowerCase().includes('opinion://manual');
                                 const scrollBadgeHtml = scrollIsOwn 
-                                    ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`
+                                    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`
                                     : '';
 
                                 rightSide.insertAdjacentHTML('beforeend', `
@@ -717,7 +717,7 @@
                     const articleCleanUrl = `/${catPath}/${slug}-id=${a.id}`;
                     
                     const cardBorder = 'border-primary/30 bg-primary/5';
-                    const badgeHtml = `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wide">PanathinaikosNews</span>`;
+                    const badgeHtml = `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`;
 
                     carouselCardsHtml += `
                     <div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
