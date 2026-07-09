@@ -172,22 +172,56 @@ function isPanathinaikosArticle(title, text) {
     const combinedTitle = (title || '').toLowerCase();
     const combinedText = (text || '').toLowerCase();
     
-    // Unicode-safe word boundary check for "παο" or "pao"
-    const paoRegex = /(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])(pao|παο)(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])/i;
+    // Core Panathinaikos identifiers
+    const coreKeywords = [
+        'παναθηναϊκ', 'panathinaikos', 'pao fc', 'pao bc', 'καε παναθηναϊκός', 'παε παναθηναϊκός',
+        'τριφύλλι', 'trifilli', 'οακα', 'oaka', 'λεωφόρος', 'leoforos', 'βοτανικός', 'votanikos'
+    ];
 
-    // 1. Strict Title Check: The title MUST contain one of the core keywords or the PAO abbreviation as a word.
-    const titleHasKeyword = PAO_KEYWORDS.some(kw => combinedTitle.includes(kw));
-    const titleHasPao = paoRegex.test(combinedTitle);
-    
-    if (!titleHasKeyword && !titleHasPao) {
+    // Player and coach names (both Greek and English/transliterated)
+    const personnelKeywords = [
+        'αταμάν', 'ataman', 'σλούκας', 'sloukas', 'ιωαννίδης', 'ioannidis', 'τετέ', 'tete',
+        'μπακασέτας', 'bakasetas', 'πελίστρι', 'pellistri', 'νίστρουπ', 'neestrup', 'μαξίμοβιτς',
+        'μπαλτσερόφσκι', 'balcerowski', 'ναν', 'nunn', 'lessort', 'λεσόρ', 'grant', 'γκραντ',
+        'γκριγκόνις', 'grigonis', 'ερνανγκόμεθ', 'hernangomez', 'χουάντσο', 'juancho', 'papapetrou',
+        'παπαπέτρου', 'μητογλου', 'mitoglou', 'καλαϊτζάκης', 'kalaitzakis', 'γιούρτσεβεν',
+        'yurtseven', 'osman', 'όσμαν', 'alonzo', 'alonza', 'αλονζο', 'αλονζα'
+    ];
+
+    const isWordMatch = (word, text) => {
+        // Unicode-safe word boundary matching
+        const regex = new RegExp(`(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])${word}(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])`, 'i');
+        return regex.test(text);
+    };
+
+    // 1. Strict Title Check
+    // A title is relevant if:
+    // - It contains a core keyword as a substring (e.g. "παναθηναϊκ")
+    // - It contains any personnel keyword or short term ("παο", "pao") as a strict whole word
+    const titleHasCore = coreKeywords.some(kw => combinedTitle.includes(kw));
+    const titleHasPersonnel = personnelKeywords.some(kw => {
+        if (kw.length <= 4) {
+            return isWordMatch(kw, combinedTitle);
+        }
+        return combinedTitle.includes(kw);
+    });
+    const titleHasPao = isWordMatch('παο', combinedTitle) || isWordMatch('pao', combinedTitle);
+
+    if (!titleHasCore && !titleHasPersonnel && !titleHasPao) {
         return false;
     }
 
-    // 2. Body sanity check: The body content must also mention a core keyword or PAO at least once (to confirm relevance and avoid false title matches)
-    const bodyHasKeyword = PAO_KEYWORDS.some(kw => combinedText.includes(kw));
-    const bodyHasPao = paoRegex.test(combinedText);
-    
-    return bodyHasKeyword || bodyHasPao;
+    // 2. Body Check: the body must contain at least one mention of the core identifiers or team personnel to guard against false matches
+    const bodyHasCore = coreKeywords.some(kw => combinedText.includes(kw));
+    const bodyHasPersonnel = personnelKeywords.some(kw => {
+        if (kw.length <= 4) {
+            return isWordMatch(kw, combinedText);
+        }
+        return combinedText.includes(kw);
+    });
+    const bodyHasPao = isWordMatch('παο', combinedText) || isWordMatch('pao', combinedText);
+
+    return bodyHasCore || bodyHasPersonnel || bodyHasPao;
 }
 
 // ─── Jaccard similarity ────────────────────────────────────────────────────────
@@ -475,6 +509,7 @@ async function generateAiBullets(title, text, isOfficial = false) {
 1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να αντιγράψεις αυτούσιες φράσεις από το κείμενο. Κάνε πλήρη αναδιατύπωση των γεγονότων.
 2. ${toneInstruction}
 3. Κάθε bullet πρέπει να ξεκινάει με τον χαρακτήρα "•" και να αποτελείται ΑΥΣΤΗΡΑ από ακριβώς μία (1) πρόταση.
+4. Κάθε bullet point πρέπει να παρουσιάζει διαφορετικά δεδομένα/γεγονότα. Απαγορεύεται η επανάληψη της ίδιας πληροφορίας στα 2 bullets.
 
 Έξοδος: Επίστρεψε ΜΟΝΟ τις 2 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
 
@@ -519,7 +554,7 @@ async function generateLongFormContent(title, text, isOfficial = false) {
 Βάσει των παρακάτω πληροφοριών, γράψε ένα αντικειμενικό, υψηλής ποιότητας, αναδιατυπωμένο άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ:
-1. Μήκος: Το κείμενο πρέπει να είναι συνοπτικό και συμπυκνωμένο, με έκταση αυστηρά περίπου στο 60% του αρχικού κειμένου. Απαγορεύεται η προσθήκη περιττών επεξηγήσεων ή «σάλτσας» (filler text).
+1. Μορφή & Μήκος: Γράψε μια συμπαγή, φυσική σύνοψη ακριβώς δύο (2) παραγράφων που να αντιπροσωπεύει περίπου το 60% των βασικών γεγονότων του αρχικού κειμένου. Αποέφυγε τη μονολεκτική ή μονογραμμική υπερ-συμπίεση, αλλά και τις περιττές σάλτσες (filler/fluff). Πρέπει να διαβάζεται στρωτά ως 2 ολοκληρωμένες παράγραφοι.
 2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά, ονόματα, νούμερα και δεδομένα. Απαγορεύεται αυστηρά η οποιαδήποτε προσθήκη μη επιβεβαιωμένων πληροφοριών ή φανταστικών στοιχείων (hallucinations).
 3. Αναδιατύπωση: Το άρθρο πρέπει να είναι πλήρως ξαναγραμμένο με δικές σου λέξεις και διαφορετική δομή προτάσεων. Απαγορεύεται το copy-paste αυτούσιων φράσεων.
 4. ${toneInstruction}

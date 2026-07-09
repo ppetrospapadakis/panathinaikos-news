@@ -572,7 +572,7 @@
 
             // ─ Side column (20 articles initially, stretches dynamically, infinite scroll) ─
             const sideGroups = sorted.slice(1, 21);
-            let sideHtml = '<div id="right-side-feed" class="md:col-span-4 pr-1" style="overflow-y:auto; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin; scrollbar-color:#2e7d32 transparent;">';
+            let sideHtml = '<div id="right-side-feed" class="md:col-span-4 pr-1" style="max-height: 700px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: thin; scrollbar-color: #2e7d32 transparent;">';
             sideGroups.forEach(g => {
                 const a = g.main;
                 const sideSlug = slugify(a.title);
@@ -602,12 +602,19 @@
                 const syncHeight = () => {
                     const leftCard = container.querySelector('.md\\:col-span-8');
                     if (leftCard && window.innerWidth >= 768) {
-                        rightSide.style.maxHeight = `${leftCard.clientHeight}px`;
+                        const h = leftCard.clientHeight;
+                        rightSide.style.maxHeight = h > 200 ? `${h}px` : '700px';
                     } else {
                         rightSide.style.maxHeight = 'none';
                     }
                 };
                 setTimeout(syncHeight, 50);
+                setTimeout(syncHeight, 300);
+                setTimeout(syncHeight, 1000);
+                const leftImg = container.querySelector('.md\\:col-span-8 img');
+                if (leftImg) {
+                    leftImg.addEventListener('load', syncHeight);
+                }
                 window.addEventListener('resize', syncHeight);
 
                 // Right Column Infinite Scroll / Lazy Loading
