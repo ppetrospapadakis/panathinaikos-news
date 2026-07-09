@@ -530,21 +530,25 @@
 
             // ─ Featured card ─
             const now = new Date();
-            const ownArticlesAll = [];
-            const scraperArticles = [];
+            let ownArticlesAll = [];
+            let scraperArticles = [];
 
-            sorted.forEach(g => {
-                const a = g.main;
-                const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
-                              (a.source_url || '').toLowerCase().includes('opinion://manual');
-                if (isOwn) {
-                    ownArticlesAll.push(g);
-                } else {
-                    scraperArticles.push(g);
-                }
-            });
+            if (activeCategory === null) {
+                sorted.forEach(g => {
+                    const a = g.main;
+                    const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
+                                  (a.source_url || '').toLowerCase().includes('opinion://manual');
+                    if (isOwn) {
+                        ownArticlesAll.push(g);
+                    } else {
+                        scraperArticles.push(g);
+                    }
+                });
+            } else {
+                scraperArticles = sorted;
+            }
 
-            // Featured Hero Card is always selected from scraperArticles (so own articles never go here)
+            // Featured Hero Card is always selected from scraperArticles (so own articles never go here on homepage)
             let featuredGroup = scraperArticles.length > 0 
                 ? scraperArticles[0] 
                 : ownArticlesAll[0];
@@ -568,12 +572,19 @@
             const mainCatPath = getCategoryCleanName(fa.category);
             const mainCleanUrl = `/${mainCatPath}/${mainSlug}-id=${fa.id}`;
 
+            const isOwnFeatured = (fa.source_url || '').toLowerCase().includes('manual') || 
+                                  (fa.source_url || '').toLowerCase().includes('opinion://manual');
+            const showBreakingLabel = !isOwnFeatured && (fa.category !== 'Άποψη');
+            const breakingBadgeHtml = showBreakingLabel 
+                ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold">BREAKING</div>`
+                : '';
+
             const featuredHtml = `
             <a class="md:col-span-8 group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover"
                  href="${mainCleanUrl}">
                 <div class="relative aspect-video overflow-hidden">
                     <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${fa.image_url || DEFAULT_IMG}" alt="${fa.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                    <div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold">BREAKING</div>
+                    ${breakingBadgeHtml}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
                     <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${fa.category || 'Ποδόσφαιρο'} • ${fDate}</span>
@@ -665,8 +676,8 @@
             }
 
             // 4. "PanathinaikosNews - Αρθρογραφία" Section:
-            // Display the 3 latest own articles (if any)
-            const ownArticlesSectionCount = Math.min(3, ownArticlesAll.length);
+            // Display the 3 latest own articles (ONLY on Homepage)
+            const ownArticlesSectionCount = activeCategory === null ? Math.min(3, ownArticlesAll.length) : 0;
             if (ownArticlesSectionCount > 0) {
                 const ownSectionArticles = ownArticlesAll.slice(0, 3);
                 container.insertAdjacentHTML('beforeend', `
@@ -680,12 +691,14 @@
             }
 
             // 5. Remaining bottom grid (Περισσότερες Ειδήσεις):
-            // Displays all other own articles (index 3 onwards) + all remaining sideCandidates (index 0 onwards)
-            const remainingOwn = ownArticlesAll.slice(3);
-            const bottomGridArticles = [
-                ...remainingOwn,
-                ...sideCandidates
-            ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
+            // Displays remaining own + remaining scraper articles (sorted chronologically)
+            const remainingOwn = activeCategory === null ? ownArticlesAll.slice(3) : [];
+            const bottomGridArticles = activeCategory === null 
+                ? [
+                    ...remainingOwn,
+                    ...sideCandidates
+                  ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at))
+                : sideCandidates;
 
             if (bottomGridArticles.length > 0) {
                 container.insertAdjacentHTML('beforeend', `
