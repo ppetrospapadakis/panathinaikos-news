@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     }
     
     // Fallback key injection if process.env is empty on Vercel UI
-    const finalKey = supabaseKey || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk0OTE4NDMsImV4cCI6MjAzNTA2Nzg0M30.7M_Mclm_Q0v2_eJ4b998N-f4Z7v-7W4v4n98_eJ4b998N"; 
+    const finalKey = supabaseKey || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI"; 
 
     const response = await fetch(targetUrl, {
       headers: {
