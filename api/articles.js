@@ -5,27 +5,52 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-function getWords(title) {
-    return new Set((title || '')
-        .toLowerCase()
-        .replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '')
-        .split(/\s+/)
-        .filter(w => w.length > 3)
-    );
+function getNGrams(str, n = 3) {
+    const clean = (str || '').toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '');
+    const ngrams = [];
+    for (let i = 0; i <= clean.length - n; i++) {
+        ngrams.push(clean.substring(i, i + n));
+    }
+    return ngrams;
 }
 
 function areSimilar(titleA, titleB) {
-    const wordsA = getWords(titleA);
-    const wordsB = getWords(titleB);
-    if (wordsA.size === 0 || wordsB.size === 0) return false;
+    // 1. Character N-Gram Cosine Similarity (captures word variations and stems)
+    const nGramsA = getNGrams(titleA, 3);
+    const nGramsB = getNGrams(titleB, 3);
     
-    let intersect = 0;
-    for (const w of wordsA) {
-        if (wordsB.has(w)) intersect++;
+    if (nGramsA.length === 0 || nGramsB.length === 0) return false;
+    
+    const freqA = {};
+    const freqB = {};
+    const allGrams = new Set();
+    
+    for (const g of nGramsA) { freqA[g] = (freqA[g] || 0) + 1; allGrams.add(g); }
+    for (const g of nGramsB) { freqB[g] = (freqB[g] || 0) + 1; allGrams.add(g); }
+    
+    let dotProduct = 0;
+    let magA = 0;
+    let magB = 0;
+    
+    for (const g of allGrams) {
+        const valA = freqA[g] || 0;
+        const valB = freqB[g] || 0;
+        dotProduct += valA * valB;
+        magA += valA * valA;
+        magB += valB * valB;
     }
-    const union = wordsA.size + wordsB.size - intersect;
-    const jaccard = intersect / union;
-    return jaccard > 0.45; // 45% word overlap threshold
+    
+    const cosineSimilarity = dotProduct / (Math.sqrt(magA) * Math.sqrt(magB));
+    
+    // 2. Keyword Entity Overlap check
+    // Simple helper to match key sports entities (e.g. names, verbs, places)
+    const wordsA = new Set((titleA || '').toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '').split(/\s+/).filter(w => w.length > 3));
+    const wordsB = (titleB || '').toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '').split(/\s+/).filter(w => w.length > 3);
+    const overlappingWords = wordsB.filter(w => wordsA.has(w)).length;
+    
+    // If cosine similarity of trigrams is high (e.g. > 0.40) and there is at least some word overlap (e.g. >= 2 words),
+    // or if the trigram cosine similarity is extremely high (e.g. > 0.60), they are duplicates.
+    return cosineSimilarity > 0.60 || (cosineSimilarity > 0.38 && overlappingWords >= 2);
 }
 
 module.exports = async (req, res) => {
