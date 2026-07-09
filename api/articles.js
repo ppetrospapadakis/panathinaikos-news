@@ -87,13 +87,13 @@ module.exports = async (req, res) => {
         const { data, error } = await query;
         if (error) throw error;
 
-        // Apply dynamic Jaccard similarity title deduplication (120-minute window)
+        // Apply dynamic Jaccard similarity title deduplication (40-minute window)
         const uniqueArticles = [];
         for (const current of (data || [])) {
             let isDuplicate = false;
             for (const existing of uniqueArticles) {
                 const timeDiffMins = Math.abs(new Date(current.created_at) - new Date(existing.created_at)) / (1000 * 60);
-                if (timeDiffMins <= 120) {
+                if (timeDiffMins <= 40) {
                     if (areSimilar(current.title, existing.title)) {
                         isDuplicate = true;
                         break;
