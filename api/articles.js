@@ -72,16 +72,18 @@ module.exports = async (req, res) => {
             .range(from, to);
           
         if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
-            // Map category parameter to actual DB value if matched
-            let dbCat = req.query.category;
-            const norm = dbCat.trim().toLowerCase();
-            if (norm === 'football' || norm === 'podosfairo') dbCat = 'Ποδόσφαιρο';
-            else if (norm === 'basketball' || norm === 'basket') dbCat = 'Μπάσκετ';
-            else if (norm === 'amateur' || norm === 'erasitechnis') dbCat = 'Ερασιτέχνης';
-            else if (norm === 'opinion' || norm === 'apopsi') dbCat = 'Άποψη';
-            else if (norm === 'transfers' || norm === 'metagrafes') dbCat = 'Μεταγραφές';
-
-            query = query.eq('category', dbCat);
+            const categoryMap = {
+              'football': 'ΠΟΔΟΣΦΑΙΡΟ',
+              'podosfairo': 'ΠΟΔΟΣΦΑΙΡΟ',
+              'basket': 'ΜΠΑΣΚΕΤ',
+              'erasitexnis': 'ΕΡΑΣΙΤΕΧΝΗΣ',
+              'apopsi': 'ΑΠΟΨΗ',
+              'metagrafes': 'ΜΕΤΑΓΡΑΦΕΣ',
+              'agones': 'ΑΓΩΝΕΣ'
+            };
+            
+            const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
+            query = query.eq('category', dbCategory);
         }
         
         const { data, error } = await query;
