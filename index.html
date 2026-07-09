@@ -677,10 +677,10 @@
             try {
                 let apiCat = '';
                 if (activeCategory === 'Ποδόσφαιρο') apiCat = 'football';
-                else if (activeCategory === 'Μπάσκετ') apiCat = 'basketball';
-                else if (activeCategory === 'Ερασιτέχνης') apiCat = 'amateur';
-                else if (activeCategory === 'Άποψη') apiCat = 'opinion';
-                else if (activeCategory === 'Μεταγραφές') apiCat = 'transfers';
+                else if (activeCategory === 'Μπάσκετ') apiCat = 'basket';
+                else if (activeCategory === 'Ερασιτέχνης') apiCat = 'erasitexnis';
+                else if (activeCategory === 'Άποψη') apiCat = 'apopsi';
+                else if (activeCategory === 'Μεταγραφές') apiCat = 'metagrafes';
 
                 console.log("[Frontend] Initiating fetch to /api/articles", { category: apiCat, page: currentPage });
                 const response = await fetch(`/api/articles?category=${apiCat}&page=${currentPage}`);
