@@ -19,8 +19,16 @@ module.exports = async (req, res) => {
     const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rctltbuiitdnqlxizlym.supabase.co';
     const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
     
-    const url = rawUrl.trim().replace(/^['"]|['"]$/g, '');
+    let url = rawUrl.trim().replace(/^['"]|['"]$/g, '');
     const key = rawKey.trim().replace(/^['"]|['"]$/g, '');
+
+    // Failsafe: Correct protocol typos automatically
+    if (url.startsWith('s://')) {
+        url = 'https://' + url.slice(4);
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
 
     if (!url || !key) {
         return res.status(500).json({ error: 'Database configuration missing.' });
