@@ -106,7 +106,7 @@ module.exports = async (req, res) => {
             'agones': 'ΑΓΩΝΕΣ'
           };
           const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
-          query = query.eq('category', dbCategory);
+          query = query.ilike('category', `%${dbCategory}%`);
         }
 
         query = query.range(from, to);
@@ -114,13 +114,13 @@ module.exports = async (req, res) => {
         const { data, error } = await query;
         if (error) throw error;
 
-        // Apply dynamic Jaccard similarity title deduplication (40-minute window)
+        // Apply dynamic Jaccard similarity title deduplication (120-minute window)
         const uniqueArticles = [];
         for (const current of (data || [])) {
             let isDuplicate = false;
             for (const existing of uniqueArticles) {
                 const timeDiffMins = Math.abs(new Date(current.created_at) - new Date(existing.created_at)) / (1000 * 60);
-                if (timeDiffMins <= 40) {
+                if (timeDiffMins <= 120) {
                     if (areSimilar(current.title, existing.title)) {
                         isDuplicate = true;
                         break;

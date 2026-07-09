@@ -738,21 +738,22 @@
             const path = window.location.pathname.replace(/\/$/, '').toLowerCase();
             let catParam = null;
             if (path.endsWith('/podosfairo')) catParam = 'football';
-            else if (path.endsWith('/basket')) catParam = 'basketball';
-            else if (path.endsWith('/erasitechnis')) catParam = 'amateur';
-            else if (path.endsWith('/apopsi')) catParam = 'opinion';
-            else if (path.endsWith('/metagrafes')) catParam = 'transfers';
+            else if (path.endsWith('/basket')) catParam = 'basket';
+            else if (path.endsWith('/erasitechnis')) catParam = 'erasitexnis';
+            else if (path.endsWith('/erasitexnis')) catParam = 'erasitexnis';
+            else if (path.endsWith('/apopsi')) catParam = 'apopsi';
+            else if (path.endsWith('/metagrafes')) catParam = 'metagrafes';
 
             if (!catParam) {
-                const params = new URLSearchParams(window.location.search);
-                catParam = params.get('cat');
+                const urlParams = new URLSearchParams(window.location.search);
+                catParam = urlParams.get('category') || '';
             }
 
             if (catParam === 'football') filterFeedWithoutPush('Ποδόσφαιρο');
             else if (catParam === 'basketball' || catParam === 'basket') filterFeedWithoutPush('Μπάσκετ');
-            else if (catParam === 'amateur' || catParam === 'erasitechnis') filterFeedWithoutPush('Ερασιτέχνης');
-            else if (catParam === 'transfers') filterFeedWithoutPush('Μεταγραφές');
-            else if (catParam === 'opinion') filterFeedWithoutPush('Άποψη');
+            else if (catParam === 'amateur' || catParam === 'erasitechnis' || catParam === 'erasitexnis') filterFeedWithoutPush('Ερασιτέχνης');
+            else if (catParam === 'transfers' || catParam === 'metagrafes') filterFeedWithoutPush('Μεταγραφές');
+            else if (catParam === 'opinion' || catParam === 'apopsi') filterFeedWithoutPush('Άποψη');
             else {
                 filterFeedWithoutPush(null);
             }

@@ -8,8 +8,40 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Quill stylesheet and library -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        
+        /* Quill Dark Mode Customization */
+        .ql-toolbar.ql-snow {
+            border-color: rgba(63, 73, 64, 0.3) !important;
+            background-color: #1a1c20 !important;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .ql-container.ql-snow {
+            border-color: rgba(63, 73, 64, 0.3) !important;
+            border-radius: 0 0 12px 12px !important;
+            font-size: 15px !important;
+            font-family: 'Geist', sans-serif !important;
+            color: #e2e2e8 !important;
+            background-color: #1e2024 !important;
+        }
+        .ql-editor.ql-blank::before {
+            color: rgba(226, 226, 232, 0.3) !important;
+            font-style: normal !important;
+        }
+        .ql-snow .ql-stroke {
+            stroke: #bfc9bd !important;
+        }
+        .ql-snow .ql-fill {
+            fill: #bfc9bd !important;
+        }
+        .ql-snow .ql-picker {
+            color: #bfc9bd !important;
+        }
+        
         body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
         .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
@@ -385,9 +417,6 @@
 
                     <!-- Toolbar -->
                     <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b border-outline-variant/30">
-                        <button class="toolbar-btn" onclick="insertFormat('\n\n')" title="Νέα Παράγραφος">
-                            <span class="material-symbols-outlined" style="font-size:16px">format_paragraph</span> Παράγραφος
-                        </button>
                         <button class="toolbar-btn" onclick="insertText('⚽ ')" title="Football emoji">⚽</button>
                         <button class="toolbar-btn" onclick="insertText('🏀 ')" title="Basketball emoji">🏀</button>
                         <button class="toolbar-btn" onclick="insertText('🔥 ')" title="Fire emoji">🔥</button>
@@ -399,9 +428,8 @@
                         </button>
                     </div>
 
-                    <textarea id="op-content" class="editor-input" rows="16"
-                        placeholder="Γράψε το άρθρο σου εδώ. Χρησιμοποίησε κενές γραμμές για να διαχωρίσεις τις παραγράφους.&#10;&#10;π.χ.&#10;Η επιστροφή του Ατάμαν στον πάγκο του Παναθηναϊκού AKTOR αποτελεί μια από τις πιο σημαντικές κινήσεις της δεκαετίας...&#10;&#10;Η εμπειρία του στη EuroLeague, σε συνδυασμό με την ικανότητά του να αξιοποιεί ταλέντα, τον καθιστά ιδανική επιλογή..."
-                        oninput="updateWordCount()"></textarea>
+                    <!-- Quill Editor -->
+                    <div id="editor-container"></div>
                     <div class="flex justify-between mt-2">
                         <span class="word-count" id="word-count">0 λέξεις</span>
                         <span class="word-count" id="char-count">0 χαρακτήρες</span>
@@ -783,9 +811,35 @@ function checkPassword() {
 }
 
 // ── Init ────────────────────────────────────────────────────────────────────
+let quill = null;
+let editingArticleId = null;
+
 function initEditor() {
     db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
+    // Initialize Quill
+    quill = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Style elements after Quill render to fit dark theme
+    const qEditor = document.querySelector('.ql-editor');
+    if (qEditor) {
+        qEditor.style.minHeight = '320px';
+    }
+
+    quill.on('text-change', () => {
+        updateWordCount();
+        updatePreviewCard();
+    });
+
     // Show admin tabs and load roster datasets
     const tabs = document.getElementById('admin-tabs');
     if (tabs) tabs.classList.remove('hidden');
@@ -794,13 +848,10 @@ function initEditor() {
     loadOpinionArticles();
     updateWordCount();
     updateSummaryCount();
+    
     document.getElementById('op-title').addEventListener('input', () => {
         const v = document.getElementById('op-title').value;
         document.getElementById('title-count').textContent = `${v.length} / 250`;
-        updatePreviewCard();
-    });
-    document.getElementById('op-content').addEventListener('input', () => {
-        updateWordCount();
         updatePreviewCard();
     });
     document.getElementById('op-summary').addEventListener('input', () => {
@@ -808,8 +859,6 @@ function initEditor() {
         updatePreviewCard();
     });
 }
-
-
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function toggleDrawer() {
@@ -822,10 +871,10 @@ function toggleDrawer() {
 }
 
 function updateWordCount() {
-    const text = document.getElementById('op-content').value;
+    const text = quill ? quill.getText() : '';
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     document.getElementById('word-count').textContent = `${words} λέξεις`;
-    document.getElementById('char-count').textContent = `${text.length} χαρακτήρες`;
+    document.getElementById('char-count').textContent = `${Math.max(0, text.length - 1)} χαρακτήρες`;
 }
 
 function updateSummaryCount() {
@@ -833,22 +882,21 @@ function updateSummaryCount() {
     document.getElementById('summary-count').textContent = `${len} / 400`;
 }
 
-function insertFormat(txt) {
-    const ta = document.getElementById('op-content');
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const val = ta.value;
-    ta.value = val.substring(0, start) + txt + val.substring(end);
-    ta.selectionStart = ta.selectionEnd = start + txt.length;
-    ta.focus();
-    updateWordCount();
+function insertText(txt) {
+    if (quill) {
+        const range = quill.getSelection();
+        if (range) {
+            quill.insertText(range.index, txt);
+            quill.setSelection(range.index + txt.length);
+        } else {
+            quill.insertText(quill.getLength() - 1, txt);
+        }
+    }
 }
-
-function insertText(txt) { insertFormat(txt); }
 
 function clearContent() {
     if (confirm('Θέλεις σίγουρα να διαγράψεις το κείμενο;')) {
-        document.getElementById('op-content').value = '';
+        if (quill) quill.setContents([]);
         updateWordCount();
     }
 }
@@ -883,9 +931,10 @@ function updatePreviewCard() {
 
 function previewArticle() {
     const title = document.getElementById('op-title').value.trim();
-    const content = document.getElementById('op-content').value.trim();
+    const content = quill ? quill.root.innerHTML.trim() : '';
+    const textOnly = quill ? quill.getText().trim() : '';
     const imageUrl = document.getElementById('op-image').value.trim();
-    if (!title && !content) { alert('Δεν υπάρχει περιεχόμενο για προεπισκόπηση.'); return; }
+    if (!title && !textOnly) { alert('Δεν υπάρχει περιεχόμενο για προεπισκόπηση.'); return; }
 
     document.getElementById('modal-title').textContent = title || '(Χωρίς τίτλο)';
     const imgWrap = document.getElementById('modal-image-wrap');
@@ -893,10 +942,8 @@ function previewArticle() {
     if (imageUrl) { img.src = imageUrl; imgWrap.classList.remove('hidden'); }
     else imgWrap.classList.add('hidden');
 
-    // Render paragraphs
     const body = document.getElementById('modal-body');
-    const paragraphs = content.split(/\n{2,}/).map(p => p.replace(/\n/g,' ').trim()).filter(Boolean);
-    body.innerHTML = paragraphs.map(p => `<p style="margin-bottom:1.4em">${p}</p>`).join('');
+    body.innerHTML = content;
 
     document.getElementById('preview-modal').classList.remove('hidden');
 }
@@ -904,12 +951,13 @@ function previewArticle() {
 // ── Publish ─────────────────────────────────────────────────────────────────
 async function publishArticle() {
     const title = document.getElementById('op-title').value.trim();
-    const content = document.getElementById('op-content').value.trim();
+    const content = quill ? quill.root.innerHTML.trim() : '';
+    const textOnly = quill ? quill.getText().trim() : '';
     const summary = document.getElementById('op-summary').value.trim();
     const imageUrl = document.getElementById('op-image').value.trim() || DEFAULT_IMG;
 
     if (!title) { showStatus('error', 'Ο τίτλος είναι υποχρεωτικός.'); return; }
-    if (!content || content.length < 50) { showStatus('error', 'Το κείμενο πρέπει να έχει τουλάχιστον 50 χαρακτήρες.'); return; }
+    if (!textOnly || textOnly.length < 10) { showStatus('error', 'Το κείμενο πρέπει να έχει τουλάχιστον 10 χαρακτήρες.'); return; }
 
     const extraCategories = [];
     if (document.getElementById('cat-football').checked) extraCategories.push('Ποδόσφαιρο');
@@ -925,18 +973,32 @@ async function publishArticle() {
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="animation:spin 1s linear infinite">refresh</span> Δημοσίευση...';
 
-    const { data, error } = await db.from('articles').insert({
-        title,
-        summary: summary || content.substring(0, 300),
-        content,
-        source_url: `opinion://manual-${Date.now()}`,
-        image_url: imageUrl,
-        category: finalCategory,
-        group_id: crypto.randomUUID(),
-        bullets: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    }).select('id');
+    let result;
+    if (editingArticleId) {
+        result = await db.from('articles').update({
+            title,
+            summary: summary || textOnly.substring(0, 300),
+            content,
+            image_url: imageUrl,
+            category: finalCategory,
+            updated_at: new Date().toISOString()
+        }).eq('id', editingArticleId).select('id');
+    } else {
+        result = await db.from('articles').insert({
+            title,
+            summary: summary || textOnly.substring(0, 300),
+            content,
+            source_url: `opinion://manual-${Date.now()}`,
+            image_url: imageUrl,
+            category: finalCategory,
+            group_id: crypto.randomUUID(),
+            bullets: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        }).select('id');
+    }
+
+    const { data, error } = result;
 
     btn.disabled = false;
     btn.innerHTML = '<span class="material-symbols-outlined">publish</span> Δημοσίευση Άρθρου';
@@ -944,10 +1006,13 @@ async function publishArticle() {
     if (error) {
         showStatus('error', `Σφάλμα δημοσίευσης: ${error.message}`);
     } else {
-        showStatus('success', `✅ Το άρθρο δημοσιεύτηκε επιτυχώς! (id: ${data[0].id.substring(0,8)}...)`);
+        showStatus('success', `✅ Το άρθρο αποθηκεύτηκε επιτυχώς!`);
+        
+        editingArticleId = null;
+        
         // Clear form
         document.getElementById('op-title').value = '';
-        document.getElementById('op-content').value = '';
+        if (quill) quill.setContents([]);
         document.getElementById('op-summary').value = '';
         document.getElementById('op-image').value = '';
         document.getElementById('cat-football').checked = false;
@@ -976,7 +1041,7 @@ async function loadOpinionArticles() {
     const list = document.getElementById('opinions-list');
     if (!db) return;
     const { data, error } = await db.from('articles')
-        .select('id, title, created_at, image_url, summary')
+        .select('id, title, created_at, image_url, summary, category')
         .ilike('category', '%Άποψη%')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -991,27 +1056,67 @@ async function loadOpinionArticles() {
         const dateStr = date.toLocaleDateString('el-GR', { day:'numeric', month:'short', year:'numeric' });
         const img = a.image_url || DEFAULT_IMG;
         return `
-        <div class="opinion-card group" onclick="window.location.href='article.html?id=${a.id}'">
+        <div class="opinion-card group">
             <div class="flex gap-3 items-start p-4">
-                <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+                <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
                     <img src="${img}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
-                <div class="flex-1 min-w-0">
+                <div class="flex-1 min-w-0 cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
                     <p class="text-xs text-primary font-bold uppercase tracking-wider mb-1">✍️ ${dateStr}</p>
                     <h4 class="text-sm font-semibold leading-snug line-clamp-2 text-on-surface group-hover:text-primary transition-colors">${a.title}</h4>
                 </div>
-                <button onclick="event.stopPropagation(); deleteOpinion('${a.id}')" class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-all opacity-0 group-hover:opacity-100" title="Διαγραφή">
-                    <span class="material-symbols-outlined" style="font-size:16px">delete</span>
-                </button>
+                <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onclick="editOpinion('${a.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-primary hover:bg-primary/10 transition-all" title="Επεξεργασία">
+                        <span class="material-symbols-outlined" style="font-size:16px">edit</span>
+                    </button>
+                    <button onclick="deleteOpinion('${a.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-all" title="Διαγραφή">
+                        <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                    </button>
+                </div>
             </div>
         </div>`;
     }).join('');
 }
 
+async function editOpinion(id) {
+    editingArticleId = id;
+    const { data, error } = await db.from('articles').select('*').eq('id', id).single();
+    if (error || !data) {
+        alert('Σφάλμα κατά την ανάκτηση του άρθρου.');
+        return;
+    }
+    
+    document.getElementById('op-title').value = data.title || '';
+    document.getElementById('op-summary').value = data.summary || '';
+    document.getElementById('op-image').value = data.image_url === DEFAULT_IMG ? '' : (data.image_url || '');
+    
+    if (quill) {
+        quill.root.innerHTML = data.content || '';
+    }
+    
+    const cat = data.category || '';
+    document.getElementById('cat-football').checked = cat.includes('Ποδόσφαιρο');
+    document.getElementById('cat-basketball').checked = cat.includes('Μπάσκετ');
+    document.getElementById('cat-amateur').checked = cat.includes('Ερασιτέχνης');
+    document.getElementById('cat-transfers').checked = cat.includes('Μεταγραφές');
+    
+    document.getElementById('publish-btn').innerHTML = '<span class="material-symbols-outlined">save</span> Αποθήκευση Αλλαγών';
+    
+    document.getElementById('op-title').scrollIntoView({ behavior: 'smooth' });
+    
+    updateWordCount();
+    updateSummaryCount();
+    previewImage();
+}
+
 async function deleteOpinion(id) {
-    if (!confirm('Διαγραφή αυτού του άρθρου;')) return;
-    await db.from('articles').delete().eq('id', id);
-    loadOpinionArticles();
+    if (!confirm('Θέλεις σίγουρα να διαγράψεις αυτό το άρθρο;')) return;
+    const { error } = await db.from('articles').delete().eq('id', id);
+    if (error) {
+        alert('Σφάλμα διαγραφής: ' + error.message);
+    } else {
+        loadOpinionArticles();
+    }
 }
 
 // ── Auto-spin animation ──────────────────────────────────────────────────────

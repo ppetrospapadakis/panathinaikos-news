@@ -190,7 +190,7 @@
                 </div>
 
                 <!-- ⑤ MINIMAL SOURCE REFERENCE BUTTON -->
-                <div class="border-t border-outline-variant/30 pt-10 text-center">
+                <div id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center">
                     <p class="font-body-sm text-body-sm text-on-surface-variant mb-5">Διαβάστε σχετικό άρθρο στο:</p>
                     <a id="article-original-link" href="#" target="_blank" rel="noopener noreferrer"
                        class="inline-flex items-center gap-3 px-8 py-4 bg-surface-container border border-outline-variant text-on-surface font-body text-body rounded-2xl hover:bg-surface-container-high hover:border-primary/40 active:scale-[0.98] transition-all">
@@ -443,26 +443,38 @@
                 : '<p class="italic text-on-surface-variant/60">Δεν υπάρχει διαθέσιμο εκτενές κείμενο. Διαβάστε το πλήρες ρεπορτάζ στην πηγή.</p>';
 
             // ⑤ Source reference button (subtle, at bottom)
-            const domainInfo = (() => {
-                try {
-                    const host = new URL(article.source_url).hostname.replace('www.','').split('.')[0].toLowerCase();
-                    const portals = {
-                        'sdna': { name: 'SDNA', color: '#00cc66' },
-                        'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
-                        'sport24': { name: 'Sport24', color: '#ff3333' },
-                        'sportal': { name: 'Sportal.gr', color: '#ff9900' },
-                        'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
-                        'athletiko': { name: 'Athletiko', color: '#0066cc' }
-                    };
-                    return portals[host] || { name: host.toUpperCase(), color: '#84d999' };
-                } catch(e) {
-                    return { name: 'Portal', color: '#84d999' };
+            const sourceContainer = document.getElementById('article-source-container');
+            const isManual = (article.source_url || '').startsWith('MANUAL') || (article.category || '').includes('ΑΠΟΨΗ');
+            if (isManual) {
+                if (sourceContainer) sourceContainer.style.display = 'none';
+            } else {
+                if (sourceContainer) sourceContainer.style.display = 'block';
+                const domainInfo = (() => {
+                    try {
+                        const host = new URL(article.source_url).hostname.replace('www.','').split('.')[0].toLowerCase();
+                        const portals = {
+                            'sdna': { name: 'SDNA', color: '#00cc66' },
+                            'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
+                            'sport24': { name: 'Sport24', color: '#ff3333' },
+                            'sportal': { name: 'Sportal.gr', color: '#ff9900' },
+                            'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
+                            'athletiko': { name: 'Athletiko', color: '#0066cc' }
+                        };
+                        return portals[host] || { name: host.toUpperCase(), color: '#84d999' };
+                    } catch(e) {
+                        return { name: 'Portal', color: '#84d999' };
+                    }
+                })();
+                const sourceSpan = document.getElementById('article-source-name');
+                if (sourceSpan) {
+                    sourceSpan.textContent = domainInfo.name;
+                    sourceSpan.style.color = domainInfo.color;
                 }
-            })();
-            const sourceSpan = document.getElementById('article-source-name');
-            sourceSpan.textContent = domainInfo.name;
-            sourceSpan.style.color = domainInfo.color;
-            document.getElementById('article-original-link').href = article.source_url;
+                const originalLink = document.getElementById('article-original-link');
+                if (originalLink) {
+                    originalLink.href = article.source_url;
+                }
+            }
 
             // Show article, hide skeleton
             document.getElementById('article-skeleton').style.display = 'none';
