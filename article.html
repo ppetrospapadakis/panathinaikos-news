@@ -73,7 +73,7 @@
             <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a class="font-h2 text-h2 font-bold tracking-tighter text-primary" href="/">PANATHINAIKOS</a>
+            <a class="font-h2 text-h2 font-bold tracking-tighter text-primary" href="/">PanathinaikosNews</a>
             <a href="/" class="flex items-center gap-2 px-5 py-2 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span class="text-sm">Επιστροφή</span>
@@ -84,7 +84,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a class="font-h3 text-h3 font-bold text-primary" href="/">panathinaikos</a>
+            <a class="font-h3 text-h3 font-bold text-primary" href="/">PanathinaikosNews</a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
@@ -115,7 +115,7 @@
             </a>
         </nav>
         <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
-            <p class="font-caption text-caption text-on-surface-variant/50">© 2024 Panathinaikos Editorial</p>
+            <p class="font-caption text-caption text-on-surface-variant/50">© 2024 PanathinaikosNews Editorial</p>
             <a href="/opinion.html" class="text-on-surface-variant/30 hover:text-primary transition-colors" title="Admin Panel">
                 <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
             </a>
@@ -362,7 +362,7 @@
 
             // ② Hero Image
             let imageUrl = article.image_url || '';
-            const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDWqLWdMtuYcKiqRBma1U3nbxLwo4s_LzWCRXGbhUk-hwbLCLpyJBvisEVIxAkafTxr--Na_6-HCaJwViznYo-evYvrmshakfxaQsm7ozviLuvdS7swiPkDUkMLDSS6qrhzlxZxizr_IHS3SCZJM8I8qTRX2SUlET9W3bVjeOlWNe7_f4bUtOyn6gJcy_pKwQQ994O0mJ_YI0cs4tJJ1Dlwz9B7Lzk5wo5qIKk8vUMgIZPJ5glPisSWJJxaaZKKS_6iaukJSB059iM';
+            const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
             if (imageUrl) {
                 try {
                     const u = new URL(imageUrl);
