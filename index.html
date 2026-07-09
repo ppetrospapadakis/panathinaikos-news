@@ -712,7 +712,7 @@
                     return a;
                 });
 
-                if (processed.length < 20) {
+                if (processed.length === 0) {
                     hasMore = false;
                 }
 
@@ -749,8 +749,8 @@
             }
 
             if (catParam === 'football') filterFeedWithoutPush('Ποδόσφαιρο');
-            else if (catParam === 'basketball') filterFeedWithoutPush('Μπάσκετ');
-            else if (catParam === 'amateur') filterFeedWithoutPush('Ερασιτέχνης');
+            else if (catParam === 'basketball' || catParam === 'basket') filterFeedWithoutPush('Μπάσκετ');
+            else if (catParam === 'amateur' || catParam === 'erasitechnis') filterFeedWithoutPush('Ερασιτέχνης');
             else if (catParam === 'transfers') filterFeedWithoutPush('Μεταγραφές');
             else if (catParam === 'opinion') filterFeedWithoutPush('Άποψη');
             else {
