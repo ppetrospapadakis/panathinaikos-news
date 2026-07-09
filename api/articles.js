@@ -72,18 +72,17 @@ module.exports = async (req, res) => {
             .range(from, to);
           
         if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
-            const categoryMap = {
-              'football': 'ΠΟΔΟΣΦΑΙΡΟ',
-              'podosfairo': 'ΠΟΔΟΣΦΑΙΡΟ',
-              'basket': 'ΜΠΑΣΚΕΤ',
-              'erasitexnis': 'ΕΡΑΣΙΤΕΧΝΗΣ',
-              'apopsi': 'ΑΠΟΨΗ',
-              'metagrafes': 'ΜΕΤΑΓΡΑΦΕΣ',
-              'agones': 'ΑΓΩΝΕΣ'
-            };
-            
-            const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
-            query = query.eq('category', dbCategory);
+          const categoryMap = {
+            'football': 'ΠΟΔΟΣΦΑΙΡΟ',
+            'podosfairo': 'ΠΟΔΟΣΦΑΙΡΟ',
+            'basket': 'ΜΠΑΣΚΕΤ',
+            'erasitexnis': 'ΕΡΑΣΙΤΕΧΝΗΣ',
+            'apopsi': 'ΑΠΟΨΗ',
+            'metagrafes': 'ΜΕΤΑΓΡΑΦΕΣ',
+            'agones': 'ΑΓΩΝΕΣ'
+          };
+          const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
+          query = query.eq('category', dbCategory);
         }
         
         const { data, error } = await query;
