@@ -80,6 +80,7 @@ module.exports = async (req, res) => {
                 .eq('id', id)
                 .single();
             if (error) throw error;
+            return res.status(200).json(data);
         }
 
         // 1b. Fetch all own opinion articles (for dedicated section)
@@ -127,19 +128,25 @@ module.exports = async (req, res) => {
         const { data, error } = await query;
         if (error) throw error;
 
-        // Apply dynamic Jaccard similarity title deduplication (120-minute window)
+        // Apply dynamic Jaccard similarity title deduplication (40-minute window)
         const uniqueArticles = [];
         for (const current of (data || [])) {
             let isDuplicate = false;
-            for (const existing of uniqueArticles) {
-                const timeDiffMins = Math.abs(new Date(current.created_at) - new Date(existing.created_at)) / (1000 * 60);
-                if (timeDiffMins <= 120) {
-                    if (areSimilar(current.title, existing.title)) {
-                        isDuplicate = true;
-                        break;
+            const currentIsOwn = (current.source_url || '').toLowerCase().includes('manual') || 
+                                 (current.source_url || '').toLowerCase().includes('opinion://manual');
+            
+            if (!currentIsOwn) {
+                for (const existing of uniqueArticles) {
+                    const timeDiffMins = Math.abs(new Date(current.created_at) - new Date(existing.created_at)) / (1000 * 60);
+                    if (timeDiffMins <= 40) {
+                        if (areSimilar(current.title, existing.title)) {
+                            isDuplicate = true;
+                            break;
+                        }
                     }
                 }
             }
+            
             if (!isDuplicate) {
                 uniqueArticles.push(current);
             }

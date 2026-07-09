@@ -4,7 +4,10 @@ const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 const supabase = createClient(url, key);
 
 async function check() {
-  const { data, error } = await supabase.from('articles').select('*').eq('id', '559acaaf-9470-45fd-a02e-6fa314901ab2').single();
+  const { data, error } = await supabase.from('articles')
+    .select('*')
+    .eq('id', '6f9820b3-2348-4059-84f5-97ff56d6af87')
+    .single();
   if (error) {
     console.error(error);
   } else {
