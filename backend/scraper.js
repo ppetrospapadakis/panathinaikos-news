@@ -288,6 +288,24 @@ function sanitizeImageUrl(scrapedImg) {
     return cleaned;
 }
 
+// ─── Dynamic Category Router ─────────────────────────────────────────────────
+function detectCategoryFromUrl(url, categoryHint) {
+    const urlLower = url.toLowerCase();
+    
+    // Explicit sport keywords in URL path
+    if (/\/(polo|volleyball|bolei|handball|erasitexnis|erasitechnis|amateur|water-polo|kolymvisi|stivos|skaki|ping-pong|skopia|pin-pon)\//.test(urlLower)) {
+        return 'Ερασιτέχνης';
+    }
+    if (/\/(podosfairo|football|soccer|superleague)\//.test(urlLower)) {
+        return 'Ποδόσφαιρο';
+    }
+    if (/\/(mpasket|basket|basketball|euroleague)\//.test(urlLower)) {
+        return 'Μπάσκετ';
+    }
+    
+    return categoryHint;
+}
+
 // ─── Scrape individual article page ───────────────────────────────────────────
 async function scrapeArticlePage(url, categoryHint) {
     try {
@@ -758,7 +776,7 @@ async function main() {
                 content:    longFormContent,
                 source_url: articleUrl,
                 image_url:  scraped.imageUrl,
-                category:   target.category,
+                category:   detectCategoryFromUrl(articleUrl, target.category),
                 created_at: scraped.created_at,
                 group_id,
                 bullets,
