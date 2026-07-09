@@ -7,6 +7,17 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
   try {
+    if (req.query.id) {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('id', req.query.id)
+        .single();
+      if (error) throw error;
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+      return res.status(200).json(data);
+    }
+
     const page = parseInt(req.query.page) || 1;
     const from = (page - 1) * 20;
     const to = from + 19;

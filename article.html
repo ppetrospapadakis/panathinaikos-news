@@ -443,11 +443,25 @@
                 : '<p class="italic text-on-surface-variant/60">Δεν υπάρχει διαθέσιμο εκτενές κείμενο. Διαβάστε το πλήρες ρεπορτάζ στην πηγή.</p>';
 
             // ⑤ Source reference button (subtle, at bottom)
-            const domain = (() => {
-                try { return new URL(article.source_url).hostname.replace('www.','').split('.')[0].toUpperCase(); }
-                catch(e) { return 'Portal'; }
+            const domainInfo = (() => {
+                try {
+                    const host = new URL(article.source_url).hostname.replace('www.','').split('.')[0].toLowerCase();
+                    const portals = {
+                        'sdna': { name: 'SDNA', color: '#00cc66' },
+                        'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
+                        'sport24': { name: 'Sport24', color: '#ff3333' },
+                        'sportal': { name: 'Sportal.gr', color: '#ff9900' },
+                        'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
+                        'athletiko': { name: 'Athletiko', color: '#0066cc' }
+                    };
+                    return portals[host] || { name: host.toUpperCase(), color: '#84d999' };
+                } catch(e) {
+                    return { name: 'Portal', color: '#84d999' };
+                }
             })();
-            document.getElementById('article-source-name').textContent = domain;
+            const sourceSpan = document.getElementById('article-source-name');
+            sourceSpan.textContent = domainInfo.name;
+            sourceSpan.style.color = domainInfo.color;
             document.getElementById('article-original-link').href = article.source_url;
 
             // Show article, hide skeleton
