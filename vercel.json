@@ -4,6 +4,7 @@
     { "source": "/basket", "destination": "/index.html?category=basket" },
     { "source": "/podosfairo", "destination": "/index.html?category=football" },
     { "source": "/erasitexnis", "destination": "/index.html?category=erasitexnis" },
+    { "source": "/erasitechnis", "destination": "/index.html?category=erasitexnis" },
     { "source": "/apopsi", "destination": "/index.html?category=apopsi" },
     { "source": "/metagrafes", "destination": "/index.html?category=metagrafes" },
     { "source": "/agones", "destination": "/index.html?category=agones" },

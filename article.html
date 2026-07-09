@@ -444,7 +444,13 @@
 
             // ⑤ Source reference button (subtle, at bottom)
             const sourceContainer = document.getElementById('article-source-container');
-            const isManual = (article.source_url || '').startsWith('MANUAL') || (article.category || '').includes('ΑΠΟΨΗ');
+            const sourceUrl = (article.source_url || '').toLowerCase();
+            const categoryStr = (article.category || '').toLowerCase();
+            const isManual = sourceUrl.startsWith('manual') || 
+                             sourceUrl.includes('opinion://manual') || 
+                             sourceUrl.includes('opinion://system-roster') ||
+                             categoryStr.includes('άποψη') || 
+                             categoryStr.includes('apopsi');
             if (isManual) {
                 if (sourceContainer) sourceContainer.style.display = 'none';
             } else {

@@ -97,13 +97,16 @@ module.exports = async (req, res) => {
           
         if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
           const categoryMap = {
-            'football': 'ΠΟΔΟΣΦΑΙΡΟ',
-            'podosfairo': 'ΠΟΔΟΣΦΑΙΡΟ',
-            'basket': 'ΜΠΑΣΚΕΤ',
-            'erasitexnis': 'ΕΡΑΣΙΤΕΧΝΗΣ',
-            'apopsi': 'ΑΠΟΨΗ',
-            'metagrafes': 'ΜΕΤΑΓΡΑΦΕΣ',
-            'agones': 'ΑΓΩΝΕΣ'
+            'football': 'Ποδόσφαιρο',
+            'podosfairo': 'Ποδόσφαιρο',
+            'basket': 'Μπάσκετ',
+            'basketball': 'Μπάσκετ',
+            'erasitexnis': 'Ερασιτέχνης',
+            'erasitechnis': 'Ερασιτέχνης',
+            'apopsi': 'Άποψη',
+            'metagrafes': 'Μεταγραφές',
+            'transfers': 'Μεταγραφές',
+            'agones': 'Αγώνες'
           };
           const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
           query = query.ilike('category', `%${dbCategory}%`);
