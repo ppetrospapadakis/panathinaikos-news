@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
 module.exports = async (req, res) => {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,34 +15,40 @@ module.exports = async (req, res) => {
     // Set high-performance Edge caching headers
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
 
-    const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const url = rawUrl ? rawUrl.trim().replace(/^['"]|['"]$/g, '') : '';
-    const key = rawKey ? rawKey.trim().replace(/^['"]|['"]$/g, '') : '';
+    // Supabase URL & Anon Key with fallback values
+    const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rctltbuiitdnqlxizlym.supabase.co';
+    const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+    
+    const url = rawUrl.trim().replace(/^['"]|['"]$/g, '');
+    const key = rawKey.trim().replace(/^['"]|['"]$/g, '');
 
     if (!url || !key) {
-        return res.status(500).json({ 
-            error: "Missing Supabase Environment Variables on Vercel Settings",
-            details: { hasUrl: !!url, hasKey: !!key }
-        });
+        return res.status(500).json({ error: 'Database configuration missing.' });
     }
-
-    const supabase = createClient(url, key);
 
     // 1. Single article fetch support (if id parameter is provided)
     const { id } = req.query;
     if (id) {
         try {
-            const { data, error } = await supabase
-                .from('articles')
-                .select('*')
-                .eq('id', id)
-                .single();
+            const targetUrl = `${url}/rest/v1/articles?select=*&id=eq.${encodeURIComponent(id)}`;
+            const response = await fetch(targetUrl, {
+                headers: {
+                    'apikey': key,
+                    'Authorization': `Bearer ${key}`
+                }
+            });
 
-            if (error) {
-                return res.status(error.code === 'PGRST116' ? 404 : 500).json({ error: error.message });
+            if (!response.ok) {
+                const errText = await response.text();
+                return res.status(response.status).json({ error: errText });
             }
-            return res.status(200).json(data);
+
+            const data = await response.json();
+            if (!data || data.length === 0) {
+                return res.status(404).json({ error: 'Article not found.' });
+            }
+
+            return res.status(200).json(data[0]);
         } catch (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -79,46 +83,52 @@ module.exports = async (req, res) => {
     const isCategoryEmpty = !categoryParam || categoryParam === 'all' || categoryParam === 'null' || categoryParam === 'undefined';
 
     try {
-        console.log("[api/articles] Querying category:", dbCategory || (isCategoryEmpty ? "ALL" : categoryParam), "PageNum:", pageNum, "From:", from, "To:", to);
+        console.log("[api/articles] Native Fetching category:", dbCategory || (isCategoryEmpty ? "ALL" : categoryParam), "PageNum:", pageNum, "From:", from, "To:", to);
 
-        let query = supabase
-            .from('articles')
-            .select('*')
-            .not('category', 'eq', 'SystemRoster')
-            .not('category', 'eq', 'SYSTEMROSTER')
-            .order('created_at', { ascending: false })
-            .range(from, to);
+        let targetUrl = `${url}/rest/v1/articles?select=*&category=not.eq.SystemRoster&category=not.eq.SYSTEMROSTER&order=created_at.desc`;
 
         if (!isCategoryEmpty) {
             if (dbCategory) {
-                query = query.eq('category', dbCategory);
+                targetUrl += `&category=eq.${encodeURIComponent(dbCategory)}`;
             } else {
-                query = query.ilike('category', `%${categoryParam}%`);
+                targetUrl += `&category=ilike.*${encodeURIComponent(categoryParam)}*`;
             }
         }
 
-        let { data, error } = await query;
-        console.log("[api/articles] Supabase response rows count:", data ? data.length : 0, "Error:", error);
+        const response = await fetch(targetUrl, {
+            headers: {
+                'apikey': key,
+                'Authorization': `Bearer ${key}`,
+                'Range': `${from}-${to}`
+            }
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Supabase REST API Error: ${errText}`);
+        }
+
+        let data = await response.json();
+        console.log("[api/articles] Supabase REST response rows count:", data ? data.length : 0);
 
         // Emergency Fallback: if data is empty on page 1, fetch top 20 rows ignoring filters
-        if ((!data || data.length === 0) && pageNum === 1 && !error) {
-            console.warn("[api/articles] Emergency fallback triggered: no rows found for page 1 under active filters. Fetching raw top 20 rows.");
-            const fallbackQuery = supabase
-                .from('articles')
-                .select('*')
-                .not('category', 'eq', 'SystemRoster')
-                .not('category', 'eq', 'SYSTEMROSTER')
-                .order('created_at', { ascending: false })
-                .range(0, 19);
-            const fallbackRes = await fallbackQuery;
-            if (!fallbackRes.error && fallbackRes.data) {
-                data = fallbackRes.data;
-                console.log("[api/articles] Emergency fallback loaded rows:", data.length);
+        if ((!data || data.length === 0) && pageNum === 1) {
+            console.warn("[api/articles] Emergency fallback triggered: no rows found. Fetching raw top 20 rows.");
+            const fallbackUrl = `${url}/rest/v1/articles?select=*&category=not.eq.SystemRoster&category=not.eq.SYSTEMROSTER&order=created_at.desc`;
+            const fallbackRes = await fetch(fallbackUrl, {
+                headers: {
+                    'apikey': key,
+                    'Authorization': `Bearer ${key}`,
+                    'Range': '0-19'
+                }
+            });
+            if (fallbackRes.ok) {
+                const fallbackData = await fallbackRes.json();
+                if (fallbackData && fallbackData.length > 0) {
+                    data = fallbackData;
+                    console.log("[api/articles] Emergency fallback loaded rows:", data.length);
+                }
             }
-        }
-
-        if (error) {
-            return res.status(500).json({ error: error.message });
         }
 
         return res.status(200).json(data || []);
