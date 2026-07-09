@@ -73,7 +73,11 @@ module.exports = async (req, res) => {
         dbCategory = 'Μεταγραφές';
     }
 
+    const isCategoryEmpty = !categoryParam || categoryParam === 'all' || categoryParam === 'null' || categoryParam === 'undefined';
+
     try {
+        console.log("[api/articles] Querying category:", dbCategory || (isCategoryEmpty ? "ALL" : categoryParam), "Page:", page, "From:", from, "To:", to);
+
         let query = supabase
             .from('articles')
             .select('*')
@@ -82,20 +86,24 @@ module.exports = async (req, res) => {
             .order('created_at', { ascending: false })
             .range(from, to);
 
-        if (dbCategory) {
-            query = query.eq('category', dbCategory);
-        } else if (categoryParam && !dbCategory) {
-            // Support direct matching fallback for custom parameters
-            query = query.ilike('category', `%${categoryParam}%`);
+        if (!isCategoryEmpty) {
+            if (dbCategory) {
+                query = query.eq('category', dbCategory);
+            } else {
+                query = query.ilike('category', `%${categoryParam}%`);
+            }
         }
 
         const { data, error } = await query;
+        console.log("[api/articles] Supabase response rows count:", data ? data.length : 0, "Error:", error);
+
         if (error) {
             return res.status(500).json({ error: error.message });
         }
 
         return res.status(200).json(data || []);
     } catch (err) {
+        console.error("[api/articles] Serverless exception:", err);
         return res.status(500).json({ error: err.message });
     }
 };
