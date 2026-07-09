@@ -703,13 +703,13 @@
                 });
 
                 // Apply initial category filter from URL path (Clean SEO URLs) or query parameters
-                const path = window.location.pathname;
+                const path = window.location.pathname.replace(/\/$/, '').toLowerCase();
                 let catParam = null;
-                if (path === '/podosfairo') catParam = 'football';
-                else if (path === '/basket') catParam = 'basketball';
-                else if (path === '/erasitechnis') catParam = 'amateur';
-                else if (path === '/apopsi') catParam = 'opinion';
-                else if (path === '/metagrafes') catParam = 'transfers';
+                if (path.endsWith('/podosfairo')) catParam = 'football';
+                else if (path.endsWith('/basket')) catParam = 'basketball';
+                else if (path.endsWith('/erasitechnis')) catParam = 'amateur';
+                else if (path.endsWith('/apopsi')) catParam = 'opinion';
+                else if (path.endsWith('/metagrafes')) catParam = 'transfers';
 
                 if (!catParam) {
                     const params = new URLSearchParams(window.location.search);
