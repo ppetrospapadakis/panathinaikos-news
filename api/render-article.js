@@ -253,13 +253,14 @@ module.exports = async (req, res) => {
                 'id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center" style="display: none;"'
             );
         } else {
+            // Inject source URL into the anchor tag
             html = html.replace(
-                /id="article-source-link" class="inline-flex items-center gap-2 px-6 py-3 bg-surface-container hover:bg-surface-container-highest border border-outline-variant\/30 text-primary font-bold rounded-xl active:scale-95 transition-all text-sm" href=""/g,
-                `id="article-source-link" class="inline-flex items-center gap-2 px-6 py-3 bg-surface-container hover:bg-surface-container-highest border border-outline-variant/30 text-primary font-bold rounded-xl active:scale-95 transition-all text-sm" href="${article.source_url || '#'}"`
+                /id="article-original-link" href="#"/g,
+                `id="article-original-link" href="${article.source_url || '#'}"`
             );
             html = html.replace(
-                /<span id="article-source-name">Portal<\/span>/g,
-                `<span id="article-source-name">${sourceName}</span>`
+                /<span id="article-source-name" class="text-primary font-bold">Portal<\/span>/g,
+                `<span id="article-source-name" class="text-primary font-bold">${sourceName}</span>`
             );
         }
 
