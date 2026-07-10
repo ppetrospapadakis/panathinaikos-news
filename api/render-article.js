@@ -229,7 +229,7 @@ module.exports = async (req, res) => {
         // Long-form body rendering
         let bodyHtml = article.content || '';
         if (!bodyHtml && article.summary) {
-            bodyHtml = article.summary.split('\n+').map(p => `<p>${escapeHtml(p)}</p>`).join('');
+            bodyHtml = article.summary.split(/\n+/).map(p => `<p>${escapeHtml(p)}</p>`).join('');
         }
         
         if (isManual) {
