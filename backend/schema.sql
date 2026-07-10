@@ -23,6 +23,7 @@ ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS bullets TEXT[];
 CREATE INDEX IF NOT EXISTS idx_articles_category ON public.articles(category);
 CREATE INDEX IF NOT EXISTS idx_articles_created_at ON public.articles(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_articles_group_id ON public.articles(group_id);
+CREATE INDEX IF NOT EXISTS idx_articles_category_created_at ON public.articles(category, created_at DESC);
 
 -- 3. Automatic updated_at trigger helper function
 CREATE OR REPLACE FUNCTION public.set_current_timestamp_updated_at()

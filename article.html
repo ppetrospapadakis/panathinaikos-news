@@ -6,6 +6,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title id="page-title">Panathinaikos News - Άρθρο</title>
     <meta name="description" content="Ανάλυση και ρεπορτάζ από τον κόσμο του Παναθηναϊκού."/>
+    <meta name="robots" content="max-image-preview:large"/>
+    <!-- {{SEO_META_PLACEHOLDER}} -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
@@ -300,6 +302,27 @@
 
         // ─── Main loader ───
         async function loadArticle() {
+            if (window.__PRE_RENDERED__) {
+                // Highlight active category tab
+                const tabMap = {
+                    'Ποδόσφαιρο': 'tab-football',
+                    'Μπάσκετ': 'tab-basketball',
+                    'Ερασιτέχνης': 'tab-amateur',
+                    'Άποψη': 'tab-opinion',
+                    'Μεταγραφές': 'tab-transfers'
+                };
+                const cat = document.getElementById('article-category').textContent || '';
+                Object.keys(tabMap).forEach(key => {
+                    if (cat.includes(key)) {
+                        const el = document.getElementById(tabMap[key]);
+                        if (el) {
+                            el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap';
+                        }
+                    }
+                });
+                return;
+            }
+
             const params = new URLSearchParams(window.location.search);
             let articleId = params.get('id');
 
