@@ -50,15 +50,11 @@ function formatBodyContent(text) {
     if (rawParagraphs.length === 0) return '';
 
     return rawParagraphs.map((para, idx) => {
-        // Bold the first sentence of each paragraph (ends with . ! or ?)
-        const boldFirst = para.replace(/^([^.!?]{20,}[.!?])(.*)$/, (_, first, rest) => {
-            return `<strong>${first}</strong>${rest}`;
-        });
         // First paragraph gets slightly larger leading font size
         const cls = idx === 0
             ? 'text-[1.05rem] leading-[1.85] text-on-surface mb-6'
             : 'text-[1rem] leading-[1.85] text-on-surface/90 mb-6';
-        return `<p class="${cls}">${boldFirst}</p>`;
+        return `<p class="${cls}">${para}</p>`;
     }).join('\n');
 }
 
