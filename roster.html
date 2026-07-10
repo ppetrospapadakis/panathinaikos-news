@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Panathinaikos - Ρόστερ & Depth Chart</title>
-    <meta name="description" content="Depth Chart και ανάλυση ρόστερ Παναθηναϊκού — Ποδόσφαιρο & Μπάσκετ."/>
+    <title>Panathinaikos - ΡΟΣΤΕΡ</title>
+    <meta name="description" content="Ρόστερ και ανάλυση Παναθηναϊκού — Ποδόσφαιρο & Μπάσκετ."/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
@@ -257,13 +257,12 @@
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
-            <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" aria-label="Menu">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center px-8 relative">
+            <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a class="font-h2 text-h2 font-bold tracking-tighter text-primary" href="/">PANATHINAIKOS</a>
-            <a href="/" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity">
-                <span class="material-symbols-outlined text-primary">home</span>
+            <a href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/>
             </a>
         </div>
     </header>
@@ -271,7 +270,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a class="font-h3 text-h3 font-bold text-primary" href="/">panathinaikos</a>
+            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-auto object-contain"/></a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
@@ -298,7 +297,7 @@
                 <span class="material-symbols-outlined">sports_score</span><span>Πρόγραμμα &amp; Αποτελέσματα</span>
             </a>
             <a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all" href="/roster.html">
-                <span class="material-symbols-outlined">groups</span><span>Depth Chart &amp; Ανάλυση</span>
+                <span class="material-symbols-outlined">groups</span><span>ΡΟΣΤΕΡ</span>
             </a>
         </nav>
         <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
@@ -318,7 +317,7 @@
                 <div class="absolute inset-0 premium-gradient-overlay"></div>
             </div>
             <div class="relative z-10 max-w-[1440px] mx-auto w-full">
-                <p class="font-label text-label text-primary uppercase tracking-[0.2em] mb-3">Depth Chart</p>
+                <p class="font-label text-label text-primary uppercase tracking-[0.2em] mb-3">ΡΟΣΤΕΡ</p>
                 <h1 class="font-display-l-mobile text-display-l-mobile md:text-display-l text-primary mb-4 max-w-2xl leading-tight">Ρόστερ &amp; Ανάλυση</h1>
                 <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">Τακτικές διατάξεις, starting 11 και squad depth.</p>
             </div>
@@ -334,7 +333,7 @@
                 <a id="tab-opinion" href="/apopsi" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</a>
                 <a id="tab-transfers" href="/metagrafes" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</a>
                 <a id="tab-matches" href="/agones" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
-                <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap">📊 Depth Chart</a>
+                <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap">📊 ΡΟΣΤΕΡ</a>
             </div>
         </div>
 
@@ -353,15 +352,16 @@
         <!-- ═══ FOOTBALL VIEW ═══ -->
         <div id="view-football" class="max-w-[1440px] mx-auto px-8 py-12 space-y-16">
 
-            <!-- PITCH 1: Starting XI -->
-            <div>
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Starting XI · 4-3-3</p>
-                        <h2 class="font-h2 text-h2">Βασική Ενδεκάδα</h2>
+            <!-- PITCH GRID WRAPPER -->
+            <div class="min-[900px]:grid min-[900px]:grid-cols-[2fr_1fr] min-[900px]:gap-8 max-[899px]:space-y-16">
+                <!-- PITCH 1: Starting XI -->
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Starting XI · 4-3-3</p>
+                            <h2 class="font-h2 text-h2">Βασική Ενδεκάδα</h2>
+                        </div>
                     </div>
-                    <span class="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full font-label text-label uppercase tracking-wider">Super League</span>
-                </div>
                 <div class="pitch rounded-2xl w-full" style="height:520px;" id="pitch-starting">
                     <div class="pitch-centre-line"></div>
                     <div class="pitch-centre-circle"></div>
@@ -407,7 +407,7 @@
             <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
-                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; Depth Chart</h2>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
                 </div>
                 <div id="analysis-text-football" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
                     <!-- Dynamically loaded -->
@@ -418,15 +418,16 @@
         <!-- ═══ BASKETBALL VIEW ═══ -->
         <div id="view-basketball" class="max-w-[1440px] mx-auto px-8 py-12 space-y-16 hidden">
 
-            <!-- COURT 1: Starting 5 -->
-            <div>
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Starting 5</p>
-                        <h2 class="font-h2 text-h2">Πρώτη Πεντάδα</h2>
+            <!-- COURT GRID WRAPPER -->
+            <div class="min-[900px]:grid min-[900px]:grid-cols-[2fr_1fr] min-[900px]:gap-8 max-[899px]:space-y-16">
+                <!-- COURT 1: Starting 5 -->
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Starting 5</p>
+                            <h2 class="font-h2 text-h2">Πρώτη Πεντάδα</h2>
+                        </div>
                     </div>
-                    <span class="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full font-label text-label uppercase tracking-wider">EuroLeague</span>
-                </div>
                 <div class="court rounded-2xl w-full" style="height:480px;" id="court-starting">
                     <div class="court-centre-line"></div>
                     <div class="court-centre-circle"></div>
@@ -471,7 +472,7 @@
             <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
-                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; Depth Chart</h2>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
                 </div>
                 <div id="analysis-text-basketball" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
                     <!-- Dynamically loaded -->
@@ -507,39 +508,39 @@
         // ─────────────────────────────────────────────────────────────────
         const footballStarting = [
             // Formation 4-3-3 (top = GK, bottom = FW)
-            // [left%, top%, initials, name, number]
-            [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1],     // GK
+            // [left%, top%, initials, name, number, pos]
+            [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1, 'GK'],
 
-            [15, 68, 'ΒΑ', 'Βαγιαννίδης', 2],     // RB
-            [38, 70, 'ΜΣ', 'Μαξίμοβιτς', 5],      // CB
-            [62, 70, 'ΤΟ', 'Τόμας', 4],            // CB
-            [85, 68, 'ΡΩΑ', 'Ρουά', 3],            // LB
+            [15, 68, 'ΒΑ', 'Βαγιαννίδης', 2, 'RB'],
+            [38, 70, 'ΜΣ', 'Μαξίμοβιτς', 5, 'CB'],
+            [62, 70, 'ΤΟ', 'Τόμας', 4, 'CB'],
+            [85, 68, 'ΡΩΑ', 'Ρουά', 3, 'LB'],
 
-            [25, 48, 'ΝΤΡ', 'Ντρ. Σκι', 8],       // CM
-            [50, 44, 'ΓΡΑ', 'Γκρέι', 6],           // CM
-            [75, 48, 'ΘΟΥ', 'Θορ', 10],            // CAM
+            [25, 48, 'ΝΤΡ', 'Ντρ. Σκι', 8, 'CM'],
+            [50, 44, 'ΓΡΑ', 'Γκρέι', 6, 'CM'],
+            [75, 48, 'ΘΟΥ', 'Θορ', 10, 'CAM'],
 
-            [18, 22, 'ΤΕΤ', 'Τετέ', 7],            // RW
-            [50, 18, 'ΙΩΑ', 'Ιωαννίδης', 9],       // ST
-            [82, 22, 'ΠΕΛ', 'Πελίστρι', 11],       // LW
+            [18, 22, 'ΤΕΤ', 'Τετέ', 7, 'RW'],
+            [50, 18, 'ΙΩΑ', 'Ιωαννίδης', 9, 'ST'],
+            [82, 22, 'ΠΕΛ', 'Πελίστρι', 11, 'LW'],
         ];
 
         const footballBench = [
             // Formation 4-4-2 on a smaller pitch
-            [50, 85, 'ΒΡΑ', 'Βρατσάνος', 23],     // GK
+            [50, 85, 'ΒΡΑ', 'Βρατσάνος', 23, 'GK'],
 
-            [15, 65, 'ΓΙΕ', 'Γιεντβάι', 14],      // RB
-            [38, 67, 'ΑΝΔ', 'Ανδρέ', 16],          // CB
-            [62, 67, 'ΛΩΡ', 'Λόρδος', 22],         // CB
-            [85, 65, 'ΚΟΡ', 'Κόρμπο', 3],          // LB
+            [15, 65, 'ΓΙΕ', 'Γιεντβάι', 14, 'RB'],
+            [38, 67, 'ΑΝΔ', 'Ανδρέ', 16, 'CB'],
+            [62, 67, 'ΛΩΡ', 'Λόρδος', 22, 'CB'],
+            [85, 65, 'ΚΟΡ', 'Κόρμπο', 3, 'LB'],
 
-            [20, 45, 'ΜΠΑ', 'Μπαλόγκ', 17],       // RM
-            [40, 42, 'ΤΖΑ', 'Τζαβέλας', 18],       // CM
-            [60, 42, 'ΧΑΡ', 'Χαρίσης', 19],        // CM
-            [80, 45, 'ΠΑΛ', 'Παλμέρι', 15],        // LM
+            [20, 45, 'ΜΠΑ', 'Μπαλόγκ', 17, 'RM'],
+            [40, 42, 'ΤΖΑ', 'Τζαβέλας', 18, 'CM'],
+            [60, 42, 'ΧΑΡ', 'Χαρίσης', 19, 'CM'],
+            [80, 45, 'ΠΑΛ', 'Παλμέρι', 15, 'LM'],
 
-            [35, 22, 'ΟΑΔ', 'Οάδες', 20],          // ST
-            [65, 22, 'ΙΝΓ', 'Ίνγκασον', 21],       // ST
+            [35, 22, 'ΟΑΔ', 'Οάδες', 20, 'ST'],
+            [65, 22, 'ΙΝΓ', 'Ίνγκασον', 21, 'ST'],
         ];
 
         const footballRest = [
@@ -586,15 +587,15 @@
             if (!container) return;
             // Remove old tokens
             container.querySelectorAll('.player-token').forEach(el => el.remove());
-            players.forEach(([left, top, initials, name, num]) => {
+            players.forEach(([left, top, initials, name, num, pos]) => {
                 const token = document.createElement('div');
                 token.className = 'player-token';
                 token.style.left = left + '%';
                 token.style.top = top + '%';
                 token.innerHTML = `
                     <div class="avatar" style="position:relative;">
-                        ${initials}
-                        <div class="num-badge">${num}</div>
+                        ${num}
+                        <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
                     </div>
                     <div class="name-tag">${name}</div>`;
                 container.appendChild(token);
@@ -605,15 +606,16 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             container.querySelectorAll('.bball-token').forEach(el => el.remove());
-            players.forEach(([left, top, initials, name, pos]) => {
+            players.forEach(([left, top, initials, name, pos], index) => {
+                const num = index + 1;
                 const token = document.createElement('div');
                 token.className = 'bball-token';
                 token.style.left = left + '%';
                 token.style.top = top + '%';
                 token.innerHTML = `
                     <div class="avatar" style="position:relative;">
-                        ${initials}
-                        <div class="pos-badge">${pos.substring(0,1)}</div>
+                        ${num}
+                        <div class="pos-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos}</div>
                     </div>
                     <div class="name-tag">${name}</div>`;
                 container.appendChild(token);

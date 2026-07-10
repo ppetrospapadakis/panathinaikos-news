@@ -72,14 +72,12 @@
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
-            <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" aria-label="Menu">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center px-8 relative">
+            <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/></a>
-            <a href="/" class="flex items-center gap-2 px-5 py-2 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">
-                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-                <span class="text-sm">Επιστροφή</span>
+            <a href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/>
             </a>
         </div>
     </header>
@@ -114,7 +112,7 @@
                 <span class="material-symbols-outlined">sports_score</span><span>Πρόγραμμα &amp; Αποτελέσματα</span>
             </a>
             <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
-                <span class="material-symbols-outlined">groups</span><span>Depth Chart &amp; Ανάλυση</span>
+                <span class="material-symbols-outlined">groups</span><span>ΡΟΣΤΕΡ</span>
             </a>
         </nav>
         <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
@@ -138,7 +136,7 @@
                 <a id="tab-opinion" href="/apopsi" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</a>
                 <a id="tab-transfers" href="/metagrafes" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</a>
                 <a id="tab-matches" href="/agones" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
-                <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 Depth Chart</a>
+                <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 ΡΟΣΤΕΡ</a>
             </div>
         </div>
 
@@ -181,7 +179,7 @@
                 <div id="article-bullets-box" class="p-6 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient hidden">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-primary text-xl">bolt</span>
-                        <span class="font-label text-label text-primary uppercase tracking-widest font-bold">F5 Quick-Takes — AI Summary</span>
+                        <span class="font-label text-label text-primary uppercase tracking-widest font-bold">AI SUMMARY</span>
                     </div>
                     <ul id="article-bullets-list" class="space-y-3 text-on-surface-variant text-body leading-relaxed">
                     </ul>

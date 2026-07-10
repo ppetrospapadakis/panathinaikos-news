@@ -559,6 +559,7 @@ async function generateLongFormContent(title, text, isOfficial = false) {
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
   "is_panathinaikos_relevant": true ή false (βάλε false αν το άρθρο αφορά γενική διεθνή ειδησεογραφία, άλλα αθλήματα/ομάδες χωρίς καμία σύνδεση με τον Παναθηναϊκό, ή άσχετα παγκόσμια γεγονότα),
+  "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, πιο clicky/attractive αλλά ακριβής, χωρίς υπερβολές)",
   "content": "το αναδιατυπωμένο άρθρο"
 }
 
@@ -584,13 +585,14 @@ async function generateLongFormContent(title, text, isOfficial = false) {
 
         if (parsed.is_panathinaikos_relevant === false) {
             console.log(`  [AI EVALUATION] Article determined NOT relevant: "${title}"`);
-            return { isRelevant: false, content: null };
+            return { isRelevant: false, content: null, title: null };
         }
 
         const articleText = (parsed.content || '').trim();
+        const newTitle = (parsed.title || title).trim();
         if (articleText && articleText.length > 100) {
-            console.log(`  [AI] Long-form generated: ${articleText.length} chars`);
-            return { isRelevant: true, content: articleText };
+            console.log(`  [AI] Long-form generated: ${articleText.length} chars. Title: ${newTitle}`);
+            return { isRelevant: true, content: articleText, title: newTitle };
         }
     } catch (err) {
         if (quotaExhausted) console.warn('[AI] Daily quota exhausted — skipping long-form.');
@@ -771,7 +773,7 @@ async function main() {
 
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
-                title:      scraped.title,
+                title:      aiResult.title || scraped.title,
                 summary:    scraped.summary,
                 content:    longFormContent,
                 source_url: articleUrl,

@@ -120,7 +120,7 @@
             </a>
             <a id="nav-roster" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
                 <span class="material-symbols-outlined">groups</span>
-                <span>Depth Chart &amp; Ανάλυση</span>
+                <span>ΡΟΣΤΕΡ</span>
             </a>
         </nav>
 
@@ -176,7 +176,7 @@
                 <button id="tab-opinion" onclick="filterFeed('Άποψη','nav-opinion')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</button>
                 <button id="tab-transfers" onclick="filterFeed('Μεταγραφές','nav-transfers')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</button>
                 <a href="/agones" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
-                <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 Depth Chart</a>
+                <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 ΡΟΣΤΕΡ</a>
             </div>
         </div>
 
@@ -316,7 +316,7 @@
             { name: '✍️ Άποψη', category: 'Άποψη', icon: 'rate_review', url: '/apopsi' },
             { name: '📋 Μεταγραφές', category: 'Μεταγραφές', icon: 'transfer_within_a_station', url: '/metagrafes' },
             { name: '🏆 Αγώνες', category: 'Matches', icon: 'sports_score', url: 'matches.html' },
-            { name: '📊 Depth Chart', category: 'Roster', icon: 'groups', url: 'roster.html' }
+            { name: '📊 ΡΟΣΤΕΡ', category: 'Roster', icon: 'groups', url: 'roster.html' }
         ];
 
         function renderQuickLinks() {
@@ -574,7 +574,7 @@
             if (fa.bullets && fa.bullets.length > 0) {
                 bulletsHtml = `
                 <div class="mt-4 p-4 bg-background/50 rounded-xl border border-primary/20">
-                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-2">⚡ F5 Quick-Takes</div>
+                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-2">⚡ AI SUMMARY</div>
                     <ul class="list-disc pl-4 space-y-1 text-sm text-on-surface-variant leading-relaxed">
                         ${fa.bullets.map(b => `<li>${b}</li>`).join('')}
                     </ul>
@@ -587,7 +587,9 @@
 
             const isOwnFeatured = (fa.source_url || '').toLowerCase().includes('manual') || 
                                   (fa.source_url || '').toLowerCase().includes('opinion://manual');
-            const showBreakingLabel = !isOwnFeatured && (fa.category !== 'Άποψη');
+            const ageMs = Date.now() - new Date(fa.created_at).getTime();
+            const isFresh = ageMs < (60 * 60 * 1000);
+            const showBreakingLabel = !isOwnFeatured && (fa.category !== 'Άποψη') && isFresh;
             const breakingBadgeHtml = showBreakingLabel 
                 ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold">BREAKING</div>`
                 : '';
@@ -769,9 +771,10 @@
                 : sideCandidates;
 
             if (bottomGridArticles.length > 0) {
+                const moreNewsText = activeCategory === 'apopsi' ? 'Περισσότερη αρθρογραφία' : 'Περισσότερες Ειδήσεις';
                 container.insertAdjacentHTML('beforeend', `
                 <div class="col-span-1 md:col-span-12 mt-12 pt-8 border-t border-outline-variant/30">
-                    <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
+                    <h2 class="font-h2 text-h2 mb-6">${moreNewsText}</h2>
                 </div>
                 <div class="col-span-1 md:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bottom-grid-cards">
                 </div>`);
