@@ -36,6 +36,32 @@ function escapeHtml(unsafe) {
          .replace(/'/g, "&#039;");
 }
 
+/**
+ * Converts plain-text article content (paragraphs separated by blank lines or \n)
+ * into well-structured HTML with styled <p> tags.
+ * Bold the first sentence of each paragraph for editorial emphasis.
+ */
+function formatBodyContent(text) {
+    if (!text || !text.trim()) return '';
+
+    // Split on one or more blank lines (handles \r\n too)
+    const rawParagraphs = text.split(/\n{2,}|\r\n{2,}/).map(p => p.replace(/[\r\n]+/g, ' ').trim()).filter(Boolean);
+
+    if (rawParagraphs.length === 0) return '';
+
+    return rawParagraphs.map((para, idx) => {
+        // Bold the first sentence of each paragraph (ends with . ! or ?)
+        const boldFirst = para.replace(/^([^.!?]{20,}[.!?])(.*)$/, (_, first, rest) => {
+            return `<strong>${first}</strong>${rest}`;
+        });
+        // First paragraph gets slightly larger leading font size
+        const cls = idx === 0
+            ? 'text-[1.05rem] leading-[1.85] text-on-surface mb-6'
+            : 'text-[1rem] leading-[1.85] text-on-surface/90 mb-6';
+        return `<p class="${cls}">${boldFirst}</p>`;
+    }).join('\n');
+}
+
 module.exports = async (req, res) => {
     // Enable Vercel Edge caching - July 10, 2026
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -227,11 +253,17 @@ module.exports = async (req, res) => {
         }
 
         // Long-form body rendering
-        let bodyHtml = article.content || '';
-        if (!bodyHtml && article.summary) {
-            bodyHtml = article.summary.split(/\n+/).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+        let bodyHtml = '';
+        const rawContent = article.content || '';
+
+        if (rawContent) {
+            // If it already contains HTML tags, use as-is; otherwise format plain text
+            const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|div|strong|em|br)[\s>]/i.test(rawContent);
+            bodyHtml = looksLikeHtml ? rawContent : formatBodyContent(rawContent);
+        } else if (article.summary) {
+            bodyHtml = formatBodyContent(article.summary);
         }
-        
+
         if (isManual) {
             const logoBlock = `
                 <div class="flex flex-col items-center justify-center py-10 border-t border-outline-variant/30 mt-12 space-y-3">
