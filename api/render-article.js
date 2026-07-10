@@ -242,7 +242,7 @@ module.exports = async (req, res) => {
         }
 
         html = html.replace(
-            /<div id="article-body" class="leading-relaxed">\s*<\/div>/g,
+            /<div id="article-body" class="leading-relaxed">[\s\S]*?<\/div>/g,
             `<div id="article-body" class="leading-relaxed">${bodyHtml}</div>`
         );
 
