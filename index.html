@@ -17,6 +17,8 @@
   <script defer src="/_vercel/insights/script.js"></script>
     <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="/favicon.png"/>
+    <link rel="apple-touch-icon" href="/favicon.png"/>
+    <meta name="theme-color" content="#111317"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Panathinaikos News - Ειδήσεις</title>
     <meta name="description" content="Όλα τα νέα του Παναθηναϊκού. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ."/>
@@ -127,14 +129,6 @@
                 <span class="material-symbols-outlined">rate_review</span>
                 <span>Άποψη</span>
             </a>
-            <a id="nav-transfers" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/metagrafes" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed('Μεταγραφές','nav-transfers'); toggleDrawer(); }">
-                <span class="material-symbols-outlined">transfer_within_a_station</span>
-                <span>Μεταγραφές</span>
-            </a>
-            <a id="nav-matches" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/agones">
-                <span class="material-symbols-outlined">sports_score</span>
-                <span>Πρόγραμμα &amp; Αποτελέσματα</span>
-            </a>
             <a id="nav-roster" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
                 <span class="material-symbols-outlined">groups</span>
                 <span>Ρόστερ</span>
@@ -161,7 +155,6 @@
             <div class="flex flex-wrap gap-4">
                 <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='OAKA'; handleSearch('OAKA')">#OAKA</span>
                 <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='Euroleague'; handleSearch('Euroleague')">#Basketball</span>
-                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='Μεταγραφές'; handleSearch('Μεταγραφές')">#Μεταγραφές</span>
                 <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='Gate 13'; handleSearch('Gate 13')">#Gate13</span>
             </div>
         </div>
@@ -183,7 +176,6 @@
             </div>
         </section>
 
-        <!-- Category Tab Bar -->
         <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
             <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
                 <button id="tab-all" onclick="filterFeed(null,'nav-all')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap">Όλα</button>
@@ -191,42 +183,44 @@
                 <button id="tab-basketball" onclick="filterFeed('Μπάσκετ','nav-basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏀 Μπάσκετ</button>
                 <button id="tab-amateur" onclick="filterFeed('Ερασιτέχνης','nav-amateur')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">☘️ Ερασιτέχνης</button>
                 <button id="tab-opinion" onclick="filterFeed('Άποψη','nav-opinion')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</button>
-                <button id="tab-transfers" onclick="filterFeed('Μεταγραφές','nav-transfers')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</button>
-                <a href="/agones" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
                 <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📊 ΡΟΣΤΕΡ</a>
             </div>
         </div>
 
-        <!-- Dynamic Articles Grid -->
-        <section class="max-w-[1440px] mx-auto px-8 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8" id="articles-feed-container">
-                <!-- Skeleton Loader -->
-                <div class="md:col-span-8 animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end">
-                    <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
-                    <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
-                    <div class="h-4 bg-surface-container-high w-full rounded"></div>
-                </div>
-                <div class="md:col-span-4 flex flex-col gap-8">
-                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-8 rounded-lg">
-                        <div class="w-[96px] h-[96px] bg-surface-container-high rounded-lg shrink-0"></div>
-                        <div class="space-y-3 w-full">
-                            <div class="h-4 bg-surface-container-high w-1/3 rounded"></div>
-                            <div class="h-4 bg-surface-container-high w-3/4 rounded"></div>
-                            <div class="h-4 bg-surface-container-high w-1/2 rounded"></div>
-                        </div>
+        <!-- Dynamic Articles Grid (3-Phase Staggered Loading) -->
+        <section class="max-w-[1440px] mx-auto px-8 py-16" id="main-feed-section">
+            <!-- Phase 1 (Hero) + Phase 2 (Stream) grid -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                <!-- Hero: left 8 cols — Phase 1 skeleton initially -->
+                <div id="hero-container" class="md:col-span-8">
+                    <div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end">
+                        <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
+                        <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
+                        <div class="h-4 bg-surface-container-high w-full rounded"></div>
                     </div>
-                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-8 rounded-lg">
-                        <div class="w-[96px] h-[96px] bg-surface-container-high rounded-lg shrink-0"></div>
-                        <div class="space-y-3 w-full">
-                            <div class="h-4 bg-surface-container-high w-1/3 rounded"></div>
-                            <div class="h-4 bg-surface-container-high w-3/4 rounded"></div>
-                        </div>
+                </div>
+                <!-- Stream: right 4 cols — Phase 2 skeletons initially -->
+                <div id="stream-container" class="md:col-span-4 flex flex-col gap-3" style="max-height:700px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
+                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
+                        <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                        <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div><div class="h-3 bg-surface-container-high w-1/2 rounded"></div></div>
+                    </div>
+                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
+                        <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                        <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
+                    </div>
+                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
+                        <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                        <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
                     </div>
                 </div>
             </div>
-            <!-- IntersectionObserver Sentinel -->
-            <div id="feed-sentinel" class="w-full flex justify-center mt-8">
-                <div id="sentinel-loader" class="hidden animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+            <!-- Phase 3: deferred sections (populated when scrolled into view) -->
+            <div id="editorial-section"></div>
+            <div id="more-news-section"></div>
+            <!-- Infinite scroll sentinel -->
+            <div id="feed-sentinel" class="w-full flex justify-center mt-8 hidden">
+                <div id="sentinel-loader" class="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
             </div>
         </section>
 
@@ -253,15 +247,24 @@
     <!-- ═══ API ROUTE + APP LOGIC ═══ -->
     <script>
     (function() {
-        // ── State ──
-        let allArticles = [];
-        let ownArticles = [];
-        let activeCategory = null;
-        let currentPage = 1;
-        let hasMore = true;
-        let isFetching = false;
 
-        // ── Helpers ──
+        // ── State ──────────────────────────────────────────────────────────────
+        let activeCategory = null;
+        let allArticles    = [];   // full stream (page 1+)
+        let ownArticles    = [];   // manual/opinion articles
+        let streamPage     = 2;    // next page to load (page 1 already loaded)
+        let streamHasMore  = true;
+        let isFetchingMore = false;
+        let editorialDone  = false;
+        let moreNewsDone   = false;
+        let sentinelObserver   = null;
+        let editorialObserver  = null;
+        let moreNewsObserver   = null;
+
+        // ── Default image ──────────────────────────────────────────────────────
+        const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+
+        // ── Helpers ────────────────────────────────────────────────────────────
         function toggleDrawer() {
             const drawer = document.getElementById('nav-drawer');
             const overlay = document.getElementById('drawer-overlay');
@@ -281,29 +284,23 @@
         }
         window.toggleSearch = toggleSearch;
 
-        function extractDomain(url) {
-            try { return new URL(url).hostname.replace('www.','').split('.')[0]; }
-            catch(e) { return 'News'; }
-        }
-
         function timeAgo(dateStr) {
             try {
                 const diff = Date.now() - new Date(dateStr).getTime();
                 const m = Math.floor(diff/60000), h = Math.floor(m/60), d = Math.floor(h/24);
                 if (isNaN(m)) return 'Πρόσφατα';
-                if (m < 1) return 'Μόλις τώρα';
+                if (m < 1)  return 'Μόλις τώρα';
                 if (m < 60) return `${m}λ πριν`;
                 if (h < 24) return `${h}ω πριν`;
                 return `${d}μ πριν`;
             } catch(e) { return 'Πρόσφατα'; }
         }
 
-        // ── Clean SEO URL helpers ──
         function slugify(text) {
             return text.toString().toLowerCase()
                 .trim()
                 .replace(/\s+/g, '-')
-                .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '') // preserve Greek characters
+                .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
                 .replace(/--+/g, '-')
                 .replace(/^-+/, '')
                 .replace(/-+$/, '');
@@ -312,235 +309,235 @@
         function getCategoryCleanName(category) {
             const cat = (category || '').toLowerCase();
             if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
-            if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
-            if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitexnis';
-            if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
-            if (cat.includes('μεταγραφές') || cat.includes('transfers')) return 'metagrafes';
+            if (cat.includes('μπάσκετ')    || cat.includes('basketball')) return 'basket';
+            if (cat.includes('ερασιτέχνης')|| cat.includes('amateur'))   return 'erasitexnis';
+            if (cat.includes('άποψη')      || cat.includes('opinion'))   return 'apopsi';
             return 'pao';
         }
 
         function getCategoryPath(category) {
             if (!category) return '/';
-            const catName = getCategoryCleanName(category);
-            return `/${catName}`;
+            return `/${getCategoryCleanName(category)}`;
         }
 
+        function getApiCat(category) {
+            if (category === 'Ποδόσφαιρο') return 'football';
+            if (category === 'Μπάσκετ')    return 'basket';
+            if (category === 'Ερασιτέχνης')return 'erasitexnis';
+            if (category === 'Άποψη')      return 'apopsi';
+            return '';
+        }
+
+        function processImage(a) {
+            const imageUrl = a.image_url || '';
+            if (!imageUrl) { a.image_url = DEFAULT_IMG; return a; }
+            try {
+                const u = new URL(imageUrl);
+                const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+                const BRANDING_FN = ['logo','icon','avatar','branding','placeholder','fallback','watermark','og-image','og_image','site-logo','site_logo','default-image','default_image','noimage','no-image','blank','generic','share-image','share_image'];
+                const BRANDING_PATH = ['/logos/','/logo/','/brand/','/branding/','/default_images/','/default-images/','/assets/images/','/site-assets/'];
+                const isBranding = BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p));
+                if (isBranding) a.image_url = DEFAULT_IMG;
+            } catch(_) {}
+            return a;
+        }
+
+        // ── Quick links (bottom bar) ───────────────────────────────────────────
         const ALL_LINKS = [
-            { name: 'Όλα', category: null, icon: 'feed', url: '/' },
-            { name: '⚽ Ποδόσφαιρο', category: 'Ποδόσφαιρο', icon: 'sports_soccer', url: '/podosfairo' },
-            { name: '🏀 Μπάσκετ', category: 'Μπάσκετ', icon: 'sports_basketball', url: '/basket' },
-            { name: '☘️ Ερασιτέχνης', category: 'Ερασιτέχνης', icon: 'sports', url: '/erasitexnis' },
-            { name: '✍️ Άποψη', category: 'Άποψη', icon: 'rate_review', url: '/apopsi' },
-            { name: '📋 Μεταγραφές', category: 'Μεταγραφές', icon: 'transfer_within_a_station', url: '/metagrafes' },
-            { name: '🏆 Αγώνες', category: 'Matches', icon: 'sports_score', url: 'matches.html' },
-            { name: '📊 ΡΟΣΤΕΡ', category: 'Roster', icon: 'groups', url: 'roster.html' }
+            { name: 'Όλα',           category: null,          icon: 'feed',            url: '/' },
+            { name: '⚽ Ποδόσφαιρο', category: 'Ποδόσφαιρο', icon: 'sports_soccer',   url: '/podosfairo' },
+            { name: '🏀 Μπάσκετ',   category: 'Μπάσκετ',    icon: 'sports_basketball',url: '/basket' },
+            { name: '☘️ Ερασιτέχνης',category: 'Ερασιτέχνης',icon: 'sports',          url: '/erasitexnis' },
+            { name: '✍️ Άποψη',     category: 'Άποψη',       icon: 'rate_review',     url: '/apopsi' },
+            { name: '📊 ΡΟΣΤΕΡ',    category: 'Roster',      icon: 'groups',          url: 'roster.html' }
         ];
 
         function renderQuickLinks() {
             const container = document.getElementById('quick-links-container');
             if (!container) return;
             container.innerHTML = '';
-            
-            const filtered = ALL_LINKS.filter(link => {
-                if (link.category === null && activeCategory === null) return false;
-                return link.category !== activeCategory;
-            });
-            
-            filtered.forEach(link => {
-                let tag = '';
-                if (link.url.endsWith('.html')) {
-                    tag = `<a href="${link.url}" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
+            ALL_LINKS
+                .filter(link => !(link.category === null && activeCategory === null))
+                .filter(link => link.category !== activeCategory)
+                .forEach(link => {
+                    const isHtml = link.url.endsWith('.html');
+                    const tag = `<a href="${link.url}" ${!isHtml ? `onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();filterFeed(${link.category?`'${link.category}'`:'null'});window.scrollTo({top:0,behavior:'smooth'})}"` : ''}
+                        class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
                         <span class="material-symbols-outlined text-primary text-3xl">${link.icon}</span>
                         <span class="font-h4 text-h4 group-hover:text-primary transition-colors">${link.name}</span>
                     </a>`;
-                } else {
-                    tag = `<a href="${link.url}" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed(${link.category ? `'${link.category}'` : 'null'}); window.scrollTo({top:0,behavior:'smooth'}); }" class="flex flex-col items-center gap-3 p-8 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
-                        <span class="material-symbols-outlined text-primary text-3xl">${link.icon}</span>
-                        <span class="font-h4 text-h4 group-hover:text-primary transition-colors">${link.name}</span>
-                    </a>`;
-                }
-                container.insertAdjacentHTML('beforeend', tag);
-            });
+                    container.insertAdjacentHTML('beforeend', tag);
+                });
         }
 
-        // ── Category Filter ──
-        function filterFeed(category, navId) {
-            activeCategory = category;
-
-            // Update browser URL path cleanly
-            const newPath = getCategoryPath(category);
-            window.history.pushState({ category }, '', newPath);
-
-            filterFeedWithoutPush(category);
-        }
-        window.filterFeed = filterFeed;
-
-        function filterFeedWithoutPush(category) {
-            // Update tab bar styles
-            const tabs = ['tab-all','tab-football','tab-basketball','tab-transfers','tab-amateur','tab-opinion'];
-            const tabMap = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Μεταγραφές':'tab-transfers','Ερασιτέχνης':'tab-amateur','Άποψη':'tab-opinion'};
-            tabs.forEach(id => {
+        // ── Tab / Drawer highlight ─────────────────────────────────────────────
+        function updateNavStyles(category) {
+            const TABS = ['tab-all','tab-football','tab-basketball','tab-amateur','tab-opinion'];
+            const TAB_MAP = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Ερασιτέχνης':'tab-amateur','Άποψη':'tab-opinion'};
+            TABS.forEach(id => {
                 const el = document.getElementById(id);
-                if (!el) return;
-                el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap';
+                if (el) el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap';
             });
-            const activeTab = tabMap[category];
+            const activeTab = TAB_MAP[category];
             if (activeTab) {
                 const el = document.getElementById(activeTab);
                 if (el) el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap';
             }
 
-            // Update drawer selection styles dynamically
-            const drawerLinks = ['nav-all', 'nav-football', 'nav-basketball', 'nav-amateur', 'nav-opinion', 'nav-transfers'];
-            const drawerMap = {null:'nav-all','Ποδόσφαιρο':'nav-football','Μπάσκετ':'nav-basketball','Ερασιτέχνης':'nav-amateur','Άποψη':'nav-opinion','Μεταγραφές':'nav-transfers'};
-            drawerLinks.forEach(id => {
+            const DRAWER = ['nav-all','nav-football','nav-basketball','nav-amateur','nav-opinion'];
+            const DRAWER_MAP = {null:'nav-all','Ποδόσφαιρο':'nav-football','Μπάσκετ':'nav-basketball','Ερασιτέχνης':'nav-amateur','Άποψη':'nav-opinion'};
+            DRAWER.forEach(id => {
                 const el = document.getElementById(id);
-                if (!el) return;
-                el.className = 'flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all';
+                if (el) el.className = 'flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all';
             });
-            const activeDrawer = drawerMap[category];
+            const activeDrawer = DRAWER_MAP[category];
             if (activeDrawer) {
                 const el = document.getElementById(activeDrawer);
                 if (el) el.className = 'flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all';
             }
 
-            // Update hero title
-            const titles = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Μεταγραφές':'Μεταγραφές','Ερασιτέχνης':'Ερασιτέχνης','Άποψη':'Η Άποψη Μας'};
+            const TITLES = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Ερασιτέχνης':'Ερασιτέχνης','Άποψη':'Η Άποψη Μας'};
             const feedTitle = document.getElementById('feed-title');
-            if (feedTitle) feedTitle.textContent = titles[category] || 'Ροή Ειδήσεων';
-
-            const liveStreamLabel = document.getElementById('feed-live-stream-label');
-            if (liveStreamLabel) {
-                if (category === 'Άποψη') {
-                    liveStreamLabel.style.display = 'none';
-                } else {
-                    liveStreamLabel.style.display = 'block';
-                }
-            }
-
-            activeCategory = category;
-            fetchArticles(true);
-            renderQuickLinks();
+            if (feedTitle) feedTitle.textContent = TITLES[category] || 'Ροή Ειδήσεων';
+            const liveLabel = document.getElementById('feed-live-stream-label');
+            if (liveLabel) liveLabel.style.display = category === 'Άποψη' ? 'none' : 'block';
         }
 
-        window.addEventListener('popstate', (event) => {
-            const cat = event.state && event.state.category ? event.state.category : null;
-            activeCategory = cat;
-            filterFeedWithoutPush(cat);
-        });
-
-        // ── Search ──
+        // ── Search ─────────────────────────────────────────────────────────────
         function handleSearch(query) {
-            if (!query.trim()) { renderFeed(allArticles); return; }
+            if (!query.trim()) { renderStream(allArticles); return; }
             const q = query.toLowerCase();
             const filtered = allArticles.filter(a =>
                 (a.title||'').toLowerCase().includes(q) ||
                 (a.summary||'').toLowerCase().includes(q) ||
                 (a.category||'').toLowerCase().includes(q)
             );
-            renderFeed(filtered);
+            renderStream(filtered);
         }
         window.handleSearch = handleSearch;
 
         window.scrollCarousel = function(direction) {
-            const container = document.getElementById('own-carousel-container');
-            if (!container) return;
-            const scrollAmount = direction === 'left' ? -380 : 380;
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            const c = document.getElementById('own-carousel-container');
+            if (c) c.scrollBy({ left: direction === 'left' ? -380 : 380, behavior: 'smooth' });
         };
 
-        // ── Default hero image ──
-        const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
-
-        let currentFilteredArticles = [];
-        let displayedCount = 20;
-        let observer = null;
-
-        function renderMoreCards(groupsList, containerElement) {
-            groupsList.forEach(g => {
-                const a = g.main;
-                let bHtml = '';
-                if (a.bullets && a.bullets.length > 0) {
-                    bHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
-                        <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ Quick-Takes</div>
-                        <ul class="list-disc pl-4 space-y-1 text-xs text-on-surface-variant leading-relaxed">
-                            ${a.bullets.map(b => `<li>${b}</li>`).join('')}
-                        </ul>
-                    </div>`;
-                }
-                const slug = slugify(a.title);
-                const catPath = getCategoryCleanName(a.category);
-                const articleCleanUrl = `/${catPath}/${slug}-id=${a.id}`;
-
-                const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
-                              (a.source_url || '').toLowerCase().includes('opinion://manual');
-                const badgeHtml = isOwn 
-                    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`
-                    : '';
-                const cardBorder = isOwn
-                    ? 'border-primary/30 bg-primary/5'
-                    : 'border-outline-variant/10 bg-surface-container/30';
-
-                containerElement.insertAdjacentHTML('beforeend', `
-                <a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${cardBorder}"
-                     href="${articleCleanUrl}">
-                    <div class="relative aspect-video overflow-hidden">
-                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                    </div>
-                    <div class="p-5 flex flex-col flex-1">
-                        <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} ${badgeHtml} • ${timeAgo(a.created_at)}</span>
-                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
-                        <div class="mt-auto" onclick="event.stopPropagation()">${bHtml}</div>
-                    </div>
-                </a>`);
-            });
+        // ── Render helpers ─────────────────────────────────────────────────────
+        function sideCardHtml(a) {
+            const slug      = slugify(a.title);
+            const catPath   = getCategoryCleanName(a.category);
+            const url       = `/${catPath}/${slug}-id=${a.id}`;
+            const isOwn     = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+            const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
+            return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
+                <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category||'Ποδόσφαιρο'} ${badge}</span>
+                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
+                    <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
+                </div>
+            </a>`;
         }
 
-        function setupInfiniteScroll() {
-            const sentinel = document.getElementById('feed-sentinel');
-            const loader = document.getElementById('sentinel-loader');
-            if (!sentinel) return;
-
-            sentinel.classList.remove('hidden');
-
-            if (observer) {
-                observer.disconnect();
+        function gridCardHtml(a) {
+            const slug     = slugify(a.title);
+            const catPath  = getCategoryCleanName(a.category);
+            const url      = `/${catPath}/${slug}-id=${a.id}`;
+            const isOwn    = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+            const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
+            const border   = isOwn ? 'border-primary/30 bg-primary/5' : 'border-outline-variant/10 bg-surface-container/30';
+            let bulletsHtml = '';
+            if (a.bullets && a.bullets.length > 0) {
+                bulletsHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
+                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ AI SUMMARY</div>
+                    <ul class="list-disc pl-5 space-y-1 text-xs text-on-surface-variant leading-relaxed">
+                        ${a.bullets.map(b=>`<li>${b}</li>`).join('')}
+                    </ul>
+                </div>`;
             }
-
-            observer = new IntersectionObserver(async (entries) => {
-                const entry = entries[0];
-                if (entry.isIntersecting && !isFetching && hasMore) {
-                    if (loader) loader.classList.remove('hidden');
-                    await fetchArticles(false);
-                    if (loader) loader.classList.add('hidden');
-                }
-            }, {
-                rootMargin: '200px'
-            });
-
-            observer.observe(sentinel);
+            return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}">
+                <div class="relative aspect-video overflow-hidden">
+                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                </div>
+                <div class="p-5 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase mb-1">${a.category||'Ποδόσφαιρο'} ${badge} • ${timeAgo(a.created_at)}</span>
+                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
+                    <div class="mt-auto">${bulletsHtml}</div>
+                </div>
+            </a>`;
         }
 
-        // ── Render ──
-        function renderFeed(articles) {
-            const container = document.getElementById('articles-feed-container');
-            if (!container) return;
-            container.innerHTML = '';
+        // ── Phase 1: Render Hero ───────────────────────────────────────────────
+        function renderHero(a) {
+            const heroEl = document.getElementById('hero-container');
+            if (!heroEl || !a) return;
 
-            const sentinel = document.getElementById('feed-sentinel');
-            if (sentinel) sentinel.classList.add('hidden');
+            const slug    = slugify(a.title);
+            const catPath = getCategoryCleanName(a.category);
+            const url     = `/${catPath}/${slug}-id=${a.id}`;
+            const isOwn   = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+            const ageMs   = Date.now() - new Date(a.created_at).getTime();
+            const isFresh = ageMs < 60 * 60 * 1000;
+            const showLatest = !isOwn && a.category !== 'Άποψη' && isFresh;
+            const latestBadge = showLatest
+                ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold tracking-wider">LATEST</div>`
+                : '';
 
-            if (observer) {
-                observer.disconnect();
-                observer = null;
+            let bulletsHtml = '';
+            if (a.bullets && a.bullets.length > 0) {
+                bulletsHtml = `<div class="mt-4 p-4 bg-background/60 rounded-xl border border-primary/25 overflow-hidden">
+                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-2">⚡ AI SUMMARY</div>
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-on-surface-variant leading-relaxed">
+                        ${a.bullets.map(b=>`<li>${b}</li>`).join('')}
+                    </ul>
+                </div>`;
             }
 
-            if (!articles || articles.length === 0) {
-                container.innerHTML = '<div class="col-span-1 md:col-span-12 text-center py-24 text-on-surface-variant font-body">Δεν βρέθηκαν ειδήσεις.</div>';
-                return;
-            }
+            heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                <div class="relative aspect-video overflow-hidden">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    ${latestBadge}
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${a.category||'Ποδόσφαιρο'} • ${timeAgo(a.created_at)}</span>
+                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
+                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
+                    <div class="mt-auto overflow-hidden">${bulletsHtml}</div>
+                </div>
+            </a>`;
 
+            // Sync stream height to hero height on desktop
+            syncStreamHeight();
+        }
+
+        function syncStreamHeight() {
+            const hero   = document.getElementById('hero-container');
+            const stream = document.getElementById('stream-container');
+            if (!hero || !stream) return;
+            const doSync = () => {
+                if (window.innerWidth >= 768) {
+                    const h = hero.clientHeight;
+                    stream.style.maxHeight = h > 200 ? `${h}px` : '700px';
+                } else {
+                    stream.style.maxHeight = 'none';
+                }
+            };
+            [50, 300, 800].forEach(t => setTimeout(doSync, t));
+            const img = hero.querySelector('img');
+            if (img) img.addEventListener('load', doSync);
+            window.removeEventListener('resize', syncStreamHeight);
+            window.addEventListener('resize', doSync);
+        }
+
+        // ── Phase 2: Render Stream (sidebar) ──────────────────────────────────
+        function renderStream(articles) {
+            const stream = document.getElementById('stream-container');
+            if (!stream) return;
+
+            // Separate scrapers vs own
+            let scraperGroups = [], ownGroups = [];
             const groups = {};
             articles.forEach(a => {
                 const gid = a.group_id || ('solo-' + a.id);
@@ -552,412 +549,297 @@
                 return { main: g[0], related: g.slice(1) };
             }).sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
 
-            if (sorted.length === 0) return;
+            sorted.forEach(g => {
+                const isOwn = (g.main.source_url||'').toLowerCase().includes('manual') || (g.main.source_url||'').toLowerCase().includes('opinion');
+                if (activeCategory === null) {
+                    if (isOwn) ownGroups.push(g);
+                    else scraperGroups.push(g);
+                } else {
+                    scraperGroups.push(g);
+                }
+            });
 
-            currentFilteredArticles = sorted;
+            // Hero = first scraper article
+            let heroGroup = scraperGroups[0] || ownGroups[0];
+            if (heroGroup) renderHero(heroGroup.main);
 
-            // ─ Featured card ─
-            const now = new Date();
-            let ownArticlesAll = [];
-            let scraperArticles = [];
-
+            // Stream = remaining scraper articles + own articles merged by date
+            let sideCandidates;
             if (activeCategory === null) {
-                // Populate ownArticlesAll from the separate global ownArticles array
-                ownArticlesAll = ownArticles.map(a => ({ main: a, related: [] }));
-                
-                // Filter out any manual articles from scraperArticles to avoid duplicates
-                sorted.forEach(g => {
-                    const a = g.main;
-                    const isOwn = (a.source_url || '').toLowerCase().includes('manual') || 
-                                  (a.source_url || '').toLowerCase().includes('opinion://manual');
-                    if (!isOwn) {
-                        scraperArticles.push(g);
-                    }
-                });
-            } else {
-                scraperArticles = sorted;
-            }
-
-            // Featured Hero Card is always selected from scraperArticles (so own articles never go here on homepage)
-            let featuredGroup = scraperArticles.length > 0 
-                ? scraperArticles[0] 
-                : ownArticlesAll[0];
-            
-            if (!featuredGroup) return; // safety
-            const fa = featuredGroup.main;
-            const fDate = timeAgo(fa.created_at);
-
-            let bulletsHtml = '';
-            if (fa.bullets && fa.bullets.length > 0) {
-                bulletsHtml = `
-                <div class="mt-4 p-4 bg-background/50 rounded-xl border border-primary/20">
-                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-2">⚡ AI SUMMARY</div>
-                    <ul class="list-disc pl-4 space-y-1 text-sm text-on-surface-variant leading-relaxed">
-                        ${fa.bullets.map(b => `<li>${b}</li>`).join('')}
-                    </ul>
-                </div>`;
-            }
-
-            const mainSlug = slugify(fa.title);
-            const mainCatPath = getCategoryCleanName(fa.category);
-            const mainCleanUrl = `/${mainCatPath}/${mainSlug}-id=${fa.id}`;
-
-            const isOwnFeatured = (fa.source_url || '').toLowerCase().includes('manual') || 
-                                  (fa.source_url || '').toLowerCase().includes('opinion://manual');
-            const ageMs = Date.now() - new Date(fa.created_at).getTime();
-            const isFresh = ageMs < (60 * 60 * 1000);
-            const showBreakingLabel = !isOwnFeatured && (fa.category !== 'Άποψη') && isFresh;
-            const breakingBadgeHtml = showBreakingLabel 
-                ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold">BREAKING</div>`
-                : '';
-
-            const featuredHtml = `
-            <a class="md:col-span-8 group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover"
-                 href="${mainCleanUrl}">
-                <div class="relative aspect-video overflow-hidden">
-                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${fa.image_url || DEFAULT_IMG}" alt="${fa.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                    ${breakingBadgeHtml}
-                </div>
-                <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${fa.category || 'Ποδόσφαιρο'} • ${fDate}</span>
-                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${fa.title}</h2>
-                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${fa.summary || ''}</p>
-                    <div class="mt-auto" onclick="event.stopPropagation()">
-                        ${bulletsHtml}
-                    </div>
-                </div>
-            </a>`;
-
-            // ─ Side column (20 articles initially, stretches dynamically, infinite scroll) ─
-            let sideCandidates = [];
-            if (activeCategory === null) {
+                const ownFromCache = ownArticles.map(a => ({ main: a, related: [] }));
                 sideCandidates = [
-                    ...scraperArticles.slice(1),
-                    ...ownArticlesAll
+                    ...scraperGroups.slice(1),
+                    ...ownFromCache
                 ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
             } else {
-                sideCandidates = scraperArticles.slice(1);
+                sideCandidates = scraperGroups.slice(1);
             }
-            const sideGroups = sideCandidates.slice(0, 20);
-            let sideHtml = '<div id="right-side-feed" class="md:col-span-4 pr-1" style="max-height: 700px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: thin; scrollbar-color: #2e7d32 transparent;">';
-            sideGroups.forEach(g => {
-                const a = g.main;
-                const sideSlug = slugify(a.title);
-                const sideCatPath = getCategoryCleanName(a.category);
-                const sideCleanUrl = `/${sideCatPath}/${sideSlug}-id=${a.id}`;
 
-                const sideIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
-                                  (a.source_url || '').toLowerCase().includes('opinion://manual');
-                const sideBadgeHtml = sideIsOwn 
-                    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`
-                    : '';
+            // Render first 20 into sidebar
+            stream.innerHTML = sideCandidates.slice(0, 20).map(g => sideCardHtml(g.main)).join('');
 
-                sideHtml += `
-                <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
-                     href="${sideCleanUrl}">
-                    <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
-                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'} ${sideBadgeHtml}</span>
-                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
-                        <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
-                    </div>
-                </a>`;
+            // Sidebar infinite scroll from local cache
+            let sideCount = 20;
+            stream.addEventListener('scroll', () => {
+                if (stream.scrollTop + stream.clientHeight >= stream.scrollHeight - 60) {
+                    const batch = sideCandidates.slice(sideCount, sideCount + 10);
+                    batch.forEach(g => stream.insertAdjacentHTML('beforeend', sideCardHtml(g.main)));
+                    sideCount += batch.length;
+                }
             });
-            sideHtml += '</div>';
 
-            container.innerHTML = featuredHtml + sideHtml;
+            // Phase 3 setup (deferred bottom sections)
+            setupPhase3(scraperGroups, ownGroups, sideCandidates);
 
-            // Sync right-side feed height to match left breaking card height on desktop
-            const rightSide = document.getElementById('right-side-feed');
-            if (rightSide) {
-                const syncHeight = () => {
-                    const leftCard = container.querySelector('.md\\:col-span-8');
-                    if (leftCard && window.innerWidth >= 768) {
-                        const h = leftCard.clientHeight;
-                        rightSide.style.maxHeight = h > 200 ? `${h}px` : '700px';
-                    } else {
-                        rightSide.style.maxHeight = 'none';
-                    }
-                };
-                setTimeout(syncHeight, 50);
-                setTimeout(syncHeight, 300);
-                setTimeout(syncHeight, 1000);
-                const leftImg = container.querySelector('.md\\:col-span-8 img');
-                if (leftImg) {
-                    leftImg.addEventListener('load', syncHeight);
-                }
-                window.addEventListener('resize', syncHeight);
+            // Sync height
+            syncStreamHeight();
+        }
 
-                // Right Column Infinite Scroll / Lazy Loading (from local cache)
-                let sideLoadedCount = 20;
-                rightSide.addEventListener('scroll', () => {
-                    if (rightSide.scrollTop + rightSide.clientHeight >= rightSide.scrollHeight - 50) {
-                        const nextBatch = sideCandidates.slice(sideLoadedCount, sideLoadedCount + 10);
-                        if (nextBatch.length > 0) {
-                            nextBatch.forEach(g => {
-                                const a = g.main;
-                                const scrollSlug = slugify(a.title);
-                                const scrollCatPath = getCategoryCleanName(a.category);
-                                const scrollCleanUrl = `/${scrollCatPath}/${scrollSlug}-id=${a.id}`;
+        // ── Phase 3: Deferred bottom sections ─────────────────────────────────
+        function setupPhase3(scraperGroups, ownGroups, sideCandidates) {
+            // Disconnect old observers
+            if (editorialObserver) editorialObserver.disconnect();
+            if (moreNewsObserver)  moreNewsObserver.disconnect();
+            if (sentinelObserver)  sentinelObserver.disconnect();
+            editorialDone = false;
+            moreNewsDone  = false;
 
-                                const scrollIsOwn = (a.source_url || '').toLowerCase().includes('manual') || 
-                                                    (a.source_url || '').toLowerCase().includes('opinion://manual');
-                                const scrollBadgeHtml = scrollIsOwn 
-                                    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="PanathinaikosNews" class="h-3.5 w-auto object-contain"/></span>`
-                                    : '';
+            const editorialEl = document.getElementById('editorial-section');
+            const moreNewsEl  = document.getElementById('more-news-section');
+            const sentinel    = document.getElementById('feed-sentinel');
 
-                                rightSide.insertAdjacentHTML('beforeend', `
-                                <a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left"
-                                     href="${scrollCleanUrl}">
-                                    <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
-                                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category || 'Ποδόσφαιρο'} ${scrollBadgeHtml}</span>
-                                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
-                                        <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
-                                    </div>
-                                </a>`);
-                            });
-                            sideLoadedCount += nextBatch.length;
+            // Reset sections
+            if (editorialEl) editorialEl.innerHTML = '';
+            if (moreNewsEl)  moreNewsEl.innerHTML  = '';
+            if (sentinel)    sentinel.classList.add('hidden');
+
+            // Editorial section (Αρθρογραφία) — own articles, homepage only
+            if (activeCategory === null) {
+                const ownToShow = ownArticles.length > 0
+                    ? ownArticles
+                    : ownGroups.map(g => g.main);
+
+                if (ownToShow.length > 0 && editorialEl) {
+                    editorialObserver = new IntersectionObserver(entries => {
+                        if (entries[0].isIntersecting && !editorialDone) {
+                            editorialDone = true;
+                            editorialObserver.disconnect();
+                            renderEditorial(ownToShow, editorialEl);
                         }
-                    }
-                });
+                    }, { rootMargin: '300px' });
+                    editorialObserver.observe(editorialEl);
+                }
             }
 
-            // 4. "PanathinaikosNews - Αρθρογραφία" Section:
-            // Display all own articles in a horizontal carousel row (ONLY on Homepage)
-            if (activeCategory === null && ownArticlesAll.length > 0) {
-                let carouselCardsHtml = '';
-                ownArticlesAll.forEach(g => {
-                    const a = g.main;
-                    const slug = slugify(a.title);
-                    const catPath = getCategoryCleanName(a.category);
-                    const articleCleanUrl = `/${catPath}/${slug}-id=${a.id}`;
-                    
-                    const cardBorder = 'border-primary/30 bg-primary/5';
-                    const badgeHtml = '';
+            // More News section (Περισσότερες Ειδήσεις)
+            const bottomArticles = activeCategory === null
+                ? scraperGroups.slice(1).map(g => g.main)
+                : sideCandidates.map(g => g.main);
 
-                    carouselCardsHtml += `
-                    <div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
-                        <a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover h-full ${cardBorder}"
-                             href="${articleCleanUrl}">
-                            <div class="relative aspect-video overflow-hidden">
-                                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url || DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
-                            </div>
-                            <div class="p-5 flex flex-col flex-1">
-                                <span class="font-label text-label text-primary uppercase mb-1">${a.category || 'Ποδόσφαιρο'} ${badgeHtml} • ${timeAgo(a.created_at)}</span>
-                                <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors line-clamp-2">${a.title}</h3>
-                                <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary || ''}</p>
-                            </div>
-                        </a>
-                    </div>`;
-                });
+            if (bottomArticles.length > 0 && moreNewsEl) {
+                moreNewsObserver = new IntersectionObserver(entries => {
+                    if (entries[0].isIntersecting && !moreNewsDone) {
+                        moreNewsDone = true;
+                        moreNewsObserver.disconnect();
+                        renderMoreNews(bottomArticles, moreNewsEl);
+                        // Activate bottom infinite scroll after section renders
+                        setupSentinel();
+                    }
+                }, { rootMargin: '300px' });
+                moreNewsObserver.observe(moreNewsEl);
+            }
+        }
 
-                container.insertAdjacentHTML('beforeend', `
-                <div class="col-span-1 md:col-span-12 mt-12 pt-8 border-t border-outline-variant/30">
-                    <h2 class="font-h2 text-h2 mb-6 flex items-center gap-3 flex-wrap">
-                        <img src="/logo.png" alt="PanathinaikosNews" class="h-10 md:h-12 w-auto object-contain"/>
-                        <span class="text-on-surface/90 font-semibold">- Αρθρογραφία</span>
-                    </h2>
-                    <div class="relative group/carousel">
-                        <!-- Left Arrow -->
-                        <button onclick="scrollCarousel('left')" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </button>
-                        
-                        <!-- Scroll Container -->
-                        <div id="own-carousel-container" class="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory py-4" style="scrollbar-width: none; -ms-overflow-style: none;">
-                            ${carouselCardsHtml}
+        function renderEditorial(articles, container) {
+            const carouselCards = articles.map(a => {
+                const slug   = slugify(a.title);
+                const cat    = getCategoryCleanName(a.category);
+                const url    = `/${cat}/${slug}-id=${a.id}`;
+                return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
+                    <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                        <div class="relative aspect-video overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
-                        
-                        <!-- Right Arrow -->
-                        <button onclick="scrollCarousel('right')" class="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </button>
+                        <div class="p-5 flex flex-col flex-1">
+                            <span class="font-label text-label text-primary uppercase mb-1">${a.category||'Άποψη'} • ${timeAgo(a.created_at)}</span>
+                            <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors line-clamp-2">${a.title}</h3>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
+                        </div>
+                    </a>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30">
+                <h2 class="font-h2 text-h2 mb-6 flex items-center gap-3 flex-wrap">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-10 md:h-12 w-auto object-contain"/>
+                    <span class="text-on-surface/90 font-semibold">- Αρθρογραφία</span>
+                </h2>
+                <div class="relative group/carousel">
+                    <button onclick="scrollCarousel('left')" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <div id="own-carousel-container" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-4" style="scrollbar-width:none;-ms-overflow-style:none;">
+                        ${carouselCards}
                     </div>
-                </div>`);
-            }
-
-            // 5. Remaining bottom grid (Περισσότερες Ειδήσεις):
-            // Displays remaining non-manual scraper articles
-            const bottomGridArticles = activeCategory === null 
-                ? scraperArticles.slice(1) 
-                : sideCandidates;
-
-            if (bottomGridArticles.length > 0) {
-                const moreNewsText = activeCategory === 'apopsi' ? 'Περισσότερη αρθρογραφία' : 'Περισσότερες Ειδήσεις';
-                container.insertAdjacentHTML('beforeend', `
-                <div class="col-span-1 md:col-span-12 mt-12 pt-8 border-t border-outline-variant/30">
-                    <h2 class="font-h2 text-h2 mb-6">${moreNewsText}</h2>
+                    <button onclick="scrollCarousel('right')" class="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
                 </div>
-                <div class="col-span-1 md:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bottom-grid-cards">
-                </div>`);
-
-                const gridCardsContainer = document.getElementById('bottom-grid-cards');
-                renderMoreCards(bottomGridArticles, gridCardsContainer);
-            }
-
-            if (hasMore) {
-                setupInfiniteScroll();
-            }
+            </div>`;
         }
 
-        // ── Fetch ──
-        async function fetchArticles(reset = false) {
-            if (isFetching) return;
-            if (reset) {
-                currentPage = 1;
-                hasMore = true;
-                allArticles = [];
-                const container = document.getElementById('articles-feed-container');
-                if (container) {
-                    container.innerHTML = `
-                        <!-- Skeleton Loader -->
-                        <div class="md:col-span-8 animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end">
-                            <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
-                            <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
-                            <div class="h-4 bg-surface-container-high w-full rounded"></div>
-                        </div>
-                        <div class="md:col-span-4 flex flex-col gap-8">
-                            <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-8 rounded-lg">
-                                <div class="w-[96px] h-[96px] bg-surface-container-high rounded-lg shrink-0"></div>
-                                <div class="space-y-3 w-full">
-                                    <div class="h-4 bg-surface-container-high w-1/3 rounded"></div>
-                                    <div class="h-4 bg-surface-container-high w-3/4 rounded"></div>
-                                </div>
-                            </div>
-                        </div>`;
+        function renderMoreNews(articles, container) {
+            const label = activeCategory === 'Άποψη' ? 'Περισσότερη αρθρογραφία' : 'Περισσότερες Ειδήσεις';
+            container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30">
+                <h2 class="font-h2 text-h2 mb-6">${label}</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bottom-grid-cards"></div>`;
+
+            const grid = document.getElementById('bottom-grid-cards');
+            articles.forEach(a => grid.insertAdjacentHTML('beforeend', gridCardHtml(a)));
+        }
+
+        // ── Sentinel (bottom page infinite scroll for more API pages) ──────────
+        function setupSentinel() {
+            const sentinel = document.getElementById('feed-sentinel');
+            if (!sentinel || !streamHasMore) return;
+            sentinel.classList.remove('hidden');
+            if (sentinelObserver) sentinelObserver.disconnect();
+            sentinelObserver = new IntersectionObserver(async entries => {
+                if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
+                    await fetchMorePages();
                 }
-            }
+            }, { rootMargin: '200px' });
+            sentinelObserver.observe(sentinel);
+        }
 
-            if (!hasMore) return;
-            isFetching = true;
-
+        async function fetchMorePages() {
+            if (isFetchingMore || !streamHasMore) return;
+            isFetchingMore = true;
+            const sentinel = document.getElementById('feed-sentinel');
             try {
-                if (activeCategory === null && ownArticles.length === 0) {
-                    try {
-                        const resOwn = await fetch('/api/articles?opinionOnly=true');
-                        if (resOwn.ok) {
-                            const rawOwn = await resOwn.json();
-                            ownArticles = (rawOwn || []).map(a => {
-                                let imageUrl = a.image_url || '';
-                                if (imageUrl) {
-                                    try {
-                                        const u = new URL(imageUrl);
-                                        const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
-                                        const filenameBrandingIndicators = [
-                                            'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                                            'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
-                                            'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
-                                        ];
-                                        const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
-                                        let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
-                                        if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + u.pathname.toLowerCase() + '/').includes(p));
-                                        if (isBranding) {
-                                            a.image_url = DEFAULT_IMG;
-                                        }
-                                    } catch (_) {}
-                                } else {
-                                    a.image_url = DEFAULT_IMG;
-                                }
-                                return a;
-                            });
-                        }
-                    } catch (e) {
-                        console.error("[Frontend] Failed to fetch own articles:", e);
-                    }
+                const apiCat = getApiCat(activeCategory);
+                const res  = await fetch(`/api/articles?category=${apiCat}&page=${streamPage}`);
+                const data = await res.json();
+                if (!data || data.length === 0) {
+                    streamHasMore = false;
+                    if (sentinel) sentinel.classList.add('hidden');
+                    return;
                 }
+                const processed = data.map(processImage);
+                allArticles = allArticles.concat(processed);
+                streamPage++;
 
-                let apiCat = '';
-                if (activeCategory === 'Ποδόσφαιρο') apiCat = 'football';
-                else if (activeCategory === 'Μπάσκετ') apiCat = 'basket';
-                else if (activeCategory === 'Ερασιτέχνης') apiCat = 'erasitexnis';
-                else if (activeCategory === 'Άποψη') apiCat = 'apopsi';
-                else if (activeCategory === 'Μεταγραφές') apiCat = 'metagrafes';
-
-                console.log("[Frontend] Initiating fetch to /api/articles", { category: apiCat, page: currentPage });
-                const response = await fetch(`/api/articles?category=${apiCat}&page=${currentPage}`);
-                if (!response.ok) throw new Error('API request failed');
-                const data = await response.json();
-
-                const processed = (data || []).map(a => {
-                    let imageUrl = a.image_url || '';
-                    if (imageUrl) {
-                        try {
-                            const u = new URL(imageUrl);
-                            const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
-                            const pathLower = u.pathname.toLowerCase();
-                            const filenameBrandingIndicators = [
-                                'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                                'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
-                                'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
-                            ];
-                            const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
-                            let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
-                            if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + u.pathname.toLowerCase() + '/').includes(p));
-                            if (isBranding) {
-                                a.image_url = DEFAULT_IMG;
-                            }
-                        } catch (_) {}
-                    } else {
-                        a.image_url = DEFAULT_IMG;
-                    }
-                    return a;
-                });
-
-                if (processed.length === 0) {
-                    hasMore = false;
-                }
-
-                if (reset) {
-                    allArticles = processed;
-                } else {
-                    allArticles = allArticles.concat(processed);
-                }
-
-                renderFeed(allArticles);
-                currentPage++;
+                // Append to bottom grid
+                const grid = document.getElementById('bottom-grid-cards');
+                if (grid) processed.forEach(a => grid.insertAdjacentHTML('beforeend', gridCardHtml(a)));
             } catch(err) {
-                console.error("[Frontend] Fetch error:", err);
-                const c = document.getElementById('articles-feed-container');
-                if (c && reset) c.innerHTML = `<div class="col-span-1 md:col-span-12 text-center py-24 text-error font-body">Σφάλμα φόρτωσης: ${err.message}</div>`;
+                console.error('[Sentinel]', err);
             } finally {
-                isFetching = false;
+                isFetchingMore = false;
             }
         }
 
-        // Apply initial category filter from URL path (Clean SEO URLs) or query parameters
+        // ── Main Load Pipeline ─────────────────────────────────────────────────
+        async function startLoad() {
+            // Reset state
+            allArticles   = [];
+            ownArticles   = [];
+            streamPage    = 2;
+            streamHasMore = true;
+            editorialDone = false;
+            moreNewsDone  = false;
+
+            // Reset UI to skeletons
+            const heroEl   = document.getElementById('hero-container');
+            const streamEl = document.getElementById('stream-container');
+            const editEl   = document.getElementById('editorial-section');
+            const moreEl   = document.getElementById('more-news-section');
+            const sentinel = document.getElementById('feed-sentinel');
+            if (heroEl)   heroEl.innerHTML   = `<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end"><div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div><div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div><div class="h-4 bg-surface-container-high w-full rounded"></div></div>`;
+            if (streamEl) streamEl.innerHTML = `<div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl"><div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div><div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div></div>`.repeat(3);
+            if (editEl)   editEl.innerHTML   = '';
+            if (moreEl)   moreEl.innerHTML   = '';
+            if (sentinel) sentinel.classList.add('hidden');
+            if (sentinelObserver) sentinelObserver.disconnect();
+
+            const apiCat = getApiCat(activeCategory);
+
+            // PHASE 1 — hero (limit=1) fires immediately, renders as soon as it arrives
+            const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data[0]) renderHero(processImage(data[0]));
+                })
+                .catch(err => console.error('[Phase1]', err));
+
+            // PHASE 2 — stream page 1 + own articles in parallel
+            const streamPromise = fetch(`/api/articles?category=${apiCat}&page=1`)
+                .then(r => r.json())
+                .then(data => data.map(processImage))
+                .catch(() => []);
+
+            const ownPromise = activeCategory === null
+                ? fetch('/api/articles?opinionOnly=true').then(r => r.json()).then(data => data.map(processImage)).catch(() => [])
+                : Promise.resolve([]);
+
+            // Don't block hero on stream; run hero independently
+            const [streamData, ownData] = await Promise.all([streamPromise, ownPromise]);
+            allArticles = streamData;
+            ownArticles = ownData;
+
+            renderStream(streamData);
+            renderQuickLinks();
+        }
+
+        // ── Category filter (updates URL + triggers reload) ────────────────────
+        function filterFeed(category) {
+            activeCategory = category;
+            window.history.pushState({ category }, '', getCategoryPath(category));
+            filterFeedWithoutPush(category);
+        }
+        window.filterFeed = filterFeed;
+
+        function filterFeedWithoutPush(category) {
+            activeCategory = category;
+            updateNavStyles(category);
+            startLoad();
+            renderQuickLinks();
+        }
+
+        window.addEventListener('popstate', event => {
+            const cat = event.state && event.state.category ? event.state.category : null;
+            filterFeedWithoutPush(cat);
+        });
+
+        // ── URL routing on page load ───────────────────────────────────────────
         function initPageFilter() {
             const path = window.location.pathname.replace(/\/$/, '').toLowerCase();
-            let catParam = null;
-            if (path.endsWith('/podosfairo')) catParam = 'football';
-            else if (path.endsWith('/basket')) catParam = 'basket';
-            else if (path.endsWith('/erasitechnis')) catParam = 'erasitexnis';
-            else if (path.endsWith('/erasitexnis')) catParam = 'erasitexnis';
-            else if (path.endsWith('/apopsi')) catParam = 'apopsi';
-            else if (path.endsWith('/metagrafes')) catParam = 'metagrafes';
+            let cat = null;
+            if      (path.endsWith('/podosfairo'))              cat = 'Ποδόσφαιρο';
+            else if (path.endsWith('/basket'))                  cat = 'Μπάσκετ';
+            else if (path.endsWith('/erasitechnis') || path.endsWith('/erasitexnis')) cat = 'Ερασιτέχνης';
+            else if (path.endsWith('/apopsi'))                  cat = 'Άποψη';
 
-            if (!catParam) {
-                const urlParams = new URLSearchParams(window.location.search);
-                catParam = urlParams.get('category') || '';
+            if (!cat) {
+                const p = new URLSearchParams(window.location.search).get('category') || '';
+                if (p === 'football')                       cat = 'Ποδόσφαιρο';
+                else if (p === 'basket' || p === 'basketball') cat = 'Μπάσκετ';
+                else if (p === 'erasitexnis' || p === 'erasitechnis' || p === 'amateur') cat = 'Ερασιτέχνης';
+                else if (p === 'apopsi' || p === 'opinion') cat = 'Άποψη';
             }
 
-            if (catParam === 'football') filterFeedWithoutPush('Ποδόσφαιρο');
-            else if (catParam === 'basketball' || catParam === 'basket') filterFeedWithoutPush('Μπάσκετ');
-            else if (catParam === 'amateur' || catParam === 'erasitechnis' || catParam === 'erasitexnis') filterFeedWithoutPush('Ερασιτέχνης');
-            else if (catParam === 'transfers' || catParam === 'metagrafes') filterFeedWithoutPush('Μεταγραφές');
-            else if (catParam === 'opinion' || catParam === 'apopsi') filterFeedWithoutPush('Άποψη');
-            else {
-                filterFeedWithoutPush(null);
-            }
+            activeCategory = cat;
+            updateNavStyles(cat);
+            startLoad();
         }
 
         window.addEventListener('DOMContentLoaded', initPageFilter);
-        })();
+
+    })();
     </script>
+
+
 </body>
 </html>
 <!-- Force Vercel rebuild - July 8, 2026 -->

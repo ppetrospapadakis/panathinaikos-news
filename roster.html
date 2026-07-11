@@ -331,8 +331,6 @@
                 <a id="tab-basketball-redirect" href="/basket" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏀 Μπάσκετ</a>
                 <a id="tab-amateur" href="/erasitechnis" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">☘️ Ερασιτέχνης</a>
                 <a id="tab-opinion" href="/apopsi" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">✍️ Άποψη</a>
-                <a id="tab-transfers" href="/metagrafes" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">📋 Μεταγραφές</a>
-                <a id="tab-matches" href="/agones" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap">🏆 Αγώνες</a>
                 <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap">📊 ΡΟΣΤΕΡ</a>
             </div>
         </div>
@@ -353,7 +351,7 @@
         <div id="view-football" class="max-w-[1440px] mx-auto px-8 py-12 space-y-16">
 
             <!-- PITCH GRID WRAPPER -->
-            <div class="min-[900px]:grid min-[900px]:grid-cols-[2fr_1fr] min-[900px]:gap-8 max-[899px]:space-y-16">
+            <div class="min-[900px]:grid min-[900px]:grid-cols-2 min-[900px]:gap-8 max-[899px]:space-y-16">
                 <!-- PITCH 1: Starting XI -->
                 <div>
                     <div class="flex items-center justify-between mb-6">
@@ -418,7 +416,7 @@
         <div id="view-basketball" class="max-w-[1440px] mx-auto px-8 py-12 space-y-16 hidden">
 
             <!-- COURT GRID WRAPPER -->
-            <div class="min-[900px]:grid min-[900px]:grid-cols-[2fr_1fr] min-[900px]:gap-8 max-[899px]:space-y-16">
+            <div class="min-[900px]:grid min-[900px]:grid-cols-2 min-[900px]:gap-8 max-[899px]:space-y-16">
                 <!-- COURT 1: Starting 5 -->
                 <div>
                     <div class="flex items-center justify-between mb-6">
@@ -752,11 +750,16 @@
                 ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all'
                 : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
 
-            // Re-render basketball tokens the first time the tab becomes visible
-            // (position:absolute tokens inside a hidden div have no layout dimensions)
+            // Render basketball tokens AFTER the view is visible in the DOM
+            // requestAnimationFrame guarantees the browser has laid out the div
+            // so position:absolute tokens get correct coordinates
             if (!isFootball && !basketballRendered) {
                 basketballRendered = true;
-                applyBasketballData();
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        applyBasketballData();
+                    });
+                });
             }
         }
         window.switchSport = switchSport;
