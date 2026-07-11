@@ -659,9 +659,6 @@
             document.head.appendChild(script);
         });
 
-        // Stores dynamic basketball data if fetched before tab is clicked
-        let pendingBasketballData = null;
-
         async function loadDynamicRoster(db) {
             try {
                 // Fetch Football Roster
@@ -687,25 +684,27 @@
                     document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
                 }
 
-                // Fetch Basketball Roster — store data, render on first tab click
+                // Fetch Basketball Roster
                 const { data: bData } = await db.from('articles')
                     .select('*')
                     .eq('source_url', 'opinion://system-roster-basketball')
                     .maybeSingle();
 
                 if (bData && bData.bullets && bData.bullets.length >= 3) {
-                    pendingBasketballData = {
-                        starting: JSON.parse(bData.bullets[0]),
-                        backup: JSON.parse(bData.bullets[1]),
-                        rest: JSON.parse(bData.bullets[2]),
-                        analysis: bData.content || ''
-                    };
-                }
+                    const starting = JSON.parse(bData.bullets[0]);
+                    const backup = JSON.parse(bData.bullets[1]);
+                    const rest = JSON.parse(bData.bullets[2]);
+                    const analysis = bData.content || '';
 
-                // If basketball tab is already visible, render immediately
-                const bView = document.getElementById('view-basketball');
-                if (bView && !bView.classList.contains('hidden')) {
-                    applyBasketballData();
+                    renderCourtPlayers('court-starting', starting);
+                    renderCourtPlayers('court-backup', backup);
+                    renderSquadList('squad-rest-basketball', rest);
+                    document.getElementById('analysis-text-basketball').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                } else {
+                    renderCourtPlayers('court-starting', basketballStarting);
+                    renderCourtPlayers('court-backup', basketballBackup);
+                    renderSquadList('squad-rest-basketball', basketballRest);
+                    document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
                 }
 
             } catch (err) {
@@ -715,29 +714,18 @@
                 renderPitchPlayers('pitch-bench', footballBench);
                 renderSquadList('squad-rest-football', footballRest);
                 document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή.</p>';
-            }
-        }
-
-        function applyBasketballData() {
-            if (pendingBasketballData) {
-                renderCourtPlayers('court-starting', pendingBasketballData.starting);
-                renderCourtPlayers('court-backup', pendingBasketballData.backup);
-                renderSquadList('squad-rest-basketball', pendingBasketballData.rest);
-                document.getElementById('analysis-text-basketball').innerHTML =
-                    pendingBasketballData.analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
-            } else {
+                
+                // Basketball fallback
                 renderCourtPlayers('court-starting', basketballStarting);
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
-                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη.</p>';
             }
         }
 
         // ─────────────────────────────────────────────────────────────────
         // SPORT SWITCHER
         // ─────────────────────────────────────────────────────────────────
-        let basketballRendered = false;
-
         function switchSport(sport) {
             const isFootball = sport === 'football';
             document.getElementById('view-football').classList.toggle('hidden', !isFootball);
@@ -749,28 +737,20 @@
             document.getElementById('tab-basketball').className = !isFootball
                 ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all'
                 : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
-
-            // Render basketball tokens AFTER the view is visible in the DOM
-            // requestAnimationFrame guarantees the browser has laid out the div
-            // so position:absolute tokens get correct coordinates
-            if (!isFootball && !basketballRendered) {
-                basketballRendered = true;
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        applyBasketballData();
-                    });
-                });
-            }
         }
         window.switchSport = switchSport;
 
         // ─────────────────────────────────────────────────────────────────
-        // INIT — render football immediately; basketball deferred to first tab click
+        // INIT
         // ─────────────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
             renderPitchPlayers('pitch-starting', footballStarting);
             renderPitchPlayers('pitch-bench', footballBench);
             renderSquadList('squad-rest-football', footballRest);
+            
+            renderCourtPlayers('court-starting', basketballStarting);
+            renderCourtPlayers('court-backup', basketballBackup);
+            renderSquadList('squad-rest-basketball', basketballRest);
         });
     })();
     </script>
