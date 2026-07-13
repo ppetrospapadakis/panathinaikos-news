@@ -394,7 +394,7 @@
 
         function renderArticle(article) {
             // Page title
-            document.getElementById('page-title').textContent = `${article.title} | Panathinaikos News`;
+            document.title = `${article.title} | Panathinaikos News`;
 
             // ① Category + date (NO source portal name in breadcrumb)
             const pubDate = new Date(article.created_at);
