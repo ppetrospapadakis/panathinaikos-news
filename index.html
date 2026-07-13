@@ -512,7 +512,7 @@
 
             heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                 <div class="relative aspect-video overflow-hidden">
-                    <img referrerpolicy="no-referrer" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
@@ -800,7 +800,7 @@
                 ? fetch('/api/articles?opinionOnly=true').then(r => r.json()).then(data => data.map(processImage)).catch(() => [])
                 : Promise.resolve([]);
 
-            // Don't block hero on stream; run hero independently
+            // Fire stream and own articles in parallel AFTER Hero is painted
             const [streamData, ownData] = await Promise.all([streamPromise, ownPromise]);
             allArticles = streamData;
             ownArticles = ownData;
