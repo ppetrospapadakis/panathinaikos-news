@@ -345,7 +345,8 @@
                     'Άποψη': 'tab-opinion',
                     'Μεταγραφές': 'tab-transfers'
                 };
-                const cat = document.getElementById('article-category').textContent || '';
+                const catEl = document.getElementById('article-category');
+                const cat = catEl ? catEl.textContent : '';
                 Object.keys(tabMap).forEach(key => {
                     if (cat.includes(key)) {
                         const el = document.getElementById(tabMap[key]);
@@ -354,6 +355,7 @@
                         }
                     }
                 });
+                fetchSidebarStream();
                 return;
             }
 
