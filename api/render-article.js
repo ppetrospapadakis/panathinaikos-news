@@ -212,8 +212,8 @@ module.exports = async (req, res) => {
 
         // Date
         html = html.replace(
-            /<span id="article-date" class="text-on-surface-variant normal-case font-normal tracking-normal"><\/span>/g,
-            `<span id="article-date" class="text-on-surface-variant normal-case font-normal tracking-normal">${dateStr}</span>`
+            /<span id="article-date"([^>]*)><\/span>/g,
+            `<span id="article-date"$1>${dateStr}</span>`
         );
 
         // Title
@@ -229,8 +229,8 @@ module.exports = async (req, res) => {
                 'id="article-image-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/20 shadow-xl"'
             );
             html = html.replace(
-                /id="article-image" class="w-full h-full object-cover" src=""/g,
-                `id="article-image" class="w-full h-full object-cover" src="${imageUrl}"`
+                /id="article-image"([^>]*)src=""/g,
+                `id="article-image"$1src="${imageUrl}"`
             );
         }
 
