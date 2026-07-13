@@ -191,7 +191,7 @@
 
                 <!-- ② SINGLE PRIMARY HERO IMAGE -->
                 <div id="article-image-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/20 shadow-xl hidden">
-                    <img id="article-image" class="w-full h-full object-contain bg-black/20" src="" alt="Article image" loading="eager"/>
+                    <img id="article-image" referrerpolicy="no-referrer" class="w-full h-full object-contain bg-black/20" src="" alt="Article image" loading="eager" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY'"/>
                 </div>
 
                 <!-- ③ F5 QUICK-TAKES BOX — directly below image -->
@@ -643,7 +643,7 @@
                     const url = `/${catPath}/${slug}-id=${a.id}`;
                     return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
                         <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
-                            <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                            <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="flex-1 min-w-0">
                             <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${formatExactDate(a.created_at)}</span>

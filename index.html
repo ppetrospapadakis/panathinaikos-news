@@ -439,7 +439,7 @@
             const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
             return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
                 <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${formatExactDate(a.created_at)} ${badge}</span>
@@ -466,7 +466,7 @@
             }
             return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}">
                 <div class="relative aspect-video overflow-hidden">
-                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="p-5 flex flex-col flex-1">
                     <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)} ${badge}</span>
@@ -505,7 +505,7 @@
 
             heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                 <div class="relative aspect-video overflow-hidden">
-                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
@@ -666,7 +666,7 @@
                 return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
                     <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                         <div class="relative aspect-video overflow-hidden">
-                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                            <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="p-5 flex flex-col flex-1">
                             <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)}</span>
