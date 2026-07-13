@@ -135,7 +135,7 @@ module.exports = async (req, res) => {
                 try {
                     const host = new URL(url).hostname.replace('www.','').split('.')[0].toLowerCase();
                     const portals = {
-                        'sdna': { name: 'SDNA', color: '#00cc66' },
+                        'sdna': { name: 'SDNA', color: '#ff6600' },
                         'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
                         'sport24': { name: 'Sport24', color: '#ff3333' },
                         'sportal': { name: 'Sportal.gr', color: '#ff9900' },
