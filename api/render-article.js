@@ -112,36 +112,67 @@ module.exports = async (req, res) => {
             imageUrl = DEFAULT_IMG;
         }
 
-        const sourceUrlStr = (article.source_url || '').toLowerCase();
+        const sourceUrlStr = (article.source_url || '');
         const categoryStr = (article.category || '').toLowerCase();
-        const isManual = sourceUrlStr.startsWith('manual') || 
-                         sourceUrlStr.includes('opinion://manual') || 
-                         sourceUrlStr.includes('opinion://system-roster') ||
+        const isManual = sourceUrlStr.toLowerCase().startsWith('manual') || 
+                         sourceUrlStr.toLowerCase().includes('opinion://manual') || 
+                         sourceUrlStr.toLowerCase().includes('opinion://system-roster') ||
                          categoryStr.includes('άποψη') || 
                          categoryStr.includes('apopsi');
 
-        // Determine source domain
-        let sourceName = 'Portal';
-        if (!isManual && article.source_url) {
-            try {
-                const host = new URL(article.source_url).hostname.replace('www.','').split('.')[0].toLowerCase();
-                const portals = {
-                    'sdna': 'SDNA',
-                    'gazzetta': 'Gazzetta.gr',
-                    'sport24': 'Sport24',
-                    'sportal': 'Sportal.gr',
-                    'sport-fm': 'Sport-FM',
-                    'athletiko': 'Athletiko'
-                };
-                sourceName = portals[host] || 'Πηγή';
-            } catch (_) {}
+        let sourcesHtml = '';
+        if (isManual) {
+            sourcesHtml = `
+            <div class="flex flex-col items-center justify-center py-10 border-t border-outline-variant/30 mt-12 space-y-3">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-12 md:h-14 w-auto object-contain opacity-90 transition-transform hover:scale-105 duration-300"/>
+                <p class="text-xs uppercase tracking-[0.25em] text-primary/80 font-bold">PanathinaikosNews Editorial</p>
+            </div>`;
+        } else if (article.source_url) {
+            const urls = article.source_url.split(',').map(u => u.trim()).filter(Boolean);
+            const linksHtml = urls.map(url => {
+                let name = 'Portal';
+                let color = '#84d999';
+                try {
+                    const host = new URL(url).hostname.replace('www.','').split('.')[0].toLowerCase();
+                    const portals = {
+                        'sdna': { name: 'SDNA', color: '#00cc66' },
+                        'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
+                        'sport24': { name: 'Sport24', color: '#ff3333' },
+                        'sportal': { name: 'Sportal.gr', color: '#ff9900' },
+                        'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
+                        'athletiko': { name: 'Athletiko', color: '#0066cc' }
+                    };
+                    if(portals[host]) {
+                        name = portals[host].name;
+                        color = portals[host].color;
+                    } else {
+                        name = host.toUpperCase();
+                    }
+                } catch(e) {}
+                
+                return `
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-all text-sm font-medium">
+                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        <span>Διαβάστε σχετικό άρθρο στο <span style="color: ${color}" class="font-bold">${name}</span></span>
+                    </a>`;
+            }).join('');
+            sourcesHtml = `<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 flex flex-wrap justify-center gap-4">${linksHtml}</div>`;
         }
 
         const pubDate = new Date(article.created_at);
-        const dateStr = pubDate.toLocaleDateString('el-GR', {
-            day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'
+        let dateStr = pubDate.toLocaleDateString('el-GR', {
+            day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit',
+            timeZone: 'Europe/Athens', hour12: false
         });
-
+        // Sometime localedateString returns something like "13 Ιουλίου 2026, 17:21"
+        // Let's ensure it has "ΣΤΙΣ"
+        if (dateStr.includes(',')) {
+            dateStr = dateStr.replace(',', ' ΣΤΙΣ');
+        } else {
+            // fallback if it format is "13 Ιουλίου 2026 17:21"
+            dateStr = dateStr.replace(/ (\d{2}:\d{2})$/, ' ΣΤΙΣ $1');
+        }
         // 4. Perform replacements
         
         // Title Replacement
@@ -273,23 +304,17 @@ module.exports = async (req, res) => {
             /<div id="article-body" class="leading-relaxed">[\s\S]*?<\/div>/g,
             `<div id="article-body" class="leading-relaxed">${bodyHtml}</div>`
         );
-
-        // Source link references
-        if (isManual) {
-            html = html.replace(
-                /id="article-source-container" class="border-t border-outline-variant\/30 pt-10 text-center"/g,
-                'id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center" style="display: none;"'
-            );
-        } else {
-            // Inject source URL into the anchor tag
-            html = html.replace(
-                /id="article-original-link" href="#"/g,
-                `id="article-original-link" href="${article.source_url || '#'}"`
-            );
-            html = html.replace(
-                /<span id="article-source-name" class="text-primary font-bold">Portal<\/span>/g,
-                `<span id="article-source-name" class="text-primary font-bold">${sourceName}</span>`
-            );
+        // Replace the entire original source container block using regex matching the HTML structure
+        const sourceContainerRegex = /<div id="article-source-container"[\s\S]*?<\/div>\s*<\/div>\s*<!-- ⑤ MINIMAL SOURCE REFERENCE BUTTON -->/m;
+        // Since matching multiline can be tricky, we'll replace a more robust substring or just use string splitting.
+        // Actually, let's just do a string replace of the known div.
+        const sourceContainerStart = '<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center">';
+        const sourceContainerEnd = '</a>\n                </div>';
+        
+        const blockStart = html.indexOf(sourceContainerStart);
+        if (blockStart !== -1) {
+            const blockEnd = html.indexOf('</div>', blockStart + sourceContainerStart.length) + 6;
+            html = html.substring(0, blockStart) + sourcesHtml + html.substring(blockEnd);
         }
 
         return res.status(200).send(html);
