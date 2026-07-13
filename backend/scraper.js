@@ -274,6 +274,10 @@ async function scrapeArticleLinks(target) {
                         const u = new URL(href);
                         if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
                         if (u.pathname === '/' || u.pathname === '') return;
+                        
+                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/'];
+                        if (blacklist.some(b => u.pathname.includes(b))) return;
+                        
                         links.add(href.split('?')[0].split('#')[0]); // strip query/hash
                     } catch (_) {}
                 });
