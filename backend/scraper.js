@@ -803,7 +803,7 @@ async function main() {
             const candidateArticles = existingArticles.filter(art => {
                 const dbTime = new Date(art.created_at);
                 const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
-                if (timeDiffMinutes > 30) return false;
+                if (timeDiffMinutes > 40) return false;
                 
                 const scrapedDomain = getSourceNameFromUrl(articleUrl);
                 const dbDomain = getSourceNameFromUrl(art.source_url);
