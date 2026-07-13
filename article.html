@@ -202,7 +202,7 @@
                         <span class="material-symbols-outlined text-primary text-xl">bolt</span>
                         <span class="font-label text-label text-primary uppercase tracking-widest font-bold">AI SUMMARY</span>
                     </div>
-                    <ul id="article-bullets-list" class="list-disc pl-5 space-y-3 text-on-surface-variant text-body leading-relaxed">
+                    <ul id="article-bullets-list" class="space-y-3 text-on-surface-variant text-body leading-relaxed">
                     </ul>
                 </div>
 
@@ -434,13 +434,29 @@
             // ③ Bullets — shown directly below image
             const bulletsBox = document.getElementById('article-bullets-box');
             const bulletsList = document.getElementById('article-bullets-list');
-            if (article.bullets && article.bullets.length > 0) {
-                bulletsList.innerHTML = article.bullets
+            
+            let parsedBullets = [];
+            if (article.bullets) {
+                if (Array.isArray(article.bullets)) {
+                    parsedBullets = article.bullets;
+                } else if (typeof article.bullets === 'string') {
+                    try { parsedBullets = JSON.parse(article.bullets); } catch(e) {}
+                }
+            }
+
+            if (parsedBullets && parsedBullets.length > 0) {
+                bulletsList.innerHTML = parsedBullets
                     .map(b => `<li class="flex items-start gap-3">
                         <span class="text-primary font-bold mt-1 shrink-0">→</span>
                         <span>${b}</span>
                     </li>`)
                     .join('');
+                bulletsBox.classList.remove('hidden');
+            } else if (article.summary) {
+                bulletsList.innerHTML = `<li class="flex items-start gap-3">
+                    <span class="text-primary font-bold mt-1 shrink-0">→</span>
+                    <span>${article.summary}</span>
+                </li>`;
                 bulletsBox.classList.remove('hidden');
             }
 
