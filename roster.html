@@ -257,13 +257,12 @@
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center px-8 relative">
-            <button onclick="toggleDrawer()" class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" aria-label="Menu">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
+            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
-                <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/>
-            </a>
+            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/></a>
+            <div class="w-6 h-6"></div>
         </div>
     </header>
 
@@ -480,9 +479,15 @@
     </main>
 
     <!-- Footer -->
-    <footer class="w-full py-12 bg-surface-container-lowest border-t border-outline-variant mt-16">
-        <div class="max-w-[1440px] mx-auto px-8 flex flex-col items-center gap-4">
-            <p class="font-caption text-caption text-on-surface-variant/40">© 2026 Panathinaikos Editorial. All rights reserved.</p>
+    <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant">
+        <div class="max-w-[1440px] mx-auto px-8 flex flex-col items-center gap-8">
+            <div class="font-h4 text-h4 text-primary font-bold tracking-tighter">PanathinaikosNews Editorial</div>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+            </div>
+            <p class="font-caption text-caption text-on-surface-variant/40">© 2026 PanathinaikosNews Editorial. All rights reserved.</p>
         </div>
     </footer>
 

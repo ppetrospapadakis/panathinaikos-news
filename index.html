@@ -469,6 +469,14 @@
                     </ul>
                 </div>`;
             }
+            return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}">
+                <div class="relative aspect-video overflow-hidden">
+                    <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                </div>
+                <div class="p-5 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)} ${badge}</span>
+                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
                     <div class="mt-auto">
                         ${bulletsHtml}
                     </div>
