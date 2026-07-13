@@ -616,10 +616,10 @@
                 
                 function slugify(text) {
                     return text.toString().toLowerCase()
-                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .trim()
                         .replace(/\s+/g, '-')
-                        .replace(/[^\w\-]+/g, '')
-                        .replace(/\-\-+/g, '-')
+                        .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+                        .replace(/--+/g, '-')
                         .replace(/^-+/, '')
                         .replace(/-+$/, '');
                 }
