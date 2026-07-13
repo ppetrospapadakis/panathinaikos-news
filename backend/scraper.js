@@ -749,7 +749,12 @@ async function main() {
             throw new Error(`DB error: ${error.message}`);
         }
         existingArticles = data || [];
-        existingUrls = new Set(existingArticles.map(a => a.source_url));
+        existingUrls = new Set();
+        existingArticles.forEach(a => {
+            if (a.source_url) {
+                a.source_url.split(',').forEach(u => existingUrls.add(u.trim()));
+            }
+        });
         console.log(`[DB] Loaded ${existingArticles.length} existing articles for deduplication.\n`);
     }
 
@@ -856,13 +861,25 @@ async function main() {
                         const newBullets = await generateAiBullets(newTitle, newContent, target.isOfficial);
                         const newSummary = newContent.substring(0, 300); // basic summary
 
+                        // Prefer non-SDNA image
+                        let newImageUrl = dbArt.image_url;
+                        const isDbSdna = (dbArt.source_url || '').toLowerCase().includes('sdna.gr');
+                        const isScrapedSdna = articleUrl.toLowerCase().includes('sdna.gr');
+                        
+                        if (!newImageUrl && scraped.imageUrl) {
+                            newImageUrl = scraped.imageUrl;
+                        } else if (isDbSdna && !isScrapedSdna && scraped.imageUrl) {
+                            newImageUrl = scraped.imageUrl; // Swap SDNA watermark image with the clean one
+                        }
+
                         const { error: updateErr } = await db.from('articles')
                             .update({ 
                                 title: newTitle,
                                 content: newContent, 
                                 summary: newSummary,
                                 bullets: newBullets,
-                                source_url: newSourceUrl, 
+                                source_url: newSourceUrl,
+                                image_url: newImageUrl,
                                 updated_at: new Date().toISOString(),
                                 created_at: new Date().toISOString() // bump to top
                             })
