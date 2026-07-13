@@ -1,30 +1,30 @@
 // ── Roster & Analysis Editing Logic ──────────────────────────────────────────
 const footballStartingDefault = [
-    [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1],
-    [15, 68, 'ΒΑ', 'Βαγιαννίδης', 2],
-    [38, 70, 'ΜΣ', 'Μαξίμοβιτς', 5],
-    [62, 70, 'ΤΟ', 'Τόμας', 4],
-    [85, 68, 'ΡΩΑ', 'Ρουά', 3],
-    [25, 48, 'ΝΤΡ', 'Ντρ. Σκι', 8],
-    [50, 44, 'ΓΡΑ', 'Γκρέι', 6],
-    [75, 48, 'ΘΟΥ', 'Θορ', 10],
-    [18, 22, 'ΤΕΤ', 'Τετέ', 7],
-    [50, 18, 'ΙΩΑ', 'Ιωαννίδης', 9],
-    [82, 22, 'ΠΕΛ', 'Πελίστρι', 11]
+    [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1, 'GK'],
+    [15, 68, 'ΒΑ', 'Βαγιαννίδης', 2, 'RB'],
+    [38, 70, 'ΜΣ', 'Μαξίμοβιτς', 5, 'CB'],
+    [62, 70, 'ΤΟ', 'Τόμας', 4, 'CB'],
+    [85, 68, 'ΡΩΑ', 'Ρουά', 3, 'LB'],
+    [25, 48, 'ΝΤΡ', 'Ντρ. Σκι', 8, 'CM'],
+    [50, 44, 'ΓΡΑ', 'Γκρέι', 6, 'CM'],
+    [75, 48, 'ΘΟΥ', 'Θορ', 10, 'CAM'],
+    [18, 22, 'ΤΕΤ', 'Τετέ', 7, 'RW'],
+    [50, 18, 'ΙΩΑ', 'Ιωαννίδης', 9, 'ST'],
+    [82, 22, 'ΠΕΛ', 'Πελίστρι', 11, 'LW']
 ];
 
 const footballBenchDefault = [
-    [50, 85, 'ΒΡΑ', 'Βρατσάνος', 23],
-    [15, 65, 'ΓΙΕ', 'Γιεντβάι', 14],
-    [38, 67, 'ΑΝΔ', 'Ανδρέ', 16],
-    [62, 67, 'ΛΩΡ', 'Λόρδος', 22],
-    [85, 65, 'ΚΟΡ', 'Κόρμπο', 3],
-    [20, 45, 'ΜΠΑ', 'Μπαλόγκ', 17],
-    [40, 42, 'ΤΖΑ', 'Τζαβέλας', 18],
-    [60, 42, 'ΧΑΡ', 'Χαρίσης', 19],
-    [80, 45, 'ΠΑΛ', 'Παλμέρι', 15],
-    [35, 22, 'ΟΑΔ', 'Οάδες', 20],
-    [65, 22, 'ΙΝΓ', 'Ίνγκασον', 21]
+    [50, 85, 'ΒΡΑ', 'Βρατσάνος', 23, 'GK'],
+    [15, 65, 'ΓΙΕ', 'Γιεντβάι', 14, 'RB'],
+    [38, 67, 'ΑΝΔ', 'Ανδρέ', 16, 'CB'],
+    [62, 67, 'ΛΩΡ', 'Λόρδος', 22, 'CB'],
+    [85, 65, 'ΚΟΡ', 'Κόρμπο', 3, 'LB'],
+    [20, 45, 'ΜΠΑ', 'Μπαλόγκ', 17, 'RM'],
+    [40, 42, 'ΤΖΑ', 'Τζαβέλας', 18, 'CM'],
+    [60, 42, 'ΧΑΡ', 'Χαρίσης', 19, 'CM'],
+    [80, 45, 'ΠΑΛ', 'Παλμέρι', 15, 'LM'],
+    [35, 22, 'ΟΑΔ', 'Οάδες', 20, 'ST'],
+    [65, 22, 'ΙΝΓ', 'Ίνγκασον', 21, 'ST']
 ];
 
 const footballRestDefault = [
@@ -161,17 +161,40 @@ function adminRenderRosterSection(sport, rosterType) {
     container.querySelectorAll('.draggable-player').forEach(el => el.remove());
     
     const players = currentRoster[sport][rosterType];
-    players.forEach(([left, top, initials, name, badgeVal], idx) => {
+    players.forEach((player, idx) => {
+        const left = player[0];
+        const top = player[1];
+        const initials = player[2];
+        const name = player[3];
+        
+        let avatarInner = '';
+        if (isFb) {
+            const num = player[4];
+            const pos = player[5];
+            avatarInner = `
+                <div class="avatar" style="position:relative;">
+                    ${num}
+                    <div class="badge">${pos || initials}</div>
+                </div>
+            `;
+        } else {
+            const num = idx + 1;
+            const pos = player[4];
+            avatarInner = `
+                <div class="avatar" style="position:relative;">
+                    ${num}
+                    <div class="badge">${pos || ''}</div>
+                </div>
+            `;
+        }
+
         const token = document.createElement('div');
         token.className = `draggable-player ${sport}`;
         token.style.left = left + '%';
         token.style.top = top + '%';
         
         token.innerHTML = `
-            <div class="avatar" style="position:relative;">
-                ${initials}
-                <div class="badge">${badgeVal || ''}</div>
-            </div>
+            ${avatarInner}
             <div class="name-tag">${name}</div>
         `;
         
@@ -281,17 +304,27 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     const player = rosterList[idx];
     if (!player) return;
     
-    const [left, top, initials, name, badge] = player;
-    
-    document.getElementById('popover-initials').value = initials;
-    document.getElementById('popover-name').value = name;
-    document.getElementById('popover-badge').value = badge;
+    document.getElementById('popover-initials').value = player[2] || '';
+    document.getElementById('popover-name').value = player[3] || '';
     
     const labelEl = document.getElementById('popover-badge-label');
+    const badgeInput = document.getElementById('popover-badge');
+    const extraWrapper = document.getElementById('popover-extra-wrapper');
+    const extraInput = document.getElementById('popover-extra-input');
+    
     if (sport === 'football') {
-        labelEl.textContent = 'Νούμερο (Jersey)';
+        labelEl.textContent = 'Νούμερο';
+        badgeInput.value = player[4] || '';
+        
+        if (extraWrapper && extraInput) {
+            extraWrapper.classList.remove('hidden');
+            document.getElementById('popover-extra-label').textContent = 'Θέση';
+            extraInput.value = player[5] || '';
+        }
     } else {
-        labelEl.textContent = 'Θέση (Position)';
+        labelEl.textContent = 'Θέση';
+        badgeInput.value = player[4] || '';
+        if (extraWrapper) extraWrapper.classList.add('hidden');
     }
     
     const popover = document.getElementById('player-edit-popover');
@@ -329,6 +362,13 @@ function savePopoverChanges() {
     rosterList[idx][2] = newInitials;
     rosterList[idx][3] = newName;
     rosterList[idx][4] = newBadge;
+    
+    if (sport === 'football') {
+        const extraInput = document.getElementById('popover-extra-input');
+        if (extraInput) {
+            rosterList[idx][5] = extraInput.value.trim();
+        }
+    }
     
     const rawId = `roster-${sport}-${rosterType}`;
     const textarea = document.getElementById(rawId);
@@ -402,7 +442,16 @@ function adminRenderReserves(sport) {
     restList.forEach((player, idx) => {
         const card = document.createElement('div');
         card.className = 'flex items-center gap-2 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30';
+        
+        let moveButtons = `
+            <div class="flex flex-col gap-1 mr-1">
+                <button onclick="moveReserve('${sport}', ${idx}, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-0.5 text-[18px] leading-none ${idx === 0 ? 'opacity-30 pointer-events-none' : ''}">arrow_drop_up</button>
+                <button onclick="moveReserve('${sport}', ${idx}, 1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-0.5 text-[18px] leading-none ${idx === restList.length - 1 ? 'opacity-30 pointer-events-none' : ''}">arrow_drop_down</button>
+            </div>
+        `;
+        
         card.innerHTML = `
+            ${moveButtons}
             <input type="text" value="${player.initials || ''}" placeholder="Αρχ" class="editor-input py-1 px-2 text-center text-xs font-bold w-12 text-primary" style="background:#111317;" maxlength="3" oninput="updateReserveField('${sport}', ${idx}, 'initials', this.value)"/>
             <input type="text" value="${player.name || ''}" placeholder="Όνομα" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
             <input type="text" value="${player.pos || player.num || ''}" placeholder="Θέση" class="editor-input py-1 px-2 text-xs w-16" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
@@ -424,6 +473,22 @@ function updateReserveField(sport, idx, field, val) {
             textarea.value = JSON.stringify(restList, null, 2);
         }
     }
+}
+
+function moveReserve(sport, idx, dir) {
+    const restList = currentRoster[sport].rest;
+    if (idx + dir < 0 || idx + dir >= restList.length) return;
+    
+    const temp = restList[idx];
+    restList[idx] = restList[idx + dir];
+    restList[idx + dir] = temp;
+    
+    const textarea = document.getElementById(`roster-${sport}-rest`);
+    if (textarea) {
+        textarea.value = JSON.stringify(restList, null, 2);
+    }
+    
+    adminRenderReserves(sport);
 }
 
 function addReserve(sport) {

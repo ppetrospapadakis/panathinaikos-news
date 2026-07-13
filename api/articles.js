@@ -67,8 +67,12 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // Set high-performance Edge caching headers
-    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    // Set high-performance Edge caching headers. If limit=1, use shorter cache to ensure freshness.
+    if (req.query.limit === '1') {
+        res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    } else {
+        res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    }
 
     try {
         // 1. Single article fetch support (if id parameter is provided)
@@ -123,7 +127,11 @@ module.exports = async (req, res) => {
           query = query.ilike('category', `%${dbCategory}%`);
         }
 
-        query = query.range(from, to);
+        if (req.query.limit) {
+            query = query.limit(parseInt(req.query.limit, 10));
+        } else {
+            query = query.range(from, to);
+        }
         
         const { data, error } = await query;
         if (error) throw error;
