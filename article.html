@@ -475,6 +475,8 @@
                 if (!text || !text.trim()) return '';
                 // Strip source attribution phrases (belt-and-suspenders, in case AI missed it)
                 return text
+                    .replace(/Πηγ[ήές]:.*$/im, '')
+                    .replace(/Διαβάστε.*στο.*$/im, '')
                     .replace(/\bσύμφωνα με\s+\S+/gi, '')
                     .replace(/\b(gazzetta|sport24|sdna|sportal|sport-fm|athletiko)\b[\s.,·]*/gi, '')
                     .replace(/\bτο (site|portal|μέσο|ρεπορτάζ)\s+\S+/gi, '')
@@ -536,31 +538,41 @@
                 </div>`;
                 body.insertAdjacentHTML('beforeend', logoBlock);
             } else {
-                if (sourceContainer) sourceContainer.style.display = 'block';
-                const domainInfo = (() => {
-                    try {
-                        const host = new URL(article.source_url).hostname.replace('www.','').split('.')[0].toLowerCase();
-                        const portals = {
-                            'sdna': { name: 'SDNA', color: '#00cc66' },
-                            'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
-                            'sport24': { name: 'Sport24', color: '#ff3333' },
-                            'sportal': { name: 'Sportal.gr', color: '#ff9900' },
-                            'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
-                            'athletiko': { name: 'Athletiko', color: '#0066cc' }
-                        };
-                        return portals[host] || { name: host.toUpperCase(), color: '#84d999' };
-                    } catch(e) {
-                        return { name: 'Portal', color: '#84d999' };
-                    }
-                })();
-                const sourceSpan = document.getElementById('article-source-name');
-                if (sourceSpan) {
-                    sourceSpan.textContent = domainInfo.name;
-                    sourceSpan.style.color = domainInfo.color;
-                }
-                const originalLink = document.getElementById('article-original-link');
-                if (originalLink) {
-                    originalLink.href = article.source_url;
+                if (sourceContainer) {
+                    sourceContainer.style.display = 'flex';
+                    sourceContainer.className = 'border-t border-outline-variant/30 pt-10 flex flex-wrap justify-center gap-4';
+                    sourceContainer.innerHTML = ''; // clear original link
+
+                    const urls = article.source_url.split(',').map(u => u.trim()).filter(Boolean);
+                    
+                    urls.forEach(url => {
+                        const domainInfo = (() => {
+                            try {
+                                const host = new URL(url).hostname.replace('www.','').split('.')[0].toLowerCase();
+                                const portals = {
+                                    'sdna': { name: 'SDNA', color: '#00cc66' },
+                                    'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
+                                    'sport24': { name: 'Sport24', color: '#ff3333' },
+                                    'sportal': { name: 'Sportal.gr', color: '#ff9900' },
+                                    'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
+                                    'athletiko': { name: 'Athletiko', color: '#0066cc' }
+                                };
+                                return portals[host] || { name: host.toUpperCase(), color: '#84d999' };
+                            } catch(e) {
+                                return { name: 'Portal', color: '#84d999' };
+                            }
+                        })();
+
+                        const linkHtml = `
+                            <a href="${url}" target="_blank" rel="noopener noreferrer" 
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-all text-sm font-medium">
+                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                <span>Διαβάστε σχετικό άρθρο στο <span style="color: ${domainInfo.color}" class="font-bold">${domainInfo.name}</span></span>
+                                <svg class="w-4 h-4 text-on-surface-variant" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        `;
+                        sourceContainer.insertAdjacentHTML('beforeend', linkHtml);
+                    });
                 }
             }
 

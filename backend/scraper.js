@@ -732,21 +732,17 @@ async function main() {
                         const sourceName = getSourceNameFromUrl(articleUrl);
                         const existingSourceName = getSourceNameFromUrl(duplicateArticle.source_url);
                         
-                        if (newContent.includes('Πηγές:')) {
-                            const match = newContent.match(/Πηγές:\s*(.+)$/i);
-                            if (match) {
-                                const currentSources = match[1].split(',').map(s => s.trim());
-                                if (!currentSources.includes(sourceName)) {
-                                    currentSources.push(sourceName);
-                                    newContent = newContent.replace(/Πηγές:\s*(.+)$/i, `Πηγές: ${currentSources.join(', ')}`);
-                                }
-                            }
-                        } else {
-                            newContent = `${newContent}\n\nΠηγές: ${existingSourceName}, ${sourceName}`;
+                        // We will update source_url instead of content
+                        let newSourceUrl = dbArt.source_url || duplicateArticle.source_url || '';
+                        if (!newSourceUrl.includes(articleUrl)) {
+                            newSourceUrl = newSourceUrl + ',' + articleUrl;
                         }
                         
+                        // Remove old "Πηγές:" text if it exists
+                        newContent = newContent.replace(/\n\nΠηγές:\s*(.+)$/i, '');
+                        
                         const { error: updateErr } = await db.from('articles')
-                            .update({ content: newContent, updated_at: new Date().toISOString() })
+                            .update({ content: newContent, source_url: newSourceUrl, updated_at: new Date().toISOString() })
                             .eq('id', duplicateArticle.id);
                             
                         if (updateErr) {
