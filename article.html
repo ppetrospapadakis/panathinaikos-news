@@ -161,8 +161,8 @@
             </div>
         </div>
 
-        <div class="max-w-[800px] mx-auto px-6 py-16">
-
+        <div class="max-w-[1440px] mx-auto px-8 py-16 grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div class="md:col-span-8">
             <!-- Skeleton Loader -->
             <div id="article-skeleton" class="space-y-6 animate-pulse">
                 <div class="h-5 bg-surface-container-high w-1/4 rounded"></div>
@@ -184,16 +184,14 @@
                     <div class="flex flex-wrap items-center gap-3 text-xs font-label text-primary uppercase tracking-wider mb-4">
                         <a href="index.html" class="text-on-surface-variant hover:text-primary transition-colors">Αρχική</a>
                         <span class="text-on-surface-variant/40">/</span>
-                        <span id="article-category">Κατηγορία</span>
-                        <span class="text-on-surface-variant/40">•</span>
-                        <span id="article-date" class="text-on-surface-variant normal-case font-normal tracking-normal"></span>
+                        <span id="article-date" class="text-primary uppercase font-bold tracking-wider"></span>
                     </div>
                     <h1 id="article-title" class="font-display-l-mobile text-display-l-mobile md:text-display-l text-on-surface leading-tight"></h1>
                 </div>
 
                 <!-- ② SINGLE PRIMARY HERO IMAGE -->
                 <div id="article-image-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/20 shadow-xl hidden">
-                    <img id="article-image" class="w-full h-full object-cover" src="" alt="Article image" loading="eager"/>
+                    <img id="article-image" class="w-full h-full object-contain bg-black/20" src="" alt="Article image" loading="eager"/>
                 </div>
 
                 <!-- ③ F5 QUICK-TAKES BOX — directly below image -->
@@ -233,7 +231,25 @@
                 </a>
             </div>
 
-        </div>
+            </div> <!-- End of md:col-span-8 -->
+
+            <!-- Sidebar Stream -->
+            <div id="stream-container" class="md:col-span-4 flex flex-col gap-3 hidden" style="max-height:800px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
+                <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
+                    <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                    <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div><div class="h-3 bg-surface-container-high w-1/2 rounded"></div></div>
+                </div>
+                <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
+                    <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                    <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
+                </div>
+                <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
+                    <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                    <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div><div class="h-3 bg-surface-container-high w-2/3 rounded"></div></div>
+                </div>
+            </div>
+
+        </div> <!-- End of grid -->
     </main>
 
     <script>
@@ -381,7 +397,6 @@
             document.getElementById('page-title').textContent = `${article.title} | Panathinaikos News`;
 
             // ① Category + date (NO source portal name in breadcrumb)
-            document.getElementById('article-category').textContent = article.category || 'Ποδόσφαιρο';
             const pubDate = new Date(article.created_at);
             document.getElementById('article-date').textContent = pubDate.toLocaleDateString('el-GR', {
                 day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'
@@ -561,6 +576,8 @@
             // Show article, hide skeleton
             document.getElementById('article-skeleton').style.display = 'none';
             document.getElementById('article-display').classList.remove('hidden');
+            
+            fetchSidebarStream();
 
             // Highlight active category tab
             const tabMap = {
@@ -579,6 +596,65 @@
                     }
                 }
             });
+        }
+
+        async function fetchSidebarStream() {
+            const streamEl = document.getElementById('stream-container');
+            if (!streamEl) return;
+            streamEl.classList.remove('hidden');
+            try {
+                const response = await fetch('/api/articles?limit=15');
+                if (!response.ok) throw new Error('Failed to fetch stream');
+                const articles = await response.json();
+                
+                const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+                
+                function formatExactDate(dateString) {
+                    if (!dateString) return '';
+                    const d = new Date(dateString);
+                    return d.toLocaleDateString('el-GR', {
+                        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+                }
+                
+                function slugify(text) {
+                    return text.toString().toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/[^\w\-]+/g, '')
+                        .replace(/\-\-+/g, '-')
+                        .replace(/^-+/, '')
+                        .replace(/-+$/, '');
+                }
+                
+                function getCategoryCleanName(cat) {
+                    if (!cat) return 'podosfairo';
+                    if (cat.includes('Ποδόσφαιρο')) return 'podosfairo';
+                    if (cat.includes('Μπάσκετ')) return 'basket';
+                    if (cat.includes('Ερασιτέχνης')) return 'erasitechnis';
+                    if (cat.includes('Άποψη')) return 'apopsi';
+                    if (cat.includes('Μεταγραφές')) return 'metagrafes';
+                    return 'podosfairo';
+                }
+
+                streamEl.innerHTML = articles.map(a => {
+                    const slug = slugify(a.title);
+                    const catPath = getCategoryCleanName(a.category);
+                    const url = `/${catPath}/${slug}-id=${a.id}`;
+                    return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
+                        <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${formatExactDate(a.created_at)}</span>
+                            <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
+                        </div>
+                    </a>`;
+                }).join('');
+
+            } catch (err) {
+                streamEl.innerHTML = `<p class="text-sm text-on-surface-variant p-4">Αποτυχία φόρτωσης ροής ειδήσεων.</p>`;
+            }
         }
 
         function showError(msg) {

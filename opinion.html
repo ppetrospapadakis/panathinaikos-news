@@ -828,11 +828,38 @@ function initEditor() {
     quill = new Quill('#editor-container', {
         theme: 'snow',
         modules: {
-            toolbar: [
-                ['bold', 'italic', 'underline'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                ['clean']
-            ]
+            toolbar: {
+                container: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image', 'video'],
+                    ['clean']
+                ],
+                handlers: {
+                    image: function() {
+                        const url = prompt('Εισάγετε το URL της εικόνας:');
+                        if (url) {
+                            const range = this.quill.getSelection(true) || { index: this.quill.getLength() };
+                            this.quill.insertEmbed(range.index, 'image', url);
+                        }
+                    },
+                    video: function() {
+                        const url = prompt('Εισάγετε το URL του Video (π.χ. YouTube):');
+                        if (url) {
+                            const range = this.quill.getSelection(true) || { index: this.quill.getLength() };
+                            let embedUrl = url;
+                            if (url.includes('youtube.com/watch?v=')) {
+                                const videoId = new URL(url).searchParams.get('v');
+                                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                            } else if (url.includes('youtu.be/')) {
+                                const videoId = url.split('youtu.be/')[1].split('?')[0];
+                                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                            }
+                            this.quill.insertEmbed(range.index, 'video', embedUrl);
+                        }
+                    }
+                }
+            }
         }
     });
 

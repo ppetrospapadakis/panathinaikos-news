@@ -36,6 +36,20 @@ const SCRAPE_TARGETS = [
     // ── FOOTBALL ──────────────────────────────────────────────────────────────
     {
         category: 'Ποδόσφαιρο',
+        name: 'Monobala Football',
+        url: 'https://monobala.gr/category/teams/sl1/panathinaikos/',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a'],
+        baseUrl: 'https://monobala.gr',
+    },
+    {
+        category: 'Γενικά',
+        name: 'Sport-FM',
+        url: 'https://www.sport-fm.gr/tag/pao',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', '.title a'],
+        baseUrl: 'https://www.sport-fm.gr',
+    },
+    {
+        category: 'Ποδόσφαιρο',
         name: 'SDNA Football',
         url: 'https://www.sdna.gr/teams/panathinaikos/podosfairo',
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', 'a[href*="/football/"]', 'a[href*="/podosfairo/"]'],

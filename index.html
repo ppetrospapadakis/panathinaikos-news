@@ -257,6 +257,15 @@
         let isFetchingMore = false;
         let editorialDone  = false;
         let moreNewsDone   = false;
+           // ── Date Formatting Helpers ────────────────────────────────────────────
+        function formatExactDate(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            return d.toLocaleDateString('el-GR', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
         let sentinelObserver   = null;
         let editorialObserver  = null;
         let moreNewsObserver   = null;
@@ -433,9 +442,8 @@
                     <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${a.category||'Ποδόσφαιρο'} ${badge}</span>
+                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider">${formatExactDate(a.created_at)} ${badge}</span>
                     <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${a.title}</h3>
-                    <span class="text-xs text-on-surface-variant/70 mt-1 block">${timeAgo(a.created_at)}</span>
                 </div>
             </a>`;
         }
@@ -461,7 +469,7 @@
                     <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="p-5 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase mb-1">${a.category||'Ποδόσφαιρο'} ${badge} • ${timeAgo(a.created_at)}</span>
+                    <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)} ${badge}</span>
                     <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
                     <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
                     <div class="mt-auto">${bulletsHtml}</div>
@@ -501,7 +509,7 @@
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${a.category||'Ποδόσφαιρο'} • ${timeAgo(a.created_at)}</span>
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${formatExactDate(a.created_at)}</span>
                     <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
                     <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
                     <div class="mt-auto overflow-hidden">${bulletsHtml}</div>
@@ -661,7 +669,7 @@
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="p-5 flex flex-col flex-1">
-                            <span class="font-label text-label text-primary uppercase mb-1">${a.category||'Άποψη'} • ${timeAgo(a.created_at)}</span>
+                            <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)}</span>
                             <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors line-clamp-2">${a.title}</h3>
                             <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
                         </div>
