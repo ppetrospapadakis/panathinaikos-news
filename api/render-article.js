@@ -272,7 +272,7 @@ module.exports = async (req, res) => {
                 'id="article-bullets-box" class="p-6 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient"'
             );
             
-            const bulletsListHtml = article.bullets.map(b => `<li>${b}</li>`).join('');
+            const bulletsListHtml = article.bullets.map(b => `<li class="flex items-start gap-3"><span class="text-primary font-bold mt-1 shrink-0">→</span><span>${b}</span></li>`).join('');
             html = html.replace(
                 /<ul id="article-bullets-list" class="space-y-3 text-on-surface-variant text-body leading-relaxed">\s*<\/ul>/g,
                 `<ul id="article-bullets-list" class="space-y-3 text-on-surface-variant text-body leading-relaxed">${bulletsListHtml}</ul>`
