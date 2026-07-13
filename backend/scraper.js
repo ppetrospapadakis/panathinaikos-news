@@ -619,6 +619,98 @@ async function generateLongFormContent(title, text, isOfficial = false) {
     return null;
 }
 
+// ─── Gemini API: semantic deduplication ────────────────────────────────────────────
+async function checkSemanticDuplicate(newTitle, newSummary, candidateArticles) {
+    if (!candidateArticles || candidateArticles.length === 0) return null;
+    const ai = getAiClient();
+    if (!ai || quotaExhausted) return null;
+
+    const candidatesList = candidateArticles.map(a => `ID: ${a.id}\nΤίτλος: ${a.title}`).join('\n\n');
+
+    try {
+        const response = await retryWithBackoff(() => ai.models.generateContent({
+            model: 'gemini-flash-lite-latest',
+            contents: `Αξιολόγησε αν το ΝΕΟ ΑΡΘΡΟ αναφέρεται ΣΤΟ ΙΔΙΟ ΑΚΡΙΒΩΣ γεγονός (ίδιο κύριο πρόσωπο/οντότητα ΚΑΙ ίδια ακριβώς ενέργεια/γεγονός) με κάποιο από τα ΠΙΘΑΝΑ ΥΠΑΡΧΟΝΤΑ ΑΡΘΡΑ.
+Αν ναι, επίστρεψε ΑΠΟΚΛΕΙΣΤΙΚΑ το ID του ταυτιζόμενου άρθρου. Αν όχι, επίστρεψε "null". ΜΗΝ δικαιολογήσεις την απάντησή σου.
+
+ΝΕΟ ΑΡΘΡΟ:
+Τίτλος: ${newTitle}
+Σύνοψη: ${newSummary ? newSummary.substring(0, 200) : ''}
+
+ΠΙΘΑΝΑ ΥΠΑΡΧΟΝΤΑ ΑΡΘΡΑ:
+${candidatesList}`,
+            config: {
+                temperature: 0.1,
+                maxOutputTokens: 20
+            }
+        }));
+
+        const result = response.text.trim();
+        if (result && result !== 'null' && result.length > 5) {
+            return result;
+        }
+    } catch (err) {
+        console.warn(`[AI] Semantic deduplication check failed: ${err.message?.substring(0, 80)}`);
+    }
+    return null;
+}
+
+// ─── Gemini API: combined long-form rewrite ────────────────────────────────────
+async function generateCombinedLongFormContent(articleA, articleB, isOfficial = false) {
+    const ai = getAiClient();
+    if (!ai || quotaExhausted) return null;
+
+    const toneInstruction = isOfficial 
+        ? 'Επειδή πρόκειται για επίσημη πηγή της ομάδας, διατήρησε ένα απόλυτα έγκυρο, επίσημο ύφος δελτίου τύπου του συλλόγου.' 
+        : 'ΠΟΤΕ μην αναφέρεις την αρχική πηγή ή άλλα μέσα ενημέρωσης. Απαγορεύονται φράσεις όπως «Σύμφωνα με...», «Το Sportal/Gazzetta/SDNA αναφέρει...».';
+
+    try {
+        const response = await retryWithBackoff(() => ai.models.generateContent({
+            model: 'gemini-flash-lite-latest',
+            contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News.
+Έχεις λάβει ΔΥΟ διαφορετικά ρεπορτάζ από διαφορετικές πηγές που αφορούν το ΙΔΙΟ ακριβώς γεγονός. Πρέπει να τα συνδυάσεις και να γράψεις ΕΝΑ, ενιαίο, αντικειμενικό, υψηλής ποιότητας άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά, το οποίο να περιέχει ΟΛΕΣ τις μοναδικές λεπτομέρειες και από τα δύο κείμενα (π.χ. οικονομικά δεδομένα από το ένα, δηλώσεις από το άλλο).
+
+ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
+{
+  "title": "ο νέος, ενιαίος τίτλος",
+  "content": "το αναδιατυπωμένο και συνδυασμένο άρθρο"
+}
+
+ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΟ content:
+1. Μορφή & Μήκος: Γράψε μια συμπαγή, φυσική σύνοψη ακριβώς δύο (2) παραγράφων.
+2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά. Ενσωμάτωσε ΟΛΑ τα σημαντικά δεδομένα και από τις δύο πηγές.
+3. Αναδιατύπωση: Απαγορεύεται το copy-paste αυτούσιων φράσεων.
+4. ${toneInstruction}
+5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown.
+6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
+
+ΠΗΓΗ 1:
+Τίτλος: ${articleA.title}
+Κείμενο: ${(articleA.content || '').substring(0, 3000)}
+
+ΠΗΓΗ 2:
+Τίτλος: ${articleB.title}
+Κείμενο: ${(articleB.content || '').substring(0, 3000)}`,
+            config: {
+                temperature: 0.5,
+                maxOutputTokens: 2048
+            }
+        }));
+
+        const rawResponse = response.text.trim();
+        const jsonString = rawResponse.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/, '').trim();
+        const parsed = JSON.parse(jsonString);
+
+        if (parsed.content && parsed.content.length > 100) {
+            console.log(`  [AI] Combined Long-form generated: ${parsed.content.length} chars. Title: ${parsed.title}`);
+            return { content: parsed.content.trim(), title: (parsed.title || '').trim() };
+        }
+    } catch (err) {
+        console.warn(`[AI] Combined Long-form failed: ${err.message?.substring(0, 80)}`);
+    }
+    return null;
+}
+
 // ─── Sleep helper ──────────────────────────────────────────────────────────────
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 // ─── Staggering configuration ───────────────────────────────────────────────────────
@@ -706,49 +798,82 @@ async function main() {
 
             // ── Cross-Source Cross-Publishing Deduplication ──────────────────
             const currentScrapedTime = new Date(scraped.created_at);
-            const duplicateArticle = existingArticles.find(art => {
+            
+            // Collect candidates from the last 30 minutes in the same category
+            const candidateArticles = existingArticles.filter(art => {
                 const dbTime = new Date(art.created_at);
                 const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
-                if (timeDiffMinutes > 45) return false;
-                
-                const similarity = jaccardSimilarity(scraped.title, art.title);
-                if (similarity < 0.35) return false;
+                if (timeDiffMinutes > 30) return false;
                 
                 const scrapedDomain = getSourceNameFromUrl(articleUrl);
                 const dbDomain = getSourceNameFromUrl(art.source_url);
-                return scrapedDomain !== dbDomain;
+                if (scrapedDomain === dbDomain) return false; // same source, usually not a duplicate event but a different article
+                
+                return true;
             });
 
+            let duplicateArticleId = null;
+
+            if (candidateArticles.length > 0) {
+                // First try Jaccard as a fast-pass (if extremely similar title)
+                const exactMatch = candidateArticles.find(art => jaccardSimilarity(scraped.title, art.title) > 0.45);
+                if (exactMatch) {
+                    duplicateArticleId = exactMatch.id;
+                } else {
+                    // Fallback to Semantic AI Match
+                    console.log(`  [AI DEDUPLICATION] Checking semantic match for "${scraped.title.substring(0, 40)}..." against ${candidateArticles.length} candidates.`);
+                    duplicateArticleId = await checkSemanticDuplicate(scraped.title, scraped.summary, candidateArticles);
+                }
+            }
+            
+            const duplicateArticle = duplicateArticleId ? existingArticles.find(a => a.id === duplicateArticleId || a.id.startsWith(duplicateArticleId)) : null;
+
             if (duplicateArticle) {
-                console.log(`  [DEDUPLICATION] Merging duplicate: "${scraped.title.substring(0, 50)}" with existing ID: ${duplicateArticle.id}`);
+                console.log(`  [DEDUPLICATION] Semantic Match found! Merging: "${scraped.title.substring(0, 50)}" with ID: ${duplicateArticle.id}`);
                 if (!isDryRun) {
                     const { data: dbArt, error: fetchErr } = await db.from('articles')
-                        .select('content')
+                        .select('*')
                         .eq('id', duplicateArticle.id)
                         .single();
                     
                     if (!fetchErr && dbArt) {
-                        let newContent = dbArt.content || '';
                         const sourceName = getSourceNameFromUrl(articleUrl);
                         const existingSourceName = getSourceNameFromUrl(duplicateArticle.source_url);
                         
-                        // We will update source_url instead of content
+                        // We will update source_url
                         let newSourceUrl = dbArt.source_url || duplicateArticle.source_url || '';
                         if (!newSourceUrl.includes(articleUrl)) {
                             newSourceUrl = newSourceUrl + ',' + articleUrl;
                         }
+
+                        // Generate Combined Long-form Rewrite
+                        const combinedResult = await generateCombinedLongFormContent(dbArt, scraped, target.isOfficial);
                         
-                        // Remove old "Πηγές:" text if it exists
-                        newContent = newContent.replace(/\n\nΠηγές:\s*(.+)$/i, '');
+                        let newContent = combinedResult ? combinedResult.content : (dbArt.content || scraped.content);
+                        let newTitle = combinedResult ? combinedResult.title : dbArt.title;
                         
+                        // Re-generate bullets for the combined content
+                        const newBullets = await generateAiBullets(newTitle, newContent, target.isOfficial);
+                        const newSummary = newContent.substring(0, 300); // basic summary
+
                         const { error: updateErr } = await db.from('articles')
-                            .update({ content: newContent, source_url: newSourceUrl, updated_at: new Date().toISOString() })
+                            .update({ 
+                                title: newTitle,
+                                content: newContent, 
+                                summary: newSummary,
+                                bullets: newBullets,
+                                source_url: newSourceUrl, 
+                                updated_at: new Date().toISOString(),
+                                created_at: new Date().toISOString() // bump to top
+                            })
                             .eq('id', duplicateArticle.id);
                             
                         if (updateErr) {
                             console.error(`  [DB ERROR] Failed to update merged sources:`, updateErr.message);
                         } else {
-                            console.log(`  ✅ Merged successfully (appended source ${sourceName})`);
+                            console.log(`  ✅ Merged successfully (appended source ${sourceName} and bumped to top)`);
+                            // update local cache to prevent redundant merges
+                            duplicateArticle.created_at = new Date().toISOString(); 
                         }
                     }
                 }
