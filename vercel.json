@@ -8,6 +8,9 @@
     { "source": "/apopsi", "destination": "/index.html?category=apopsi" },
     { "source": "/metagrafes", "destination": "/index.html?category=metagrafes" },
     { "source": "/agones", "destination": "/index.html?category=agones" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
+    { "source": "/terms-of-service", "destination": "/terms-of-service.html" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/:category/:slug-id=:id", "destination": "/api/render-article?id=:id" }
   ]
