@@ -15,6 +15,13 @@
 
   <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <!-- HERO_PRELOAD_INJECT -->
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="/favicon.png"/>
     <link rel="apple-touch-icon" href="/favicon.png"/>
@@ -190,9 +197,9 @@
         <!-- Dynamic Articles Grid (3-Phase Staggered Loading) -->
         <section class="max-w-[1440px] mx-auto px-8 py-16" id="main-feed-section">
             <!-- Phase 1 (Hero) + Phase 2 (Stream) grid -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-                <!-- Hero: left 8 cols — Phase 1 skeleton initially -->
-                <div id="hero-container" class="md:col-span-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 min-h-[500px]">
+            <!-- Hero Section (Left 8 cols) -->
+            <div class="lg:col-span-8 flex flex-col h-full" id="hero-container">
                     <div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end">
                         <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
                         <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
@@ -789,13 +796,18 @@
 
             const apiCat = getApiCat(activeCategory);
 
-            // PHASE 1 — hero (limit=1) fires immediately, renders as soon as it arrives
-            const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data && data[0]) renderHero(processImage(data[0]));
-                })
-                .catch(err => console.error('[Phase1]', err));
+            const heroEl = document.getElementById('hero-container');
+            const hasSsrHero = heroEl && heroEl.querySelector('[data-ssr="true"]');
+
+            // PHASE 1 — hero (limit=1) fires immediately if no SSR hero
+            if (!hasSsrHero) {
+                const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data[0]) renderHero(processImage(data[0]));
+                    })
+                    .catch(err => console.error('[Phase1]', err));
+            }
 
             // PHASE 2 — stream page 1 + own articles in parallel
             const streamPromise = fetch(`/api/articles?category=${apiCat}&page=1`)

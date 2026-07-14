@@ -1,17 +1,18 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/basket", "destination": "/index.html?category=basket" },
-    { "source": "/podosfairo", "destination": "/index.html?category=football" },
-    { "source": "/erasitexnis", "destination": "/index.html?category=erasitexnis" },
-    { "source": "/erasitechnis", "destination": "/index.html?category=erasitexnis" },
-    { "source": "/apopsi", "destination": "/index.html?category=apopsi" },
-    { "source": "/metagrafes", "destination": "/index.html?category=metagrafes" },
-    { "source": "/agones", "destination": "/index.html?category=agones" },
+    { "source": "/basket", "destination": "/api/render-index?category=basket" },
+    { "source": "/podosfairo", "destination": "/api/render-index?category=football" },
+    { "source": "/erasitexnis", "destination": "/api/render-index?category=erasitexnis" },
+    { "source": "/erasitechnis", "destination": "/api/render-index?category=erasitexnis" },
+    { "source": "/apopsi", "destination": "/api/render-index?category=apopsi" },
+    { "source": "/metagrafes", "destination": "/api/render-index?category=metagrafes" },
+    { "source": "/agones", "destination": "/api/render-index?category=agones" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
     { "source": "/terms-of-service", "destination": "/terms-of-service.html" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/:category/:slug-id=:id", "destination": "/api/render-article?id=:id" }
+    { "source": "/:category/:slug-id=:id", "destination": "/api/render-article?id=:id" },
+    { "source": "/", "destination": "/api/render-index" }
   ]
 }
