@@ -395,14 +395,14 @@
         function updateNavStyles(category) {
             const TABS = ['tab-all','tab-football','tab-basketball','tab-amateur','tab-opinion'];
             const TAB_MAP = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Ερασιτέχνης':'tab-amateur','Άποψη':'tab-opinion'};
-            TABS.forEach(id => {
+            Object.values(TAB_MAP).forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap';
+                if (el) el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center';
             });
             const activeTab = TAB_MAP[category];
             if (activeTab) {
                 const el = document.getElementById(activeTab);
-                if (el) el.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap';
+                if (el) el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap lg:flex-1 text-center';
             }
 
             const DRAWER = ['nav-all','nav-football','nav-basketball','nav-amateur','nav-opinion'];
