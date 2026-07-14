@@ -914,29 +914,28 @@ async function main() {
                 continue;
             }
 
-            // If AI failed or determined irrelevant
-            if (!aiResult) {
-                console.log(`    [SKIP] AI generation failed — skipping.`);
-                continue;
-            }
-            if (aiResult.isRelevant === false) {
+            // If AI evaluated as NOT relevant
+            if (aiResult && aiResult.isRelevant === false) {
                 console.log(`    [SKIP] AI evaluated article as NOT relevant: "${scraped.title}"`);
                 continue;
             }
 
-            const longFormContent = aiResult.content;
+            // Fallback to raw content if AI failed (e.g., quota exhausted)
+            let finalContent = aiResult ? aiResult.content : (scraped.content || scraped.summary);
+            let finalTitle = aiResult ? aiResult.title : scraped.title;
+            let finalBullets = bullets || [];
 
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
-                title:      aiResult.title || scraped.title,
-                summary:    scraped.summary,
-                content:    longFormContent,
+                title:      finalTitle,
+                summary:    scraped.summary || (finalContent ? finalContent.substring(0, 300) : ''),
+                content:    finalContent,
                 source_url: articleUrl,
                 image_url:  scraped.imageUrl,
                 category:   detectCategoryFromUrl(articleUrl, target.category),
                 created_at: scraped.created_at,
                 group_id,
-                bullets,
+                bullets:    finalBullets,
                 updated_at: new Date().toISOString(),
             };
             console.log(`[DB PAYLOAD] Inserting to Supabase:`, JSON.stringify(dbPayload, null, 2));
