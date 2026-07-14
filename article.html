@@ -540,7 +540,14 @@
             });
         }
 
+        let sidebarPage = 1;
+        let sidebarHasMore = true;
+        let isFetchingSidebar = false;
+
         async function fetchSidebarStream() {
+            if (isFetchingSidebar || !sidebarHasMore) return;
+            isFetchingSidebar = true;
+
             const streamEl = document.getElementById('stream-container');
             if (!streamEl) return;
             const streamWrapper = document.getElementById('stream-wrapper');
@@ -548,9 +555,16 @@
             else streamEl.classList.remove('hidden');
             
             try {
-                const response = await fetch('/api/articles?page=1');
+                const response = await fetch('/api/articles?page=' + sidebarPage);
                 if (!response.ok) throw new Error('Failed to fetch stream');
                 const articles = await response.json();
+                
+                if (!articles || articles.length === 0) {
+                    sidebarHasMore = false;
+                    return;
+                }
+                
+                sidebarPage++;
                 
                 const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
                 
@@ -585,7 +599,7 @@
                     return 'podosfairo';
                 }
 
-                streamEl.innerHTML = articles.map(a => {
+                const htmlString = articles.map(a => {
                     const slug = slugify(a.title);
                     const catPath = getCategoryCleanName(a.category);
                     const url = `/${catPath}/${slug}-id=${a.id}`;
@@ -600,8 +614,20 @@
                     </a>`;
                 }).join('');
 
+                if (sidebarPage === 2) { // because we incremented it already
+                    streamEl.innerHTML = htmlString;
+                    streamEl.addEventListener('scroll', () => {
+                        if (streamEl.scrollTop + streamEl.clientHeight >= streamEl.scrollHeight - 100) {
+                            fetchSidebarStream();
+                        }
+                    });
+                } else {
+                    streamEl.insertAdjacentHTML('beforeend', htmlString);
+                }
             } catch (err) {
-                streamEl.innerHTML = `<p class="text-sm text-on-surface-variant p-4">Αποτυχία φόρτωσης ροής ειδήσεων.</p>`;
+                if (sidebarPage === 2) streamEl.innerHTML = `<p class="text-sm text-on-surface-variant p-4">Αποτυχία φόρτωσης ροής ειδήσεων.</p>`;
+            } finally {
+                isFetchingSidebar = false;
             }
         }
 

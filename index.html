@@ -595,13 +595,20 @@
             // Render first 20 into sidebar
             stream.innerHTML = sideCandidates.slice(0, 20).map(g => sideCardHtml(g.main)).join('');
 
-            // Sidebar infinite scroll from local cache
+            // Sidebar infinite scroll from local cache + API
             let sideCount = 20;
-            stream.addEventListener('scroll', () => {
-                if (stream.scrollTop + stream.clientHeight >= stream.scrollHeight - 60) {
-                    const batch = sideCandidates.slice(sideCount, sideCount + 10);
-                    batch.forEach(g => stream.insertAdjacentHTML('beforeend', sideCardHtml(g.main)));
-                    sideCount += batch.length;
+            stream.addEventListener('scroll', async () => {
+                if (stream.scrollTop + stream.clientHeight >= stream.scrollHeight - 150) {
+                    if (sideCount < allArticles.length - 1) {
+                        const batch = allArticles.slice(sideCount + 1, sideCount + 11);
+                        batch.forEach(a => stream.insertAdjacentHTML('beforeend', sideCardHtml(a)));
+                        sideCount += batch.length;
+                    } else if (!isFetchingMore && streamHasMore) {
+                        await fetchMorePages();
+                        const batch = allArticles.slice(sideCount + 1, sideCount + 11);
+                        batch.forEach(a => stream.insertAdjacentHTML('beforeend', sideCardHtml(a)));
+                        sideCount += batch.length;
+                    }
                 }
             });
 
