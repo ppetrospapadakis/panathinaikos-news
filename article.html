@@ -248,6 +248,14 @@
             </div>
 
         </div> <!-- End of grid -->
+
+        <!-- Phase 3: More News Grid -->
+        <section class="max-w-[1440px] mx-auto px-8 pb-16">
+            <div id="more-news-section"></div>
+            <div id="feed-sentinel" class="w-full flex justify-center mt-8 hidden">
+                <div id="sentinel-loader" class="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+            </div>
+        </section>
     </main>
 
     <script>
@@ -519,6 +527,8 @@
             document.getElementById('article-skeleton').style.display = 'none';
             document.getElementById('article-display').classList.remove('hidden');
             
+            // Fetch sidebar and bottom grid using the article's category
+            currentArticleCategory = article.category;
             fetchSidebarStream();
 
             // Highlight active category tab
@@ -543,6 +553,8 @@
         let sidebarPage = 1;
         let sidebarHasMore = true;
         let isFetchingSidebar = false;
+        let currentArticleCategory = null;
+        let sentinelObserver = null;
 
         async function fetchSidebarStream() {
             if (isFetchingSidebar || !sidebarHasMore) return;
@@ -555,7 +567,12 @@
             else streamEl.classList.remove('hidden');
             
             try {
-                const response = await fetch('/api/articles?page=' + sidebarPage);
+                let url = '/api/articles?page=' + sidebarPage;
+                if (currentArticleCategory) {
+                    const catForApi = getCategoryCleanName(currentArticleCategory);
+                    url += `&category=${catForApi}`;
+                }
+                const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch stream');
                 const articles = await response.json();
                 
@@ -614,6 +631,25 @@
                     </a>`;
                 }).join('');
 
+                const gridCardsHtml = articles.map(a => {
+                    const slug = slugify(a.title);
+                    const catPath = getCategoryCleanName(a.category);
+                    const url = `/${catPath}/${slug}-id=${a.id}`;
+                    const border = 'border-outline-variant/20';
+                    return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border} h-full" href="${url}">
+                        <div class="relative aspect-video overflow-hidden">
+                            <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                        </div>
+                        <div class="p-6 flex flex-col flex-1 bg-surface-container">
+                            <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${formatExactDate(a.created_at)}</span>
+                            <h3 class="font-h3 text-h3 group-hover:text-primary transition-colors leading-tight line-clamp-3">${a.title}</h3>
+                        </div>
+                    </a>`;
+                }).join('');
+
+                const moreNewsSection = document.getElementById('more-news-section');
+                let gridContainer = document.getElementById('bottom-grid-cards');
+
                 if (sidebarPage === 2) { // because we incremented it already
                     streamEl.innerHTML = htmlString;
                     streamEl.addEventListener('scroll', () => {
@@ -621,9 +657,39 @@
                             fetchSidebarStream();
                         }
                     });
+
+                    // Setup More News grid
+                    if (moreNewsSection) {
+                        moreNewsSection.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30">
+                            <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bottom-grid-cards"></div>`;
+                        gridContainer = document.getElementById('bottom-grid-cards');
+                    }
                 } else {
                     streamEl.insertAdjacentHTML('beforeend', htmlString);
                 }
+
+                if (gridContainer) {
+                    gridContainer.insertAdjacentHTML('beforeend', gridCardsHtml);
+                }
+
+                // Set up sentinel observer
+                const sentinel = document.getElementById('feed-sentinel');
+                if (sentinel && sidebarHasMore) {
+                    sentinel.classList.remove('hidden');
+                    if (!sentinelObserver) {
+                        sentinelObserver = new IntersectionObserver(async entries => {
+                            if (entries[0].isIntersecting && !isFetchingSidebar && sidebarHasMore) {
+                                await fetchSidebarStream();
+                            }
+                        }, { rootMargin: '300px' });
+                        sentinelObserver.observe(sentinel);
+                    }
+                } else if (sentinel) {
+                    sentinel.classList.add('hidden');
+                }
+
             } catch (err) {
                 if (sidebarPage === 2) streamEl.innerHTML = `<p class="text-sm text-on-surface-variant p-4">Αποτυχία φόρτωσης ροής ειδήσεων.</p>`;
             } finally {

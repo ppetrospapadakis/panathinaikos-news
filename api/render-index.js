@@ -130,13 +130,13 @@ module.exports = async (req, res) => {
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
         
         // Inject Hero HTML
-        const heroRegex = /(<div[^>]*id="hero-container"[^>]*>)([\s\S]*?)(<\/div>)/i;
+        const heroRegex = /(<!-- HERO_START -->)([\s\S]*?)(<!-- HERO_END -->)/i;
         if (heroRegex.test(html)) {
             html = html.replace(heroRegex, `$1\n${heroHtml}\n$3`);
         } else {
-            // Fallback for different order
-            const heroRegex2 = /(<div[^>]*id='hero-container'[^>]*>)([\s\S]*?)(<\/div>)/i;
-            html = html.replace(heroRegex2, `$1\n${heroHtml}\n$3`);
+            // Fallback just in case
+            const fallbackRegex = /(<div[^>]*id="hero-container"[^>]*>)([\s\S]*?)(<\/div>)/i;
+            html = html.replace(fallbackRegex, `$1\n${heroHtml}\n$3`);
         }
         
         res.status(200).send(html);
