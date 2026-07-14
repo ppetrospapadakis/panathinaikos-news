@@ -529,6 +529,7 @@
             
             // Fetch sidebar and bottom grid using the article's category
             currentArticleCategory = article.category;
+            currentArticleId = article.id;
             fetchSidebarStream();
 
             // Highlight active category tab
@@ -554,6 +555,7 @@
         let sidebarHasMore = true;
         let isFetchingSidebar = false;
         let currentArticleCategory = null;
+        let currentArticleId = null;
         let sentinelObserver = null;
 
         async function fetchSidebarStream() {
@@ -574,7 +576,11 @@
                 }
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch stream');
-                const articles = await response.json();
+                let articles = await response.json();
+                
+                if (currentArticleId) {
+                    articles = articles.filter(a => String(a.id) !== String(currentArticleId));
+                }
                 
                 if (!articles || articles.length === 0) {
                     sidebarHasMore = false;
