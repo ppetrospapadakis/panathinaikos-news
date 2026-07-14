@@ -880,8 +880,7 @@ async function main() {
                                 bullets: newBullets,
                                 source_url: newSourceUrl,
                                 image_url: newImageUrl,
-                                updated_at: new Date().toISOString(),
-                                created_at: new Date().toISOString() // bump to top
+                                updated_at: new Date().toISOString()
                             })
                             .eq('id', duplicateArticle.id);
                             
