@@ -69,9 +69,9 @@ module.exports = async (req, res) => {
 
     // Set high-performance Edge caching headers. If limit=1, use shorter cache to ensure freshness.
     if (req.query.limit === '1') {
-        res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+        res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=30');
     } else {
-        res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+        res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
     }
 
     try {

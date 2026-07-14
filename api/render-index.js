@@ -40,7 +40,7 @@ function formatExactDate(dateString) {
 module.exports = async (req, res) => {
     // Vercel Edge caching - 60s
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
 
     let categoryFilter = null;
     if (req.query.category) {
