@@ -781,13 +781,15 @@
             editorialDone = false;
             moreNewsDone  = false;
 
-            // Reset UI to skeletons
             const heroEl   = document.getElementById('hero-container');
+            const hasSsrHero = heroEl && heroEl.querySelector('[data-ssr="true"]');
+
             const streamEl = document.getElementById('stream-container');
             const editEl   = document.getElementById('editorial-section');
             const moreEl   = document.getElementById('more-news-section');
             const sentinel = document.getElementById('feed-sentinel');
-            if (heroEl)   heroEl.innerHTML   = `<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end"><div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div><div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div><div class="h-4 bg-surface-container-high w-full rounded"></div></div>`;
+            
+            if (heroEl && !hasSsrHero) heroEl.innerHTML = `<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end"><div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div><div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div><div class="h-4 bg-surface-container-high w-full rounded"></div></div>`;
             if (streamEl) streamEl.innerHTML = `<div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl"><div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div><div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div></div>`.repeat(3);
             if (editEl)   editEl.innerHTML   = '';
             if (moreEl)   moreEl.innerHTML   = '';
@@ -795,9 +797,6 @@
             if (sentinelObserver) sentinelObserver.disconnect();
 
             const apiCat = getApiCat(activeCategory);
-
-            const heroEl = document.getElementById('hero-container');
-            const hasSsrHero = heroEl && heroEl.querySelector('[data-ssr="true"]');
 
             // PHASE 1 — hero (limit=1) fires immediately if no SSR hero
             if (!hasSsrHero) {
