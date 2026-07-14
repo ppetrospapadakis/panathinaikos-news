@@ -767,6 +767,15 @@ async function main() {
                 continue;
             }
 
+            // Skip specific promotional/irrelevant articles by keyword in URL or Title
+            const skipKeywords = ['back2mpak', 'live-stis', 'back2back'];
+            const lowerUrl = articleUrl.toLowerCase();
+            const lowerTitle = scraped.title.toLowerCase();
+            if (skipKeywords.some(kw => lowerUrl.includes(kw) || lowerTitle.includes(kw))) {
+                console.log(`[SKIP] Promotional/Live show article ignored: ${scraped.title}`);
+                continue;
+            }
+
             // Rate limit: 1s between article fetches
             await sleep(1000);
 
