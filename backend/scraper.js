@@ -429,8 +429,9 @@ async function scrapeArticlePage(url, categoryHint) {
             }
         }
 
-        if (!bodyText) {
-            console.log(`  [PARSING WARNING] Body text is empty for ${url}`);
+        if (!bodyText || bodyText.length < 150) {
+            console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Likely a video-only article. Skipping.`);
+            return null;
         }
 
         // ── Summary (meta description) ─────────────────────────────────────────
@@ -464,22 +465,40 @@ function generateFallbackBullets(title, content) {
 }
 
 // ─── Gemini API: SDK Initialization Helper ────────────────────────────────────
+let apiKeys = [];
+let currentKeyIndex = 0;
 let aiClientInstance = null;
+
+// If we hit the daily limit across ALL keys, stop wasting time on further API calls
+let quotaExhausted = false;
+
 function getAiClient() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return null;
+    if (apiKeys.length === 0) {
+        const rawKey = process.env.GEMINI_API_KEY || '';
+        apiKeys = rawKey.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    }
+    if (apiKeys.length === 0 || quotaExhausted) return null;
+
     if (!aiClientInstance) {
         const { GoogleGenAI } = require('@google/genai');
-        aiClientInstance = new GoogleGenAI({ apiKey });
+        aiClientInstance = new GoogleGenAI({ apiKey: apiKeys[currentKeyIndex] });
     }
     return aiClientInstance;
 }
 
-// ─── Quota exhaustion tracker ──────────────────────────────────────────────────
-// If we hit the daily limit, stop wasting time on further API calls this run
-let quotaExhausted = false;
+function rotateAiClient() {
+    currentKeyIndex++;
+    if (currentKeyIndex >= apiKeys.length) {
+        quotaExhausted = true;
+        console.warn(`[AI] CRITICAL: All ${apiKeys.length} API keys have exhausted their daily quota!`);
+        return false;
+    }
+    console.warn(`[AI] Quota exhausted. Swapping to fallback key ${currentKeyIndex + 1}/${apiKeys.length}...`);
+    aiClientInstance = null; // force re-initialization
+    return true;
+}
 
-// ─── Retry helper for 429 rate limits (per-minute throttle, not daily limit) ──
+// ─── Retry helper for rate limits (throttle and daily quota fallback) ──────────
 async function retryWithBackoff(fn, maxRetries = 2) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
@@ -488,16 +507,23 @@ async function retryWithBackoff(fn, maxRetries = 2) {
             const is429 = err.status === 429 || (err.message && err.message.includes('429'));
             if (!is429) throw err; // non-quota error — bubble up immediately
 
-            // Check if it's a daily limit (cannot retry) vs per-minute throttle (can retry)
+            // A 429 can mean per-minute throttle OR daily quota exhaustion
+            // The new SDK usually says "Quota exceeded for metric..."
+            const isResourceExhausted = err.message && err.message.includes('Quota exceeded');
             const isDailyLimit = err.message && err.message.includes('per_day');
-            if (isDailyLimit) {
-                quotaExhausted = true;
-                throw err;
+
+            if (isResourceExhausted || isDailyLimit) {
+                if (rotateAiClient()) {
+                    attempt--; // Don't count against retries, it's a new key
+                    continue; // Try immediately with the new key
+                } else {
+                    throw err; // All keys exhausted
+                }
             }
 
             if (attempt < maxRetries) {
                 const waitMs = (attempt + 1) * 30000; // 30s, 60s
-                console.log(`    [AI] Rate limit hit — waiting ${waitMs/1000}s before retry ${attempt + 1}/${maxRetries}...`);
+                console.log(`    [AI] Rate limit hit (throttle) — waiting ${waitMs/1000}s before retry ${attempt + 1}/${maxRetries}...`);
                 await sleep(waitMs);
             } else {
                 throw err;
@@ -506,55 +532,8 @@ async function retryWithBackoff(fn, maxRetries = 2) {
     }
 }
 
-// ─── Gemini API: bullets ───────────────────────────────────────────────────────
-async function generateAiBullets(title, text, isOfficial = false) {
-    const ai = getAiClient();
-    if (!ai || quotaExhausted) return generateFallbackBullets(title, text);
-
-    const cleanText = (text || '')
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/\bσύμφωνα με\s+\S+/gi, '')
-        .replace(/\b(gazzetta|sport24|sdna|sportal|athletiko|sport-fm)\b[\s.,]*/gi, '')
-        .replace(/\s+/g, ' ').trim().substring(0, 4000);
-
-    const toneInstruction = isOfficial 
-        ? 'Επειδή πρόκειται για επίσημη πηγή της ομάδας, διατήρησε ένα απόλυτα έγκυρο, επίσημο ύφος δελτίου τύπου του συλλόγου (authoritative, official club press-release tone).' 
-        : 'Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη. ΠΟΤΕ μην αναφέρεις πού βρήκες την πληροφορία (καμία αναφορά σε άλλα portals, sites, «Σύμφωνα με...»).';
-
-    try {
-        const response = await retryWithBackoff(() => ai.models.generateContent({
-            model: 'gemini-flash-lite-latest',
-            contents: `Είσαι in-house αθλητικός συντάκτης του Panathinaikos News. Βάσει των παρακάτω πληροφοριών, δημιούργησε ακριβώς 2 δυναμικά bullet points ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
-
-ΑΠΑΡΑΙΤΗΤΕΣ ΟΔΗΓΙΕΣ:
-1. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να αντιγράψεις αυτούσιες φράσεις από το κείμενο. Κάνε πλήρη αναδιατύπωση των γεγονότων.
-2. ${toneInstruction}
-3. Κάθε bullet πρέπει να ξεκινάει με τον χαρακτήρα "•" και να αποτελείται ΑΥΣΤΗΡΑ από ακριβώς μία (1) πρόταση.
-4. Κάθε bullet point πρέπει να παρουσιάζει διαφορετικά δεδομένα/γεγονότα. Απαγορεύεται η επανάληψη της ίδιας πληροφορίας στα 2 bullets.
-
-Έξοδος: Επίστρεψε ΜΟΝΟ τις 2 γραμμές με τα bullets (ξεκινώντας με "•"). Μην γράψεις κανένα άλλο εισαγωγικό ή επεξηγηματικό κείμενο.
-
-Τίτλος: ${title}
-Κείμενο: ${cleanText}`
-        }));
-
-        const textResponse = response.text.trim();
-        const bullets = textResponse.split('\n')
-            .map(line => line.trim())
-            .filter(line => /^[\u2022\-*\s]/.test(line))
-            .map(line => line.replace(/^[\u2022\-*\s]+/, '').trim())
-            .filter(line => line.length > 5);
-        if (bullets.length >= 2) return bullets.slice(0, 2);
-        throw new Error('Found only ' + bullets.length + ' bullets');
-    } catch (err) {
-        if (quotaExhausted) console.warn('[AI] Daily quota exhausted — using fallback bullets.');
-        else console.warn('[AI] Bullets fallback:', err.message?.substring(0, 80));
-        return generateFallbackBullets(title, text);
-    }
-}
-
-// ─── Gemini API: long-form article ────────────────────────────────────────────
-async function generateLongFormContent(title, text, isOfficial = false) {
+// ─── Gemini API: combined article data (bullets + long-form) ────────────────
+async function generateArticleData(title, text, isOfficial = false) {
     const ai = getAiClient();
     if (!ai || quotaExhausted) return null;
 
@@ -566,28 +545,33 @@ async function generateLongFormContent(title, text, isOfficial = false) {
 
     const toneInstruction = isOfficial 
         ? 'Επειδή πρόκειται για επίσημη πηγή της ομάδας, διατήρησε ένα απόλυτα έγκυρο, επίσημο ύφος δελτίου τύπου του συλλόγου (authoritative, official club press-release tone).' 
-        : 'ΠΟΤΕ μην αναφέρεις την αρχική πηγή ή άλλα μέσα ενημέρωσης. Απαγορεύονται φράσεις όπως «Σύμφωνα με...», «Το Sportal/Gazzetta/SDNA αναφέρει...», «Όπως γράφεται...».';
+        : 'ΠΟΤΕ μην αναφέρεις την αρχική πηγή ή άλλα μέσα ενημέρωσης. Απαγορεύονται φράσεις όπως «Σύμφωνα με...», «Το Sportal/Gazzetta/SDNA αναφέρει...», «Όπως γράφεται...». Γράφεις ΩΣ ανεξάρτητη αθλητική σύνταξη.';
 
     try {
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News.
-Βάσει των παρακάτω πληροφοριών, αξιολόγησε τη σχετικότητα του θέματος με τον Παναθηναϊκό (ποδόσφαιρο, μπάσκετ, ερασιτέχνη, διοίκηση, μεταγραφές κλπ.) και γράψε ένα αντικειμενικό, υψηλής ποιότητας, αναδιατυπωμένο άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
+Βάσει των παρακάτω πληροφοριών, αξιολόγησε τη σχετικότητα του θέματος με τον Παναθηναϊκό (ποδόσφαιρο, μπάσκετ, ερασιτέχνη, διοίκηση, μεταγραφές κλπ.) και γράψε ένα αντικειμενικό, υψηλής ποιότητας, αναδιατυπωμένο άρθρο (summary) και 2 bullets ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά.
 
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
   "is_panathinaikos_relevant": true ή false (βάλε false αν το άρθρο αφορά γενική διεθνή ειδησεογραφία, άλλα αθλήματα/ομάδες χωρίς καμία σύνδεση με τον Παναθηναϊκό, ή άσχετα παγκόσμια γεγονότα),
   "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, πιο clicky/attractive αλλά ακριβής, χωρίς υπερβολές)",
-  "content": "το αναδιατυπωμένο άρθρο"
+  "content": "το αναδιατυπωμένο άρθρο (σύμφωνα με τους κανόνες παρακάτω)",
+  "bullets": ["Bullet 1", "Bullet 2"]
 }
 
 ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΟ content:
-1. Μορφή & Μήκος: Γράψε μια συμπαγή, φυσική σύνοψη ακριβώς δύο (2) παραγράφων που να αντιπροσωπεύει περίπου το 60% των βασικών γεγονότων του αρχικού κειμένου. Αποέφυγε τη μονολεκτική ή μονογραμμική υπερ-συμπίεση, αλλά και τις περιττές σάλτσες (filler/fluff). Πρέπει να διαβάζεται στρωτά ως 2 ολοκληρωμένες παράγραφοι.
-2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά, ονόματα, νούμερα και δεδομένα. Απαγορεύεται αυστηρά η οποιαδήποτε προσθήκη μη επιβεβαιωμένων πληροφοριών ή φανταστικών στοιχείων (hallucinations).
-3. Αναδιατύπωση: Το άρθρο πρέπει να είναι πλήρως ξαναγραμμένο με δικές σου λέξεις και διαφορετική δομή προτάσεων. Απαγορεύεται το copy-paste αυτούσιων φράσεων.
+1. Μορφή & Μήκος: Γράψε μια συμπαγή, φυσική σύνοψη ακριβώς δύο (2) παραγράφων που να αντιπροσωπεύει περίπου το 60% των βασικών γεγονότων. Αποέφυγε τη μονολεκτική ή μονογραμμική υπερ-συμπίεση, αλλά και τις περιττές σάλτσες. Πρέπει να διαβάζεται στρωτά ως 2 ολοκληρωμένες παράγραφοι.
+2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά, ονόματα, νούμερα και δεδομένα. Απαγορεύεται η προσθήκη μη επιβεβαιωμένων πληροφοριών.
+3. Αναδιατύπωση: Το άρθρο πρέπει να είναι πλήρως ξαναγραμμένο με δικές σου λέξεις. Απαγορεύεται το copy-paste.
 4. ${toneInstruction}
-5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown (bolding, lists, stars κλπ.).
-6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
+5. Διαχώρισε τις παραγράφους με μία κενή γραμμή (\\n\\n). ΜΟΝΟ καθαρό κείμενο.
+
+ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΑ bullets:
+1. Ακριβώς 2 bullets (strings μέσα στο array). Απαγορεύεται η αντιγραφή από το κείμενο.
+2. Κάθε bullet πρέπει να παρουσιάζει διαφορετικά δεδομένα. Απαγορεύεται η επανάληψη.
+3. Ακριβώς μία (1) πρόταση ανά bullet. Μην βάζεις σύμβολα όπως "•" στην αρχή του string.
 
 Τίτλος: ${title}
 Πληροφορίες: ${cleanText}`,
@@ -603,18 +587,20 @@ async function generateLongFormContent(title, text, isOfficial = false) {
 
         if (parsed.is_panathinaikos_relevant === false) {
             console.log(`  [AI EVALUATION] Article determined NOT relevant: "${title}"`);
-            return { isRelevant: false, content: null, title: null };
+            return { isRelevant: false, content: null, title: null, bullets: [] };
         }
 
         const articleText = (parsed.content || '').trim();
         const newTitle = (parsed.title || title).trim();
+        const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2) : [];
+        
         if (articleText && articleText.length > 100) {
-            console.log(`  [AI] Long-form generated: ${articleText.length} chars. Title: ${newTitle}`);
-            return { isRelevant: true, content: articleText, title: newTitle };
+            console.log(`  [AI] Article Data generated: ${articleText.length} chars, ${bullets.length} bullets. Title: ${newTitle}`);
+            return { isRelevant: true, content: articleText, title: newTitle, bullets };
         }
     } catch (err) {
-        if (quotaExhausted) console.warn('[AI] Daily quota exhausted — skipping long-form.');
-        else console.warn(`[AI] Long-form failed: ${err.message?.substring(0, 80)}`);
+        if (quotaExhausted) console.warn('[AI] Daily quota exhausted — skipping article generation.');
+        else console.warn(`[AI] Article generation failed: ${err.message?.substring(0, 80)}`);
     }
     return null;
 }
@@ -655,8 +641,8 @@ ${candidatesList}`,
     return null;
 }
 
-// ─── Gemini API: combined long-form rewrite ────────────────────────────────────
-async function generateCombinedLongFormContent(articleA, articleB, isOfficial = false) {
+// ─── Gemini API: combined article data (bullets + long-form) ────────────────
+async function generateCombinedArticleData(articleA, articleB, isOfficial = false) {
     const ai = getAiClient();
     if (!ai || quotaExhausted) return null;
 
@@ -668,12 +654,13 @@ async function generateCombinedLongFormContent(articleA, articleB, isOfficial = 
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: `Είσαι in-house αθλητικός αρχισυντάκτης του Panathinaikos News.
-Έχεις λάβει ΔΥΟ διαφορετικά ρεπορτάζ από διαφορετικές πηγές που αφορούν το ΙΔΙΟ ακριβώς γεγονός. Πρέπει να τα συνδυάσεις και να γράψεις ΕΝΑ, ενιαίο, αντικειμενικό, υψηλής ποιότητας άρθρο (summary) ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά, το οποίο να περιέχει ΟΛΕΣ τις μοναδικές λεπτομέρειες και από τα δύο κείμενα (π.χ. οικονομικά δεδομένα από το ένα, δηλώσεις από το άλλο).
+Έχεις λάβει ΔΥΟ διαφορετικά ρεπορτάζ από διαφορετικές πηγές που αφορούν το ΙΔΙΟ ακριβώς γεγονός. Πρέπει να τα συνδυάσεις και να γράψεις ΕΝΑ, ενιαίο, αντικειμενικό, υψηλής ποιότητας άρθρο (summary) ΚΑΙ 2 bullets ΑΠΟΚΛΕΙΣΤΙΚΑ στα Ελληνικά, το οποίο να περιέχει ΟΛΕΣ τις μοναδικές λεπτομέρειες και από τα δύο κείμενα (π.χ. οικονομικά δεδομένα από το ένα, δηλώσεις από το άλλο).
 
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
   "title": "ο νέος, ενιαίος τίτλος",
-  "content": "το αναδιατυπωμένο και συνδυασμένο άρθρο"
+  "content": "το αναδιατυπωμένο και συνδυασμένο άρθρο (σύμφωνα με τους κανόνες)",
+  "bullets": ["Bullet 1", "Bullet 2"]
 }
 
 ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΟ content:
@@ -683,6 +670,11 @@ async function generateCombinedLongFormContent(articleA, articleB, isOfficial = 
 4. ${toneInstruction}
 5. ΜΟΝΟ καθαρό κείμενο, χωρίς HTML tags, χωρίς markdown.
 6. Διαχώρισε τις παραγράφους με μία κενή γραμμή.
+
+ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΑ bullets:
+1. Ακριβώς 2 bullets (strings μέσα στο array).
+2. Κάθε bullet πρέπει να παρουσιάζει διαφορετικά δεδομένα. Απαγορεύεται η επανάληψη.
+3. Ακριβώς μία (1) πρόταση ανά bullet. Μην βάζεις σύμβολα όπως "•" στην αρχή του string.
 
 ΠΗΓΗ 1:
 Τίτλος: ${articleA.title}
@@ -702,8 +694,9 @@ async function generateCombinedLongFormContent(articleA, articleB, isOfficial = 
         const parsed = JSON.parse(jsonString);
 
         if (parsed.content && parsed.content.length > 100) {
-            console.log(`  [AI] Combined Long-form generated: ${parsed.content.length} chars. Title: ${parsed.title}`);
-            return { content: parsed.content.trim(), title: (parsed.title || '').trim() };
+            const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2) : [];
+            console.log(`  [AI] Combined Article Data generated: ${parsed.content.length} chars, ${bullets.length} bullets. Title: ${parsed.title}`);
+            return { content: parsed.content.trim(), title: (parsed.title || '').trim(), bullets };
         }
     } catch (err) {
         console.warn(`[AI] Combined Long-form failed: ${err.message?.substring(0, 80)}`);
@@ -786,7 +779,7 @@ async function main() {
                 continue;
             }
 
-            // Cross-category URL guard: prevent basketball articles leaking into football source and vice versa
+        // Cross-category URL guard: prevent basketball articles leaking into football source and vice versa
             const urlLower = articleUrl.toLowerCase();
             const isBasketUrl = /\/(mpasket|basket|basketball)\//.test(urlLower);
             const isFootballUrl = /\/(podosfairo|football|soccer)\//.test(urlLower);
@@ -825,9 +818,16 @@ async function main() {
                 if (exactMatch) {
                     duplicateArticleId = exactMatch.id;
                 } else {
-                    // Fallback to Semantic AI Match
-                    console.log(`  [AI DEDUPLICATION] Checking semantic match for "${scraped.title.substring(0, 40)}..." against ${candidateArticles.length} candidates.`);
-                    duplicateArticleId = await checkSemanticDuplicate(scraped.title, scraped.summary, candidateArticles);
+                    // Check if any candidate has a similarity > 0.05 (at least 1 common word). If not, bypass AI completely
+                    const hasPossibleMatch = candidateArticles.some(art => jaccardSimilarity(scraped.title, art.title) > 0.05);
+                    
+                    if (!hasPossibleMatch) {
+                        console.log(`  [AI DEDUPLICATION BYPASS] Jaccard similarity too low. Assuming unique event.`);
+                    } else {
+                        // Fallback to Semantic AI Match for borderline cases
+                        console.log(`  [AI DEDUPLICATION] Checking semantic match for "${scraped.title.substring(0, 40)}..." against ${candidateArticles.length} candidates.`);
+                        duplicateArticleId = await checkSemanticDuplicate(scraped.title, scraped.summary, candidateArticles);
+                    }
                 }
             }
             
@@ -851,14 +851,17 @@ async function main() {
                             newSourceUrl = newSourceUrl + ',' + articleUrl;
                         }
 
-                        // Generate Combined Long-form Rewrite
-                        const combinedResult = await generateCombinedLongFormContent(dbArt, scraped, target.isOfficial);
+                        // Generate Combined Article Data (Long-form + Bullets)
+                        const combinedResult = await generateCombinedArticleData(dbArt, scraped, target.isOfficial);
                         
                         let newContent = combinedResult ? combinedResult.content : (dbArt.content || scraped.content);
                         let newTitle = combinedResult ? combinedResult.title : dbArt.title;
+                        let newBullets = combinedResult ? combinedResult.bullets : dbArt.bullets;
                         
-                        // Re-generate bullets for the combined content
-                        const newBullets = await generateAiBullets(newTitle, newContent, target.isOfficial);
+                        // Fallback bullets if missing
+                        if (!newBullets || newBullets.length === 0) {
+                            newBullets = generateFallbackBullets(newTitle, newContent);
+                        }
                         const newSummary = newContent.substring(0, 300); // basic summary
 
                         // Prefer non-SDNA image
@@ -900,8 +903,8 @@ async function main() {
             const group_id = crypto.randomUUID();
 
             // ── AI Generation ─────────────────────────────────────────────────
-            const bullets = await generateAiBullets(scraped.title, scraped.content || scraped.summary, target.isOfficial);
-            const aiResult = await generateLongFormContent(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+            const aiResult = await generateArticleData(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+            const bullets = aiResult ? aiResult.bullets : generateFallbackBullets(scraped.title, scraped.content || scraped.summary);
 
             if (isDryRun) {
                 console.log(`    Category:  ${target.category}`);
@@ -920,10 +923,15 @@ async function main() {
                 continue;
             }
 
-            // Fallback to raw content if AI failed (e.g., quota exhausted)
-            let finalContent = aiResult ? aiResult.content : (scraped.content || scraped.summary);
-            let finalTitle = aiResult ? aiResult.title : scraped.title;
-            let finalBullets = bullets || [];
+            // Skip insertion if AI failed (e.g., quota exhausted). We DO NOT want raw content.
+            if (!aiResult) {
+                console.log(`    [SKIP] AI generation failed or quota exhausted. Skipping article so it can be retried later.`);
+                continue;
+            }
+
+            let finalContent = aiResult.content;
+            let finalTitle = aiResult.title;
+            let finalBullets = aiResult.bullets || [];
 
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
