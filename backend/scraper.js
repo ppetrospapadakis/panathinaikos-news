@@ -714,9 +714,9 @@ async function generateCombinedLongFormContent(articleA, articleB, isOfficial = 
 // ─── Sleep helper ──────────────────────────────────────────────────────────────
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 // ─── Staggering configuration ───────────────────────────────────────────────────────
-// Wait 2 minutes (120,000 ms) between processing each source target to avoid rate‑limit spikes.
+// Wait 20 seconds (20000 ms) between processing each source target.
 // Skipped during dry‑run for faster testing.
-const TARGET_STAGGER_MS = 120000;
+const TARGET_STAGGER_MS = 20000;
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
