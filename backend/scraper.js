@@ -767,12 +767,11 @@ async function main() {
                 continue;
             }
 
-            // Skip specific promotional/irrelevant articles by keyword in URL or Title
+            // Skip specific promotional/irrelevant articles by keyword in URL
             const skipKeywords = ['back2mpak', 'live-stis', 'back2back'];
             const lowerUrl = articleUrl.toLowerCase();
-            const lowerTitle = scraped.title.toLowerCase();
-            if (skipKeywords.some(kw => lowerUrl.includes(kw) || lowerTitle.includes(kw))) {
-                console.log(`[SKIP] Promotional/Live show article ignored: ${scraped.title}`);
+            if (skipKeywords.some(kw => lowerUrl.includes(kw))) {
+                console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);
                 continue;
             }
 
@@ -785,6 +784,13 @@ async function main() {
             // Check PAO relevance
             if (!isPanathinaikosArticle(scraped.title, scraped.content)) {
                 console.log(`  [SKIP] Not PAO-relevant: ${scraped.title.substring(0, 50)}`);
+                continue;
+            }
+
+            // Skip specific promotional/irrelevant articles by keyword in Title
+            const lowerTitle = scraped.title.toLowerCase();
+            if (skipKeywords.some(kw => lowerTitle.includes(kw))) {
+                console.log(`[SKIP] Promotional/Live show article ignored by Title: ${scraped.title}`);
                 continue;
             }
 
