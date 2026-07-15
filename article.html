@@ -522,6 +522,47 @@
                 ? bodyHtml
                 : '<p class="italic text-on-surface-variant/60">Δεν υπάρχει διαθέσιμο εκτενές κείμενο. Διαβάστε το πλήρες ρεπορτάζ στην πηγή.</p>';
 
+            // ⑤ Sources rendering
+            const sourceContainer = document.getElementById('article-source-container');
+            if (sourceContainer && article.source_url) {
+                const urls = article.source_url.split(',').map(u => u.trim()).filter(Boolean);
+                const linksHtml = urls.map(url => {
+                    let name = 'Portal';
+                    let color = '#84d999';
+                    try {
+                        const host = new URL(url).hostname.replace('www.','').split('.')[0].toLowerCase();
+                        const portals = {
+                            'sdna': { name: 'SDNA', color: '#ff6600' },
+                            'gazzetta': { name: 'Gazzetta.gr', color: '#0099ff' },
+                            'sport24': { name: 'Sport24', color: '#ff3333' },
+                            'sportal': { name: 'Sportal.gr', color: '#ff9900' },
+                            'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
+                            'athletiko': { name: 'Athletiko', color: '#0066cc' },
+                            'pao': { name: 'PAO.GR', color: '#007a33' },
+                            'paobc': { name: 'PAOBC.GR', color: '#007a33' },
+                            'pao1908': { name: 'PAO1908.COM', color: '#007a33' }
+                        };
+                        if(portals[host]) {
+                            name = portals[host].name;
+                            color = portals[host].color;
+                        } else {
+                            name = host.toUpperCase();
+                        }
+                    } catch(e) {}
+                    
+                    return `
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-all text-sm font-medium text-on-surface">
+                            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            <span>Διαβάστε σχετικό άρθρο στο <span style="color: ${color}" class="font-bold">${name}</span></span>
+                        </a>`;
+                }).join('');
+                sourceContainer.className = "border-t border-outline-variant/30 pt-10 flex flex-wrap justify-center gap-4";
+                sourceContainer.innerHTML = linksHtml;
+            } else if (sourceContainer) {
+                sourceContainer.classList.add('hidden');
+            }
+
             // Show article, hide skeleton
             document.getElementById('article-skeleton').style.display = 'none';
             document.getElementById('article-display').classList.remove('hidden');

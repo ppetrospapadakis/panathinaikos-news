@@ -878,20 +878,41 @@ async function main() {
                     
                     if (!fetchErr && dbArt) {
                         const sourceName = getSourceNameFromUrl(articleUrl);
-                        const existingSourceName = getSourceNameFromUrl(duplicateArticle.source_url);
-                        
+                        const isDbArtOfficial = (dbArt.source_url || '').toLowerCase().includes('pao.gr') || 
+                                                (dbArt.source_url || '').toLowerCase().includes('paobc.gr') || 
+                                                (dbArt.source_url || '').toLowerCase().includes('pao1908.com');
+                        const isScrapedOfficial = !!target.isOfficial;
+
                         // We will update source_url
                         let newSourceUrl = dbArt.source_url || duplicateArticle.source_url || '';
                         if (!newSourceUrl.includes(articleUrl)) {
-                            newSourceUrl = newSourceUrl + ',' + articleUrl;
+                            if (isScrapedOfficial) {
+                                // Put official source first
+                                newSourceUrl = articleUrl + ',' + newSourceUrl;
+                            } else {
+                                // Put new source last
+                                newSourceUrl = newSourceUrl + ',' + articleUrl;
+                            }
                         }
 
-                        // Generate Combined Article Data (Long-form + Bullets)
-                        const combinedResult = await generateCombinedArticleData(dbArt, scraped, target.isOfficial);
-                        
-                        let newContent = combinedResult ? combinedResult.content : (dbArt.content || scraped.content);
-                        let newTitle = combinedResult ? combinedResult.title : dbArt.title;
-                        let newBullets = combinedResult ? combinedResult.bullets : dbArt.bullets;
+                        let newContent = dbArt.content;
+                        let newTitle = dbArt.title;
+                        let newBullets = dbArt.bullets;
+
+                        if (isDbArtOfficial) {
+                            console.log(`  [DEDUPLICATION] Existing article is official. Keeping verbatim content.`);
+                        } else if (isScrapedOfficial) {
+                            console.log(`  [DEDUPLICATION] Scraped article is official. Overwriting with official verbatim content.`);
+                            newContent = scraped.content || scraped.summary;
+                            newTitle = scraped.title;
+                            newBullets = generateFallbackBullets(scraped.title, scraped.content || scraped.summary);
+                        } else {
+                            // Generate Combined Article Data (Long-form + Bullets) using AI
+                            const combinedResult = await generateCombinedArticleData(dbArt, scraped, target.isOfficial);
+                            newContent = combinedResult ? combinedResult.content : (dbArt.content || scraped.content);
+                            newTitle = combinedResult ? combinedResult.title : dbArt.title;
+                            newBullets = combinedResult ? combinedResult.bullets : dbArt.bullets;
+                        }
                         
                         // Fallback bullets if missing
                         if (!newBullets || newBullets.length === 0) {
