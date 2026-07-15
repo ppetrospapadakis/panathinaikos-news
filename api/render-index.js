@@ -38,9 +38,9 @@ function formatExactDate(dateString) {
 }
 
 module.exports = async (req, res) => {
-    // Vercel Edge caching - 60s
+    // Reduce cache during fixes to ensure the user sees changes immediately
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=0, stale-while-revalidate=0');
 
     let categoryFilter = null;
     if (req.query.category) {
@@ -84,8 +84,6 @@ module.exports = async (req, res) => {
             const isBranding = filenameBrandingIndicators.some(ind => pathLower.includes(ind));
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
-            } else if (!imageUrl.startsWith('https://images2-focus-opensocial.googleusercontent.com')) {
-                imageUrl = `https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(imageUrl)}`;
             }
         } catch (e) {}
 
