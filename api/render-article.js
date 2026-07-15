@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+﻿const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
 
@@ -187,13 +187,13 @@ module.exports = async (req, res) => {
     <meta property="og:title" content="${escapeHtml(article.title)}"/>
     <meta property="og:description" content="${escapeHtml(article.summary || '')}"/>
     <meta property="og:image" content="${imageUrl}"/>
-    <meta property="og:url" content="https://panathinaikos-news.vercel.app/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
+    <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
     <meta property="og:type" content="article"/>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="${escapeHtml(article.title)}"/>
     <meta name="twitter:description" content="${escapeHtml(article.summary || '')}"/>
     <meta name="twitter:image" content="${imageUrl}"/>
-    <link rel="canonical" href="https://panathinaikos-news.vercel.app/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
+    <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -213,7 +213,7 @@ module.exports = async (req, res) => {
         "name": "PanathinaikosNews",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://panathinaikos-news.vercel.app/logo.png"
+          "url": "https://www.panathinaikosnews.gr/logo.png"
         }
       }
     }

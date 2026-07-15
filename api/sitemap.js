@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+﻿const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = "https://rctltbuiitdnqlxizlym.supabase.co".trim();
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI".trim();
@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
         if (error) throw error;
 
         // Base domain
-        const domain = 'https://panathinaikos-news.vercel.app';
+        const domain = 'https://www.panathinaikosnews.gr';
 
         // Static routes
         const staticRoutes = [
@@ -93,7 +93,7 @@ module.exports = async (req, res) => {
         let fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
         fallbackXml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
         fallbackXml += `  <url>\n`;
-        fallbackXml += `    <loc>https://panathinaikos-news.vercel.app</loc>\n`;
+        fallbackXml += `    <loc>https://www.panathinaikosnews.gr</loc>\n`;
         fallbackXml += `  </url>\n`;
         fallbackXml += `</urlset>`;
         console.error('Sitemap generation error:', err);
