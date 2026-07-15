@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
 
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
 Sitemap: https://www.panathinaikosnews.gr/sitemap.xml

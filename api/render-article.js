@@ -201,6 +201,7 @@ module.exports = async (req, res) => {
     {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
+      "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}",
       "headline": ${JSON.stringify(article.title)},
       "image": [
         ${JSON.stringify(imageUrl)}
@@ -209,7 +210,8 @@ module.exports = async (req, res) => {
       "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},
       "author": {
         "@type": "Organization",
-        "name": "PanathinaikosNews"
+        "name": "PanathinaikosNews",
+        "url": "https://www.panathinaikosnews.gr"
       },
       "publisher": {
         "@type": "Organization",
@@ -272,8 +274,8 @@ module.exports = async (req, res) => {
         // Bullets (AI Summary)
         if (article.bullets && article.bullets.length > 0) {
             html = html.replace(
-                /id="article-bullets-box" class="p-6 bg-surface-container-low rounded-2xl border border-primary\/30 premium-gradient hidden"/g,
-                'id="article-bullets-box" class="p-6 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient"'
+                /id="article-bullets-box" class="ai-summary p-6 bg-surface-container-low rounded-2xl border border-primary\/30 premium-gradient hidden"/g,
+                'id="article-bullets-box" class="ai-summary p-6 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient"'
             );
             
             const bulletsListHtml = article.bullets.map(b => `<li class="flex items-start gap-3"><span class="text-primary font-bold mt-1 shrink-0">→</span><span>${b}</span></li>`).join('');
