@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="el">
 <head>
     <link rel="canonical" href="https://www.panathinaikosnews.gr/article.html" />
@@ -343,17 +343,26 @@
 
         // ─── Main loader ───
         async function loadArticle() {
+            const params = new URLSearchParams(window.location.search);
+            let articleId = params.get('id');
+            if (!articleId) {
+                const match = window.location.pathname.match(/-id=([a-zA-Z0-9-]+)/);
+                if (match) articleId = match[1];
+            }
+            currentArticleId = articleId;
+
             if (window.__PRE_RENDERED__) {
                 // Highlight active category tab
                 const tabMap = {
-                    'Ποδόσφαιρο': 'tab-football',
-                    'Μπάσκετ': 'tab-basketball',
-                    'Ερασιτέχνης': 'tab-amateur',
-                    'Άποψη': 'tab-opinion',
-                    'Μεταγραφές': 'tab-transfers'
+                    'ΠΟΔΟΣΦΑΙΡΟ': 'tab-football',
+                    'ΜΠΑΣΚΕΤ': 'tab-basketball',
+                    'ΕΡΑΣΙΤΕΧΝΗΣ': 'tab-amateur',
+                    'ΑΠΟΨΗ': 'tab-opinion',
+                    'ΜΕΤΑΓΡΑΦΕΣ': 'tab-transfers'
                 };
                 const catEl = document.getElementById('article-category');
                 const cat = catEl ? catEl.textContent : '';
+                currentArticleCategory = cat;
                 Object.keys(tabMap).forEach(key => {
                     if (cat.includes(key)) {
                         const el = document.getElementById(tabMap[key]);
