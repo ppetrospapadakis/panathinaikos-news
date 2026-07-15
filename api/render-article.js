@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
         }
 
         // 2. Read template file article.html
-        const templatePath = path.join(process.cwd(), 'article.html');
+        const templatePath = path.join(__dirname, '../article.html');
         let html = fs.readFileSync(templatePath, 'utf8');
 
         // 3. Prepare parameters

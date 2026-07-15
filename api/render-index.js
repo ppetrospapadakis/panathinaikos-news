@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
         const { data: articles, error } = await query;
         let article = (articles && articles.length > 0) ? articles[0] : null;
 
-        const templatePath = path.join(process.cwd(), 'index.html');
+        const templatePath = path.join(__dirname, '../index.html');
         let html = fs.readFileSync(templatePath, 'utf8');
 
         if (!article) {
@@ -142,7 +142,7 @@ module.exports = async (req, res) => {
 
     } catch (err) {
         console.error('SSR Index Error:', err);
-        const templatePath = path.join(process.cwd(), 'index.html');
+        const templatePath = path.join(__dirname, '../index.html');
         let html = fs.readFileSync(templatePath, 'utf8');
         res.status(200).send(html); // Fallback to raw HTML
     }
