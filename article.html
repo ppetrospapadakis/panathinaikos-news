@@ -629,7 +629,7 @@
                     const imgBoxClass = isOwn ? 'w-[128px] h-[72px]' : 'w-[72px] h-[72px]';
                     return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
                         <div class="${imgBoxClass} flex-shrink-0 rounded-lg overflow-hidden">
-                            <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                            <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="flex-1 min-w-0">
                             <span class="font-label text-label text-primary uppercase text-xs tracking-wider flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${officialBadge}</span>
