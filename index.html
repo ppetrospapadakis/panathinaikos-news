@@ -618,15 +618,22 @@
                 }
             }
 
-            // We do NOT filter out the Hero from groups to allow it to show in the sidebar stream, per user request.
+            // Safely filter out the Hero from groups to prevent duplicates (except for 'Άποψη')
+            if (window.currentHeroId && activeCategory !== 'Άποψη') {
+                scraperGroups = scraperGroups.filter(g => g.main.id !== window.currentHeroId);
+                ownGroups = ownGroups.filter(g => g.main.id !== window.currentHeroId);
+            }
 
             // Stream = scraper articles + own articles merged by date
             let sideCandidates;
             if (activeCategory === null) {
                 const ownFromCache = ownArticles.map(a => ({ main: a, related: [] }));
+                const filteredOwnCache = window.currentHeroId
+                    ? ownFromCache.filter(g => g.main.id !== window.currentHeroId)
+                    : ownFromCache;
                 sideCandidates = [
                     ...scraperGroups,
-                    ...ownFromCache
+                    ...filteredOwnCache
                 ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
             } else {
                 sideCandidates = scraperGroups;
@@ -653,6 +660,7 @@
                         
                         Object.values(newGroupsObj).forEach(g => {
                             g.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                            if (activeCategory !== 'Άποψη' && window.currentHeroId && g[0].id === window.currentHeroId) return;
                             sideCandidates.push({ main: g[0], related: g.slice(1) });
                         });
                     }
