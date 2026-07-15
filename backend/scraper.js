@@ -832,11 +832,17 @@ async function main() {
             // ── Cross-Source Cross-Publishing Deduplication ──────────────────
             const currentScrapedTime = new Date(scraped.created_at);
             
-            // Collect candidates from the last 30 minutes in the same category
+            // Collect candidates from the last 30/60 minutes in the same category
             const candidateArticles = existingArticles.filter(art => {
                 const dbTime = new Date(art.created_at);
                 const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
-                if (timeDiffMinutes > 40) return false;
+                
+                const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
+                const isAmateur = (art.category && art.category.includes('Ερασιτέχνης')) || 
+                                 (scrapedCategory && scrapedCategory.includes('Ερασιτέχνης'));
+                const maxWindow = isAmateur ? 60 : 40;
+                
+                if (timeDiffMinutes > maxWindow) return false;
                 
                 const scrapedDomain = getSourceNameFromUrl(articleUrl);
                 const dbDomain = getSourceNameFromUrl(art.source_url);
