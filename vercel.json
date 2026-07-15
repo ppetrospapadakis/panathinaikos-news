@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "images": {
-    "remotePatterns": [
-      { "protocol": "https", "hostname": "**" },
-      { "protocol": "http", "hostname": "**" }
-    ]
-  },
   "redirects": [
     { "source": "/matches.html", "destination": "/", "permanent": true },
     { "source": "/roster.html", "destination": "/", "permanent": true },
