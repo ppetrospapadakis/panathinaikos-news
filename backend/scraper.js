@@ -86,6 +86,14 @@ const SCRAPE_TARGETS = [
     // ── BASKETBALL ────────────────────────────────────────────────────────────
     {
         category: 'Μπάσκετ',
+        name: 'PAO BC Official',
+        url: 'https://www.paobc.gr/news/',
+        articleLinkSelectors: ['.blog__results__items__item__title a', 'a.linkbox', 'h3 a', 'article a'],
+        baseUrl: 'https://www.paobc.gr',
+        isOfficial: true,
+    },
+    {
+        category: 'Μπάσκετ',
         name: 'SDNA Basketball',
         url: 'https://www.sdna.gr/teams/panathinaikos-aktor',
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/basket"]'],
@@ -183,6 +191,7 @@ function getSourceNameFromUrl(url) {
         if (hostname.includes('sportdog.gr')) return 'Sportdog';
         if (hostname.includes('pao.gr')) return 'PAO Official';
         if (hostname.includes('pao1908.com')) return 'PAO1908 Official';
+        if (hostname.includes('paobc.gr')) return 'PAO BC Official';
         const parts = hostname.replace('www.', '').split('.');
         return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
     } catch (_) {
@@ -929,7 +938,18 @@ async function main() {
             const group_id = crypto.randomUUID();
 
             // ── AI Generation ─────────────────────────────────────────────────
-            const aiResult = await generateArticleData(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+            let aiResult = null;
+            if (target.isOfficial) {
+                // Bypass AI for official sources and use verbatim text
+                aiResult = {
+                    title: scraped.title,
+                    content: scraped.content || scraped.summary,
+                    bullets: generateFallbackBullets(scraped.title, scraped.content || scraped.summary),
+                    isRelevant: true
+                };
+            } else {
+                aiResult = await generateArticleData(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+            }
             const bullets = aiResult ? aiResult.bullets : generateFallbackBullets(scraped.title, scraped.content || scraped.summary);
 
             if (isDryRun) {
