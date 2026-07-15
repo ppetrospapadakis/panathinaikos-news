@@ -1,7 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /matches.html
-Disallow: /roster.html
 Disallow: /agones
 Disallow: /sport-latest.html
 

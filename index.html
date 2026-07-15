@@ -610,7 +610,7 @@
                     window.currentHeroId = candidateHeroGroup.main.id;
                     window.currentHeroDate = candidateHeroGroup.main.created_at;
                     renderHero(candidateHeroGroup.main);
-                } else if (new Date(candidateHeroGroup.main.created_at) > new Date(window.currentHeroDate)) {
+                } else if (activeCategory === null && new Date(candidateHeroGroup.main.created_at) > new Date(window.currentHeroDate)) {
                     // Stream API returned a NEWER article than the Hero API/SSR!
                     window.currentHeroId = candidateHeroGroup.main.id;
                     window.currentHeroDate = candidateHeroGroup.main.created_at;
@@ -802,7 +802,8 @@
             const sentinel = document.getElementById('feed-sentinel');
             try {
                 const apiCat = getApiCat(activeCategory);
-                const res  = await fetch(`/api/articles?category=${apiCat}&page=${streamPage}`);
+                const streamCat = activeCategory === 'Άποψη' ? '' : apiCat;
+                const res  = await fetch(`/api/articles?category=${streamCat}&page=${streamPage}`);
                 const data = await res.json();
                 if (!data || data.length === 0) {
                     streamHasMore = false;
@@ -874,8 +875,10 @@
                     .catch(err => console.error('[Phase1]', err));
             }
 
+            const streamCat = activeCategory === 'Άποψη' ? '' : apiCat;
+
             // PHASE 2 — stream page 1 + own articles in parallel
-            const streamPromise = fetch(`/api/articles?category=${apiCat}&page=1`)
+            const streamPromise = fetch(`/api/articles?category=${streamCat}&page=1`)
                 .then(r => r.json())
                 .then(data => data.map(processImage))
                 .catch(() => []);

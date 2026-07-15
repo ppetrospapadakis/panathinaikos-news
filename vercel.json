@@ -2,7 +2,6 @@
   "version": 2,
   "redirects": [
     { "source": "/matches.html", "destination": "/", "permanent": true },
-    { "source": "/roster.html", "destination": "/", "permanent": true },
     { "source": "/agones", "destination": "/", "permanent": true },
     { "source": "/sport-latest.html", "destination": "/", "permanent": true }
   ],
