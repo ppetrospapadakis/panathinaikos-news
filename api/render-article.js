@@ -140,7 +140,10 @@ module.exports = async (req, res) => {
                         'sport24': { name: 'Sport24', color: '#ff3333' },
                         'sportal': { name: 'Sportal.gr', color: '#ff9900' },
                         'sport-fm': { name: 'Sport-FM', color: '#ffcc00' },
-                        'athletiko': { name: 'Athletiko', color: '#0066cc' }
+                        'athletiko': { name: 'Athletiko', color: '#0066cc' },
+                        'pao': { name: 'PAO.GR', color: '#007a33' },
+                        'paobc': { name: 'PAOBC.GR', color: '#007a33' },
+                        'pao1908': { name: 'PAO1908.COM', color: '#007a33' }
                     };
                     if(portals[host]) {
                         name = portals[host].name;
