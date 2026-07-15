@@ -366,12 +366,7 @@
                 const BRANDING_FN = ['logo','icon','avatar','branding','placeholder','fallback','watermark','og-image','og_image','site-logo','site_logo','default-image','default_image','noimage','no-image','blank','generic','share-image','share_image'];
                 const BRANDING_PATH = ['/logos/','/logo/','/brand/','/branding/','/default_images/','/default-images/','/assets/images/','/site-assets/'];
                 const isBranding = BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p));
-                if (isBranding) {
-                    a.image_url = DEFAULT_IMG;
-                } else {
-                    // Route through Vercel image proxy: auto-resize to 640px wide, WebP, quality 80
-                    a.image_url = `/_vercel/image?url=${encodeURIComponent(imageUrl)}&w=640&q=80`;
-                }
+                if (isBranding) a.image_url = DEFAULT_IMG;
             } catch(_) {}
             return a;
         }

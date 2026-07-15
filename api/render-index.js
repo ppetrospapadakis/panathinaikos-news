@@ -84,9 +84,8 @@ module.exports = async (req, res) => {
             const isBranding = filenameBrandingIndicators.some(ind => pathLower.includes(ind));
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
-            } else {
-                // Route through Vercel image optimization (WebP, 1200px for hero, quality 85)
-                imageUrl = `/_vercel/image?url=${encodeURIComponent(imageUrl)}&w=1200&q=85`;
+            } else if (!imageUrl.startsWith('https://images2-focus-opensocial.googleusercontent.com')) {
+                imageUrl = `https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(imageUrl)}`;
             }
         } catch (e) {}
 
