@@ -144,6 +144,7 @@ module.exports = async (req, res) => {
         console.error('SSR Index Error:', err);
         const templatePath = path.join(__dirname, '../index.html');
         let html = fs.readFileSync(templatePath, 'utf8');
+        html += `<!-- SSR ERROR: ${err.message}\n${err.stack} -->`;
         res.status(200).send(html); // Fallback to raw HTML
     }
 };
