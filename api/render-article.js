@@ -1,4 +1,4 @@
-﻿const { createClient } = require('@supabase/supabase-js');
+const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
 
@@ -205,8 +205,8 @@ module.exports = async (req, res) => {
       "datePublished": ${JSON.stringify(article.created_at)},
       "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},
       "author": {
-        "@type": "Person",
-        "name": "PanathinaikosNews Editorial"
+        "@type": "Organization",
+        "name": "PanathinaikosNews"
       },
       "publisher": {
         "@type": "Organization",
@@ -215,7 +215,8 @@ module.exports = async (req, res) => {
           "@type": "ImageObject",
           "url": "https://www.panathinaikosnews.gr/logo.png"
         }
-      }
+      },
+      "description": ${JSON.stringify(article.summary || article.title)}
     }
     </script>
     <script>window.__PRE_RENDERED__ = true;</script>
