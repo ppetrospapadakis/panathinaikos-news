@@ -355,9 +355,6 @@
                 return;
             }
 
-            const params = new URLSearchParams(window.location.search);
-            let articleId = params.get('id');
-
             if (!articleId) {
                 // Fallback: extract from path, e.g. /podosfairo/slug-id=123
                 const match = window.location.pathname.match(/-id=([^/&?]+)/);
