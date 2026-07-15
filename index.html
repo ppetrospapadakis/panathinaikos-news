@@ -456,9 +456,10 @@
             const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
             const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
             const imgBoxClass = isOwn ? 'w-[128px] h-[72px]' : 'w-[72px] h-[72px]';
+            const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
                 <div class="${imgBoxClass} flex-shrink-0 rounded-lg overflow-hidden">
-                    <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" class="w-full h-full ${imageFit} group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="font-label text-label text-primary uppercase text-xs tracking-wider flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge}</span>
@@ -634,17 +635,31 @@
             stream.innerHTML = sideCandidates.slice(0, 20).map(g => sideCardHtml(g.main)).join('');
 
             // Sidebar infinite scroll from local cache + API
-            let sideCount = 20;
+            let sideCount = Math.min(20, sideCandidates.length);
             stream.addEventListener('scroll', async () => {
                 if (stream.scrollTop + stream.clientHeight >= stream.scrollHeight - 150) {
-                    if (sideCount < allArticles.length - 1) {
-                        const batch = allArticles.slice(sideCount + 1, sideCount + 11);
-                        batch.forEach(a => stream.insertAdjacentHTML('beforeend', sideCardHtml(a)));
-                        sideCount += batch.length;
-                    } else if (!isFetchingMore && streamHasMore) {
+                    if (sideCount >= sideCandidates.length && !isFetchingMore && streamHasMore) {
+                        const oldLength = allArticles.length;
                         await fetchMorePages();
-                        const batch = allArticles.slice(sideCount + 1, sideCount + 11);
-                        batch.forEach(a => stream.insertAdjacentHTML('beforeend', sideCardHtml(a)));
+                        const newArticles = allArticles.slice(oldLength);
+                        
+                        const newGroupsObj = {};
+                        newArticles.forEach(a => {
+                            const gid = a.group_id || ('solo-' + a.id);
+                            if (!newGroupsObj[gid]) newGroupsObj[gid] = [];
+                            newGroupsObj[gid].push(a);
+                        });
+                        
+                        Object.values(newGroupsObj).forEach(g => {
+                            g.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                            if (window.currentHeroId && g[0].id === window.currentHeroId) return;
+                            sideCandidates.push({ main: g[0], related: g.slice(1) });
+                        });
+                    }
+
+                    if (sideCount < sideCandidates.length) {
+                        const batch = sideCandidates.slice(sideCount, sideCount + 10);
+                        batch.forEach(g => stream.insertAdjacentHTML('beforeend', sideCardHtml(g.main)));
                         sideCount += batch.length;
                     }
                 }
@@ -695,7 +710,7 @@
 
             // More News section (Περισσότερες Ειδήσεις)
             const bottomArticles = activeCategory === null
-                ? scraperGroups.slice(1).map(g => g.main)
+                ? scraperGroups.map(g => g.main)
                 : sideCandidates.map(g => g.main);
 
             if (bottomArticles.length > 0 && moreNewsEl) {
