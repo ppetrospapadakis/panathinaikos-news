@@ -474,6 +474,7 @@
             const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
             const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
             const border   = isOwn ? 'border-primary/30 bg-primary/5' : 'border-outline-variant/10 bg-surface-container/30';
+            const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             let bulletsHtml = '';
             if (a.bullets && a.bullets.length > 0) {
                 bulletsHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
@@ -485,7 +486,7 @@
             }
             return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full ${imageFit} group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="p-5 flex flex-col flex-1">
                     <span class="font-label text-label text-primary uppercase mb-1 flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge}</span>
@@ -698,7 +699,7 @@
                 return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
                     <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                         <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                            <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                            <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-contain bg-surface-container/50 group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="p-5 flex flex-col flex-1">
                             <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)}</span>

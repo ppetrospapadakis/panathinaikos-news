@@ -93,7 +93,8 @@ module.exports = async (req, res) => {
                 .from('articles')
                 .select('*')
                 .or('source_url.ilike.%manual%,source_url.ilike.%opinion://manual%')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: false })
+                .order('id', { ascending: false });
             if (error) throw error;
             return res.status(200).json(data);
         }
@@ -108,7 +109,8 @@ module.exports = async (req, res) => {
             .select('*')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: false });
           
         if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
           const categoryMap = {

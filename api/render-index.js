@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        let query = supabase.from('articles').select('*').order('created_at', { ascending: false }).limit(1);
+        let query = supabase.from('articles').select('*').order('created_at', { ascending: false }).order('id', { ascending: false }).limit(1);
         if (categoryFilter) {
             if (categoryFilter === 'Άποψη') {
                 query = query.ilike('category', '%Άποψη%');
