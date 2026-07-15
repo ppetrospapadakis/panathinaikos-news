@@ -457,7 +457,7 @@
             const slug      = slugify(a.title);
             const catPath   = getCategoryCleanName(a.category);
             const url       = `/${catPath}/${slug}-id=${a.id}`;
-            const isOwn     = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+            const isOwn     = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
             const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
@@ -478,7 +478,7 @@
             const slug     = slugify(a.title);
             const catPath  = getCategoryCleanName(a.category);
             const url      = `/${catPath}/${slug}-id=${a.id}`;
-            const isOwn    = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+            const isOwn    = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
             const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
@@ -516,7 +516,7 @@
             const slug    = slugify(a.title);
             const catPath = getCategoryCleanName(a.category);
             const url     = `/${catPath}/${slug}-id=${a.id}`;
-            const isOwn   = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+            const isOwn   = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const ageMs   = Date.now() - new Date(a.created_at).getTime();
             const isFresh = ageMs < 60 * 60 * 1000;
@@ -593,7 +593,7 @@
             }).sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
 
             sorted.forEach(g => {
-                const isOwn = (g.main.source_url||'').toLowerCase().includes('manual') || (g.main.source_url||'').toLowerCase().includes('opinion');
+                const isOwn = (g.main.source_url||'').toLowerCase().includes('manual') || (g.main.source_url||'').toLowerCase().includes('opinion://');
                 if (activeCategory === null) {
                     if (isOwn) ownGroups.push(g);
                     else scraperGroups.push(g);
