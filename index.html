@@ -263,6 +263,8 @@
         let ownArticles    = [];   // manual/opinion articles
         let streamPage     = 2;    // next page to load (page 1 already loaded)
         let streamHasMore  = true;
+        window.currentHeroId = null;
+        window.currentHeroDate = null;
         let isFetchingMore = false;
         let editorialDone  = false;
         let moreNewsDone   = false;
@@ -593,20 +595,39 @@
                 }
             });
 
-            // Hero = first scraper article
-            let heroGroup = scraperGroups[0] || ownGroups[0];
-            if (heroGroup) renderHero(heroGroup.main);
+            // Hero logic with cache mismatch handling
+            let candidateHeroGroup = scraperGroups[0] || ownGroups[0];
+            
+            if (candidateHeroGroup) {
+                if (!window.currentHeroId) {
+                    window.currentHeroId = candidateHeroGroup.main.id;
+                    window.currentHeroDate = candidateHeroGroup.main.created_at;
+                    renderHero(candidateHeroGroup.main);
+                } else if (new Date(candidateHeroGroup.main.created_at) > new Date(window.currentHeroDate)) {
+                    // Stream API returned a NEWER article than the Hero API/SSR!
+                    window.currentHeroId = candidateHeroGroup.main.id;
+                    window.currentHeroDate = candidateHeroGroup.main.created_at;
+                    renderHero(candidateHeroGroup.main);
+                }
+            }
+
+            // Safely filter out the Hero from groups to prevent duplicates
+            if (window.currentHeroId) {
+                scraperGroups = scraperGroups.filter(g => g.main.id !== window.currentHeroId);
+                ownGroups = ownGroups.filter(g => g.main.id !== window.currentHeroId);
+            }
 
             // Stream = remaining scraper articles + own articles merged by date
             let sideCandidates;
             if (activeCategory === null) {
                 const ownFromCache = ownArticles.map(a => ({ main: a, related: [] }));
+                const filteredOwnCache = ownFromCache.filter(g => g.main.id !== window.currentHeroId);
                 sideCandidates = [
-                    ...scraperGroups.slice(1),
-                    ...ownFromCache
+                    ...scraperGroups,
+                    ...filteredOwnCache
                 ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
             } else {
-                sideCandidates = scraperGroups.slice(1);
+                sideCandidates = scraperGroups;
             }
 
             // Render first 20 into sidebar
@@ -790,9 +811,19 @@
             streamHasMore = true;
             editorialDone = false;
             moreNewsDone  = false;
+            window.currentHeroId = null;
+            window.currentHeroDate = null;
 
             const heroEl   = document.getElementById('hero-container');
             const hasSsrHero = heroEl && heroEl.querySelector('[data-ssr="true"]');
+            if (hasSsrHero) {
+                const ssrHero = heroEl.querySelector('[data-ssr="true"]');
+                const parsed = JSON.parse(ssrHero.getAttribute('data-article') || 'null');
+                if (parsed) {
+                    window.currentHeroId = parsed.id;
+                    window.currentHeroDate = parsed.created_at;
+                }
+            }
 
             const streamEl = document.getElementById('stream-container');
             const editEl   = document.getElementById('editorial-section');
@@ -813,7 +844,11 @@
                 const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
                     .then(r => r.json())
                     .then(data => {
-                        if (data && data[0]) renderHero(processImage(data[0]));
+                        if (data && data[0]) {
+                            window.currentHeroId = data[0].id;
+                            window.currentHeroDate = data[0].created_at;
+                            renderHero(processImage(data[0]));
+                        }
                     })
                     .catch(err => console.error('[Phase1]', err));
             }
