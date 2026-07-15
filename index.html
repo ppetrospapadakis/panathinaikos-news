@@ -463,7 +463,7 @@
                 </div>`;
             }
             return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}">
-                <div class="relative aspect-video overflow-hidden">
+                <div class="relative w-full shrink-0 overflow-hidden" style="aspect-ratio: 16/9;">
                     <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="p-5 flex flex-col flex-1">
@@ -504,7 +504,7 @@
             }
 
             heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
-                <div class="relative aspect-video overflow-hidden">
+                <div class="relative w-full shrink-0 overflow-hidden" style="aspect-ratio: 16/9;">
                     <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
@@ -674,7 +674,7 @@
                 const url    = `/${cat}/${slug}-id=${a.id}`;
                 return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
                     <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}">
-                        <div class="relative aspect-video overflow-hidden">
+                        <div class="relative w-full shrink-0 overflow-hidden" style="aspect-ratio: 16/9;">
                             <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="p-5 flex flex-col flex-1">

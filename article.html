@@ -620,7 +620,7 @@
                     const url = `/${catPath}/${slug}-id=${a.id}`;
                     const border = 'border-outline-variant/20';
                     return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border} h-full" href="${url}">
-                        <div class="relative aspect-video overflow-hidden">
+                        <div class="relative w-full shrink-0 overflow-hidden" style="aspect-ratio: 16/9;">
                             <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="p-6 flex flex-col flex-1 bg-surface-container">
