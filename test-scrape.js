@@ -1,0 +1,1 @@
+const axios = require('axios'); const cheerio = require('cheerio'); async function run() { const html = (await axios.get('https://www.sport-fm.gr/tag/pao')).data; const $ = cheerio.load(html); console.log($('a').map((i, el) => $(el).attr('href')).get().filter(h => h && h.includes('article/'))); } run();

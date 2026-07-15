@@ -35,13 +35,6 @@ const http = axios.create({
 const SCRAPE_TARGETS = [
     // ── FOOTBALL ──────────────────────────────────────────────────────────────
     {
-        category: 'Ποδόσφαιρο',
-        name: 'Monobala Football',
-        url: 'https://monobala.gr/category/teams/sl1/panathinaikos/',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a'],
-        baseUrl: 'https://monobala.gr',
-    },
-    {
         category: 'Γενικά',
         name: 'Sport-FM',
         url: 'https://www.sport-fm.gr/tag/pao',
