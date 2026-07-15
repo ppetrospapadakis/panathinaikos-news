@@ -37,6 +37,15 @@ function formatExactDate(dateString) {
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
 }
 
+function escapeHtml(unsafe) {
+    return (unsafe || '')
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
 module.exports = async (req, res) => {
     // Reduce cache during fixes to ensure the user sees changes immediately
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -92,8 +101,13 @@ module.exports = async (req, res) => {
         const url = `/${catPath}/${slug}-id=${article.id}`;
         const pubDate = formatExactDate(article.created_at);
 
+        const articleJson = JSON.stringify({
+            id: article.id,
+            created_at: article.created_at
+        });
+
         const heroHtml = `
-            <a href="${url}" class="group relative block aspect-[4/3] md:aspect-video w-full rounded-2xl overflow-hidden bg-surface-container-high transition-transform card-hover border border-outline-variant/20 shadow-sm" data-ssr="true">
+            <a href="${url}" class="group relative block aspect-[4/3] md:aspect-video w-full rounded-2xl overflow-hidden bg-surface-container-high transition-transform card-hover border border-outline-variant/20 shadow-sm" data-ssr="true" data-article="${escapeHtml(articleJson)}">
                 <img rel="preload" fetchpriority="high" loading="eager" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
                 <div class="absolute inset-0 bg-gradient-to-t from-[#1A1C1E]/95 via-[#1A1C1E]/50 to-transparent"></div>
                 

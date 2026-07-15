@@ -618,20 +618,15 @@
                 }
             }
 
-            // Safely filter out the Hero from groups to prevent duplicates
-            if (window.currentHeroId) {
-                scraperGroups = scraperGroups.filter(g => g.main.id !== window.currentHeroId);
-                ownGroups = ownGroups.filter(g => g.main.id !== window.currentHeroId);
-            }
+            // We do NOT filter out the Hero from groups to allow it to show in the sidebar stream, per user request.
 
-            // Stream = remaining scraper articles + own articles merged by date
+            // Stream = scraper articles + own articles merged by date
             let sideCandidates;
             if (activeCategory === null) {
                 const ownFromCache = ownArticles.map(a => ({ main: a, related: [] }));
-                const filteredOwnCache = ownFromCache.filter(g => g.main.id !== window.currentHeroId);
                 sideCandidates = [
                     ...scraperGroups,
-                    ...filteredOwnCache
+                    ...ownFromCache
                 ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
             } else {
                 sideCandidates = scraperGroups;
@@ -658,7 +653,6 @@
                         
                         Object.values(newGroupsObj).forEach(g => {
                             g.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-                            if (window.currentHeroId && g[0].id === window.currentHeroId) return;
                             sideCandidates.push({ main: g[0], related: g.slice(1) });
                         });
                     }
@@ -907,6 +901,13 @@
         function filterFeedWithoutPush(category) {
             activeCategory = category;
             updateNavStyles(category);
+            const heroEl = document.getElementById('hero-container');
+            if (heroEl) {
+                const ssrEl = heroEl.querySelector('[data-ssr="true"]');
+                if (ssrEl) {
+                    ssrEl.removeAttribute('data-ssr');
+                }
+            }
             startLoad();
             renderQuickLinks();
         }
