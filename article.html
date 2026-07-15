@@ -626,8 +626,10 @@
                     const slug = slugify(a.title);
                     const catPath = getCategoryCleanName(a.category);
                     const url = `/${catPath}/${slug}-id=${a.id}`;
+                    const isOwn = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion');
+                    const imgBoxClass = isOwn ? 'w-[128px] h-[72px]' : 'w-[72px] h-[72px]';
                     return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
-                        <div class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden">
+                        <div class="${imgBoxClass} flex-shrink-0 rounded-lg overflow-hidden">
                             <img referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="flex-1 min-w-0">

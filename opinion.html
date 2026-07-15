@@ -300,8 +300,8 @@
 <div id="lock-screen">
     <div class="lock-card">
         <div class="icon material-symbols-outlined">lock</div>
-        <h1>Editor Πρόσβασης</h1>
-        <p>Εισάγετε τον κωδικό για να αποκτήσετε πρόσβαση στον editor άρθρων.</p>
+        <h1>Admin Panel</h1>
+        <p>Εισάγετε τον κωδικό για να αποκτήσετε πρόσβαση στο admin panel.</p>
         <input class="lock-input" id="lock-password" type="password" placeholder="••••••••" maxlength="30"
                onkeydown="if(event.key==='Enter') checkPassword()"/>
         <button class="lock-btn" onclick="checkPassword()">
@@ -1086,7 +1086,7 @@ async function loadOpinionArticles() {
         return `
         <div class="opinion-card group">
             <div class="flex gap-3 items-start p-4">
-                <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
+                <div class="w-[112px] h-[63px] flex-shrink-0 rounded-lg overflow-hidden cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
                     <img src="${img}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="flex-1 min-w-0 cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
