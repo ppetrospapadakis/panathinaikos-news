@@ -1,4 +1,4 @@
-﻿const { createClient } = require('@supabase/supabase-js');
+const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
 
@@ -82,9 +82,11 @@ module.exports = async (req, res) => {
             const pathLower = u.pathname.toLowerCase();
             const filenameBrandingIndicators = ['logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark'];
             const isBranding = filenameBrandingIndicators.some(ind => pathLower.includes(ind));
-            if (isBranding) imageUrl = DEFAULT_IMG;
-            else if (!imageUrl.startsWith('https://images2-focus-opensocial.googleusercontent.com')) {
-                imageUrl = `https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(imageUrl)}`;
+            if (isBranding) {
+                imageUrl = DEFAULT_IMG;
+            } else {
+                // Route through Vercel image optimization (WebP, 1200px for hero, quality 85)
+                imageUrl = `/_vercel/image?url=${encodeURIComponent(imageUrl)}&w=1200&q=85`;
             }
         } catch (e) {}
 

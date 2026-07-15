@@ -106,6 +106,9 @@ module.exports = async (req, res) => {
                 if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
                 if (isBranding) {
                     imageUrl = DEFAULT_IMG;
+                } else {
+                    // Route through Vercel image optimization (WebP, 1200px for article hero)
+                    imageUrl = `/_vercel/image?url=${encodeURIComponent(imageUrl)}&w=1200&q=85`;
                 }
             } catch (_) {}
         } else {
