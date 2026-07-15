@@ -1,9 +1,16 @@
 {
   "version": 2,
+  "images": {
+    "remotePatterns": [
+      { "protocol": "https", "hostname": "**" },
+      { "protocol": "http", "hostname": "**" }
+    ]
+  },
   "redirects": [
     { "source": "/matches.html", "destination": "/", "permanent": true },
     { "source": "/roster.html", "destination": "/", "permanent": true },
-    { "source": "/agones", "destination": "/", "permanent": true }
+    { "source": "/agones", "destination": "/", "permanent": true },
+    { "source": "/sport-latest.html", "destination": "/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/basket", "destination": "/api/render-index?category=basket" },
@@ -20,3 +27,4 @@
     { "source": "/", "destination": "/api/render-index" }
   ]
 }
+
