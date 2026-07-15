@@ -150,7 +150,7 @@ module.exports = async (req, res) => {
                     const timeDiffMins = Math.abs(new Date(current.created_at) - new Date(existing.created_at)) / (1000 * 60);
                     const isAmateur = (current.category && current.category.includes('Ερασιτέχνης')) ||
                                      (existing.category && existing.category.includes('Ερασιτέχνης'));
-                    const maxWindow = isAmateur ? 60 : 40;
+                    const maxWindow = isAmateur ? 120 : 60;
                     if (timeDiffMins <= maxWindow) {
                         if (areSimilar(current.title, existing.title)) {
                             isDuplicate = true;
