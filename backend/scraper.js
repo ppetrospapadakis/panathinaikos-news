@@ -45,7 +45,7 @@ const SCRAPE_TARGETS = [
         category: 'Γενικά',
         name: 'Sport-FM',
         url: 'https://www.sport-fm.gr/tag/pao',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', '.title a'],
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', '.title a', 'a[href*="/article/"]'],
         baseUrl: 'https://www.sport-fm.gr',
     },
     {
@@ -83,6 +83,13 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
         baseUrl: 'https://www.athletiko.gr',
     },
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'Sportdog Football',
+        url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-fc',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
+        baseUrl: 'https://www.sportdog.gr',
+    },
     // ── BASKETBALL ────────────────────────────────────────────────────────────
     {
         category: 'Μπάσκετ',
@@ -111,6 +118,13 @@ const SCRAPE_TARGETS = [
         url: 'https://www.athletiko.gr/panathinaikos-mpasket',
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
         baseUrl: 'https://www.athletiko.gr',
+    },
+    {
+        category: 'Μπάσκετ',
+        name: 'Sportdog Basketball',
+        url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-bc',
+        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
+        baseUrl: 'https://www.sportdog.gr',
     },
     // ── AMATEUR / VOLLEYBALL ─────────────────────────────────────────────────
     {
@@ -147,7 +161,7 @@ const SCRAPE_TARGETS = [
         category: 'Ερασιτέχνης',
         name: 'PAO1908 Official',
         url: 'https://www.pao1908.com/category/nea/',
-        articleLinkSelectors: ['.post a', 'h2 a', 'h3 a', '.entry-title a', 'article a'],
+        articleLinkSelectors: ['.post a', 'h2 a', 'h3 a', '.entry-title a', 'article a', 'a[href*="/nea/"]'],
         baseUrl: 'https://www.pao1908.com',
         isOfficial: true,
     },
@@ -173,6 +187,7 @@ function getSourceNameFromUrl(url) {
         if (hostname.includes('sport24.gr')) return 'Sport24';
         if (hostname.includes('gazzetta.gr')) return 'Gazzetta';
         if (hostname.includes('athletiko.gr')) return 'Athletiko';
+        if (hostname.includes('sportdog.gr')) return 'Sportdog';
         if (hostname.includes('pao.gr')) return 'PAO Official';
         if (hostname.includes('pao1908.com')) return 'PAO1908 Official';
         const parts = hostname.replace('www.', '').split('.');
@@ -429,8 +444,11 @@ async function scrapeArticlePage(url, categoryHint) {
             }
         }
 
-        if (!bodyText || bodyText.length < 150) {
-            console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Likely a video-only article. Skipping.`);
+        const isSportdog = url.includes('sportdog.gr');
+        const minLength = isSportdog ? 300 : 150;
+
+        if (!bodyText || bodyText.length < minLength) {
+            console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
             return null;
         }
 
