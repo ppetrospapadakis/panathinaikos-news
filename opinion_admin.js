@@ -210,7 +210,17 @@ function selectRun(runId) {
     const recentErrors = run.stats?.recent_errors || [];
     
     const skipped = (totals.skipped_duplicate || 0) + (totals.skipped_relevance || 0) + (totals.skipped_size || 0) + (totals.skipped_crawling_failed || 0) + (totals.skipped_technical_error || 0) + (totals.skipped_other || 0);
-    const errorsCount = (totals.skipped_technical_error || 0) + (run.status === 'failed' ? 1 : 0);
+    const errorsCount = recentErrors.length + (run.status === 'failed' ? 1 : 0);
+
+    // Build a map of source → error code for highlighting 0-scraped sources
+    const sourceErrorMap = {};
+    recentErrors.forEach(err => {
+        if (err.source && !sourceErrorMap[err.source]) {
+            // Extract HTTP status code from message, e.g. "Request failed with status code 403"
+            const codeMatch = err.message && err.message.match(/(\d{3})/);
+            sourceErrorMap[err.source] = codeMatch ? codeMatch[1] : 'ERR';
+        }
+    });
     
     // Fatal run error alert
     let fatalAlertHtml = '';
@@ -249,14 +259,29 @@ function selectRun(runId) {
     Object.keys(sources).forEach(srcKey => {
         const src = sources[srcKey];
         const srcSkipped = (src.skipped_duplicate || 0) + (src.skipped_relevance || 0) + (src.skipped_size || 0) + (src.skipped_crawling_failed || 0) + (src.skipped_technical_error || 0) + (src.skipped_other || 0);
+        const scraped = src.scraped || 0;
+        const relevance = src.skipped_relevance || 0;
+        
+        // If scraped=0 and source appears in recent_errors, show the error badge
+        const errCode = scraped === 0 ? sourceErrorMap[srcKey] : null;
+        const scrapedCell = errCode
+            ? `<span class="font-mono text-red-400">0</span><span title="${errCode} error" class="ml-1.5 inline-flex items-center gap-0.5 bg-red-500/15 text-red-400 border border-red-500/30 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider cursor-help">⚠ ${errCode}</span>`
+            : `<span class="font-mono">${scraped}</span>`;
+        
+        // Colour relevance only if non-zero
+        const relevanceCell = relevance > 0
+            ? `<span class="font-mono text-yellow-400 font-semibold">${relevance}</span>`
+            : `<span class="font-mono text-on-surface-variant/40">0</span>`;
+        
         tableRowsHtml += `
             <tr class="border-b border-outline-variant/10 text-xs text-on-surface-variant hover:bg-surface-container-high/20">
                 <td class="py-3 px-4 font-bold text-on-surface text-left">${srcKey}</td>
-                <td class="py-3 px-4 text-center font-mono">${src.scraped || 0}</td>
+                <td class="py-3 px-4 text-center">${scrapedCell}</td>
                 <td class="py-3 px-4 text-center font-mono text-primary font-semibold">${src.added || 0}</td>
                 <td class="py-3 px-4 text-center font-mono text-tertiary font-semibold">${src.merged || 0}</td>
                 <td class="py-3 px-4 text-center font-mono text-red-400">${src.skipped_crawling_failed || 0}</td>
                 <td class="py-3 px-4 text-center font-mono text-red-500">${src.skipped_technical_error || 0}</td>
+                <td class="py-3 px-4 text-center">${relevanceCell}</td>
                 <td class="py-3 px-4 text-center font-mono">${srcSkipped}</td>
             </tr>
         `;
@@ -404,6 +429,7 @@ function selectRun(runId) {
                             <th class="py-3 px-4 text-center">Merged</th>
                             <th class="py-3 px-4 text-center text-red-400/80">Crawl Fail</th>
                             <th class="py-3 px-4 text-center text-red-500/80">Errors</th>
+                            <th class="py-3 px-4 text-center text-yellow-400/80">Relevance</th>
                             <th class="py-3 px-4 text-center">Skipped</th>
                         </tr>
                     </thead>
@@ -983,6 +1009,8 @@ async function loadEngagementStats() {
 
         // 4. Render 24h Post Activity Chart
         const hourlyPosts = data.hourly_posts || Array(24).fill(0);
+        const hourlyBySource = data.hourly_by_source || Array(24).fill(null).map(() => ({}));
+        const hourlyLabels = data.hourly_labels || Array(24).fill(null).map((_, i) => `${String(i).padStart(2,'0')}:00`);
         const chartContainer = document.getElementById('chart-bars-container');
         if (chartContainer) {
             // Retain absolute grid lines
@@ -1000,21 +1028,43 @@ async function loadEngagementStats() {
             document.getElementById('y-axis-val-1').textContent = Math.round(maxVal * 1 / 3).toString();
 
             // Populate all 24 bars
-            hourlyPosts.forEach((count, hour) => {
-                const hourStr = hour.toString().padStart(2, '0') + ':00';
-                const pct = ((count / maxVal) * 98).toFixed(1); // max height is 98%
+            hourlyPosts.forEach((count, idx) => {
+                const label = hourlyLabels[idx] || `${String(idx).padStart(2,'0')}:00`;
+                const pct = ((count / maxVal) * 98).toFixed(1);
+                
+                // Build per-source breakdown for tooltip
+                const srcBreakdown = hourlyBySource[idx] || {};
+                const srcEntries = Object.entries(srcBreakdown)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([src, n]) => `<span class="flex justify-between gap-3"><span class="text-on-surface-variant/70">${src}</span><strong class="text-on-surface">${n}</strong></span>`)
+                    .join('');
+                const srcHtml = srcEntries
+                    ? `<div class="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-outline-variant/30">${srcEntries}</div>`
+                    : '';
                 
                 const barDiv = document.createElement('div');
-                barDiv.className = 'w-full bg-primary/25 hover:bg-primary transition-all duration-300 rounded-t cursor-pointer relative group';
-                barDiv.style.height = `${Math.max(3, pct)}%`; // minimum height of 3% for presentation
+                barDiv.className = 'w-full bg-primary/25 hover:bg-primary/60 transition-all duration-300 rounded-t cursor-pointer relative group';
+                barDiv.style.height = `${Math.max(3, pct)}%`;
                 
                 barDiv.innerHTML = `
-                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-2xl leading-normal font-normal">
-                        <strong>${hourStr}</strong>: ${count} άρθρα
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[140px]" style="white-space:normal">
+                        <div class="flex justify-between items-center gap-3 font-bold">
+                            <span class="text-primary">${label}</span>
+                            <span class="text-on-surface">${count} άρθρα</span>
+                        </div>
+                        ${srcHtml}
                     </div>
                 `;
                 chartContainer.appendChild(barDiv);
             });
+
+            // Update chart subtitle and x-axis to reflect real 24h window
+            const startLabel = hourlyLabels[0] || '00:00';
+            const endLabel = hourlyLabels[23] || '23:00';
+            const chartSubtitle = document.getElementById('chart-subtitle');
+            if (chartSubtitle) {
+                chartSubtitle.textContent = `Άρθρα που δημοσιεύθηκαν ανά ώρα — τελευταίες 24h (${startLabel} → ${endLabel} UTC)`;
+            }
         }
 
     } catch (err) {
@@ -1022,3 +1072,4 @@ async function loadEngagementStats() {
     }
 }
 window.loadEngagementStats = loadEngagementStats;
+

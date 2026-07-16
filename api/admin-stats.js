@@ -39,39 +39,70 @@ module.exports = async (req, res) => {
         // Estimated database size: articles are ~5.2 KB each, runs are ~14.5 KB each (in raw JSONB payload)
         const dbSizeEstimatedMb = Number(((totalArticles * 5.2 + totalRuns * 14.5) / 1024).toFixed(2));
 
-        // 2. Fetch Post Frequency over the last 7 days (hourly distribution)
-        const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        const { data: recentArticles, error: artErr } = await supabase
-            .from('articles')
-            .select('created_at')
-            .gt('created_at', lastWeek);
+        // 2. Fetch Post Frequency for the REAL last 24h — each slot = one of the past 24 hours
+        // Slot 0 = the hour that started 24h ago, slot 23 = the most recent complete hour
+        const now = Date.now();
+        const last24h = new Date(now - 24 * 60 * 60 * 1000).toISOString();
 
+        const { data: recentArticles } = await supabase
+            .from('articles')
+            .select('created_at, source_url')
+            .gt('created_at', last24h);
+
+        // Build 24 hourly buckets (slot 0 = oldest hour, slot 23 = most recent)
+        // Bucket index = Math.floor((articleTime - windowStart) / 3600000)
+        const windowStart = now - 24 * 60 * 60 * 1000; // 24h ago in ms
         const hourlyDistribution = Array(24).fill(0);
+        // Also track breakdown by source per hour
+        const hourlyBySource = Array(24).fill(null).map(() => ({}));
+
         if (recentArticles) {
             recentArticles.forEach(art => {
-                if (art.created_at) {
-                    const date = new Date(art.created_at);
-                    // Get local hour (Athens is typically EET/EEST, we get local timezone hour or fallback nicely)
-                    const hour = date.getHours(); 
-                    if (hour >= 0 && hour < 24) {
-                        hourlyDistribution[hour]++;
+                if (!art.created_at) return;
+                const artMs = new Date(art.created_at).getTime();
+                const bucket = Math.min(23, Math.floor((artMs - windowStart) / 3600000));
+                if (bucket >= 0 && bucket < 24) {
+                    hourlyDistribution[bucket]++;
+
+                    // Parse source name from source_url
+                    // source_url is typically a full URL like https://www.sport24.gr/...
+                    // We try to extract a short domain label
+                    let srcLabel = 'Άλλο';
+                    if (art.source_url) {
+                        try {
+                            const domain = new URL(art.source_url).hostname.replace('www.', '');
+                            srcLabel = domain.split('.')[0]; // e.g. "sport24", "gazzetta", etc.
+                        } catch {}
                     }
+                    hourlyBySource[bucket][srcLabel] = (hourlyBySource[bucket][srcLabel] || 0) + 1;
                 }
             });
         }
 
+        // Build X-axis labels — the wall-clock hour label for each slot
+        const hourlyLabels = Array(24).fill(null).map((_, i) => {
+            const slotStart = new Date(windowStart + i * 3600000);
+            const h = slotStart.getUTCHours().toString().padStart(2, '0');
+            const m = '00';
+            return `${h}:${m}`;
+        });
+
         // 3. Fetch scraping runs in the last 24 hours to aggregate Gemini API usage
-        const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        const { data: runs, error: runsErr } = await supabase
+        const { data: runs } = await supabase
             .from('scraping_runs')
             .select('stats, started_at')
             .gt('started_at', last24h)
             .order('started_at', { ascending: false });
 
-        // Parse Gemini Keys from process.env
-        const rawKey = process.env.GEMINI_API_KEY || '';
-        const apiKeys = rawKey.split(',').map(k => k.trim()).filter(k => k.length > 0);
-        const keyCount = apiKeys.length || 1; // default to at least 1 key for presentation if env is empty
+        // Parse Gemini Keys — support GEMINI_API_KEY (comma-separated) AND GEMINI_API_KEY_2 as fallback
+        const rawKey1 = process.env.GEMINI_API_KEY || '';
+        const rawKey2 = process.env.GEMINI_API_KEY_2 || '';
+        
+        // Combine: split key1 by comma, then append key2 if set
+        let apiKeys = rawKey1.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        if (rawKey2) apiKeys.push(rawKey2.trim());
+
+        const keyCount = apiKeys.length || 1; // default to 1 for presentation if env is empty
 
         // Initialize key totals dictionary
         const keyUsageToday = {};
@@ -144,7 +175,9 @@ module.exports = async (req, res) => {
                 key_count: keyCount,
                 keys: keysStatus
             },
-            hourly_posts: hourlyDistribution
+            hourly_posts: hourlyDistribution,
+            hourly_by_source: hourlyBySource,
+            hourly_labels: hourlyLabels
         });
 
     } catch (err) {
