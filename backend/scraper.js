@@ -263,7 +263,7 @@ function jaccardSimilarity(a, b) {
 }
 
 // ─── Scrape listing page → article URLs ───────────────────────────────────────
-async function scrapeArticleLinks(target) {
+async function scrapeArticleLinks(target, logErrorCallback) {
     try {
         const response = await http.get(target.url);
         console.log(`[HTTP GET] ${target.url} | Status: ${response.status}`);
@@ -308,6 +308,7 @@ async function scrapeArticleLinks(target) {
         return arr;
     } catch (err) {
         console.warn(`[${target.name}] Failed to scrape listing page: ${err.message}`);
+        if (logErrorCallback) logErrorCallback(err.message);
         return [];
     }
 }
@@ -461,7 +462,7 @@ async function scrapeArticlePage(url, categoryHint) {
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
-            return null;
+            return { status: 'skipped_size', length: bodyText ? bodyText.length : 0 };
         }
 
         // ── Summary (meta description) ─────────────────────────────────────────
@@ -472,10 +473,10 @@ async function scrapeArticlePage(url, categoryHint) {
             title
         ).substring(0, 500);
 
-        return { title, summary, content: bodyText, imageUrl, created_at, sourceUrl: url };
+        return { status: 'success', title, summary, content: bodyText, imageUrl, created_at, sourceUrl: url };
     } catch (err) {
         console.warn(`[SCRAPER] Failed to scrape article ${url}: ${err.message}`);
-        return null;
+        return { status: 'failed_crawl', error: err.message };
     }
 }
 
@@ -760,8 +761,22 @@ async function main() {
             skipped_technical_error: 0,
             skipped_other: 0
         },
-        sources: {}
+        sources: {},
+        recent_errors: []
     };
+
+    function logRunError(sourceName, url, type, message) {
+        if (!runStats.recent_errors) runStats.recent_errors = [];
+        if (runStats.recent_errors.length < 20) {
+            runStats.recent_errors.push({
+                time: new Date().toISOString(),
+                source: sourceName,
+                url: url || null,
+                type: type, // 'crawl', 'parse', 'api', 'db'
+                message: message
+            });
+        }
+    }
     
     // Initialize stats per source target
     SCRAPE_TARGETS.forEach(target => {
@@ -818,7 +833,7 @@ async function main() {
     for (const target of SCRAPE_TARGETS) {
         console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
 
-        const links = await scrapeArticleLinks(target);
+        const links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
         if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
 
         runStats.sources[target.name].scraped += links.length;
@@ -848,6 +863,8 @@ async function main() {
 
             const scraped = await scrapeArticlePage(articleUrl, target.category);
             if (!scraped || scraped.status === 'failed_crawl') {
+                const errMsg = scraped ? scraped.error : 'Unknown HTTP crawl failure';
+                logRunError(target.name, articleUrl, 'article_fetch', errMsg);
                 runStats.sources[target.name].skipped_crawling_failed++;
                 runStats.totals.skipped_crawling_failed++;
                 continue;
@@ -1016,6 +1033,7 @@ async function main() {
                             
                         if (updateErr) {
                             console.error(`  [DB ERROR] Failed to update merged sources:`, updateErr.message);
+                            logRunError(target.name, articleUrl, 'database_error', updateErr.message);
                             runStats.sources[target.name].skipped_technical_error++;
                             runStats.totals.skipped_technical_error++;
                         } else {
@@ -1076,6 +1094,7 @@ async function main() {
             // Skip insertion if AI failed (e.g., quota exhausted). We DO NOT want raw content.
             if (!aiResult) {
                 console.log(`    [SKIP] AI generation failed or quota exhausted. Skipping article so it can be retried later.`);
+                logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or quota exhausted');
                 runStats.sources[target.name].skipped_technical_error++;
                 runStats.totals.skipped_technical_error++;
                 continue;
@@ -1110,6 +1129,7 @@ async function main() {
                     runStats.totals.skipped_duplicate++;
                 } else {
                     console.error(`    → DB insert error: ${insertErr.message}`);
+                    logRunError(target.name, articleUrl, 'database_error', insertErr.message);
                     runStats.sources[target.name].skipped_technical_error++;
                     runStats.totals.skipped_technical_error++;
                 }

@@ -76,18 +76,341 @@ function switchAdminTab(tab) {
     document.querySelectorAll('.admin-panel-content').forEach(el => el.classList.add('hidden'));
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 
-    ['opinion', 'football', 'basketball'].forEach(t => {
+    // Style active sidebar menu items
+    ['opinion', 'football', 'basketball', 'analytics-ingestion', 'analytics-engagement'].forEach(t => {
         const btn = document.getElementById(`admin-tab-${t}`);
         if (btn) {
             if (t === tab) {
-                btn.className = 'px-5 py-2.5 rounded-xl font-label text-label uppercase bg-primary text-on-primary transition-all flex items-center gap-2';
+                btn.className = 'w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left';
             } else {
-                btn.className = 'px-5 py-2.5 rounded-xl font-label text-label uppercase bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-2';
+                btn.className = 'w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left';
             }
         }
     });
+
+    if (tab === 'analytics-ingestion') {
+        loadScraperRuns();
+    }
 }
 window.switchAdminTab = switchAdminTab;
+
+// ── Ingestion Runs Fetching & Inspectors ───────────────────────────────────
+let runsCached = [];
+let selectedRunId = null;
+
+async function loadScraperRuns() {
+    const listContainer = document.getElementById('runs-list-container');
+    const refreshIcon = document.getElementById('refresh-runs-icon');
+    
+    if (refreshIcon) refreshIcon.classList.add('animate-spin');
+    
+    try {
+        const { data, error } = await db.from('scraping_runs')
+            .select('*')
+            .order('started_at', { ascending: false })
+            .limit(40);
+            
+        if (error) throw error;
+        
+        runsCached = data || [];
+        renderRunsList();
+        
+        // Auto-select first run if none selected
+        if (runsCached.length > 0 && !selectedRunId) {
+            selectRun(runsCached[0].id);
+        } else if (selectedRunId) {
+            selectRun(selectedRunId);
+        } else {
+            document.getElementById('run-inspector-card').innerHTML = `
+                <div class="text-center text-on-surface-variant/40 py-16">Δεν βρέθηκαν εκτελέσεις στη βάση.</div>
+            `;
+        }
+    } catch (err) {
+        console.error('Failed to load runs:', err);
+        if (listContainer) {
+            listContainer.innerHTML = `
+                <div class="text-center text-error py-8 text-xs font-semibold">❌ Σφάλμα σύνδεσης: ${err.message}</div>
+            `;
+        }
+    } finally {
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+    }
+}
+window.loadScraperRuns = loadScraperRuns;
+
+function renderRunsList() {
+    const container = document.getElementById('runs-list-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (runsCached.length === 0) {
+        container.innerHTML = `<div class="text-center text-on-surface-variant/40 py-8">Δεν βρέθηκαν εκτελέσεις.</div>`;
+        return;
+    }
+    
+    runsCached.forEach(run => {
+        const date = new Date(run.started_at);
+        const dateStr = date.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
+        const timeStr = date.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
+        
+        const isSuccess = run.status === 'success';
+        const activeClass = run.id === selectedRunId 
+            ? 'border-primary bg-primary/5' 
+            : 'border-outline-variant/30 hover:border-primary/40 bg-surface-container-low';
+            
+        const statusDot = isSuccess 
+            ? '<span class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>'
+            : '<span class="w-2.5 h-2.5 rounded-full bg-error inline-block animate-pulse"></span>';
+            
+        const card = document.createElement('div');
+        card.className = `p-4 border rounded-xl cursor-pointer transition-all duration-200 active:scale-98 ${activeClass}`;
+        card.onclick = () => selectRun(run.id);
+        
+        const skipped = run.stats?.totals 
+            ? (run.stats.totals.skipped_duplicate || 0) + (run.stats.totals.skipped_relevance || 0) + (run.stats.totals.skipped_size || 0) + (run.stats.totals.skipped_crawling_failed || 0) + (run.stats.totals.skipped_technical_error || 0) + (run.stats.totals.skipped_other || 0)
+            : 0;
+            
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-mono font-bold text-on-surface-variant/75">${dateStr} · ${timeStr}</span>
+                ${statusDot}
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-on-surface-variant">
+                <span>Νέα: <strong class="text-primary">${run.stats?.totals?.added || 0}</strong></span>
+                <span>Merge: <strong class="text-tertiary">${run.stats?.totals?.merged || 0}</strong></span>
+                <span>Skipped: <strong>${skipped}</strong></span>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function selectRun(runId) {
+    selectedRunId = runId;
+    renderRunsList(); // Refresh active highlight
+    
+    const run = runsCached.find(r => r.id === runId);
+    const inspector = document.getElementById('run-inspector-card');
+    if (!run || !inspector) return;
+    
+    const dateStart = new Date(run.started_at);
+    const dateEnd = new Date(run.completed_at);
+    const durationSec = Math.round((dateEnd - dateStart) / 1000);
+    const isSuccess = run.status === 'success';
+    
+    const statusBadge = isSuccess 
+        ? '<div class="status-badge status-success">Success</div>'
+        : '<div class="status-badge status-error">Failed</div>';
+        
+    const totals = run.stats?.totals || {};
+    const sources = run.stats?.sources || {};
+    const recentErrors = run.stats?.recent_errors || [];
+    
+    const skipped = (totals.skipped_duplicate || 0) + (totals.skipped_relevance || 0) + (totals.skipped_size || 0) + (totals.skipped_crawling_failed || 0) + (totals.skipped_technical_error || 0) + (totals.skipped_other || 0);
+    const errorsCount = (totals.skipped_technical_error || 0) + (run.status === 'failed' ? 1 : 0);
+    
+    // Fatal run error alert
+    let fatalAlertHtml = '';
+    if (run.error_message) {
+        fatalAlertHtml = `
+            <div class="bg-error/10 text-error p-4 rounded-xl border border-error/20 mb-6 font-mono text-xs whitespace-pre-wrap text-left">
+                <h5 class="font-bold mb-2 flex items-center gap-2 text-sm uppercase">
+                    <span class="material-symbols-outlined text-[18px]">warning</span> Fatal Scraper Crash
+                </h5>
+                ${run.error_message}
+            </div>
+        `;
+    }
+    
+    // Generate recent errors markup
+    let errorsListHtml = '<div class="text-on-surface-variant/40 py-2 italic text-left">Δεν καταγράφηκαν σφάλματα κατά τη διάρκεια αυτής της εκτέλεσης.</div>';
+    if (recentErrors.length > 0) {
+        errorsListHtml = recentErrors.map(err => {
+            const errDate = new Date(err.time);
+            const timeStr = errDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            return `
+                <div class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col gap-1 text-left">
+                    <div class="flex justify-between items-center text-[10px] text-on-surface-variant/50">
+                        <span class="font-bold text-primary">${err.source}</span>
+                        <span>${timeStr} · Type: <strong class="text-tertiary">${err.type}</strong></span>
+                    </div>
+                    ${err.url ? `<a href="${err.url}" target="_blank" class="text-[10px] text-primary/75 hover:underline break-all mb-1">${err.url}</a>` : ''}
+                    <div class="text-on-surface text-[11px] font-mono leading-normal bg-background/50 p-2 rounded border border-outline-variant/10 break-words">${err.message}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Build target rows
+    let tableRowsHtml = '';
+    Object.keys(sources).forEach(srcKey => {
+        const src = sources[srcKey];
+        const srcSkipped = (src.skipped_duplicate || 0) + (src.skipped_relevance || 0) + (src.skipped_size || 0) + (src.skipped_crawling_failed || 0) + (src.skipped_technical_error || 0) + (src.skipped_other || 0);
+        tableRowsHtml += `
+            <tr class="border-b border-outline-variant/10 text-xs text-on-surface-variant hover:bg-surface-container-high/20">
+                <td class="py-3 px-4 font-bold text-on-surface text-left">${srcKey}</td>
+                <td class="py-3 px-4 text-center font-mono">${src.scraped || 0}</td>
+                <td class="py-3 px-4 text-center font-mono text-primary font-semibold">${src.added || 0}</td>
+                <td class="py-3 px-4 text-center font-mono text-tertiary font-semibold">${src.merged || 0}</td>
+                <td class="py-3 px-4 text-center font-mono text-red-400">${src.skipped_crawling_failed || 0}</td>
+                <td class="py-3 px-4 text-center font-mono text-red-500">${src.skipped_technical_error || 0}</td>
+                <td class="py-3 px-4 text-center font-mono">${srcSkipped}</td>
+            </tr>
+        `;
+    });
+
+    inspector.innerHTML = `
+        <!-- Header details -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30 text-left">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h4 class="font-bold text-lg text-on-surface">Run Details</h4>
+                    ${statusBadge}
+                </div>
+                <p class="text-xs text-on-surface-variant font-mono mt-1">ID: ${run.id}</p>
+            </div>
+            <div class="text-left md:text-right">
+                <p class="text-xs text-on-surface-variant">Έναρξη: <span class="font-bold text-on-surface">${dateStart.toLocaleString('el-GR')}</span></p>
+                <p class="text-xs text-on-surface-variant mt-1">Διάρκεια: <span class="font-bold text-on-surface">${durationSec}s</span></p>
+            </div>
+        </div>
+
+        ${fatalAlertHtml}
+
+        <!-- Metrics cards row -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
+                <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Scraped</p>
+                <h4 class="text-xl font-bold text-on-surface">${totals.scraped || 0}</h4>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
+                <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Added (New)</p>
+                <h4 class="text-xl font-bold text-primary">${totals.added || 0}</h4>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
+                <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Merged</p>
+                <h4 class="text-xl font-bold text-tertiary">${totals.merged || 0}</h4>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
+                <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Exclusions</p>
+                <h4 class="text-xl font-bold text-on-surface">${skipped}</h4>
+            </div>
+            <div onclick="document.getElementById('recent-errors-container').scrollIntoView({ behavior: 'smooth' })" class="bg-surface-container-low border border-outline-variant/30 hover:border-error/40 p-4 rounded-xl text-center cursor-pointer transition-colors group">
+                <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1 group-hover:text-error/70 transition-colors">Errors / Failed</p>
+                <h4 class="text-xl font-bold text-error">${errorsCount}</h4>
+            </div>
+        </div>
+
+        <!-- Skips breakdown panel -->
+        <div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-5 text-left">
+            <h5 class="text-xs uppercase tracking-wider text-primary font-bold mb-4">Ανάλυση Απορρίψεων & Φίλτρων</h5>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs text-on-surface-variant">
+                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                        <span>Διπλότυπα URL (Duplicates)</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 line-clamp-3">
+                            Αυτά τα άρθρα έχουν ήδη εισαχθεί στη βάση δεδομένων από το ίδιο URL και αγνοήθηκαν για την αποφυγή διπλότυπων.
+                        </span>
+                    </span>
+                    <strong class="font-mono text-on-surface">${totals.skipped_duplicate || 0}</strong>
+                </div>
+
+                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                        <span>Άσχετο Περιεχόμενο (Relevance)</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            Το AI αξιολόγησε το άρθρο ως μη σχετικό με τον Παναθηναϊκό.
+                        </span>
+                    </span>
+                    <strong class="font-mono text-on-surface">${totals.skipped_relevance || 0}</strong>
+                </div>
+
+                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                        <span>Μικρό Κείμενο / Video (Size)</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            Άρθρα με πολύ μικρό κείμενο (π.χ. video-only άρθρα, tweets ή φωτογραφίες).
+                        </span>
+                    </span>
+                    <strong class="font-mono text-on-surface">${totals.skipped_size || 0}</strong>
+                </div>
+
+                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                        <span>Αποτυχία Φόρτωσης (Crawl Failed)</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            Αδυναμία λήψης της σελίδας λόγω σφαλμάτων δικτύου, 404 ή Cloudflare block.
+                        </span>
+                    </span>
+                    <strong class="font-mono text-on-surface text-red-400">${totals.skipped_crawling_failed || 0}</strong>
+                </div>
+
+                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                        <span>Σφάλματα API/DB (Errors)</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            Σφάλματα API Gemini (quota/rate limit) ή σφάλματα Supabase DB. Κάντε κλικ στο Error card για να δείτε τα logs.
+                        </span>
+                    </span>
+                    <strong class="font-mono text-on-surface text-red-500">${totals.skipped_technical_error || 0}</strong>
+                </div>
+
+                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                        <span>Προωθητικά / Άλλα (Other)</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            Διαφημιστικά άρθρα, Live WebTV εκπομπές ή άρθρα που εξαιρέθηκαν βάσει φίλτρων τίτλου.
+                        </span>
+                    </span>
+                    <strong class="font-mono text-on-surface">${totals.skipped_other || 0}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Target by Target stats table -->
+        <div class="bg-surface-container-low border border-outline-variant/20 rounded-xl overflow-hidden text-left">
+            <div class="p-5 border-b border-outline-variant/20">
+                <h5 class="text-xs uppercase tracking-wider text-primary font-bold">Ανάλυση ανά Πηγή</h5>
+            </div>
+            <div class="overflow-x-auto w-full">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-high/50 text-[10px] uppercase font-bold text-on-surface-variant/70 border-b border-outline-variant/30">
+                            <th class="py-3 px-4">Πηγή</th>
+                            <th class="py-3 px-4 text-center">Scraped</th>
+                            <th class="py-3 px-4 text-center">Added</th>
+                            <th class="py-3 px-4 text-center">Merged</th>
+                            <th class="py-3 px-4 text-center text-red-400/80">Crawl Fail</th>
+                            <th class="py-3 px-4 text-center text-red-500/80">Errors</th>
+                            <th class="py-3 px-4 text-center">Skipped</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/10">
+                        ${tableRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent errors card list -->
+        <div id="recent-errors-container" class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-5 text-left">
+            <h5 class="text-xs uppercase tracking-wider text-error font-bold mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">error</span> Logs / Σφάλματα Συστήματος
+            </h5>
+            <div class="flex flex-col gap-3 max-h-64 overflow-y-auto pr-1">
+                ${errorsListHtml}
+            </div>
+        </div>
+    `;
+}
+
 
 async function loadRostersForEditing() {
     try {
