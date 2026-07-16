@@ -421,7 +421,17 @@ async function scrapeArticlePage(url, categoryHint) {
             $('[class*="date"], [class*="time"]').first().text().trim() ||
             new Date().toISOString()
         );
-        const created_at = new Date(dateStr).toISOString().split('Z')[0] + '+00:00';
+        let created_at;
+        try {
+            const parsedDate = new Date(dateStr);
+            if (isNaN(parsedDate.getTime())) {
+                created_at = new Date().toISOString().split('Z')[0] + '+00:00';
+            } else {
+                created_at = parsedDate.toISOString().split('Z')[0] + '+00:00';
+            }
+        } catch (e) {
+            created_at = new Date().toISOString().split('Z')[0] + '+00:00';
+        }
 
         // ── Body text ──────────────────────────────────────────────────────────
         // Try progressively more specific selectors
