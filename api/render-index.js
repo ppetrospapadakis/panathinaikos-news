@@ -101,37 +101,49 @@ module.exports = async (req, res) => {
         const url = `/${catPath}/${slug}-id=${article.id}`;
         const pubDate = formatExactDate(article.created_at);
 
+        const isOwn = (article.source_url||'').toLowerCase().includes('manual') || (article.source_url||'').toLowerCase().includes('opinion://');
+        const ageMs = Date.now() - new Date(article.created_at).getTime();
+        const isFresh = ageMs < 60 * 60 * 1000;
+        const showLatest = !isOwn && article.category !== 'Άποψη' && isFresh;
+        const latestBadge = showLatest
+            ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold tracking-wider">LATEST</div>`
+            : '';
+
+        let bulletsHtml = '';
+        let parsedBullets = [];
+        if (article.bullets) {
+            if (Array.isArray(article.bullets)) {
+                parsedBullets = article.bullets;
+            } else if (typeof article.bullets === 'string') {
+                try { parsedBullets = JSON.parse(article.bullets); } catch(e) {}
+            }
+        }
+        if (parsedBullets && parsedBullets.length > 0) {
+            bulletsHtml = `<div class="mt-4 p-4 bg-background/60 rounded-xl border border-primary/25 overflow-hidden">
+                <div class="text-xs uppercase tracking-widest text-primary font-bold mb-2">⚡ AI SUMMARY</div>
+                <ul class="list-disc pl-5 space-y-1 text-sm text-on-surface-variant leading-relaxed">
+                    ${parsedBullets.map(b => `<li>${b}</li>`).join('')}
+                </ul>
+            </div>`;
+        }
+
         const articleJson = JSON.stringify({
             id: article.id,
             created_at: article.created_at
         });
 
         const heroHtml = `
-            <a href="${url}" class="group relative block aspect-[4/3] md:aspect-video w-full rounded-2xl overflow-hidden bg-surface-container-high transition-transform card-hover border border-outline-variant/20 shadow-sm" data-ssr="true" data-article="${escapeHtml(articleJson)}">
-                <img rel="preload" fetchpriority="high" loading="eager" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#1A1C1E]/95 via-[#1A1C1E]/50 to-transparent"></div>
-                
-                <div class="absolute inset-x-0 bottom-0 p-6 md:p-10 flex flex-col justify-end">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-label uppercase tracking-widest bg-primary text-on-primary">
-                            ${article.category ? article.category.split(',')[0].trim() : 'Γενικα'}
-                        </span>
-                        <span class="text-xs font-label text-surface-container-highest bg-[#1A1C1E]/50 px-2 py-1 rounded backdrop-blur-sm">
-                            ${pubDate}
-                        </span>
-                    </div>
-                    
-                    <h1 class="text-2xl md:text-4xl lg:text-5xl font-h1 text-white mb-3 leading-tight drop-shadow-md group-hover:text-primary-light transition-colors">
-                        ${article.title||''}
-                    </h1>
-                    
-                    <p class="text-white/80 font-body text-body-lg line-clamp-2 md:line-clamp-3 mb-5 max-w-3xl drop-shadow">
-                        ${article.summary||''}
-                    </p>
-                    
-                    <div class="flex items-center gap-2 text-primary-light font-label uppercase tracking-widest text-sm group-hover:translate-x-2 transition-transform">
-                        <span>Διαβαστε περισσοτερα</span>
-                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+            <a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
+                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    ${latestBadge}
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${pubDate}</span>
+                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
+                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
+                    <div class="mt-auto overflow-hidden">
+                        ${bulletsHtml}
                     </div>
                 </div>
             </a>
