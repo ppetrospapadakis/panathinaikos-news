@@ -40,8 +40,9 @@ const http = axios.create({
 });
 
 // ─── HTTP GET with retry (for transient 503/429/network errors) ───────────────
-// Does NOT retry 403/404 — those are intentional blocks.
-async function httpGetWithRetry(url, extraHeaders = {}, retries = 3) {
+// retryOn403: some sites (SDNA, PAO BC) use 403 as a temporary CDN rate-limit,
+// not a permanent block. Setting retryOn403=true will retry those with longer backoff.
+async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 = false) {
     const baseOrigin = (() => { try { return new URL(url).origin + '/'; } catch { return undefined; } })();
     const headers = baseOrigin ? { 'Referer': baseOrigin, ...extraHeaders } : extraHeaders;
 
@@ -51,13 +52,15 @@ async function httpGetWithRetry(url, extraHeaders = {}, retries = 3) {
         } catch (err) {
             const status = err.response?.status;
             const isTransient = !status || status === 503 || status === 429 || status === 502 || status === 520 || status === 521;
-            if (isTransient && attempt < retries) {
-                const delay = attempt * 5000; // 5s, 10s, 15s
+            const isTreatable403 = retryOn403 && status === 403;
+            if ((isTransient || isTreatable403) && attempt < retries) {
+                // Longer backoff for 403 (CDN throttle) vs normal transient errors
+                const delay = isTreatable403 ? attempt * 10000 : attempt * 5000;
                 console.warn(`[RETRY ${attempt}/${retries}] ${status || err.code} on ${url} — retrying in ${delay/1000}s`);
                 await new Promise(r => setTimeout(r, delay));
                 continue;
             }
-            throw err; // 403, 404, or max retries reached → propagate
+            throw err; // permanent block or max retries reached → propagate
         }
     }
 }
@@ -73,11 +76,13 @@ const SCRAPE_TARGETS = [
         baseUrl: 'https://www.sport-fm.gr',
     },
     {
-        category: 'Ποδόσφαιρο',
-        name: 'SDNA Football',
-        url: 'https://www.sdna.gr/teams/panathinaikos/podosfairo',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', 'a[href*="/football/"]', 'a[href*="/podosfairo/"]'],
+        category: 'Ερασιτέχνης', // default fallback — detectCategoryFromUrl() will override to Football/Basketball based on article URL
+        name: 'SDNA',
+        url: 'https://www.sdna.gr/teams/panathinaikos',
+        articleLinkSelectors: ['a[href*="/podosfairo/"]', 'a[href*="/mpasket/"]', 'a[href*="/bolei/"]', 'a[href*="/polo/"]', 'a[href*="/stivos/"]'],
         baseUrl: 'https://www.sdna.gr',
+        retryOn403: true,
+        sdnaNumericOnly: true, // filter: only accept links that contain a numeric article ID
     },
     {
         category: 'Ποδόσφαιρο',
@@ -129,14 +134,9 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['.blog__results__items__item__title a', 'a.linkbox', 'h3 a', 'article a'],
         baseUrl: 'https://www.paobc.gr',
         isOfficial: true,
+        retryOn403: true,
     },
-    {
-        category: 'Μπάσκετ',
-        name: 'SDNA Basketball',
-        url: 'https://www.sdna.gr/teams/panathinaikos-aktor',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/basket"]'],
-        baseUrl: 'https://www.sdna.gr',
-    },
+
     {
         category: 'Μπάσκετ',
         name: 'Gazzetta Basketball',
@@ -173,13 +173,7 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/volleyball/"]'],
         baseUrl: 'https://www.gazzetta.gr',
     },
-    {
-        category: 'Ερασιτέχνης',
-        name: 'SDNA Volleyball',
-        url: 'https://www.sdna.gr/teams/panathinaikos/bolei',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'article a'],
-        baseUrl: 'https://www.sdna.gr',
-    },
+
     {
         category: 'Ερασιτέχνης',
         name: 'Gazzetta Polo',
@@ -334,6 +328,9 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         
                         const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/'];
                         if (blacklist.some(b => u.pathname.includes(b))) return;
+                        
+                        // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
+                        if (target.sdnaNumericOnly && !/\/\d{5,}/.test(u.pathname)) return;
                         
                         links.add(href.split('?')[0].split('#')[0]); // strip query/hash
                     } catch (_) {}
