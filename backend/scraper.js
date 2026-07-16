@@ -737,6 +737,37 @@ async function main() {
     console.log(`\n[SCRAPER] Panathinaikos Direct Scraper — Mode: ${isDryRun ? 'DRY-RUN' : 'LIVE-SYNC'}`);
     console.log(`[SCRAPER] Targets: ${SCRAPE_TARGETS.length} sources | ${new Date().toISOString()}\n`);
 
+    const runStartTime = new Date().toISOString();
+    const runStats = {
+        totals: {
+            scraped: 0,
+            added: 0,
+            merged: 0,
+            skipped_duplicate: 0,
+            skipped_relevance: 0,
+            skipped_size: 0,
+            skipped_crawling_failed: 0,
+            skipped_technical_error: 0,
+            skipped_other: 0
+        },
+        sources: {}
+    };
+    
+    // Initialize stats per source target
+    SCRAPE_TARGETS.forEach(target => {
+        runStats.sources[target.name] = {
+            scraped: 0,
+            added: 0,
+            merged: 0,
+            skipped_duplicate: 0,
+            skipped_relevance: 0,
+            skipped_size: 0,
+            skipped_crawling_failed: 0,
+            skipped_technical_error: 0,
+            skipped_other: 0
+        };
+    });
+
     // ── Supabase ──────────────────────────────────────────────────────────────
     let db = null;
     let existingUrls = new Set();
@@ -780,10 +811,15 @@ async function main() {
         const links = await scrapeArticleLinks(target);
         if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
 
+        runStats.sources[target.name].scraped += links.length;
+        runStats.totals.scraped += links.length;
+
         for (const articleUrl of links) {
             // Skip if already in DB
             if (!isDryRun && existingUrls.has(articleUrl)) {
                 totalSkipped++;
+                runStats.sources[target.name].skipped_duplicate++;
+                runStats.totals.skipped_duplicate++;
                 continue;
             }
 
@@ -792,6 +828,8 @@ async function main() {
             const lowerUrl = articleUrl.toLowerCase();
             if (skipKeywords.some(kw => lowerUrl.includes(kw))) {
                 console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);
+                runStats.sources[target.name].skipped_other++;
+                runStats.totals.skipped_other++;
                 continue;
             }
 
@@ -799,11 +837,22 @@ async function main() {
             await sleep(1000);
 
             const scraped = await scrapeArticlePage(articleUrl, target.category);
-            if (!scraped || !scraped.title) { continue; }
+            if (!scraped || scraped.status === 'failed_crawl') {
+                runStats.sources[target.name].skipped_crawling_failed++;
+                runStats.totals.skipped_crawling_failed++;
+                continue;
+            }
+            if (scraped.status === 'skipped_size') {
+                runStats.sources[target.name].skipped_size++;
+                runStats.totals.skipped_size++;
+                continue;
+            }
 
             // Check PAO relevance
             if (!isPanathinaikosArticle(scraped.title, scraped.content)) {
                 console.log(`  [SKIP] Not PAO-relevant: ${scraped.title.substring(0, 50)}`);
+                runStats.sources[target.name].skipped_relevance++;
+                runStats.totals.skipped_relevance++;
                 continue;
             }
 
@@ -811,6 +860,8 @@ async function main() {
             const lowerTitle = scraped.title.toLowerCase();
             if (skipKeywords.some(kw => lowerTitle.includes(kw))) {
                 console.log(`[SKIP] Promotional/Live show article ignored by Title: ${scraped.title}`);
+                runStats.sources[target.name].skipped_other++;
+                runStats.totals.skipped_other++;
                 continue;
             }
 
@@ -820,10 +871,14 @@ async function main() {
             const isFootballUrl = /\/(podosfairo|football|soccer)\//.test(urlLower);
             if (target.category === 'Ποδόσφαιρο' && isBasketUrl) {
                 console.log(`  [SKIP] Basketball URL in football source: ${scraped.title.substring(0, 50)}`);
+                runStats.sources[target.name].skipped_other++;
+                runStats.totals.skipped_other++;
                 continue;
             }
             if (target.category === 'Μπάσκετ' && isFootballUrl) {
                 console.log(`  [SKIP] Football URL in basketball source: ${scraped.title.substring(0, 50)}`);
+                runStats.sources[target.name].skipped_other++;
+                runStats.totals.skipped_other++;
                 continue;
             }
 
@@ -951,12 +1006,20 @@ async function main() {
                             
                         if (updateErr) {
                             console.error(`  [DB ERROR] Failed to update merged sources:`, updateErr.message);
+                            runStats.sources[target.name].skipped_technical_error++;
+                            runStats.totals.skipped_technical_error++;
                         } else {
                             console.log(`  ✅ Merged successfully (appended source ${sourceName} and bumped to top)`);
+                            runStats.sources[target.name].merged++;
+                            runStats.totals.merged++;
                             // update local cache to prevent redundant merges
                             duplicateArticle.created_at = new Date().toISOString(); 
                         }
                     }
+                } else {
+                    // Dry run merge simulation
+                    runStats.sources[target.name].merged++;
+                    runStats.totals.merged++;
                 }
                 totalSkipped++;
                 continue;
@@ -986,6 +1049,8 @@ async function main() {
                 console.log(`    Summary:   ${scraped.summary.substring(0, 100)}...`);
                 console.log(`    Bullets:   ${JSON.stringify(bullets)}`);
                 console.log(`    Long-form: ${aiResult ? (aiResult.isRelevant ? aiResult.content.substring(0, 80) + '...' : 'Irrelevant article') : 'AI unavailable'}`);
+                runStats.sources[target.name].added++;
+                runStats.totals.added++;
                 totalNew++;
                 continue;
             }
@@ -993,12 +1058,16 @@ async function main() {
             // If AI evaluated as NOT relevant
             if (aiResult && aiResult.isRelevant === false) {
                 console.log(`    [SKIP] AI evaluated article as NOT relevant: "${scraped.title}"`);
+                runStats.sources[target.name].skipped_relevance++;
+                runStats.totals.skipped_relevance++;
                 continue;
             }
 
             // Skip insertion if AI failed (e.g., quota exhausted). We DO NOT want raw content.
             if (!aiResult) {
                 console.log(`    [SKIP] AI generation failed or quota exhausted. Skipping article so it can be retried later.`);
+                runStats.sources[target.name].skipped_technical_error++;
+                runStats.totals.skipped_technical_error++;
                 continue;
             }
 
@@ -1027,12 +1096,18 @@ async function main() {
                 console.error(`[DB ERROR] Supabase insert failed:`, JSON.stringify(insertErr, null, 2));
                 if (insertErr.code === '23505') {
                     console.log(`    → Duplicate content, skipped.`);
+                    runStats.sources[target.name].skipped_duplicate++;
+                    runStats.totals.skipped_duplicate++;
                 } else {
                     console.error(`    → DB insert error: ${insertErr.message}`);
+                    runStats.sources[target.name].skipped_technical_error++;
+                    runStats.totals.skipped_technical_error++;
                 }
                 continue;
             } else {
                 console.log(`[DB RESPONSE] Insert success:`, JSON.stringify(inserted, null, 2));
+                runStats.sources[target.name].added++;
+                runStats.totals.added++;
             }
 
             existingUrls.add(articleUrl);
@@ -1052,12 +1127,29 @@ async function main() {
         }
     }
 
-    console.log(`\n[SCRAPER] Done. New: ${totalNew} | Skipped: ${totalSkipped} | ${new Date().toISOString()}`);
+    const runEndTime = new Date().toISOString();
+    console.log(`\n[SCRAPER] Done. New: ${totalNew} | Skipped: ${totalSkipped} | ${runEndTime}`);
+
+    if (!isDryRun && db) {
+        console.log('[ANALYTICS] Writing run stats to scraping_runs table...');
+        const { error: logErr } = await db.from('scraping_runs').insert({
+            started_at: runStartTime,
+            completed_at: runEndTime,
+            status: 'success',
+            stats: runStats
+        });
+        if (logErr) {
+            console.error('[ANALYTICS] Failed to log scraping run stats:', logErr.message);
+        } else {
+            console.log('[ANALYTICS] Scraping run logged successfully.');
+        }
+    }
+
     return { totalNew, totalSkipped };
 }
 
 if (require.main === module) {
-    main().catch(err => {
+    main().catch(async (err) => {
         console.error('[FATAL] Scraper crashed:', err.message);
         process.exit(1);
     });

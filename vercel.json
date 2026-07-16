@@ -12,6 +12,7 @@
     { "source": "/erasitechnis", "destination": "/api/render-index?category=erasitexnis" },
     { "source": "/apopsi", "destination": "/api/render-index?category=apopsi" },
     { "source": "/metagrafes", "destination": "/api/render-index?category=metagrafes" },
+    { "source": "/analytics", "destination": "/analytics.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
     { "source": "/terms-of-service", "destination": "/terms-of-service.html" },
