@@ -22,7 +22,7 @@ require('dotenv').config();
 // Uses full Chrome 136 browser fingerprint to avoid anti-bot detection.
 // Missing sec-fetch-* and Referer headers cause 403/503 on modern sites.
 const http = axios.create({
-    timeout: 20000,
+    timeout: 25000,
     headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -42,13 +42,14 @@ const http = axios.create({
 // ─── HTTP GET with retry (for transient 503/429/network errors) ───────────────
 // retryOn403: some sites (SDNA, PAO BC) use 403 as a temporary CDN rate-limit,
 // not a permanent block. Setting retryOn403=true will retry those with longer backoff.
-async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 = false) {
+async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 = false, timeoutMs = null) {
     const baseOrigin = (() => { try { return new URL(url).origin + '/'; } catch { return undefined; } })();
     const headers = baseOrigin ? { 'Referer': baseOrigin, ...extraHeaders } : extraHeaders;
+    const reqConfig = timeoutMs ? { headers, timeout: timeoutMs } : { headers };
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            return await http.get(url, { headers });
+            return await http.get(url, reqConfig);
         } catch (err) {
             const status = err.response?.status;
             const isTransient = !status || status === 503 || status === 429 || status === 502 || status === 520 || status === 521;
@@ -112,13 +113,14 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
         baseUrl: 'https://www.athletiko.gr',
     },
-    {
-        category: 'Ποδόσφαιρο',
-        name: 'Sportdog Football',
-        url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-fc',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
-        baseUrl: 'https://www.sportdog.gr',
-    },
+    // Sportdog Football: DISABLED — site uses JavaScript rendering, static scraper gets only matchzone links, no articles.
+    // {
+    //     category: 'Ποδόσφαιρο',
+    //     name: 'Sportdog Football',
+    //     url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-fc',
+    //     articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
+    //     baseUrl: 'https://www.sportdog.gr',
+    // },
     {
         category: 'Ποδόσφαιρο',
         name: 'Monobala Football',
@@ -135,6 +137,7 @@ const SCRAPE_TARGETS = [
         baseUrl: 'https://www.paobc.gr',
         isOfficial: true,
         retryOn403: true,
+        timeout: 30000, // PAO BC is slow — needs extra time
     },
 
     {
@@ -158,13 +161,14 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
         baseUrl: 'https://www.athletiko.gr',
     },
-    {
-        category: 'Μπάσκετ',
-        name: 'Sportdog Basketball',
-        url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-bc',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
-        baseUrl: 'https://www.sportdog.gr',
-    },
+    // Sportdog Basketball: DISABLED — site uses JavaScript rendering, static scraper gets only matchzone links, no articles.
+    // {
+    //     category: 'Μπάσκετ',
+    //     name: 'Sportdog Basketball',
+    //     url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-bc',
+    //     articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
+    //     baseUrl: 'https://www.sportdog.gr',
+    // },
     // ── AMATEUR / VOLLEYBALL ─────────────────────────────────────────────────
     {
         category: 'Ερασιτέχνης',
@@ -299,7 +303,7 @@ function jaccardSimilarity(a, b) {
 // ─── Scrape listing page → article URLs ───────────────────────────────────────
 async function scrapeArticleLinks(target, logErrorCallback) {
     try {
-        const response = await httpGetWithRetry(target.url);
+        const response = await httpGetWithRetry(target.url, {}, 3, target.retryOn403 || false, target.timeout || null);
         console.log(`[HTTP GET] ${target.url} | Status: ${response.status}`);
         const html = response.data;
         const $ = cheerio.load(html);
@@ -543,8 +547,10 @@ const geminiCallsPerKey = {};
 
 function getAiClient() {
     if (apiKeys.length === 0) {
-        const rawKey = process.env.GEMINI_API_KEY || '';
-        apiKeys = rawKey.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        const rawKey1 = process.env.GEMINI_API_KEY || '';
+        const rawKey2 = process.env.GEMINI_API_KEY_2 || '';
+        apiKeys = rawKey1.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        if (rawKey2) apiKeys.push(...rawKey2.split(',').map(k => k.trim()).filter(k => k.length > 0));
     }
     if (apiKeys.length === 0 || quotaExhausted) return null;
 
@@ -586,9 +592,10 @@ async function retryWithBackoff(fn, maxRetries = 2) {
             if (!isRetryable) throw err; // non-retryable error — bubble up immediately
 
             // A 429 can mean per-minute throttle OR daily quota exhaustion
-            // The new SDK usually says "Quota exceeded for metric..."
-            const isResourceExhausted = err.message && err.message.includes('Quota exceeded');
-            const isDailyLimit = err.message && err.message.includes('per_day');
+            // The new SDK usually says "Quota exceeded for metric..." or "Resource has been exhausted"
+            const msgLower = (err.message || '').toLowerCase();
+            const isResourceExhausted = msgLower.includes('quota exceeded') || msgLower.includes('exhausted') || msgLower.includes('quota');
+            const isDailyLimit = msgLower.includes('per_day');
 
             if (isResourceExhausted || isDailyLimit) {
                 if (rotateAiClient()) {
