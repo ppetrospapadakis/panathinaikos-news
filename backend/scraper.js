@@ -19,17 +19,48 @@ const crypto  = require('crypto');
 require('dotenv').config();
 
 // ─── HTTP client ───────────────────────────────────────────────────────────────
+// Uses full Chrome 136 browser fingerprint to avoid anti-bot detection.
+// Missing sec-fetch-* and Referer headers cause 403/503 on modern sites.
 const http = axios.create({
-    timeout: 15000,
+    timeout: 20000,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'el-GR,el;q=0.9,en;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'el-GR,el;q=0.9,en-US;q=0.8,en;q=0.7',
         'Accept-Encoding': 'gzip, deflate, br',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'max-age=0',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'sec-fetch-dest': 'document',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-site': 'none',
+        'sec-fetch-user': '?1',
     },
     maxRedirects: 5,
 });
+
+// ─── HTTP GET with retry (for transient 503/429/network errors) ───────────────
+// Does NOT retry 403/404 — those are intentional blocks.
+async function httpGetWithRetry(url, extraHeaders = {}, retries = 3) {
+    const baseOrigin = (() => { try { return new URL(url).origin + '/'; } catch { return undefined; } })();
+    const headers = baseOrigin ? { 'Referer': baseOrigin, ...extraHeaders } : extraHeaders;
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            return await http.get(url, { headers });
+        } catch (err) {
+            const status = err.response?.status;
+            const isTransient = !status || status === 503 || status === 429 || status === 502 || status === 520 || status === 521;
+            if (isTransient && attempt < retries) {
+                const delay = attempt * 5000; // 5s, 10s, 15s
+                console.warn(`[RETRY ${attempt}/${retries}] ${status || err.code} on ${url} — retrying in ${delay/1000}s`);
+                await new Promise(r => setTimeout(r, delay));
+                continue;
+            }
+            throw err; // 403, 404, or max retries reached → propagate
+        }
+    }
+}
 
 // ─── Target URLs per category ──────────────────────────────────────────────────
 const SCRAPE_TARGETS = [
@@ -265,7 +296,7 @@ function jaccardSimilarity(a, b) {
 // ─── Scrape listing page → article URLs ───────────────────────────────────────
 async function scrapeArticleLinks(target, logErrorCallback) {
     try {
-        const response = await http.get(target.url);
+        const response = await httpGetWithRetry(target.url);
         console.log(`[HTTP GET] ${target.url} | Status: ${response.status}`);
         const html = response.data;
         const $ = cheerio.load(html);
@@ -345,7 +376,7 @@ function detectCategoryFromUrl(url, categoryHint) {
 // ─── Scrape individual article page ───────────────────────────────────────────
 async function scrapeArticlePage(url, categoryHint) {
     try {
-        const response = await http.get(url);
+        const response = await httpGetWithRetry(url);
         console.log(`[HTTP GET] ${url} | Status: ${response.status}`);
         const html = response.data;
         const $ = cheerio.load(html);
