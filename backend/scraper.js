@@ -114,6 +114,13 @@ const SCRAPE_TARGETS = [
         articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
         baseUrl: 'https://www.sportdog.gr',
     },
+    {
+        category: 'Ποδόσφαιρο',
+        name: 'Monobala Football',
+        url: 'https://monobala.gr/category/teams/sl1/panathinaikos/',
+        articleLinkSelectors: ['h3 a', 'h2 a', '.entry-title a', 'article a', '.post-title a'],
+        baseUrl: 'https://monobala.gr',
+    },
     // ── BASKETBALL ────────────────────────────────────────────────────────────
     {
         category: 'Μπάσκετ',
