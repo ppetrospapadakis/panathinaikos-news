@@ -502,6 +502,7 @@ let aiClientInstance = null;
 
 // If we hit the daily limit across ALL keys, stop wasting time on further API calls
 let quotaExhausted = false;
+const geminiCallsPerKey = {};
 
 function getAiClient() {
     if (apiKeys.length === 0) {
@@ -533,7 +534,11 @@ function rotateAiClient() {
 async function retryWithBackoff(fn, maxRetries = 2) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-            return await fn();
+            const res = await fn();
+            // Track successful calls per key index
+            if (!geminiCallsPerKey[currentKeyIndex]) geminiCallsPerKey[currentKeyIndex] = 0;
+            geminiCallsPerKey[currentKeyIndex]++;
+            return res;
         } catch (err) {
             const is429 = err.status === 429 || (err.message && err.message.includes('429'));
             if (!is429) throw err; // non-quota error — bubble up immediately
@@ -1161,6 +1166,22 @@ async function main() {
     console.log(`\n[SCRAPER] Done. New: ${totalNew} | Skipped: ${totalSkipped} | ${runEndTime}`);
 
     if (!isDryRun && db) {
+        // Populate Gemini keys usage info
+        getAiClient();
+        runStats.gemini = {
+            key_count: apiKeys.length,
+            current_index: currentKeyIndex,
+            quota_exhausted: quotaExhausted,
+            calls_by_key: geminiCallsPerKey,
+            keys_status: apiKeys.map((key, idx) => {
+                return {
+                    index: idx,
+                    masked: key.slice(0, 8) + '...' + key.slice(-4),
+                    status: idx < currentKeyIndex ? 'exhausted' : (idx === currentKeyIndex && !quotaExhausted ? 'active' : 'exhausted')
+                };
+            })
+        };
+
         console.log('[ANALYTICS] Writing run stats to scraping_runs table...');
         const { error: logErr } = await db.from('scraping_runs').insert({
             started_at: runStartTime,

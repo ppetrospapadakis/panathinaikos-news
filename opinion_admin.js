@@ -91,6 +91,9 @@ function switchAdminTab(tab) {
     if (tab === 'analytics-ingestion') {
         loadScraperRuns();
     }
+    if (tab === 'analytics-engagement') {
+        loadEngagementStats();
+    }
 }
 window.switchAdminTab = switchAdminTab;
 
@@ -307,66 +310,78 @@ function selectRun(runId) {
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs text-on-surface-variant">
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                    <span class="flex items-center gap-1.5 cursor-help">
                         <span>Διπλότυπα URL (Duplicates)</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
-                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 line-clamp-3">
-                            Αυτά τα άρθρα έχουν ήδη εισαχθεί στη βάση δεδομένων από το ίδιο URL και αγνοήθηκαν για την αποφυγή διπλότυπων.
+                        <span class="relative group inline-flex items-center">
+                            <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                            <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
+                                Αυτά τα άρθρα έχουν ήδη εισαχθεί στη βάση δεδομένων από το ίδιο URL και αγνοήθηκαν για την αποφυγή διπλότυπων.
+                            </span>
                         </span>
                     </span>
                     <strong class="font-mono text-on-surface">${totals.skipped_duplicate || 0}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                    <span class="flex items-center gap-1.5 cursor-help">
                         <span>Άσχετο Περιεχόμενο (Relevance)</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
-                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                            Το AI αξιολόγησε το άρθρο ως μη σχετικό με τον Παναθηναϊκό.
+                        <span class="relative group inline-flex items-center">
+                            <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                            <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
+                                Το AI αξιολόγησε το άρθρο ως μη σχετικό με τον Παναθηναϊκό.
+                            </span>
                         </span>
                     </span>
                     <strong class="font-mono text-on-surface">${totals.skipped_relevance || 0}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                    <span class="flex items-center gap-1.5 cursor-help">
                         <span>Μικρό Κείμενο / Video (Size)</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
-                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                            Άρθρα με πολύ μικρό κείμενο (π.χ. video-only άρθρα, tweets ή φωτογραφίες).
+                        <span class="relative group inline-flex items-center">
+                            <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                            <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
+                                Άρθρα με πολύ μικρό κείμενο (π.χ. video-only άρθρα, tweets ή φωτογραφίες).
+                            </span>
                         </span>
                     </span>
                     <strong class="font-mono text-on-surface">${totals.skipped_size || 0}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                    <span class="flex items-center gap-1.5 cursor-help">
                         <span>Αποτυχία Φόρτωσης (Crawl Failed)</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
-                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                            Αδυναμία λήψης της σελίδας λόγω σφαλμάτων δικτύου, 404 ή Cloudflare block.
+                        <span class="relative group inline-flex items-center">
+                            <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                            <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
+                                Αδυναμία λήψης της σελίδας λόγω σφαλμάτων δικτύου, 404 ή Cloudflare block.
+                            </span>
                         </span>
                     </span>
                     <strong class="font-mono text-on-surface text-red-400">${totals.skipped_crawling_failed || 0}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                    <span class="flex items-center gap-1.5 cursor-help">
                         <span>Σφάλματα API/DB (Errors)</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
-                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                            Σφάλματα API Gemini (quota/rate limit) ή σφάλματα Supabase DB. Κάντε κλικ στο Error card για να δείτε τα logs.
+                        <span class="relative group inline-flex items-center">
+                            <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                            <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
+                                Σφάλματα API Gemini (quota/rate limit) ή σφάλματα Supabase DB. Κάντε κλικ στο Error card για να δείτε τα logs.
+                            </span>
                         </span>
                     </span>
                     <strong class="font-mono text-on-surface text-red-500">${totals.skipped_technical_error || 0}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help group relative">
+                    <span class="flex items-center gap-1.5 cursor-help">
                         <span>Προωθητικά / Άλλα (Other)</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
-                        <span class="absolute bottom-full left-0 mb-2 w-64 bg-surface-container-highest border border-outline-variant text-[10px] text-on-surface-variant/90 p-2.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                            Διαφημιστικά άρθρα, Live WebTV εκπομπές ή άρθρα που εξαιρέθηκαν βάσει φίλτρων τίτλου.
+                        <span class="relative group inline-flex items-center">
+                            <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
+                            <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
+                                Διαφημιστικά άρθρα, Live WebTV εκπομπές ή άρθρα που εξαιρέθηκαν βάσει φίλτρων τίτλου.
+                            </span>
                         </span>
                     </span>
                     <strong class="font-mono text-on-surface">${totals.skipped_other || 0}</strong>
@@ -905,3 +920,105 @@ async function saveRoster(sport) {
     }
 }
 window.saveRoster = saveRoster;
+
+// ── Engagement & Resource Limits Dynamic Binding ───────────────────────────
+async function loadEngagementStats() {
+    try {
+        const res = await fetch('/api/admin-stats?password=pao1908');
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+        
+        // 1. Update Database Totals
+        const dbInfo = data.database || {};
+        document.getElementById('total-articles-count').textContent = dbInfo.total_articles.toLocaleString('el-GR');
+        document.getElementById('manual-opinions-count').textContent = dbInfo.manual_opinions.toLocaleString('el-GR');
+        document.getElementById('total-runs-count').textContent = dbInfo.total_runs.toLocaleString('el-GR');
+
+        // 2. Update Database Size Storage Progress Bar
+        const sizeMb = dbInfo.estimated_size_mb || 0;
+        const limitMb = dbInfo.limit_mb || 500;
+        const dbPct = Math.min(100, Math.max(0.1, (sizeMb / limitMb) * 100)).toFixed(1);
+        document.getElementById('db-percentage').textContent = `${dbPct}%`;
+        document.getElementById('db-progress').style.width = `${dbPct}%`;
+        document.getElementById('db-usage-text').textContent = `${sizeMb} MB`;
+
+        // 3. Update Gemini Keys List
+        const geminiInfo = data.gemini || {};
+        const keysContainer = document.getElementById('gemini-keys-container');
+        if (keysContainer) {
+            keysContainer.innerHTML = '';
+            const keys = geminiInfo.keys || [];
+            if (keys.length === 0) {
+                keysContainer.innerHTML = `<div class="text-[11px] text-on-surface-variant/40 italic">Δεν υπάρχουν κλειδιά.</div>`;
+            } else {
+                keys.forEach(key => {
+                    const calls = key.calls_today || 0;
+                    const limit = key.limit || 1500;
+                    const keyPct = Math.min(100, (calls / limit) * 100).toFixed(0);
+                    
+                    const isExhausted = key.status === 'exhausted';
+                    const statusText = isExhausted ? 'Exhausted' : 'Active';
+                    const badgeClass = isExhausted 
+                        ? 'bg-error/10 text-error border border-error/20' 
+                        : 'bg-primary/10 text-primary border border-primary/20';
+                        
+                    const keyRow = document.createElement('div');
+                    keyRow.className = 'flex flex-col gap-1.5';
+                    keyRow.innerHTML = `
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="font-mono text-on-surface-variant">${key.masked}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badgeClass}">${statusText}</span>
+                        </div>
+                        <div class="w-full bg-surface-container-low border border-outline-variant/20 rounded-full h-2 overflow-hidden overflow-hidden">
+                            <div class="${isExhausted ? 'bg-error' : 'bg-primary'} h-full transition-all duration-300" style="width: ${keyPct}%"></div>
+                        </div>
+                        <div class="text-[10px] text-on-surface-variant/70 text-right">
+                            Κλήσεις: <strong class="text-on-surface font-mono">${calls}</strong> / ${limit} (RPD)
+                        </div>
+                    `;
+                    keysContainer.appendChild(keyRow);
+                });
+            }
+        }
+
+        // 4. Render 24h Post Activity Chart
+        const hourlyPosts = data.hourly_posts || Array(24).fill(0);
+        const chartContainer = document.getElementById('chart-bars-container');
+        if (chartContainer) {
+            // Retain absolute grid lines
+            chartContainer.innerHTML = `
+                <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+                <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+            `;
+            
+            const maxVal = Math.max(...hourlyPosts, 1);
+            
+            // Set Y-axis labels dynamically based on max
+            document.getElementById('y-axis-val-3').textContent = Math.round(maxVal).toString();
+            document.getElementById('y-axis-val-2').textContent = Math.round(maxVal * 2 / 3).toString();
+            document.getElementById('y-axis-val-1').textContent = Math.round(maxVal * 1 / 3).toString();
+
+            // Populate all 24 bars
+            hourlyPosts.forEach((count, hour) => {
+                const hourStr = hour.toString().padStart(2, '0') + ':00';
+                const pct = ((count / maxVal) * 98).toFixed(1); // max height is 98%
+                
+                const barDiv = document.createElement('div');
+                barDiv.className = 'w-full bg-primary/25 hover:bg-primary transition-all duration-300 rounded-t cursor-pointer relative group';
+                barDiv.style.height = `${Math.max(3, pct)}%`; // minimum height of 3% for presentation
+                
+                barDiv.innerHTML = `
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-2xl leading-normal font-normal">
+                        <strong>${hourStr}</strong>: ${count} άρθρα
+                    </div>
+                `;
+                chartContainer.appendChild(barDiv);
+            });
+        }
+
+    } catch (err) {
+        console.error('Failed to load engagement/system stats:', err);
+    }
+}
+window.loadEngagementStats = loadEngagementStats;
