@@ -862,11 +862,13 @@ async function main() {
         }
         db = createClient(url, key);
 
-        // Load existing articles for dedup + group matching
+        // Load existing articles from the last 48 hours for dedup + group matching
+        const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
         const { data, error } = await db.from('articles')
             .select('id, title, source_url, group_id, created_at')
+            .gte('created_at', twoDaysAgo)
             .order('created_at', { ascending: false })
-            .limit(500);
+            .limit(3000);
 
         if (error) {
             throw new Error(`DB error: ${error.message}`);
@@ -1120,9 +1122,19 @@ async function main() {
                     isRelevant: true
                 };
             } else {
-                aiResult = await generateArticleData(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+                // Pre-AI Keyword Filter (Zero-cost relevance check)
+                const combinedText = (scraped.title + ' ' + (scraped.content || scraped.summary)).toLowerCase();
+                const paoKeywords = ['παναθηναϊκ', 'παναθηναικ', 'παο ', ' pao', 'pao ', 'τριφυλλ', 'πρασιν', 'οακα', 'λεωφορ', 'αταμαν', 'αλονσο', 'γιαννακοπουλ', 'αλαφουζ', 'τεριμ', 'γιοβανοβιτ', 'ντιεγκο αλονσο', 'συλλογος μεγαλος', 'εξαστερος', 'επταστερος'];
+                const isLikelyRelated = paoKeywords.some(kw => combinedText.includes(kw));
+
+                if (!isLikelyRelated) {
+                    console.log(`    [PRE-FILTER] Article rejected (No PAO keywords): "${scraped.title}"`);
+                    aiResult = { isRelevant: false };
+                } else {
+                    aiResult = await generateArticleData(scraped.title, scraped.content || scraped.summary, target.isOfficial);
+                }
             }
-            const bullets = aiResult ? aiResult.bullets : generateFallbackBullets(scraped.title, scraped.content || scraped.summary);
+            const bullets = (aiResult && aiResult.bullets) ? aiResult.bullets : generateFallbackBullets(scraped.title, scraped.content || scraped.summary);
 
             if (isDryRun) {
                 console.log(`    Category:  ${target.category}`);
@@ -1137,11 +1149,30 @@ async function main() {
                 continue;
             }
 
-            // If AI evaluated as NOT relevant
+            // If AI evaluated as NOT relevant (either via pre-filter or Gemini)
             if (aiResult && aiResult.isRelevant === false) {
                 console.log(`    [SKIP] AI evaluated article as NOT relevant: "${scraped.title}"`);
                 runStats.sources[target.name].skipped_relevance++;
                 runStats.totals.skipped_relevance++;
+
+                // FIX: Save irrelevant URLs to prevent infinite retries
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: `ignored_${crypto.randomUUID()}`,
+                            title: '[IGNORED]',
+                            summary: '[IGNORED]',
+                            content: '[IGNORED]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster', // Frontend ignores this category
+                            group_id: 'IGNORED_URLS',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 
