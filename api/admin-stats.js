@@ -102,7 +102,7 @@ module.exports = async (req, res) => {
         let apiKeys = rawKey1.split(',').map(k => k.trim()).filter(k => k.length > 0);
         if (rawKey2) apiKeys.push(rawKey2.trim());
 
-        const keyCount = apiKeys.length || 1; // default to 1 for presentation if env is empty
+        let keyCount = apiKeys.length || 1; // default to 1 for presentation if env is empty
 
         // Initialize key totals dictionary
         const keyUsageToday = {};
@@ -127,7 +127,13 @@ module.exports = async (req, res) => {
                     Object.keys(run.stats.gemini.calls_by_key).forEach(idxStr => {
                         const idx = parseInt(idxStr, 10);
                         const count = run.stats.gemini.calls_by_key[idxStr] || 0;
-                        if (idx >= 0 && idx < keyCount) {
+                        
+                        if (idx >= 0) {
+                            // If the scraper used more keys than the dashboard knows about, dynamically add placeholders
+                            while (idx >= apiKeys.length) {
+                                apiKeys.push(''); // placeholder
+                                keyCount = apiKeys.length;
+                            }
                             keyUsageToday[idx] = (keyUsageToday[idx] || 0) + count;
                         }
                     });

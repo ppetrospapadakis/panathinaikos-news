@@ -387,12 +387,12 @@ function selectRun(runId) {
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
-                    <span class="flex items-center gap-1.5 cursor-help">
+                    <span class="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors" onclick="document.getElementById('recent-errors-container').scrollIntoView({behavior: 'smooth'})">
                         <span>Σφάλματα API/DB (Errors)</span>
                         <span class="relative group inline-flex items-center">
                             <span class="material-symbols-outlined text-on-surface-variant/50 text-[14px]">help</span>
                             <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[#1e2024] border border-outline-variant text-[11px] text-on-surface/90 p-3 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 text-left line-clamp-4 leading-relaxed normal-case font-normal">
-                                Σφάλματα API Gemini (quota/rate limit) ή σφάλματα Supabase DB. Κάντε κλικ στο Error card για να δείτε τα logs.
+                                Σφάλματα API Gemini (quota/rate limit) ή σφάλματα Supabase DB. Κάντε κλικ εδώ για να κάνετε scroll στα Logs κάτω.
                             </span>
                         </span>
                     </span>
@@ -1026,6 +1026,12 @@ async function loadEngagementStats() {
             document.getElementById('y-axis-val-3').textContent = Math.round(maxVal).toString();
             document.getElementById('y-axis-val-2').textContent = Math.round(maxVal * 2 / 3).toString();
             document.getElementById('y-axis-val-1').textContent = Math.round(maxVal * 1 / 3).toString();
+
+            // Set X-axis labels dynamically
+            [0, 4, 8, 12, 16, 20, 23].forEach(idx => {
+                const el = document.getElementById(`x-axis-val-${idx}`);
+                if (el) el.textContent = hourlyLabels[idx] || '';
+            });
 
             // Populate all 24 bars
             hourlyPosts.forEach((count, idx) => {

@@ -238,28 +238,30 @@ function getSourceNameFromUrl(url) {
 }
 
 function isPanathinaikosArticle(title, text) {
-    const combinedTitle = (title || '').toLowerCase();
-    const combinedText = (text || '').toLowerCase();
+    const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const combinedTitle = removeAccents(title || '');
+    const combinedText = removeAccents(text || '');
     
-    // Core Panathinaikos identifiers
+    // Core Panathinaikos identifiers (unaccented)
     const coreKeywords = [
-        'παναθηναϊκ', 'panathinaikos', 'pao fc', 'pao bc', 'καε παναθηναϊκός', 'παε παναθηναϊκός',
-        'τριφύλλι', 'trifilli', 'οακα', 'oaka', 'λεωφόρος', 'leoforos', 'βοτανικός', 'votanikos'
+        'παναθηναικ', 'panathinaikos', 'pao fc', 'pao bc', 'καε παναθηναικος', 'παε παναθηναικος',
+        'τριφυλλι', 'trifilli', 'οακα', 'oaka', 'λεωφορος', 'leoforos', 'βοτανικος', 'votanikos',
+        'πρασιν', 'θυρα 13', 'gate 13', 'green heretics'
     ];
 
-    // Player and coach names (both Greek and English/transliterated)
+    // Player and coach names (both Greek and English/transliterated, unaccented)
     const personnelKeywords = [
-        'αταμάν', 'ataman', 'σλούκας', 'sloukas', 'ιωαννίδης', 'ioannidis', 'τετέ', 'tete',
-        'μπακασέτας', 'bakasetas', 'πελίστρι', 'pellistri', 'νίστρουπ', 'neestrup', 'μαξίμοβιτς',
-        'μπαλτσερόφσκι', 'balcerowski', 'ναν', 'nunn', 'lessort', 'λεσόρ', 'grant', 'γκραντ',
-        'γκριγκόνις', 'grigonis', 'ερνανγκόμεθ', 'hernangomez', 'χουάντσο', 'juancho', 'papapetrou',
-        'παπαπέτρου', 'μητογλου', 'mitoglou', 'καλαϊτζάκης', 'kalaitzakis', 'γιούρτσεβεν',
-        'yurtseven', 'osman', 'όσμαν', 'alonzo', 'alonza', 'αλονζο', 'αλονζα', 'κρίστιανσεν',
-        'christiansen', 'ντε φράι', 'de vrij'
+        'αταμαν', 'ataman', 'σλουκας', 'sloukas', 'ιωαννιδης', 'ioannidis', 'τετε', 'tete',
+        'μπακασετας', 'bakasetas', 'πελιστρι', 'pellistri', 'νιστρουπ', 'neestrup', 'μαξιμοβιτς',
+        'μπαλτσεροφσκι', 'balcerowski', 'ναν', 'nunn', 'lessort', 'λεσορ', 'grant', 'γκραντ',
+        'γκριγκονις', 'grigonis', 'ερνανγκομεθ', 'hernangomez', 'χουαντσο', 'juancho', 'papapetrou',
+        'παπαπετρου', 'μητογλου', 'mitoglou', 'καλαιτζακης', 'kalaitzakis', 'γιουρτσεβεν',
+        'yurtseven', 'osman', 'οσμαν', 'alonzo', 'alonza', 'αλονζο', 'αλονζα', 'κριστιανσεν',
+        'christiansen', 'ντε φραι', 'de vrij'
     ];
 
     const isWordMatch = (word, text) => {
-        const regex = new RegExp(`(?<=^|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])${word}(?=$|[^a-zA-Z0-9α-ωΑ-Ωίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώίϊΐόάέύϋΰήώ])`, 'i');
+        const regex = new RegExp(`(?<=^|[^a-z0-9α-ω])${word}(?=$|[^a-z0-9α-ω])`, 'i');
         return regex.test(text);
     };
 
@@ -578,8 +580,13 @@ async function retryWithBackoff(fn, maxRetries = 2) {
             geminiCallsPerKey[currentKeyIndex]++;
             return res;
         } catch (err) {
-            const is429 = err.status === 429 || (err.message && err.message.includes('429'));
-            if (!is429) throw err; // non-quota error — bubble up immediately
+            const status = err.status || err.code;
+            const msg = (err.message || '').toLowerCase();
+            const isRetryable = status === 429 || status === 503 || status === 500 || status === 502 || 
+                                msg.includes('429') || msg.includes('503') || msg.includes('500') || 
+                                msg.includes('502') || msg.includes('fetch failed') || 
+                                msg.includes('econnreset') || msg.includes('timeout') || msg.includes('socket');
+            if (!isRetryable) throw err; // non-retryable error — bubble up immediately
 
             // A 429 can mean per-minute throttle OR daily quota exhaustion
             // The new SDK usually says "Quota exceeded for metric..."
