@@ -1,8 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = (process.env.SUPABASE_URL || "https://rctltbuiitdnqlxizlym.supabase.co").trim();
-// Use service role key if available for administrative metrics, otherwise fallback to standard key
-const supabaseKey = (process.env.SUPABASE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI").trim();
+const supabaseUrl = "https://rctltbuiitdnqlxizlym.supabase.co".trim();
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI".trim();
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
