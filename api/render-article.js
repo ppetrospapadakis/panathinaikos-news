@@ -258,8 +258,8 @@ module.exports = async (req, res) => {
 
         // Title
         html = html.replace(
-            /<h1 id="article-title" class="font-display-l-mobile text-display-l-mobile md:text-display-l text-on-surface leading-tight"><\/h1>/g,
-            `<h1 id="article-title" class="font-display-l-mobile text-display-l-mobile md:text-display-l text-on-surface leading-tight">${article.title}</h1>`
+            /<h1 id="article-title" class="font-display text-h1 md:text-display font-bold text-on-surface leading-tight mb-4"><\/h1>/g,
+            `<h1 id="article-title" class="font-display text-h1 md:text-display font-bold text-on-surface leading-tight mb-4">${article.title}</h1>`
         );
 
         // Image Box
