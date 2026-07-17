@@ -508,6 +508,8 @@
             script.onload = () => {
                 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 loadDynamicRoster(db);
+                // Load "Περισσότερες Ειδήσεις" independently — no category filter needed
+                initMoreNewsScroll();
             };
             script.onerror = () => {
                 // If script fails to load, render fallbacks immediately
@@ -520,6 +522,8 @@
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
                 document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                // Still try to load news even without Supabase CDN
+                initMoreNewsScroll();
             };
             document.head.appendChild(script);
         });
