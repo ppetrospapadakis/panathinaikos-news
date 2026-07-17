@@ -594,10 +594,11 @@
                 if (!groups[gid]) groups[gid] = [];
                 groups[gid].push(a);
             });
+            const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
             const sorted = Object.values(groups).map(g => {
-                g.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
                 return { main: g[0], related: g.slice(1) };
-            }).sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
+            }).sort((a,b) => getTime(b.main.created_at) - getTime(a.main.created_at));
 
             sorted.forEach(g => {
                 const isOwn = (g.main.source_url||'').toLowerCase().includes('manual') || (g.main.source_url||'').toLowerCase().includes('opinion://');
@@ -610,7 +611,7 @@
             });
 
             // Hero logic with cache mismatch handling
-            let candidateHeroGroup = scraperGroups[0] || ownGroups[0];
+            let candidateHeroGroup = activeCategory === 'Άποψη' ? null : (scraperGroups[0] || ownGroups[0]);
             
             if (candidateHeroGroup) {
                 if (!window.currentHeroId) {
@@ -638,10 +639,11 @@
                 const filteredOwnCache = window.currentHeroId
                     ? ownFromCache.filter(g => g.main.id !== window.currentHeroId)
                     : ownFromCache;
+                const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
                 sideCandidates = [
                     ...scraperGroups,
                     ...filteredOwnCache
-                ].sort((a,b) => new Date(b.main.created_at) - new Date(a.main.created_at));
+                ].sort((a,b) => getTime(b.main.created_at) - getTime(a.main.created_at));
             } else {
                 sideCandidates = scraperGroups;
             }
@@ -665,8 +667,9 @@
                             newGroupsObj[gid].push(a);
                         });
                         
+                        const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
                         Object.values(newGroupsObj).forEach(g => {
-                            g.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                            g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
                             if (activeCategory !== 'Άποψη' && window.currentHeroId && g[0].id === window.currentHeroId) return;
                             sideCandidates.push({ main: g[0], related: g.slice(1) });
                         });
