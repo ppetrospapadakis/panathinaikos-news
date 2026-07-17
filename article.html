@@ -27,78 +27,15 @@
     <meta name="robots" content="max-image-preview:large"/>
     <!-- {{SEO_META_PLACEHOLDER}} -->
     
-    <!-- Critical Rendering Path: Preload Tailwind CSS to prevent rendering blocks -->
-    <link rel="preload" href="https://cdn.tailwindcss.com?plugins=forms,container-queries" as="script">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Compiled Tailwind CSS -->
+    <link rel="preload" href="/style.css" as="style">
+    <link rel="stylesheet" href="/style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block&v=2.0.3" rel="stylesheet"/>
     
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-        body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; opacity:0; transition:opacity 0.15s ease; }
-        .icons-loaded .material-symbols-outlined { opacity:1; }
-        /* Long-form article typography */
-        #article-body p { margin-bottom: 1.25em; line-height: 1.8; font-size: 18px; color: #bfc9bd; }
-        #article-body h2,#article-body h3 { color:#e2e2e8; font-weight:600; margin:1.5em 0 0.5em; }
-        #article-body h2 { font-size:22px; }
-        #article-body h3 { font-size:18px; }
-        #article-body a { color:#84d999; text-decoration:underline; }
-        #article-body a:hover { opacity:0.8; }
-        #article-body ul,#article-body ol { padding-left:1.5em; margin-bottom:1em; }
-        #article-body li { margin-bottom:0.4em; line-height:1.7; color:#bfc9bd; }
-        #article-body img { border-radius:12px; width:100%; height:auto; margin:1.5em 0; display:block; }
-        #article-body strong,#article-body b { color:#e2e2e8; }
-        .premium-gradient { background:linear-gradient(135deg,rgba(132,217,153,0.08) 0%,rgba(14,16,20,0) 60%); }
-    </style>
-    <script>
-        tailwind.config = {
-            darkMode:"class",
-            theme:{
-                extend:{
-                    colors:{
-                        primary:"#84d999",
-                        secondary:"#b2d1b7",
-                        tertiary:"#a2ced5",
-                        error:"#ffb4ab",
-                        background:"#111317",
-                        "on-primary":"#00391c",
-                        "on-secondary":"#1f3525",
-                        "on-tertiary":"#00363d",
-                        "on-error":"#690005",
-                        "on-background":"#e2e2e8",
-                        "surface-container-lowest":"#0b0e12",
-                        "surface-container-low":"#1a1c20",
-                        "surface-container":"#1e2024",
-                        "surface-container-high":"#282b30",
-                        "on-surface":"#e2e2e8",
-                        "on-surface-variant":"#c0c9be",
-                        "outline":"#8a9389",
-                        "outline-variant":"#3f4940"
-                    },
-                    borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
-                    spacing:{"4":"4px","8":"8px","16":"16px","24":"24px","32":"32px","48":"48px","64":"64px","96":"96px"},
-                    fontFamily:{
-                        "h1":["Geist"],"h2":["Geist"],"h3":["Geist"],"h4":["Geist"],
-                        "body":["Geist"],"body-sm":["Geist"],"body-lg":["Geist"],
-                        "label":["Geist"],"caption":["Geist"],"display-l":["Geist"],"display-l-mobile":["Geist"]
-                    },
-                    fontSize:{
-                        "h1":["32px",{lineHeight:"40px",fontWeight:"600"}],
-                        "h2":["24px",{lineHeight:"32px",fontWeight:"600"}],
-                        "h3":["20px",{lineHeight:"28px",fontWeight:"600"}],
-                        "h4":["18px",{lineHeight:"24px",fontWeight:"600"}],
-                        "body":["16px",{lineHeight:"24px",fontWeight:"400"}],
-                        "body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],
-                        "body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],
-                        "label":["12px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"600"}],
-                        "caption":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"400"}],
-                        "display-l":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"700"}],
-                        "display-l-mobile":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}]
-                    }
-                }
-            }
-        }
-    </script>
+    
+    
     <script>
         document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
             document.documentElement.classList.add('icons-loaded');

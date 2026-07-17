@@ -87,13 +87,19 @@ module.exports = async (req, res) => {
 
         // Try to filter out generic branding logos and replace with google proxy if valid
         try {
-            const u = new URL(imageUrl);
+            if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+            let u;
+            if (imageUrl.startsWith('/')) {
+                u = new URL(imageUrl, 'https://www.panathinaikosnews.gr');
+            } else {
+                u = new URL(imageUrl);
+            }
             const pathLower = u.pathname.toLowerCase();
             const filenameBrandingIndicators = ['logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark'];
             const isBranding = filenameBrandingIndicators.some(ind => pathLower.includes(ind));
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
-            } else if (!imageUrl.startsWith('/') && !imageUrl.includes('localhost') && !imageUrl.includes('panathinaikosnews.gr')) {
+            } else if (!u.hostname.includes('localhost') && !u.hostname.includes('panathinaikosnews.gr') && !u.hostname.includes('wsrv.nl')) {
                 // Compress external image on-the-fly to tiny WebP/AVIF format
                 imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=800&output=webp&q=82`;
             }

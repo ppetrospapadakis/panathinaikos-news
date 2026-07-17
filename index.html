@@ -41,50 +41,13 @@
     <meta name="twitter:image" content="https://www.panathinaikosnews.gr/favicon.png" />
     <link rel="canonical" href="https://www.panathinaikosnews.gr/"/>
     
-    <!-- Critical Rendering Path: Preload Tailwind CSS to prevent rendering blocks -->
-    <link rel="preload" href="https://cdn.tailwindcss.com?plugins=forms,container-queries" as="script">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Compiled Tailwind CSS -->
+    <link rel="preload" href="/style.css" as="style">
+    <link rel="stylesheet" href="/style.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block&v=2.0.3" rel="stylesheet"/>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-        body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; opacity:0; transition:opacity 0.15s ease; }
-        .icons-loaded .material-symbols-outlined { opacity:1; }
-        .premium-gradient-overlay { background:linear-gradient(to top,rgba(15,17,21,1) 0%,rgba(15,17,21,0.4) 50%,rgba(15,17,21,0) 100%); }
-        .search-reveal { transition:transform 0.5s cubic-bezier(0.16,1,0.3,1),opacity 0.4s ease; }
-        .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
-        .card-hover:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
-    </style>
-    <script>
-        tailwind.config = {
-            darkMode:"class",
-            theme:{
-                extend:{
-                    colors:{
-                        primary:"#84d999",
-                        secondary:"#b2d1b7",
-                        tertiary:"#a2ced5",
-                        error:"#ffb4ab",
-                        background:"#111317",
-                        "on-primary":"#00391c",
-                        "on-secondary":"#1f3525",
-                        "on-tertiary":"#00363d",
-                        "on-error":"#690005",
-                        "on-background":"#e2e2e8",
-                        "surface-container-lowest":"#0b0e12",
-                        "surface-container-low":"#1a1c20",
-                        "surface-container":"#1e2024",
-                        "surface-container-high":"#282b30",
-                        "on-surface":"#e2e2e8",
-                        "on-surface-variant":"#c0c9be",
-                        "outline":"#8a9389",
-                        "outline-variant":"#3f4940"
-                    }
-                }
-            }
-        };
-    </script>
+    
+    
     <script>
         // Reveal icons only after Material Symbols font is loaded to avoid flash of raw text
         document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
@@ -356,10 +319,16 @@
         }
 
         function processImage(a) {
-            const imageUrl = a.image_url || '';
+            let imageUrl = a.image_url || '';
             if (!imageUrl) { a.image_url = DEFAULT_IMG; return a; }
             try {
-                const u = new URL(imageUrl);
+                if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+                let u;
+                if (imageUrl.startsWith('/')) {
+                    u = new URL(imageUrl, 'https://www.panathinaikosnews.gr');
+                } else {
+                    u = new URL(imageUrl);
+                }
                 const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
                 const BRANDING_FN = ['logo','icon','avatar','branding','placeholder','fallback','watermark','og-image','og_image','site-logo','site_logo','default-image','default_image','noimage','no-image','blank','generic','share-image','share_image'];
                 const BRANDING_PATH = ['/logos/','/logo/','/brand/','/branding/','/default_images/','/default-images/','/assets/images/','/site-assets/'];
