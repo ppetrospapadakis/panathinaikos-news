@@ -147,7 +147,7 @@ module.exports = async (req, res) => {
         const ownBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
         const heroHtml = `
-            <a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
+            <a class="group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                     <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
