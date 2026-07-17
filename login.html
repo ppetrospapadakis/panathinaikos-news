@@ -986,9 +986,23 @@ function initEditor() {
     });
 
     // Style elements after Quill render to fit dark theme
+    const container = document.getElementById('editor-container');
+    if (container) {
+        container.style.minHeight = '320px';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.border = '1px solid var(--md-sys-color-outline-variant, #3f4940)';
+        container.style.borderRadius = '0 0 12px 12px';
+    }
     const qEditor = document.querySelector('.ql-editor');
     if (qEditor) {
-        qEditor.style.minHeight = '320px';
+        qEditor.style.minHeight = '300px';
+    }
+    const qToolbar = document.querySelector('.ql-toolbar');
+    if (qToolbar) {
+        qToolbar.style.border = '1px solid var(--md-sys-color-outline-variant, #3f4940)';
+        qToolbar.style.borderRadius = '12px 12px 0 0';
+        qToolbar.style.borderBottom = 'none';
     }
 
     // Image/Video Resize listeners
