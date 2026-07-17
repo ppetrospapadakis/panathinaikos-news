@@ -4,14 +4,7 @@
     <!-- Google Discover Optimization Tag -->
   <meta name="robots" content="max-image-preview:large">
 
-  <!-- Google Analytics (deferred to unblock render) -->
-  <script defer src="https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14"></script>
-  <script defer>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-HGPHW30Z14');
-  </script>
+  
 
   <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
@@ -56,6 +49,28 @@
             document.documentElement.classList.add('icons-loaded');
         });
     </script>
+
+    <!-- Google Analytics (Lazy Loaded) -->
+<script>
+  (function() {
+    let gtagLoaded = false;
+    function loadGtag() {
+        if (gtagLoaded) return;
+        gtagLoaded = true;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-HGPHW30Z14');
+        const script = document.createElement('script');
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14";
+        script.async = true;
+        document.head.appendChild(script);
+        ['scroll','mousemove','touchstart','keydown'].forEach(e => window.removeEventListener(e, loadGtag));
+    }
+    ['scroll','mousemove','touchstart','keydown'].forEach(e => window.addEventListener(e, loadGtag, {once:true, passive:true}));
+    setTimeout(loadGtag, 8000); // Fallback
+  })();
+</script>
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden">
 
@@ -536,18 +551,23 @@
             const hero   = document.getElementById('hero-container');
             const stream = document.getElementById('stream-container');
             if (!hero || !stream) return;
+                        let isSyncing = false;
             const doSync = () => {
-                if (window.innerWidth >= 768) {
-                    const h = hero.clientHeight;
-                    stream.style.maxHeight = h > 200 ? `${h}px` : '700px';
-                } else {
-                    stream.style.maxHeight = 'none';
-                }
+                if (isSyncing) return;
+                isSyncing = true;
+                requestAnimationFrame(() => {
+                    isSyncing = false;
+                    const isDesktop = window.innerWidth >= 768;
+                    const h = isDesktop ? hero.clientHeight : 0;
+                    requestAnimationFrame(() => {
+                        stream.style.maxHeight = isDesktop ? (h > 200 ? `${h}px` : '700px') : 'none';
+                    });
+                });
             };
             [50, 300, 800].forEach(t => setTimeout(doSync, t));
             const img = hero.querySelector('img');
             if (img) img.addEventListener('load', doSync);
-            window.removeEventListener('resize', syncStreamHeight);
+            window.removeEventListener('resize', syncStreamHeight); // Ensure old generic listener is removed if it existed
             window.addEventListener('resize', doSync);
         }
 

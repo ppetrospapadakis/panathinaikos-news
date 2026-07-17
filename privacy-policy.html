@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html class="dark" lang="el">
 <head>
-    <!-- Google Analytics (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-HGPHW30Z14');
-  </script>
+    
 
   <!-- Google Discover Optimization Tag -->
   <meta name="robots" content="max-image-preview:large">
@@ -39,6 +32,28 @@
     <!-- Compiled Tailwind CSS -->
     <link rel="preload" href="/style.css?v=4" as="style">
     <link rel="stylesheet" href="/style.css?v=4">
+
+    <!-- Google Analytics (Lazy Loaded) -->
+<script>
+  (function() {
+    let gtagLoaded = false;
+    function loadGtag() {
+        if (gtagLoaded) return;
+        gtagLoaded = true;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-HGPHW30Z14');
+        const script = document.createElement('script');
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14";
+        script.async = true;
+        document.head.appendChild(script);
+        ['scroll','mousemove','touchstart','keydown'].forEach(e => window.removeEventListener(e, loadGtag));
+    }
+    ['scroll','mousemove','touchstart','keydown'].forEach(e => window.addEventListener(e, loadGtag, {once:true, passive:true}));
+    setTimeout(loadGtag, 8000); // Fallback
+  })();
+</script>
 </head>
 <body class="bg-background text-on-surface font-body overflow-x-hidden selection:bg-primary/30 selection:text-primary">
 
