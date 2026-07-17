@@ -88,6 +88,41 @@ function switchAdminTab(tab) {
         }
     });
 
+    // Update Page Header Content dynamically
+    const headerIcon = document.getElementById('page-header-icon');
+    const headerTag = document.getElementById('page-header-tag');
+    const headerTitle = document.getElementById('page-header-title');
+    const headerDesc = document.getElementById('page-header-desc');
+
+    if (headerIcon && headerTag && headerTitle && headerDesc) {
+        if (tab === 'opinion') {
+            headerIcon.textContent = 'edit_note';
+            headerTag.textContent = 'Private Editor';
+            headerTitle.textContent = 'Η Άποψή Μου';
+            headerDesc.innerHTML = 'Γράψε τη δική σου αθλητική ανάλυση, άποψη ή σχόλιο για τον Παναθηναϊκό. Τα άρθρα σου εμφανίζονται στη ροή ειδήσεων με την κατηγορία <span class="text-primary font-semibold">✍️ Άποψη</span>.';
+        } else if (tab === 'football') {
+            headerIcon.textContent = 'sports_soccer';
+            headerTag.textContent = 'Squad Manager';
+            headerTitle.textContent = 'Ρόστερ Ποδοσφαίρου';
+            headerDesc.textContent = 'Διαμόρφωσε τη βασική ενδεκάδα, τον πάγκο και την ανάλυση τακτικής για την ποδοσφαιρική ομάδα του Παναθηναϊκού.';
+        } else if (tab === 'basketball') {
+            headerIcon.textContent = 'sports_basketball';
+            headerTag.textContent = 'Squad Manager';
+            headerTitle.textContent = 'Ρόστερ Μπάσκετ';
+            headerDesc.textContent = 'Διαμόρφωσε την αρχική πεντάδα, τις εναλλακτικές επιλογές και την ανάλυση τακτικής για την ομάδα μπάσκετ του Παναθηναϊκού.';
+        } else if (tab === 'analytics-ingestion') {
+            headerIcon.textContent = 'database';
+            headerTag.textContent = 'Crawler Monitor';
+            headerTitle.textContent = 'Ingestion Stats';
+            headerDesc.textContent = 'Παρακολούθησε το ιστορικό εκτελέσεων του scraper, τις επιτυχημένες ροές και τις λεπτομέρειες των φιλτραρισμένων άρθρων.';
+        } else if (tab === 'analytics-engagement') {
+            headerIcon.textContent = 'analytics';
+            headerTag.textContent = 'Dashboard';
+            headerTitle.textContent = 'Reader Traffic';
+            headerDesc.textContent = 'Συνολικά στατιστικά βάσης δεδομένων, όρια πόρων, χρήση κλειδιών Gemini API και δραστηριότητα δημοσιεύσεων ανά ώρα.';
+        }
+    }
+
     if (tab === 'analytics-ingestion') {
         loadScraperRuns();
     }
@@ -141,6 +176,44 @@ async function loadScraperRuns() {
 }
 window.loadScraperRuns = loadScraperRuns;
 
+// Ingestion filter state
+let currentIngestionFilter = 'ALL';
+window.currentIngestionFilter = currentIngestionFilter;
+
+// Ingestion sorting state
+let ingestionSortColumn = 'name'; // default sort by source name
+let ingestionSortDirection = 'asc'; // 'asc' or 'desc'
+window.ingestionSortColumn = ingestionSortColumn;
+window.ingestionSortDirection = ingestionSortDirection;
+
+function applyIngestionFilter() {
+    const dropdown = document.getElementById('ingestion-site-filter');
+    if (dropdown) {
+        currentIngestionFilter = dropdown.value;
+        // Re-render list & selected details to apply filter
+        renderRunsList();
+        if (selectedRunId) {
+            selectRun(selectedRunId);
+        }
+    }
+}
+window.applyIngestionFilter = applyIngestionFilter;
+
+function sortIngestionTable(column) {
+    if (ingestionSortColumn === column) {
+        // Toggle direction
+        ingestionSortDirection = ingestionSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        ingestionSortColumn = column;
+        ingestionSortDirection = 'desc'; // default to desc for numeric metrics
+        if (column === 'name') ingestionSortDirection = 'asc';
+    }
+    if (selectedRunId) {
+        selectRun(selectedRunId);
+    }
+}
+window.sortIngestionTable = sortIngestionTable;
+
 function renderRunsList() {
     const container = document.getElementById('runs-list-container');
     if (!container) return;
@@ -169,9 +242,22 @@ function renderRunsList() {
         card.className = `p-4 border rounded-xl cursor-pointer transition-all duration-200 active:scale-98 ${activeClass}`;
         card.onclick = () => selectRun(run.id);
         
-        const skipped = run.stats?.totals 
-            ? (run.stats.totals.skipped_duplicate || 0) + (run.stats.totals.skipped_relevance || 0) + (run.stats.totals.skipped_size || 0) + (run.stats.totals.skipped_crawling_failed || 0) + (run.stats.totals.skipped_technical_error || 0) + (run.stats.totals.skipped_other || 0)
-            : 0;
+        // Sum totals dynamically or filter them
+        let added = 0;
+        let merged = 0;
+        let skipped = 0;
+
+        const sources = run.stats?.sources || {};
+        Object.keys(sources).forEach(srcKey => {
+            // Apply site filter
+            if (currentIngestionFilter !== 'ALL' && !srcKey.toLowerCase().includes(currentIngestionFilter.toLowerCase())) {
+                return;
+            }
+            const src = sources[srcKey];
+            added += (src.added || 0);
+            merged += (src.merged || 0);
+            skipped += (src.skipped_duplicate || 0) + (src.skipped_relevance || 0) + (src.skipped_size || 0) + (src.skipped_crawling_failed || 0) + (src.skipped_technical_error || 0) + (src.skipped_other || 0);
+        });
             
         card.innerHTML = `
             <div class="flex items-center justify-between mb-2">
@@ -179,8 +265,8 @@ function renderRunsList() {
                 ${statusDot}
             </div>
             <div class="flex items-center justify-between text-[11px] text-on-surface-variant">
-                <span>Νέα: <strong class="text-primary">${run.stats?.totals?.added || 0}</strong></span>
-                <span>Merge: <strong class="text-tertiary">${run.stats?.totals?.merged || 0}</strong></span>
+                <span>Νέα: <strong class="text-primary">${added}</strong></span>
+                <span>Merge: <strong class="text-tertiary">${merged}</strong></span>
                 <span>Skipped: <strong>${skipped}</strong></span>
             </div>
         `;
@@ -190,8 +276,8 @@ function renderRunsList() {
 
 function selectRun(runId) {
     selectedRunId = runId;
-    renderRunsList(); // Refresh active highlight
     
+    // Find run, keeping selected highlight updated
     const run = runsCached.find(r => r.id === runId);
     const inspector = document.getElementById('run-inspector-card');
     if (!run || !inspector) return;
@@ -205,18 +291,49 @@ function selectRun(runId) {
         ? '<div class="status-badge status-success">Success</div>'
         : '<div class="status-badge status-error">Failed</div>';
         
-    const totals = run.stats?.totals || {};
     const sources = run.stats?.sources || {};
     const recentErrors = run.stats?.recent_errors || [];
     
-    const skipped = (totals.skipped_duplicate || 0) + (totals.skipped_relevance || 0) + (totals.skipped_size || 0) + (totals.skipped_crawling_failed || 0) + (totals.skipped_technical_error || 0) + (totals.skipped_other || 0);
-    const errorsCount = recentErrors.length + (run.status === 'failed' ? 1 : 0);
+    // Compute totals filtered by current filter state
+    let totalScraped = 0;
+    let totalAdded = 0;
+    let totalMerged = 0;
+    let totalSkippedDuplicate = 0;
+    let totalSkippedRelevance = 0;
+    let totalSkippedSize = 0;
+    let totalSkippedCrawling = 0;
+    let totalSkippedTechnical = 0;
+    let totalSkippedOther = 0;
+
+    Object.keys(sources).forEach(srcKey => {
+        if (currentIngestionFilter !== 'ALL' && !srcKey.toLowerCase().includes(currentIngestionFilter.toLowerCase())) {
+            return;
+        }
+        const src = sources[srcKey];
+        totalScraped += (src.scraped || 0);
+        totalAdded += (src.added || 0);
+        totalMerged += (src.merged || 0);
+        totalSkippedDuplicate += (src.skipped_duplicate || 0);
+        totalSkippedRelevance += (src.skipped_relevance || 0);
+        totalSkippedSize += (src.skipped_size || 0);
+        totalSkippedCrawling += (src.skipped_crawling_failed || 0);
+        totalSkippedTechnical += (src.skipped_technical_error || 0);
+        totalSkippedOther += (src.skipped_other || 0);
+    });
+
+    const skippedTotal = totalSkippedDuplicate + totalSkippedRelevance + totalSkippedSize + totalSkippedCrawling + totalSkippedTechnical + totalSkippedOther;
+
+    // Filtered Errors Count
+    const filteredErrors = recentErrors.filter(err => {
+        if (currentIngestionFilter === 'ALL') return true;
+        return err.source && err.source.toLowerCase().includes(currentIngestionFilter.toLowerCase());
+    });
+    const errorsCount = filteredErrors.length + (run.status === 'failed' && currentIngestionFilter === 'ALL' ? 1 : 0);
 
     // Build a map of source → error code for highlighting 0-scraped sources
     const sourceErrorMap = {};
-    recentErrors.forEach(err => {
+    filteredErrors.forEach(err => {
         if (err.source && !sourceErrorMap[err.source]) {
-            // Extract HTTP status code from message, e.g. "Request failed with status code 403"
             const codeMatch = err.message && err.message.match(/(\d{3})/);
             sourceErrorMap[err.source] = codeMatch ? codeMatch[1] : 'ERR';
         }
@@ -224,7 +341,7 @@ function selectRun(runId) {
     
     // Fatal run error alert
     let fatalAlertHtml = '';
-    if (run.error_message) {
+    if (run.error_message && currentIngestionFilter === 'ALL') {
         fatalAlertHtml = `
             <div class="bg-error/10 text-error p-4 rounded-xl border border-error/20 mb-6 font-mono text-xs whitespace-pre-wrap text-left">
                 <h5 class="font-bold mb-2 flex items-center gap-2 text-sm uppercase">
@@ -237,8 +354,8 @@ function selectRun(runId) {
     
     // Generate recent errors markup
     let errorsListHtml = '<div class="text-on-surface-variant/40 py-2 italic text-left">Δεν καταγράφηκαν σφάλματα κατά τη διάρκεια αυτής της εκτέλεσης.</div>';
-    if (recentErrors.length > 0) {
-        errorsListHtml = recentErrors.map(err => {
+    if (filteredErrors.length > 0) {
+        errorsListHtml = filteredErrors.map(err => {
             const errDate = new Date(err.time);
             const timeStr = errDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             return `
@@ -254,44 +371,78 @@ function selectRun(runId) {
         }).join('');
     }
 
-    // Build target rows
-    let tableRowsHtml = '';
+    // Build target rows (with sorting applied)
+    const tableData = [];
     Object.keys(sources).forEach(srcKey => {
+        if (currentIngestionFilter !== 'ALL' && !srcKey.toLowerCase().includes(currentIngestionFilter.toLowerCase())) {
+            return;
+        }
         const src = sources[srcKey];
         const srcSkipped = (src.skipped_duplicate || 0) + (src.skipped_relevance || 0) + (src.skipped_size || 0) + (src.skipped_crawling_failed || 0) + (src.skipped_technical_error || 0) + (src.skipped_other || 0);
-        const scraped = src.scraped || 0;
-        const relevance = src.skipped_relevance || 0;
         
-        // If scraped=0 and source appears in recent_errors, show the error badge
-        const errCode = scraped === 0 ? sourceErrorMap[srcKey] : null;
+        tableData.push({
+            name: srcKey,
+            scraped: src.scraped || 0,
+            added: src.added || 0,
+            merged: src.merged || 0,
+            crawl_fail: src.skipped_crawling_failed || 0,
+            errors: src.skipped_technical_error || 0,
+            relevance: src.skipped_relevance || 0,
+            skipped: srcSkipped
+        });
+    });
+
+    // Apply Sorting logic
+    tableData.sort((a, b) => {
+        let valA = a[ingestionSortColumn];
+        let valB = b[ingestionSortColumn];
+
+        if (typeof valA === 'string') {
+            return ingestionSortDirection === 'asc' 
+                ? valA.localeCompare(valB)
+                : valB.localeCompare(valA);
+        } else {
+            return ingestionSortDirection === 'asc' 
+                ? valA - valB
+                : valB - valA;
+        }
+    });
+
+    let tableRowsHtml = '';
+    tableData.forEach(row => {
+        const errCode = row.scraped === 0 ? sourceErrorMap[row.name] : null;
         const scrapedCell = errCode
             ? `<span class="font-mono text-red-400">0</span><span title="${errCode} error" class="ml-1.5 inline-flex items-center gap-0.5 bg-red-500/15 text-red-400 border border-red-500/30 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider cursor-help">⚠ ${errCode}</span>`
-            : `<span class="font-mono">${scraped}</span>`;
+            : `<span class="font-mono">${row.scraped}</span>`;
         
-        // Colour relevance only if non-zero
-        const relevanceCell = relevance > 0
-            ? `<span class="font-mono text-yellow-400 font-semibold">${relevance}</span>`
+        const relevanceCell = row.relevance > 0
+            ? `<span class="font-mono text-yellow-400 font-semibold">${row.relevance}</span>`
             : `<span class="font-mono text-on-surface-variant/40">0</span>`;
-        
+
         tableRowsHtml += `
             <tr class="border-b border-outline-variant/10 text-xs text-on-surface-variant hover:bg-surface-container-high/20">
-                <td class="py-3 px-4 font-bold text-on-surface text-left">${srcKey}</td>
+                <td class="py-3 px-4 font-bold text-on-surface text-left">${row.name}</td>
                 <td class="py-3 px-4 text-center">${scrapedCell}</td>
-                <td class="py-3 px-4 text-center font-mono text-primary font-semibold">${src.added || 0}</td>
-                <td class="py-3 px-4 text-center font-mono text-tertiary font-semibold">${src.merged || 0}</td>
-                <td class="py-3 px-4 text-center font-mono text-red-400">${src.skipped_crawling_failed || 0}</td>
-                <td class="py-3 px-4 text-center font-mono text-red-500">${src.skipped_technical_error || 0}</td>
+                <td class="py-3 px-4 text-center font-mono text-primary font-semibold">${row.added}</td>
+                <td class="py-3 px-4 text-center font-mono text-tertiary font-semibold">${row.merged}</td>
+                <td class="py-3 px-4 text-center font-mono text-red-400">${row.crawl_fail}</td>
+                <td class="py-3 px-4 text-center font-mono text-red-500">${row.errors}</td>
                 <td class="py-3 px-4 text-center">${relevanceCell}</td>
-                <td class="py-3 px-4 text-center font-mono">${srcSkipped}</td>
+                <td class="py-3 px-4 text-center font-mono">${row.skipped}</td>
             </tr>
         `;
     });
 
     // Generate skipped details list
     const skippedDetails = run.stats?.skipped_details || [];
+    const filteredSkippedDetails = skippedDetails.filter(item => {
+        if (currentIngestionFilter === 'ALL') return true;
+        return item.source && item.source.toLowerCase().includes(currentIngestionFilter.toLowerCase());
+    });
+    
     let skippedDetailsHtml = '';
-    if (skippedDetails.length > 0) {
-        const itemsHtml = skippedDetails.map(item => {
+    if (filteredSkippedDetails.length > 0) {
+        const itemsHtml = filteredSkippedDetails.map(item => {
             let reasonBadge = '';
             if (item.reason === 'relevance') reasonBadge = '<span class="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">ΑΣΧΕΤΟ</span>';
             else if (item.reason === 'size') reasonBadge = '<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">ΜΙΚΡΟ</span>';
@@ -352,19 +503,19 @@ function selectRun(runId) {
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
                 <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Scraped</p>
-                <h4 class="text-xl font-bold text-on-surface">${totals.scraped || 0}</h4>
+                <h4 class="text-xl font-bold text-on-surface">${totalScraped}</h4>
             </div>
             <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
                 <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Added (New)</p>
-                <h4 class="text-xl font-bold text-primary">${totals.added || 0}</h4>
+                <h4 class="text-xl font-bold text-primary">${totalAdded}</h4>
             </div>
             <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
                 <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Merged</p>
-                <h4 class="text-xl font-bold text-tertiary">${totals.merged || 0}</h4>
+                <h4 class="text-xl font-bold text-tertiary">${totalMerged}</h4>
             </div>
             <div class="bg-surface-container-low border border-outline-variant/30 p-4 rounded-xl text-center">
                 <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">Exclusions</p>
-                <h4 class="text-xl font-bold text-on-surface">${skipped}</h4>
+                <h4 class="text-xl font-bold text-on-surface">${skippedTotal}</h4>
             </div>
             <div onclick="document.getElementById('recent-errors-container').scrollIntoView({ behavior: 'smooth' })" class="bg-surface-container-low border border-outline-variant/30 hover:border-error/40 p-4 rounded-xl text-center cursor-pointer transition-colors group">
                 <p class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1 group-hover:text-error/70 transition-colors">Errors / Failed</p>
@@ -387,7 +538,7 @@ function selectRun(runId) {
                             </span>
                         </span>
                     </span>
-                    <strong class="font-mono text-on-surface">${totals.skipped_duplicate || 0}</strong>
+                    <strong class="font-mono text-on-surface">${totalSkippedDuplicate}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
@@ -400,7 +551,7 @@ function selectRun(runId) {
                             </span>
                         </span>
                     </span>
-                    <strong class="font-mono text-on-surface">${totals.skipped_relevance || 0}</strong>
+                    <strong class="font-mono text-on-surface">${totalSkippedRelevance}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
@@ -413,7 +564,7 @@ function selectRun(runId) {
                             </span>
                         </span>
                     </span>
-                    <strong class="font-mono text-on-surface">${totals.skipped_size || 0}</strong>
+                    <strong class="font-mono text-on-surface">${totalSkippedSize}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
@@ -426,7 +577,7 @@ function selectRun(runId) {
                             </span>
                         </span>
                     </span>
-                    <strong class="font-mono text-on-surface text-red-400">${totals.skipped_crawling_failed || 0}</strong>
+                    <strong class="font-mono text-on-surface text-red-400">${totalSkippedCrawling}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
@@ -439,7 +590,7 @@ function selectRun(runId) {
                             </span>
                         </span>
                     </span>
-                    <strong class="font-mono text-on-surface text-red-500">${totals.skipped_technical_error || 0}</strong>
+                    <strong class="font-mono text-on-surface text-red-500">${totalSkippedTechnical}</strong>
                 </div>
 
                 <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
@@ -452,7 +603,7 @@ function selectRun(runId) {
                             </span>
                         </span>
                     </span>
-                    <strong class="font-mono text-on-surface">${totals.skipped_other || 0}</strong>
+                    <strong class="font-mono text-on-surface">${totalSkippedOther}</strong>
                 </div>
             </div>
 
@@ -462,20 +613,36 @@ function selectRun(runId) {
         <!-- Target by Target stats table -->
         <div class="bg-surface-container-low border border-outline-variant/20 rounded-xl overflow-hidden text-left">
             <div class="p-5 border-b border-outline-variant/20">
-                <h5 class="text-xs uppercase tracking-wider text-primary font-bold">Ανάλυση ανά Πηγή</h5>
+                <h5 class="text-xs uppercase tracking-wider text-primary font-bold">Ανάλυση ανά Πηγή (Κάντε κλικ στους τίτλους για ταξινόμηση)</h5>
             </div>
             <div class="overflow-x-auto w-full">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-surface-container-high/50 text-[10px] uppercase font-bold text-on-surface-variant/70 border-b border-outline-variant/30">
-                            <th class="py-3 px-4">Πηγή</th>
-                            <th class="py-3 px-4 text-center">Scraped</th>
-                            <th class="py-3 px-4 text-center">Added</th>
-                            <th class="py-3 px-4 text-center">Merged</th>
-                            <th class="py-3 px-4 text-center text-red-400/80">Crawl Fail</th>
-                            <th class="py-3 px-4 text-center text-red-500/80">Errors</th>
-                            <th class="py-3 px-4 text-center text-yellow-400/80">Relevance</th>
-                            <th class="py-3 px-4 text-center">Skipped</th>
+                        <tr class="bg-surface-container-high/50 text-[10px] uppercase font-bold text-on-surface-variant/70 border-b border-outline-variant/30 select-none">
+                            <th onclick="sortIngestionTable('name')" class="py-3 px-4 cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Πηγή ${ingestionSortColumn === 'name' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('scraped')" class="py-3 px-4 text-center cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Scraped ${ingestionSortColumn === 'scraped' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('added')" class="py-3 px-4 text-center cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Added ${ingestionSortColumn === 'added' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('merged')" class="py-3 px-4 text-center cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Merged ${ingestionSortColumn === 'merged' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('crawl_fail')" class="py-3 px-4 text-center text-red-400/80 cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Crawl Fail ${ingestionSortColumn === 'crawl_fail' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('errors')" class="py-3 px-4 text-center text-red-500/80 cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Errors ${ingestionSortColumn === 'errors' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('relevance')" class="py-3 px-4 text-center text-yellow-400/80 cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Relevance ${ingestionSortColumn === 'relevance' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
+                            <th onclick="sortIngestionTable('skipped')" class="py-3 px-4 text-center cursor-pointer hover:bg-surface-container-high hover:text-primary transition-colors">
+                                Skipped ${ingestionSortColumn === 'skipped' ? (ingestionSortDirection === 'asc' ? '▲' : '▼') : ''}
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant/10">
@@ -1114,7 +1281,7 @@ async function loadEngagementStats() {
             const endLabel = hourlyLabels[23] || '23:00';
             const chartSubtitle = document.getElementById('chart-subtitle');
             if (chartSubtitle) {
-                chartSubtitle.textContent = `Άρθρα που δημοσιεύθηκαν ανά ώρα — τελευταίες 24h (${startLabel} → ${endLabel} UTC)`;
+                chartSubtitle.textContent = `Άρθρα που δημοσιεύθηκαν ανά ώρα — τελευταίες 24h (${startLabel} → ${endLabel})`;
             }
         }
 

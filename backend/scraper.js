@@ -73,7 +73,11 @@ const SCRAPE_TARGETS = [
         category: 'Γενικά',
         name: 'Sport-FM',
         url: 'https://www.sport-fm.gr/tag/pao',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', '.post-title a', '.title a', 'a[href*="/article/"]'],
+        articleLinkSelectors: [
+            '.archive-posts-col .archive-row-tile > a[href*="/article/"]',
+            '.archive-posts-col .archive-row-tile > a',
+            '.archive-left a[href*="/article/"]',
+        ],
         baseUrl: 'https://www.sport-fm.gr',
     },
     {
@@ -89,28 +93,51 @@ const SCRAPE_TARGETS = [
         category: 'Ποδόσφαιρο',
         name: 'Sportal Football',
         url: 'https://www.sportal.gr/podosfairo/panathinaikos-551',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.teaser-title a', '.headline a', 'a[href*="/podosfairo/"]', 'article a'],
+        articleLinkSelectors: [
+            '.archive__main-col h3.card__title a',
+            '.archive__main-col .card__link',
+            '.main-posts-vertical-stack h3 a',
+            '.main-posts-vertical-stack .card__link',
+            '.archive__main-col h2 a',
+            '.archive__main-col article h3 a',
+        ],
         baseUrl: 'https://www.sportal.gr',
     },
     {
         category: 'Ποδόσφαιρο',
         name: 'Sport24 Football',
         url: 'https://www.sport24.gr/football/tag/panathinaikos/',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.story-title a', '.headline a', 'a[href*="/football/"]'],
+        articleLinkSelectors: [
+            '.category__content h2 a',
+            '.category__content h3 a',
+            '.category__content .article-title a',
+            '.category__content .story-title a',
+            '.category__content .headline a',
+            '.category__content a[href*="/football/"]'
+        ],
         baseUrl: 'https://www.sport24.gr',
     },
     {
         category: 'Ποδόσφαιρο',
         name: 'Gazzetta Football',
         url: 'https://www.gazzetta.gr/football/panathinaikos',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'a[href*="/football/"]', 'a[href*="panathinaikos"]'],
+        articleLinkSelectors: [
+            '.list-article__info a.link-overall',
+            '.list-article__info h3 a'
+        ],
         baseUrl: 'https://www.gazzetta.gr',
     },
     {
         category: 'Ποδόσφαιρο',
         name: 'Athletiko Football',
         url: 'https://www.athletiko.gr/panathinaikos-podosfairo',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
+        articleLinkSelectors: [
+            '#ajax-content h2 a',
+            '#ajax-content h3 a',
+            '#ajax-content .article-title a',
+            '#ajax-content .post-title a',
+            '#ajax-content a[href*="panathinaikos"]'
+        ],
         baseUrl: 'https://www.athletiko.gr',
     },
     // Sportdog Football: DISABLED — site uses JavaScript rendering, static scraper gets only matchzone links, no articles.
@@ -125,56 +152,59 @@ const SCRAPE_TARGETS = [
         category: 'Ποδόσφαιρο',
         name: 'Monobala Football',
         url: 'https://monobala.gr/category/teams/sl1/panathinaikos/',
-        articleLinkSelectors: ['h3 a', 'h2 a', '.entry-title a', 'article a', '.post-title a'],
+        articleLinkSelectors: [
+            '.post-list .sec-news-post h3 a',
+            '.post-list article h3 a',
+            '.content.post-list h3 a',
+        ],
         baseUrl: 'https://monobala.gr',
     },
     // ── BASKETBALL ────────────────────────────────────────────────────────────
     {
         category: 'Μπάσκετ',
-        name: 'PAO BC Official',
-        url: 'https://www.paobc.gr/post-sitemap1.xml',
-        articleLinkSelectors: ['loc'],
-        baseUrl: 'https://www.paobc.gr',
-        isOfficial: true,
-        retryOn403: true,
-        timeout: 30000,
-    },
-
-    {
-        category: 'Μπάσκετ',
         name: 'Gazzetta Basketball',
         url: 'https://www.gazzetta.gr/basketball/panathinaikos',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/basketball/"]', 'a[href*="panathinaikos"]'],
+        articleLinkSelectors: [
+            '.list-article__info a.link-overall',
+            '.list-article__info h3 a'
+        ],
         baseUrl: 'https://www.gazzetta.gr',
     },
     {
         category: 'Μπάσκετ',
         name: 'Sport24 Basketball',
         url: 'https://www.sport24.gr/basket/tag/panathinaikos/',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.story-title a', 'a[href*="/basket/"]'],
+        articleLinkSelectors: [
+            '.category__content h2 a',
+            '.category__content h3 a',
+            '.category__content .article-title a',
+            '.category__content .story-title a',
+            '.category__content a[href*="/basket/"]'
+        ],
         baseUrl: 'https://www.sport24.gr',
     },
     {
         category: 'Μπάσκετ',
         name: 'Athletiko Basketball',
         url: 'https://www.athletiko.gr/panathinaikos-mpasket',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.post-title a', 'a[href*="panathinaikos"]'],
+        articleLinkSelectors: [
+            '#ajax-content h2 a',
+            '#ajax-content h3 a',
+            '#ajax-content .article-title a',
+            '#ajax-content .post-title a',
+            '#ajax-content a[href*="panathinaikos"]'
+        ],
         baseUrl: 'https://www.athletiko.gr',
     },
-    // Sportdog Basketball: DISABLED — site uses JavaScript rendering, static scraper gets only matchzone links, no articles.
-    // {
-    //     category: 'Μπάσκετ',
-    //     name: 'Sportdog Basketball',
-    //     url: 'https://www.sportdog.gr/teams/panathinaikos/panathinaikos-bc',
-    //     articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
-    //     baseUrl: 'https://www.sportdog.gr',
-    // },
     // ── OFFICIAL PORTALS ───────────────────────────────────────────────────────
     {
         category: 'Ποδόσφαιρο',
         name: 'PAO Official',
         url: 'https://www.pao.gr/',
-        articleLinkSelectors: ['.latest-news a', 'h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/news/"]', '.news-item a'],
+        articleLinkSelectors: [
+            'article.postTiles h3 a',
+            'article.postTiles .mask-image a'
+        ],
         baseUrl: 'https://www.pao.gr',
         isOfficial: true,
     },
@@ -480,7 +510,17 @@ async function scrapeArticlePage(url, categoryHint) {
                 if (els.length > 0) {
                     // Strip scripts, ads, share buttons
                     els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"]').remove();
-                    bodyText = els.text().replace(/\s+/g, ' ').trim();
+                    // Map block elements to lines to preserve paragraph structure
+                    const paragraphs = [];
+                    els.find('p, div, br').each((i, el) => {
+                        const t = $(el).text().replace(/[ \t]+/g, ' ').trim();
+                        if (t) paragraphs.push(t);
+                    });
+                    if (paragraphs.length > 0) {
+                        bodyText = paragraphs.join('\n\n');
+                    } else {
+                        bodyText = els.text().replace(/[ \t]+/g, ' ').trim();
+                    }
                     if (bodyText.length > 100) break;
                 }
             } catch (e) {
@@ -865,25 +905,38 @@ async function main() {
         }
         db = createClient(url, key);
 
-        // Load existing articles from the last 48 hours for dedup + group matching
-        const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+        // Load existing articles from the last 30 days for deduping ignored URLs,
+        // but limit duplicate group merging candidates to the last 48 hours.
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
         const { data, error } = await db.from('articles')
-            .select('id, title, source_url, group_id, created_at')
-            .gte('created_at', twoDaysAgo)
+            .select('id, title, source_url, group_id, created_at, category')
+            .gte('created_at', thirtyDaysAgo)
             .order('created_at', { ascending: false })
-            .limit(3000);
+            .limit(10000);
 
         if (error) {
             throw new Error(`DB error: ${error.message}`);
         }
-        existingArticles = data || [];
+        const rawDbArticles = data || [];
         existingUrls = new Set();
-        existingArticles.forEach(a => {
+        existingArticles = [];
+
+        const twoDaysAgoMs = Date.now() - 48 * 60 * 60 * 1000;
+
+        rawDbArticles.forEach(a => {
             if (a.source_url) {
                 a.source_url.split(',').forEach(u => existingUrls.add(u.trim()));
             }
+            // Only add valid, non-ignored, recent articles (< 48h) to existingArticles for merge matching
+            const isIgnored = a.group_id === 'IGNORED_URLS' || (a.title && a.title.includes('[IGNORED')) || a.category === 'SystemRoster';
+            if (!isIgnored) {
+                const createdMs = new Date(a.created_at).getTime();
+                if (createdMs >= twoDaysAgoMs) {
+                    existingArticles.push(a);
+                }
+            }
         });
-        console.log(`[DB] Loaded ${existingArticles.length} existing articles for deduplication.\n`);
+        console.log(`[DB] Loaded ${existingUrls.size} URLs for deduplication and ${existingArticles.length} recent articles for group merging.\n`);
     }
 
     let totalNew = 0, totalSkipped = 0;
@@ -940,6 +993,25 @@ async function main() {
                 runStats.sources[target.name].skipped_size++;
                 runStats.totals.skipped_size++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Short)', 'size', `Πολύ μικρό κείμενο: ${scraped.length || 0} χαρακτήρες (Video/Gallery)`);
+                
+                // Save ignored URL to prevent re-crawling
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: `ignored_${crypto.randomUUID()}`,
+                            title: '[IGNORED_SIZE]',
+                            summary: '[IGNORED_SIZE]',
+                            content: '[IGNORED_SIZE]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            group_id: 'IGNORED_URLS',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored size URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 
@@ -949,6 +1021,25 @@ async function main() {
                 runStats.sources[target.name].skipped_relevance++;
                 runStats.totals.skipped_relevance++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Τοπικό φίλτρο λέξεων (Not PAO-relevant)');
+                
+                // Save ignored URL to prevent re-crawling
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: `ignored_${crypto.randomUUID()}`,
+                            title: '[IGNORED_IRRELEVANT]',
+                            summary: '[IGNORED_IRRELEVANT]',
+                            content: '[IGNORED_IRRELEVANT]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            group_id: 'IGNORED_URLS',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored irrelevant URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 
@@ -959,6 +1050,25 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο τίτλου (Promo/Live show)');
+                
+                // Save ignored URL to prevent re-crawling
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: `ignored_${crypto.randomUUID()}`,
+                            title: '[IGNORED_PROMO]',
+                            summary: '[IGNORED_PROMO]',
+                            content: '[IGNORED_PROMO]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            group_id: 'IGNORED_URLS',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored promo URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 
@@ -971,6 +1081,25 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Μπάσκετ σε Ποδόσφαιρο)');
+                
+                // Save ignored URL to prevent re-crawling
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: `ignored_${crypto.randomUUID()}`,
+                            title: '[IGNORED_CROSS_BASKET]',
+                            summary: '[IGNORED_CROSS_BASKET]',
+                            content: '[IGNORED_CROSS_BASKET]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            group_id: 'IGNORED_URLS',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored cross URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
             if (target.category === 'Μπάσκετ' && isFootballUrl) {
@@ -978,6 +1107,25 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Ποδόσφαιρο σε Μπάσκετ)');
+                
+                // Save ignored URL to prevent re-crawling
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: `ignored_${crypto.randomUUID()}`,
+                            title: '[IGNORED_CROSS_FOOTBALL]',
+                            summary: '[IGNORED_CROSS_FOOTBALL]',
+                            content: '[IGNORED_CROSS_FOOTBALL]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            group_id: 'IGNORED_URLS',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored cross URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 

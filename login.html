@@ -46,7 +46,8 @@
         }
         
         body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; opacity:0; transition:opacity 0.15s ease; }
+        .icons-loaded .material-symbols-outlined { opacity:1; }
         .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
         .card-hover:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
 
@@ -293,6 +294,11 @@
             }
         }
     </script>
+    <script>
+        document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
+            document.documentElement.classList.add('icons-loaded');
+        }).catch(() => { document.documentElement.classList.add('icons-loaded'); });
+    </script>
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden">
 
@@ -384,13 +390,13 @@
         <!-- Page Header -->
         <div class="mb-10">
             <div class="flex items-center gap-3 mb-4">
-                <span class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
+                <span id="page-header-icon" class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
                 <div>
-                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
-                    <h1 class="text-3xl font-bold text-on-surface">Η Άποψή Μου</h1>
+                    <p id="page-header-tag" class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
+                    <h1 id="page-header-title" class="text-3xl font-bold text-on-surface">Η Άποψή Μου</h1>
                 </div>
             </div>
-            <p class="text-on-surface-variant max-w-xl">Γράψε τη δική σου αθλητική ανάλυση, άποψη ή σχόλιο για τον Παναθηναϊκό. Τα άρθρα σου εμφανίζονται στη ροή ειδήσεων με την κατηγορία <span class="text-primary font-semibold">✍️ Άποψη</span>.</p>
+            <p id="page-header-desc" class="text-on-surface-variant max-w-xl">Γράψε τη δική σου αθλητική ανάλυση, άποψη ή σχόλιο για τον Παναθηναϊκό. Τα άρθρα σου εμφανίζονται στη ροή ειδήσεων με την κατηγορία <span class="text-primary font-semibold">✍️ Άποψη</span>.</p>
         </div>
 
         <!-- Admin Sub-navigation Tabs (only shown when authenticated) -->
@@ -758,9 +764,27 @@
                     <h2 class="text-xl font-bold text-primary mb-2">Ingestion Analytics & Crawler Logs</h2>
                     <p class="text-sm text-on-surface-variant">Δείτε τα στατιστικά στοιχεία και τα σφάλματα από τα τρεξίματα του crawler (ανά 15 λεπτά).</p>
                 </div>
-                <button onclick="loadScraperRuns()" class="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary py-2.5 px-4 rounded-xl text-xs font-bold hover:bg-primary/20 transition-all select-none">
-                    <span class="material-symbols-outlined animate-none" id="refresh-runs-icon">refresh</span> Ανανέωση
-                </button>
+                <div class="flex items-center gap-4">
+                    <!-- Dropdown Filter for Ingestion Sources -->
+                    <div class="flex items-center gap-2">
+                        <label for="ingestion-site-filter" class="text-xs font-bold text-on-surface-variant uppercase tracking-wider select-none">Φίλτρο Πηγής:</label>
+                        <select id="ingestion-site-filter" onchange="applyIngestionFilter()" class="editor-input py-2 px-3 text-xs w-48 font-medium" style="background:#111317; border-radius:10px;">
+                            <option value="ALL">Όλες οι πηγές</option>
+                            <option value="Sport-FM">Sport-FM</option>
+                            <option value="SDNA">SDNA</option>
+                            <option value="Sportal">Sportal</option>
+                            <option value="Sport24">Sport24</option>
+                            <option value="Gazzetta">Gazzetta</option>
+                            <option value="Athletiko">Athletiko</option>
+                            <option value="Monobala">Monobala</option>
+                            <option value="PAO Official">PAO Official</option>
+                            <option value="PAO1908 Official">PAO1908 Official</option>
+                        </select>
+                    </div>
+                    <button onclick="loadScraperRuns()" class="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary py-2.5 px-4 rounded-xl text-xs font-bold hover:bg-primary/20 transition-all select-none">
+                        <span class="material-symbols-outlined animate-none" id="refresh-runs-icon">refresh</span> Ανανέωση
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -970,7 +994,7 @@
     </div>
 </div>
 
-<script src="opinion_admin.js?v=2.0.3"></script>
+<script src="opinion_admin.js?v=2.0.4"></script>
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';

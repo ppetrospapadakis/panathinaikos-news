@@ -79,12 +79,16 @@ module.exports = async (req, res) => {
             });
         }
 
-        // Build X-axis labels — the wall-clock hour label for each slot
+        // Build X-axis labels — the wall-clock hour label for each slot in Greece Time (Europe/Athens)
         const hourlyLabels = Array(24).fill(null).map((_, i) => {
             const slotStart = new Date(windowStart + i * 3600000);
-            const h = slotStart.getUTCHours().toString().padStart(2, '0');
-            const m = '00';
-            return `${h}:${m}`;
+            const formatter = new Intl.DateTimeFormat('el-GR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                timeZone: 'Europe/Athens'
+            });
+            return formatter.format(slotStart);
         });
 
         // 3. Fetch scraping runs in the last 24 hours to aggregate Gemini API usage

@@ -31,7 +31,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
         body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; opacity:0; transition:opacity 0.15s ease; }
+        .icons-loaded .material-symbols-outlined { opacity:1; }
         /* Long-form article typography */
         #article-body p { margin-bottom: 1.25em; line-height: 1.8; font-size: 18px; color: #bfc9bd; }
         #article-body h2,#article-body h3 { color:#e2e2e8; font-weight:600; margin:1.5em 0 0.5em; }
@@ -84,6 +85,11 @@
                 }
             }
         }
+    </script>
+    <script>
+        document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
+            document.documentElement.classList.add('icons-loaded');
+        }).catch(() => { document.documentElement.classList.add('icons-loaded'); });
     </script>
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden">
@@ -329,9 +335,10 @@
         // ─── Convert plain text to paragraphs ───
         function textToParagraphs(text) {
             if (!text || !text.trim()) return '';
-            const lines = text.trim().split(/\n+/);
+            // Split by double newlines or single newlines that act as paragraph boundaries
+            const lines = text.trim().split(/\n\s*\n+/);
             return lines
-                .map(l => l.trim())
+                .map(l => l.trim().replace(/\n+/g, ' ')) // join single line breaks inside a paragraph
                 .filter(l => l.length > 0)
                 .map(l => `<p>${l}</p>`)
                 .join('');
