@@ -1,5 +1,16 @@
 {
   "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=30"
+        }
+      ]
+    }
+  ],
   "redirects": [
     { "source": "/matches.html", "destination": "/", "permanent": true },
     { "source": "/agones", "destination": "/", "permanent": true },
