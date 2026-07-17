@@ -488,12 +488,12 @@
             const isPinned = pinAgeMs < 3 * 60 * 60 * 1000;
             const borderClass = isPinned ? 'border-primary/40 bg-primary/5' : 'border-outline-variant/10 bg-surface-container/30';
             const pinPrefix = isPinned ? '📌 ' : '';
-            return `<a class="relative group cursor-pointer flex gap-3 items-start p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border ${borderClass} text-left" href="${url}">${pinButtonHtml(a.id, a.pinned_at)}
+            return `<a class="relative group cursor-pointer flex gap-3 items-start p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border ${borderClass} text-left" href="${url}" data-article-id="${a.id}">${pinButtonHtml(a.id, a.pinned_at)}
                 <div class="${imgBoxClass} flex-shrink-0 rounded-lg overflow-hidden">
                     <img referrerpolicy="no-referrer" class="w-full h-full ${imageFit} group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge}</span>
+                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
                     <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${pinPrefix}${a.title}</h3>
                 </div>
             </a>`;
@@ -512,18 +512,18 @@
             let bulletsHtml = '';
             if (a.bullets && a.bullets.length > 0) {
                 bulletsHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
-                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ AI SUMMARY</div>
-                    <ul class="list-disc pl-5 space-y-1 text-xs text-on-surface-variant leading-relaxed">
-                        ${a.bullets.map(b=>`<li>${b}</li>`).join('')}
-                    </ul>
-                </div>`;
+                     <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ AI SUMMARY</div>
+                     <ul class="list-disc pl-5 space-y-1 text-xs text-on-surface-variant leading-relaxed">
+                         ${a.bullets.map(b=>`<li>${b}</li>`).join('')}
+                     </ul>
+                 </div>`;
             }
-            return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}">
+            return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}" data-article-id="${a.id}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                     <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full ${imageFit} group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="p-5 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase mb-1 flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge}</span>
+                    <span class="font-label text-label text-primary uppercase mb-1 flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
                     <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
                     <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
                     <div class="mt-auto">
@@ -565,13 +565,13 @@
 
             const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
-            heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+            heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                     <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge}</span>
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
                     <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
                     <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
                     <div class="mt-auto overflow-hidden">
@@ -789,12 +789,12 @@
                 const cat    = getCategoryCleanName(a.category);
                 const url    = `/${cat}/${slug}-id=${a.id}`;
                 return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
-                    <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                    <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
                         <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                             <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-contain bg-surface-container/50 group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
                         </div>
                         <div class="p-5 flex flex-col flex-1">
-                            <span class="font-label text-label text-primary uppercase mb-1">${formatExactDate(a.created_at)}</span>
+                            <span class="font-label text-label text-primary uppercase mb-1 flex items-center flex-wrap gap-y-1">${formatExactDate(a.created_at)} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
                             <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors line-clamp-2">${a.title}</h3>
                             <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
                         </div>
@@ -867,6 +867,7 @@
                 // Append to bottom grid
                 const grid = document.getElementById('bottom-grid-cards');
                 if (grid) processed.forEach(a => grid.insertAdjacentHTML('beforeend', gridCardHtml(a)));
+                setTimeout(fetchCommentCounts, 100);
             } catch(err) {
                 console.error('[Sentinel]', err);
             } finally {
@@ -944,6 +945,7 @@
 
             renderStream(streamData);
             renderQuickLinks();
+            setTimeout(fetchCommentCounts, 150);
         }
 
         // ── Category filter (updates URL + triggers reload) ────────────────────
@@ -1060,7 +1062,32 @@
         }
         window.togglePin = togglePin;
 
-        window.addEventListener('DOMContentLoaded', initPageFilter);
+        async function fetchCommentCounts() {
+            const badgeElements = document.querySelectorAll('[id^="comments-badge-"]');
+            const articleIds = Array.from(badgeElements).map(el => el.id.replace('comments-badge-', ''));
+            if (articleIds.length === 0) return;
+            try {
+                const res = await fetch(`/api/comments?action=batch_counts&article_ids=${articleIds.join(',')}`);
+                if (res.ok) {
+                    const counts = await res.json();
+                    Object.keys(counts).forEach(artId => {
+                        const badge = document.getElementById('comments-badge-' + artId);
+                        if (badge && counts[artId] > 0) {
+                            badge.innerHTML = `<span class="material-symbols-outlined text-[12px] text-primary/70">forum</span>${counts[artId]}`;
+                        }
+                    });
+                }
+            } catch(e) {
+                console.error('[Comments count error]', e);
+            }
+        }
+        window.fetchCommentCounts = fetchCommentCounts;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPageFilter();
+            // Allow initial render to settle, then load comment counts asynchronously
+            setTimeout(fetchCommentCounts, 600);
+        });
 
     })();
     </script>
