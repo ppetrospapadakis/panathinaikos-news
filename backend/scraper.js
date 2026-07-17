@@ -501,7 +501,7 @@ async function scrapeArticlePage(url, categoryHint) {
             'article .article-body', 'article .content', '.article-content',
             '.article-body', '.story-body', '.entry-content', '.post-content',
             '[class*="article-text"]', '[class*="article-content"]',
-            'article p', '.content-area p', 'main p',
+            '.single-article', 'article p', '.content-area p', 'main p',
         ];
         let bodyText = '';
         for (const sel of bodySelectors) {
@@ -521,6 +521,12 @@ async function scrapeArticlePage(url, categoryHint) {
                     } else {
                         bodyText = els.text().replace(/[ \t]+/g, ' ').trim();
                     }
+                    
+                    // Clean promotional junk
+                    bodyText = bodyText.replace(/Μην χάνεις είδηση[\s\S]{0,100}στην Google/gi, '').trim();
+                    bodyText = bodyText.replace(/Ακολουθήστε το .*? στο Google News/gi, '').trim();
+                    bodyText = bodyText.replace(/Βάλε το .*? στην Google/gi, '').trim();
+                    
                     if (bodyText.length > 100) break;
                 }
             } catch (e) {
@@ -529,11 +535,17 @@ async function scrapeArticlePage(url, categoryHint) {
         }
 
         const isOfficial = url.includes('pao.gr') || url.includes('paobc.gr') || url.includes('pao1908.com');
-        const minLength = isOfficial ? 0 : 350;
+        const minLength = isOfficial ? 0 : 500;
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
             return { status: 'skipped_size', length: bodyText ? bodyText.length : 0 };
+        }
+
+        const isVideoStub = (bodyText.includes('Δείτε το σχετικό απόσπασμα') || bodyText.includes('Πατήστε Play')) && bodyText.length < 800;
+        if (isVideoStub) {
+            console.log(`  [PARSING WARNING] Article is a video stub (Watch the video) with length ${bodyText.length}. Skipping.`);
+            return { status: 'skipped_video_stub', length: bodyText.length };
         }
 
         // ── Summary (meta description) ─────────────────────────────────────────
