@@ -169,22 +169,6 @@ const SCRAPE_TARGETS = [
     //     articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', '.entry-title a', 'article a', 'a[href*="/sports/"]'],
     //     baseUrl: 'https://www.sportdog.gr',
     // },
-    // ── AMATEUR / VOLLEYBALL ─────────────────────────────────────────────────
-    {
-        category: 'Ερασιτέχνης',
-        name: 'Gazzetta Volleyball',
-        url: 'https://www.gazzetta.gr/volleyball/panathinaikos',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/volleyball/"]'],
-        baseUrl: 'https://www.gazzetta.gr',
-    },
-
-    {
-        category: 'Ερασιτέχνης',
-        name: 'Gazzetta Polo',
-        url: 'https://www.gazzetta.gr/polo/panathinaikos',
-        articleLinkSelectors: ['h2 a', 'h3 a', '.article-title a', 'a[href*="/polo/"]'],
-        baseUrl: 'https://www.gazzetta.gr',
-    },
     // ── OFFICIAL PORTALS ───────────────────────────────────────────────────────
     {
         category: 'Ποδόσφαιρο',
