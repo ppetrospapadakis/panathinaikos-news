@@ -1216,7 +1216,7 @@ async function loadOpinionArticles() {
     const list = document.getElementById('opinions-list');
     if (!db) return;
     const { data, error } = await db.from('articles')
-        .select('id, title, created_at, image_url, summary, category')
+        .select('id, title, created_at, image_url, summary, category, pinned_at')
         .ilike('category', '%Άποψη%')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -1230,17 +1230,26 @@ async function loadOpinionArticles() {
         const date = new Date(a.created_at);
         const dateStr = date.toLocaleDateString('el-GR', { day:'numeric', month:'short', year:'numeric' });
         const img = a.image_url || DEFAULT_IMG;
+        const pinAgeMs = a.pinned_at ? Date.now() - new Date(a.pinned_at).getTime() : Infinity;
+        const isPinned = pinAgeMs < 2 * 60 * 60 * 1000;
+        const pinBorderClass = isPinned ? 'border-primary/40 bg-primary/5' : '';
+        const pinBtnTitle = isPinned ? 'Unpin' : 'Pin στην αρχική';
+        const pinBtnColor = isPinned ? 'text-primary hover:bg-primary/20' : 'text-on-surface-variant/40 hover:text-primary hover:bg-primary/10';
+        const pinIcon = isPinned ? 'keep_off' : 'keep';
         return `
-        <div class="opinion-card group">
+        <div class="opinion-card group border ${pinBorderClass}">
             <div class="flex gap-3 items-start p-4">
                 <div class="w-[112px] h-[63px] flex-shrink-0 rounded-lg overflow-hidden cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
                     <img src="${img}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='${DEFAULT_IMG}'"/>
                 </div>
                 <div class="flex-1 min-w-0 cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
-                    <p class="text-xs text-primary font-bold uppercase tracking-wider mb-1">✍️ ${dateStr}</p>
+                    <p class="text-xs text-primary font-bold uppercase tracking-wider mb-1">${isPinned ? '📌 PINNED • ' : ''}✍️ ${dateStr}</p>
                     <h4 class="text-sm font-semibold leading-snug line-clamp-2 text-on-surface group-hover:text-primary transition-colors">${a.title}</h4>
                 </div>
                 <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onclick="pinArticle('${a.id}', ${isPinned})" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all ${pinBtnColor}" title="${pinBtnTitle}">
+                        <span class="material-symbols-outlined" style="font-size:16px">${pinIcon}</span>
+                    </button>
                     <button onclick="editOpinion('${a.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-primary hover:bg-primary/10 transition-all" title="Επεξεργασία">
                         <span class="material-symbols-outlined" style="font-size:16px">edit</span>
                     </button>
@@ -1330,6 +1339,18 @@ function adminLogout() {
     window.location.reload();
 }
 window.adminLogout = adminLogout;
+
+async function pinArticle(id, isCurrentlyPinned) {
+    if (isCurrentlyPinned) {
+        const { error } = await db.from('articles').update({ pinned_at: null }).eq('id', id);
+        if (error) { alert('Σφάλμα unpin: ' + error.message); return; }
+    } else {
+        await db.from('articles').update({ pinned_at: null }).not('pinned_at', 'is', null);
+        const { error } = await db.from('articles').update({ pinned_at: new Date().toISOString() }).eq('id', id);
+        if (error) { alert('Σφάλμα pin: ' + error.message); return; }
+    }
+    loadOpinionArticles();
+}
 </script>
 </body>
 </html>

@@ -108,9 +108,20 @@ module.exports = async (req, res) => {
             .from('articles')
             .select('*')
             .not('category', 'eq', 'SystemRoster')
-            .not('category', 'eq', 'SYSTEMROSTER')
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: false });
+            .not('category', 'eq', 'SYSTEMROSTER');
+
+        // Page 1: surface any pinned article first using B-Tree index on pinned_at.
+        // Pages 2+: normal recency order (pinned window is 2h, irrelevant for older pages).
+        if (page === 1) {
+            query = query
+                .order('pinned_at', { ascending: false, nullsFirst: false })
+                .order('created_at', { ascending: false })
+                .order('id', { ascending: false });
+        } else {
+            query = query
+                .order('created_at', { ascending: false })
+                .order('id', { ascending: false });
+        }
           
         if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
           const categoryMap = {
