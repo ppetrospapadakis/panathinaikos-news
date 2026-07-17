@@ -265,8 +265,8 @@ module.exports = async (req, res) => {
         // Image Box
         if (imageUrl) {
             html = html.replace(
-                /id="article-image-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant\/20 shadow-xl hidden"/g,
-                'id="article-image-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/20 shadow-xl"'
+                /id="article-image-box" class="relative w-full aspect-video rounded-none md:rounded-2xl overflow-hidden bg-surface-container-low border-y border-x-0 md:border-x md:border-y border-outline-variant\/20 shadow-xl hidden"/g,
+                'id="article-image-box" class="relative w-full aspect-video rounded-none md:rounded-2xl overflow-hidden bg-surface-container-low border-y border-x-0 md:border-x md:border-y border-outline-variant/20 shadow-xl"'
             );
             html = html.replace(
                 /id="article-image"([^>]*)src=""/g,
@@ -277,8 +277,8 @@ module.exports = async (req, res) => {
         // Bullets (AI Summary)
         if (article.bullets && article.bullets.length > 0) {
             html = html.replace(
-                /id="article-bullets-box" class="ai-summary p-6 bg-surface-container-low rounded-2xl border border-primary\/30 premium-gradient hidden"/g,
-                'id="article-bullets-box" class="ai-summary p-6 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient"'
+                /id="article-bullets-box" class="ai-summary p-6 mx-4 md:mx-0 bg-surface-container-low rounded-2xl border border-primary\/30 premium-gradient hidden"/g,
+                'id="article-bullets-box" class="ai-summary p-6 mx-4 md:mx-0 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient"'
             );
             
             const bulletsListHtml = article.bullets.map(b => `<li class="flex items-start gap-3"><span class="text-primary font-bold mt-1 shrink-0">→</span><span>${b}</span></li>`).join('');
