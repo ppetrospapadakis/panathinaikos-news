@@ -94,9 +94,16 @@ module.exports = async (req, res) => {
             } else {
                 u = new URL(imageUrl);
             }
+            const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
             const pathLower = u.pathname.toLowerCase();
-            const filenameBrandingIndicators = ['logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark'];
-            const isBranding = filenameBrandingIndicators.some(ind => pathLower.includes(ind));
+            const filenameBrandingIndicators = [
+                'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
+                'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
+            ];
+            const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
+            let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
+            if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
             } else if (!u.hostname.includes('localhost') && !u.hostname.includes('panathinaikosnews.gr') && !u.hostname.includes('wsrv.nl')) {
