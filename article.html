@@ -119,10 +119,10 @@
             </div>
         </div>
 
-        <div class="max-w-[1440px] mx-auto px-8 py-16 grid grid-cols-1 md:grid-cols-12 gap-8">
+        <div class="max-w-[1440px] mx-auto px-0 md:px-8 py-6 md:py-16 grid grid-cols-1 md:grid-cols-12 gap-8">
             <div class="md:col-span-8 mb-10 md:mb-0">
             <!-- Skeleton Loader -->
-            <div id="article-skeleton" class="space-y-6 animate-pulse">
+            <div id="article-skeleton" class="space-y-6 animate-pulse px-4 md:px-0">
                 <div class="h-5 bg-surface-container-high w-1/4 rounded"></div>
                 <div class="h-10 bg-surface-container-high w-full rounded"></div>
                 <div class="h-8 bg-surface-container-high w-3/4 rounded"></div>
@@ -149,12 +149,12 @@
                 </div>
 
                 <!-- ② SINGLE PRIMARY HERO IMAGE -->
-                <div id="article-image-box" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/20 shadow-xl hidden">
+                <div id="article-image-box" class="relative w-full aspect-video rounded-none md:rounded-2xl overflow-hidden bg-surface-container-low border-y border-x-0 md:border-x md:border-y border-outline-variant/20 shadow-xl hidden">
                     <img id="article-image" referrerpolicy="no-referrer" class="w-full h-full object-contain bg-black/20" src="" alt="Article image" loading="eager" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY'"/>
                 </div>
 
                 <!-- ③ F5 QUICK-TAKES BOX — directly below image -->
-                <section id="article-bullets-box" class="ai-summary p-6 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient hidden">
+                <section id="article-bullets-box" class="ai-summary p-6 mx-4 md:mx-0 bg-surface-container-low rounded-2xl border border-primary/30 premium-gradient hidden">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-primary text-xl">bolt</span>
                         <span class="font-label text-label text-primary uppercase tracking-widest font-bold">AI SUMMARY</span>
@@ -164,12 +164,12 @@
                 </section>
 
                 <!-- ④ LONG-FORM AI ARTICLE BODY -->
-                <div id="article-body" class="leading-relaxed">
+                <div id="article-body" class="leading-relaxed px-4 md:px-0">
                     <!-- Populated by JS — all body images are stripped, only text paragraphs rendered here -->
                 </div>
 
                 <!-- ⑤ MINIMAL SOURCE REFERENCE BUTTON -->
-                <div id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center">
+                <div id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center px-4 md:px-0">
                     <a id="article-original-link" href="#" target="_blank" rel="noopener noreferrer"
                        class="inline-flex items-center gap-3 px-8 py-4 bg-surface-container border border-outline-variant text-on-surface font-body text-body rounded-2xl hover:bg-surface-container-high hover:border-primary/40 active:scale-[0.98] transition-all">
                         <span class="material-symbols-outlined text-primary text-[18px]">link</span>
@@ -193,7 +193,7 @@
             </div> <!-- End of md:col-span-8 -->
 
             <!-- Sidebar Stream Wrapper -->
-            <div id="stream-wrapper" class="md:col-span-4 hidden flex-col md:mt-[112px]">
+            <div id="stream-wrapper" class="md:col-span-4 hidden flex-col md:mt-[112px] px-4 md:px-0">
                 <div class="flex items-center gap-2 mb-4 px-2">
                     <span class="material-symbols-outlined text-primary text-xl">rss_feed</span>
                     <h2 class="font-label text-label text-primary uppercase tracking-widest font-bold">Ροη Ειδησεων</h2>

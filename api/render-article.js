@@ -163,7 +163,7 @@ module.exports = async (req, res) => {
                         <span>Διαβάστε σχετικό άρθρο στο <span style="color: ${color}" class="font-bold">${name}</span></span>
                     </a>`;
             }).join('');
-            sourcesHtml = `<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 flex flex-wrap justify-center gap-4">${linksHtml}</div>`;
+            sourcesHtml = `<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 flex flex-wrap justify-center gap-4 px-4 md:px-0">${linksHtml}</div>`;
         }
 
         const pubDate = new Date(article.created_at);
@@ -302,14 +302,14 @@ module.exports = async (req, res) => {
 
         // Remove duplicate logo block injection in bodyHtml since it's already in sourcesHtml
         html = html.replace(
-            /<div id="article-body" class="leading-relaxed">[\s\S]*?<\/div>/g,
-            `<div id="article-body" class="leading-relaxed">${bodyHtml}</div>`
+            /<div id="article-body" class="leading-relaxed px-4 md:px-0">[\s\S]*?<\/div>/g,
+            `<div id="article-body" class="leading-relaxed px-4 md:px-0">${bodyHtml}</div>`
         );
         // Replace the entire original source container block using regex matching the HTML structure
         const sourceContainerRegex = /<div id="article-source-container"[\s\S]*?<\/div>\s*<\/div>\s*<!-- ⑤ MINIMAL SOURCE REFERENCE BUTTON -->/m;
         // Since matching multiline can be tricky, we'll replace a more robust substring or just use string splitting.
         // Actually, let's just do a string replace of the known div.
-        const sourceContainerStart = '<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center">';
+        const sourceContainerStart = '<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 text-center px-4 md:px-0">';
         const sourceContainerEnd = '</a>\n                </div>';
         
         const blockStart = html.indexOf(sourceContainerStart);
