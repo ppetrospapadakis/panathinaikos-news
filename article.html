@@ -845,12 +845,12 @@
                     <h4 class="text-sm font-bold uppercase tracking-wider text-primary">Προσθηκη Σχολιου</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="text-xs font-bold text-on-surface-variant block mb-1">Όνομα / Ψευδώνυμο</label>
+                            <label for="comment-user-name" class="text-xs font-bold text-on-surface-variant block mb-1">Όνομα / Ψευδώνυμο</label>
                             <input type="text" id="comment-user-name" placeholder="π.χ. Gate13" required maxlength="50" class="w-full bg-background border border-outline-variant rounded-xl p-3 text-sm focus:outline-none focus:border-primary/50 text-on-surface">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-on-surface-variant block mb-1">Το σχόλιό σας</label>
+                        <label for="comment-text" class="text-xs font-bold text-on-surface-variant block mb-1">Το σχόλιό σας</label>
                         <textarea id="comment-text" rows="4" placeholder="Γράψτε ένα κόσμιο σχόλιο..." required maxlength="1000" class="w-full bg-background border border-outline-variant rounded-xl p-3 text-sm focus:outline-none focus:border-primary/50 text-on-surface resize-none"></textarea>
                     </div>
                     <button type="submit" id="submit-comment-btn" class="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl text-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
