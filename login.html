@@ -24,6 +24,162 @@
     <!-- Compiled Tailwind CSS -->
     <link rel="preload" href="/style.css?v=4" as="style">
     <link rel="stylesheet" href="/style.css?v=4">
+    <style>
+        /* Quill Dark Mode Customization */
+        .ql-toolbar.ql-snow {
+            border-color: rgba(63, 73, 64, 0.3) !important;
+            background-color: #1a1c20 !important;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .ql-container.ql-snow {
+            border-color: rgba(63, 73, 64, 0.3) !important;
+            border-radius: 0 0 12px 12px !important;
+            font-size: 15px !important;
+            font-family: 'Geist', sans-serif !important;
+            color: #e2e2e8 !important;
+            background-color: #1e2024 !important;
+        }
+        .ql-editor.ql-blank::before {
+            color: rgba(226, 226, 232, 0.3) !important;
+            font-style: normal !important;
+        }
+        .ql-snow .ql-stroke {
+            stroke: #bfc9bd !important;
+        }
+        .ql-snow .ql-fill {
+            fill: #bfc9bd !important;
+        }
+        .ql-snow .ql-picker {
+            color: #bfc9bd !important;
+        }
+        
+        /* Lock Screen */
+        #lock-screen { position:fixed; inset:0; z-index:200; background:#111317; display:flex; align-items:center; justify-content:center; }
+        .lock-card { background:#1a1c20; border:1px solid #3f4940; border-radius:24px; padding:48px; max-width:420px; width:100%; text-align:center; }
+        .lock-card .icon { font-size:56px; color:#84d999; margin-bottom:24px; }
+        .lock-card h1 { font-size:28px; font-weight:700; color:#e2e2e8; margin-bottom:8px; }
+        .lock-card p { color:#bfc9bd; margin-bottom:32px; font-size:15px; }
+        .lock-input { width:100%; background:#111317; border:1.5px solid #3f4940; border-radius:12px; padding:14px 18px; color:#e2e2e8; font-size:16px; outline:none; transition:border-color 0.2s; text-align:center; letter-spacing:4px; font-family:'Geist',sans-serif; }
+        .lock-input:focus { border-color:#84d999; }
+        .lock-btn { margin-top:16px; width:100%; background:#84d999; color:#00391a; font-weight:700; font-size:15px; padding:14px; border-radius:12px; border:none; cursor:pointer; transition:background 0.2s, transform 0.1s; }
+        .lock-btn:hover { background:#a8e6b8; }
+        .lock-btn:active { transform:scale(0.98); }
+        .lock-error { color:#ffb4ab; font-size:13px; margin-top:10px; min-height:20px; }
+
+        /* Editor */
+        .editor-input { background:#1a1c20; border:1.5px solid #3f4940; border-radius:12px; padding:16px 20px; color:#e2e2e8; font-size:15px; font-family:'Geist',sans-serif; width:100%; outline:none; transition:border-color 0.2s; resize:none; }
+        .editor-input:focus { border-color:#84d999; }
+        .editor-input::placeholder { color:#5a6360; }
+
+        /* Toolbar */
+        .toolbar-btn { background:#1e2024; border:1px solid #3f4940; border-radius:8px; padding:6px 10px; color:#bfc9bd; cursor:pointer; font-size:13px; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; }
+        .toolbar-btn:hover { background:#2a2d31; border-color:#84d999; color:#84d999; }
+
+        /* Word count */
+        .word-count { font-size:12px; color:#5a6360; }
+
+        /* Article cards */
+        .opinion-card { background:#1a1c20; border:1px solid #3f4940; border-radius:16px; overflow:hidden; cursor:pointer; transition:all 0.2s; }
+        .opinion-card:hover { border-color:#84d999; transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
+
+        /* Status badge */
+        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+        .status-success { background:rgba(132,217,153,0.12); color:#84d999; border:1px solid rgba(132,217,153,0.3); }
+        .status-error { background:rgba(255,180,171,0.12); color:#ffb4ab; border:1px solid rgba(255,180,171,0.3); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:#3f4940; border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:#84d999; }
+
+        /* Draggable Player Tokens */
+        .draggable-player {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: grab;
+            z-index: 10;
+            user-select: none;
+        }
+        .draggable-player.dragging {
+            cursor: grabbing;
+            z-index: 100;
+            opacity: 0.8;
+        }
+        .draggable-player.selected .avatar {
+            border-color: #ebc23e !important;
+            box-shadow: 0 0 16px rgba(235,194,62,0.6) !important;
+        }
+        .draggable-player .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2.5px solid #84d999;
+            background: #006633;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #84d999;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .draggable-player.basketball .avatar {
+            background: #1a4a1a;
+        }
+        .draggable-player .name-tag {
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .draggable-player .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ebc23e;
+            color: #2a1800;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 8px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .draggable-player.football .badge {
+            background: #84d999;
+            color: #003300;
+        }
+
+        /* Player edit popover modal */
+        .player-popover {
+            position: absolute;
+            z-index: 150;
+            width: 200px;
+            background: #1e2024;
+            border: 1px solid #3f4940;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+    </style>
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden">
 
