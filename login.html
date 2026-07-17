@@ -48,61 +48,7 @@
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden">
 
-<!-- ═══ LOCK SCREEN ═══ -->
-<div id="lock-screen" onclick="window.location.href='/'">
-    <div class="lock-card" onclick="event.stopPropagation()">
-        <div class="icon material-symbols-outlined">lock</div>
-        <h1>Admin Panel</h1>
-        <p>Εισάγετε τον κωδικό για να αποκτήσετε πρόσβαση στο admin panel.</p>
-        <input class="lock-input" id="lock-password" type="password" placeholder="••••••••" maxlength="30"
-               onkeydown="if(event.key==='Enter') checkPassword()"/>
-        <button class="lock-btn" onclick="checkPassword()">
-            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">arrow_forward</span>
-            Είσοδος
-        </button>
-        <div class="lock-error" id="lock-error"></div>
-        <p style="margin-top:24px;font-size:12px;color:#3f4940">Panathinaikos News · Private Editor</p>
-    </div>
-</div>
 
-<!-- ═══ TOP HEADER ═══ -->
-    <header id="admin-header" class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant transition-all duration-300">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
-            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSidebar()" aria-label="Menu">
-                <span class="material-symbols-outlined text-primary">menu</span>
-            </button>
-            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/></a>
-            <a href="/" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-sm">
-                <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
-                Πίσω
-            </a>
-        </div>
-    </header>
-
-<!-- ═══ ADMIN SIDEBAR ═══ -->
-<aside id="admin-sidebar" class="fixed inset-y-0 left-0 w-[260px] z-[60] bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full p-4 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out hidden">
-    <div class="flex items-center justify-between mb-8 px-2 pt-2">
-        <div>
-            <h2 class="font-h2 text-[20px] font-bold text-primary cursor-pointer" onclick="window.location.href='/'">Editorial</h2>
-            <p class="text-[11px] text-on-surface-variant opacity-60">Admin Controls</p>
-        </div>
-        <button class="md:hidden material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleSidebar()">close</button>
-    </div>
-    
-    <nav class="flex-grow flex flex-col gap-2">
-        <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">edit_note</span>
-            <span>Article Editor</span>
-        </button>
-        <button id="admin-tab-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">sports_soccer</span>
-            <span>Roster Ποδοσφαίρου</span>
-        </button>
-        <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">sports_basketball</span>
-            <span>Roster Μπάσκετ</span>
-        </button>
-        
 <!-- ═══ LOCK SCREEN ═══ -->
 <div id="lock-screen" onclick="window.location.href='/'">
     <div class="lock-card" onclick="event.stopPropagation()">
