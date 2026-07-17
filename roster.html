@@ -49,12 +49,14 @@
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8">
             <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
             <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-[200px] object-contain" width="200" height="74"/></a>
-            <div class="w-6 h-6"></div>
+            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="window.location.href='/?search=open'" aria-label="Search">
+                <span class="material-symbols-outlined text-primary">search</span>
+            </button>
         </div>
     </header>
 
@@ -253,6 +255,11 @@
             </div>
         </div>
 
+        <!-- ═══ MORE NEWS ═══ -->
+        <div id="more-news-section" class="max-w-[1440px] mx-auto px-8 py-12 hidden border-t border-outline-variant/30 mt-12">
+            <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="more-news-grid"></div>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -419,6 +426,14 @@
         // INIT & DYNAMIC SUPABASE LOADING
         // ─────────────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
+            // Scroll active tab into view horizontally
+            const el = document.getElementById('tab-roster');
+            if (el && el.parentElement) {
+                const container = el.parentElement;
+                const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
+                container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+            }
+
             // Load Supabase script dynamically
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -499,6 +514,37 @@
                     renderCourtPlayers('court-backup', basketballBackup);
                     renderSquadList('squad-rest-basketball', basketballRest);
                     document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                }
+
+                // Fetch latest news
+                const { data: newsData } = await db.from('articles')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+                if (newsData && newsData.length > 0) {
+                    const grid = document.getElementById('more-news-grid');
+                    if (grid) {
+                        grid.innerHTML = newsData.map(a => {
+                            const date = new Date(a.created_at).toLocaleDateString('el-GR', {day:'2-digit', month:'2-digit', year:'numeric'});
+                            const slug = (a.title || '').toLowerCase().replace(/[^a-z0-9\u0370-\u03ff]+/g, '-').replace(/(^-|-$)/g, '');
+                            let cat = 'podosfairo';
+                            if (a.category === 'Μπάσκετ') cat = 'basket';
+                            if (a.category === 'Ερασιτέχνης') cat = 'erasitexnis';
+                            const url = `/${cat}/${slug}-id=${a.id}`;
+                            const img = a.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+                            return `
+                            <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY'"/>
+                                </div>
+                                <div class="p-5 flex flex-col flex-1">
+                                    <span class="font-label text-label text-primary uppercase mb-1">${date}</span>
+                                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                                </div>
+                            </a>`;
+                        }).join('');
+                        document.getElementById('more-news-section').classList.remove('hidden');
+                    }
                 }
 
             } catch (err) {

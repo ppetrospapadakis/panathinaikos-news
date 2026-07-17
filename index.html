@@ -387,7 +387,14 @@
             const activeTab = TAB_MAP[category];
             if (activeTab) {
                 const el = document.getElementById(activeTab);
-                if (el) el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
+                if (el) {
+                    el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
+                    const container = el.parentElement;
+                    if (container) {
+                        const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
+                        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                    }
+                }
             }
 
             const DRAWER = ['nav-all','nav-football','nav-basketball','nav-amateur','nav-opinion'];
@@ -934,6 +941,10 @@
             activeCategory = cat;
             updateNavStyles(cat);
             startLoad();
+
+            if (new URLSearchParams(window.location.search).get('search') === 'open') {
+                setTimeout(() => toggleSearch(), 300);
+            }
         }
 
         window.addEventListener('DOMContentLoaded', initPageFilter);
