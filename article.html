@@ -938,6 +938,32 @@
                 toast.textContent = '';
             }
 
+            // --- Client-side Rate Limit Control (2 comments max per 15 mins per article) ---
+            const rateLimitKey = `rate_limit_comments_${currentArticleId}`;
+            let rateData = { count: 0, firstSubmittedAt: null };
+            try {
+                const raw = localStorage.getItem(rateLimitKey);
+                if (raw) {
+                    rateData = JSON.parse(raw);
+                }
+            } catch (e) {}
+
+            const now = Date.now();
+            const fifteenMinsMs = 15 * 60 * 1000;
+
+            if (rateData.firstSubmittedAt && (now - rateData.firstSubmittedAt < fifteenMinsMs)) {
+                if (rateData.count >= 2) {
+                    const remainingMs = fifteenMinsMs - (now - rateData.firstSubmittedAt);
+                    const remainingMins = Math.ceil(remainingMs / (60 * 1000));
+                    showToast(`Έχετε φτάσει το όριο των 2 σχολίων. Παρακαλώ περιμένετε ${remainingMins} λεπτά προτού ξανασχολιάσετε.`);
+                    return;
+                }
+            } else {
+                // Limit window expired or does not exist, reset counter
+                rateData.count = 0;
+                rateData.firstSubmittedAt = null;
+            }
+
             const hasLink = /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(text) ||
                             /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(name);
             if (hasLink) {
@@ -971,6 +997,16 @@
 
                 if (res.ok) {
                     textEl.value = '';
+                    
+                    // Increment rate limit trackers
+                    if (rateData.count === 0) {
+                        rateData.firstSubmittedAt = now;
+                    }
+                    rateData.count += 1;
+                    try {
+                        localStorage.setItem(rateLimitKey, JSON.stringify(rateData));
+                    } catch (e) {}
+
                     await loadComments();
                     await fetchCommentCounts();
                 } else {
