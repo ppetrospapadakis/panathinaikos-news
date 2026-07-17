@@ -98,7 +98,7 @@
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8">
             <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
@@ -175,7 +175,7 @@
     <main class="mt-[80px]">
 
         <!-- Hero Section -->
-        <section class="relative w-full h-[320px] min-h-[240px] flex flex-col justify-end px-8 pb-10 overflow-hidden">
+        <section class="relative w-full h-[320px] min-h-[240px] flex flex-col justify-end px-4 md:px-8 pb-10 overflow-hidden">
             <div class="absolute inset-0 z-0">
                 <div class="w-full h-full bg-cover bg-center scale-105" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY')"></div>
                 <div class="absolute inset-0 premium-gradient-overlay"></div>
@@ -188,7 +188,7 @@
         </section>
 
         <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
-            <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
                 <a id="tab-all" href="/" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed(null,'tab-all');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
                 <a id="tab-football" href="/podosfairo" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ποδόσφαιρο','tab-football');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
                 <a id="tab-basketball" href="/basket" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Μπάσκετ','tab-basketball');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
@@ -199,7 +199,7 @@
         </div>
 
         <!-- Dynamic Articles Grid (3-Phase Staggered Loading) -->
-        <section class="max-w-[1440px] mx-auto px-8 py-16" id="main-feed-section">
+        <section class="max-w-[1440px] mx-auto px-4 md:px-8 py-16" id="main-feed-section">
             <!-- Phase 1 (Hero) + Phase 2 (Stream) grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 min-h-[500px]">
             <!-- Hero Section (Left 8 cols) -->
@@ -238,7 +238,7 @@
         </section>
 
         <!-- Quick links bar -->
-        <section class="max-w-[1440px] mx-auto px-8 pb-16">
+        <section class="max-w-[1440px] mx-auto px-4 md:px-8 pb-16">
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="quick-links-container">
             </div>
         </section>
@@ -246,7 +246,7 @@
 
     <!-- Footer -->
     <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant">
-        <div class="max-w-[1440px] mx-auto px-8 flex flex-col items-center gap-8">
+        <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col items-center gap-8">
             <div class="font-h4 text-h4 text-primary font-bold tracking-tighter">PanathinaikosNews Editorial</div>
             <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
                 <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/privacy-policy">Privacy Policy</a>
