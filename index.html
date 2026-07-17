@@ -332,10 +332,11 @@
                 const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
                 const BRANDING_FN = ['logo','icon','avatar','branding','placeholder','fallback','watermark','og-image','og_image','site-logo','site_logo','default-image','default_image','noimage','no-image','blank','generic','share-image','share_image'];
                 const BRANDING_PATH = ['/logos/','/logo/','/brand/','/branding/','/default_images/','/default-images/','/assets/images/','/site-assets/'];
-                const isBranding = BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p));
+                const isInternal = u.hostname.includes('localhost') || u.hostname.includes('panathinaikosnews.gr') || imageUrl.startsWith('/');
+                const isBranding = !isInternal && (BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p)));
                 if (isBranding) {
                     a.image_url = DEFAULT_IMG;
-                } else if (!u.hostname.includes('localhost') && !u.hostname.includes('panathinaikosnews.gr') && !u.hostname.includes('wsrv.nl')) {
+                } else if (!isInternal && !u.hostname.includes('wsrv.nl')) {
                     // Proxy external image to reduce network payload & serve optimized WebP
                     a.image_url = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=480&output=webp&q=80`;
                 }

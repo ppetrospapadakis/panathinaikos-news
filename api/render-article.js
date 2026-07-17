@@ -300,15 +300,7 @@ module.exports = async (req, res) => {
             bodyHtml = formatBodyContent(article.summary);
         }
 
-        if (isManual) {
-            const logoBlock = `
-                <div class="flex flex-col items-center justify-center py-10 border-t border-outline-variant/30 mt-12 space-y-3">
-                    <img src="/logo.png" alt="PanathinaikosNews" class="h-12 md:h-14 w-auto object-contain opacity-90 transition-transform hover:scale-105 duration-300"/>
-                    <p class="text-xs uppercase tracking-[0.25em] text-primary/80 font-bold">PanathinaikosNews Editorial</p>
-                </div>`;
-            bodyHtml += logoBlock;
-        }
-
+        // Remove duplicate logo block injection in bodyHtml since it's already in sourcesHtml
         html = html.replace(
             /<div id="article-body" class="leading-relaxed">[\s\S]*?<\/div>/g,
             `<div id="article-body" class="leading-relaxed">${bodyHtml}</div>`
