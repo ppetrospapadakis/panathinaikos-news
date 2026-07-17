@@ -132,12 +132,12 @@ const SCRAPE_TARGETS = [
     {
         category: 'Μπάσκετ',
         name: 'PAO BC Official',
-        url: 'https://www.paobc.gr/news/',
-        articleLinkSelectors: ['.blog__results__items__item__title a', 'a.linkbox', 'h3 a', 'article a'],
+        url: 'https://www.paobc.gr/post-sitemap1.xml',
+        articleLinkSelectors: ['loc'],
         baseUrl: 'https://www.paobc.gr',
         isOfficial: true,
         retryOn403: true,
-        timeout: 30000, // PAO BC is slow — needs extra time
+        timeout: 30000,
     },
 
     {
@@ -292,6 +292,7 @@ async function scrapeArticleLinks(target, logErrorCallback) {
         const html = response.data;
         const $ = cheerio.load(html);
         const links = new Set();
+        const isSitemap = target.url.endsWith('.xml') || target.url.includes('sitemap');
 
         for (const sel of target.articleLinkSelectors) {
             try {
@@ -300,9 +301,14 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                     console.log(`  [PARSING WARNING] Selector '${sel}' returned no elements on ${target.url}`);
                 }
                 elements.each((_, el) => {
-                    let href = $(el).attr('href') || '';
+                    let href = '';
+                    if (isSitemap) {
+                        href = $(el).text().trim();
+                    } else {
+                        href = $(el).attr('href') || '';
+                    }
                     if (!href) {
-                        console.log(`  [PARSING WARNING] Element matched by '${sel}' is missing href attribute`);
+                        console.log(`  [PARSING WARNING] Element matched by '${sel}' is missing URL value`);
                         return;
                     }
                     // Make absolute
@@ -314,7 +320,7 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
                         if (u.pathname === '/' || u.pathname === '') return;
                         
-                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/'];
+                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/'];
                         if (blacklist.some(b => u.pathname.includes(b))) return;
                         
                         // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
@@ -334,7 +340,7 @@ async function scrapeArticleLinks(target, logErrorCallback) {
     } catch (err) {
         console.warn(`[${target.name}] Failed to scrape listing page: ${err.message}`);
         if (logErrorCallback) logErrorCallback(err.message);
-        return [];
+        return null; // Return null instead of [] on error to indicate failure
     }
 }
 
@@ -815,6 +821,19 @@ async function main() {
             });
         }
     }
+
+    function logSkippedArticle(sourceName, url, title, reason, details) {
+        if (!runStats.skipped_details) runStats.skipped_details = [];
+        if (runStats.skipped_details.length < 100) {
+            runStats.skipped_details.push({
+                source: sourceName,
+                url: url || '',
+                title: title || 'Unknown Title',
+                reason: reason, // 'relevance', 'size', 'promo', 'crawling_failed'
+                details: details || ''
+            });
+        }
+    }
     
     // Initialize stats per source target
     SCRAPE_TARGETS.forEach(target => {
@@ -874,6 +893,12 @@ async function main() {
         console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
 
         const links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
+        if (links === null) {
+            runStats.sources[target.name].skipped_crawling_failed++;
+            runStats.totals.skipped_crawling_failed++;
+            logSkippedArticle(target.name, target.url, 'Listing Page Index', 'crawling_failed', 'Αδυναμία φόρτωσης αρχικής σελίδας (503/403/Timeout)');
+            continue;
+        }
         if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
 
         runStats.sources[target.name].scraped += links.length;
@@ -895,6 +920,7 @@ async function main() {
                 console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
+                logSkippedArticle(target.name, articleUrl, 'Unknown Title (Excluded by URL)', 'promo', 'Φίλτρο διεύθυνσης URL (Promo/Live show)');
                 continue;
             }
 
@@ -907,11 +933,13 @@ async function main() {
                 logRunError(target.name, articleUrl, 'article_fetch', errMsg);
                 runStats.sources[target.name].skipped_crawling_failed++;
                 runStats.totals.skipped_crawling_failed++;
+                logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
                 continue;
             }
             if (scraped.status === 'skipped_size') {
                 runStats.sources[target.name].skipped_size++;
                 runStats.totals.skipped_size++;
+                logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Short)', 'size', `Πολύ μικρό κείμενο: ${scraped.length || 0} χαρακτήρες (Video/Gallery)`);
                 continue;
             }
 
@@ -920,6 +948,7 @@ async function main() {
                 console.log(`  [SKIP] Not PAO-relevant: ${scraped.title.substring(0, 50)}`);
                 runStats.sources[target.name].skipped_relevance++;
                 runStats.totals.skipped_relevance++;
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Τοπικό φίλτρο λέξεων (Not PAO-relevant)');
                 continue;
             }
 
@@ -929,10 +958,11 @@ async function main() {
                 console.log(`[SKIP] Promotional/Live show article ignored by Title: ${scraped.title}`);
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο τίτλου (Promo/Live show)');
                 continue;
             }
 
-        // Cross-category URL guard: prevent basketball articles leaking into football source and vice versa
+            // Cross-category URL guard: prevent basketball articles leaking into football source and vice versa
             const urlLower = articleUrl.toLowerCase();
             const isBasketUrl = /\/(mpasket|basket|basketball)\//.test(urlLower);
             const isFootballUrl = /\/(podosfairo|football|soccer)\//.test(urlLower);
@@ -940,12 +970,14 @@ async function main() {
                 console.log(`  [SKIP] Basketball URL in football source: ${scraped.title.substring(0, 50)}`);
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Μπάσκετ σε Ποδόσφαιρο)');
                 continue;
             }
             if (target.category === 'Μπάσκετ' && isFootballUrl) {
                 console.log(`  [SKIP] Football URL in basketball source: ${scraped.title.substring(0, 50)}`);
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Ποδόσφαιρο σε Μπάσκετ)');
                 continue;
             }
 
@@ -1138,6 +1170,7 @@ async function main() {
                 console.log(`    [SKIP] AI evaluated article as NOT relevant: "${scraped.title}"`);
                 runStats.sources[target.name].skipped_relevance++;
                 runStats.totals.skipped_relevance++;
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Μη σχετικό περιεχόμενο (Relevance)');
 
                 // FIX: Save irrelevant URLs to prevent infinite retries
                 if (!isDryRun) {

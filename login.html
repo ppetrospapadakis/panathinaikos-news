@@ -282,7 +282,7 @@
                         "on-tertiary":"#3c2f00","inverse-surface":"#e2e2e8","tertiary":"#ebc23e",
                         "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
                         "surface":"#111317","primary":"#84d999","on-error":"#690005",
-                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20",
+                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20","surface-container-lowest":"#0b0d10",
                         "inverse-primary":"#0f6d39","on-background":"#e2e2e8",
                         "on-surface":"#e2e2e8","secondary":"#a0cfaa","on-secondary":"#003918",
                         "on-primary":"#00391a","surface-container":"#1e2024",
@@ -1005,6 +1005,169 @@ function checkPassword() {
     }
 }
 
+// ── Quill Visual Resizer & Align Controls ────────────────────────────────────
+let currentResizeTarget = null;
+let resizerOverlay = null;
+
+function showResizer(el) {
+    currentResizeTarget = el;
+    const container = document.getElementById('editor-container');
+    if (!container) return;
+
+    if (!resizerOverlay) {
+        resizerOverlay = document.createElement('div');
+        resizerOverlay.id = 'quill-resizer-overlay';
+        resizerOverlay.style.position = 'absolute';
+        resizerOverlay.style.border = '2px dashed #84d999';
+        resizerOverlay.style.zIndex = '1000';
+        resizerOverlay.style.pointerEvents = 'none';
+        resizerOverlay.style.boxSizing = 'border-box';
+        
+        // Handle
+        const handle = document.createElement('div');
+        handle.style.position = 'absolute';
+        handle.style.width = '14px';
+        handle.style.height = '14px';
+        handle.style.background = '#84d999';
+        handle.style.border = '2px solid #111317';
+        handle.style.right = '-7px';
+        handle.style.bottom = '-7px';
+        handle.style.cursor = 'se-resize';
+        handle.style.pointerEvents = 'auto';
+        handle.style.borderRadius = '50%';
+        
+        // Drag logic
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const startWidth = el.offsetWidth || el.getBoundingClientRect().width;
+            const startHeight = el.offsetHeight || el.getBoundingClientRect().height;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            
+            function onMouseMove(moveEv) {
+                const deltaX = moveEv.clientX - startX;
+                const newWidth = Math.max(50, startWidth + deltaX);
+                
+                if (el.tagName === 'IMG') {
+                    el.style.width = newWidth + 'px';
+                    el.style.height = 'auto';
+                } else {
+                    const ratio = startHeight / startWidth;
+                    el.style.width = newWidth + 'px';
+                    el.style.height = (newWidth * ratio) + 'px';
+                }
+                updateOverlayPos();
+            }
+            
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                if (quill) quill.update();
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+        
+        // Align controls
+        const controls = document.createElement('div');
+        controls.style.position = 'absolute';
+        controls.style.top = '-36px';
+        controls.style.left = '50%';
+        controls.style.transform = 'translateX(-50%)';
+        controls.style.background = '#1a1c20';
+        controls.style.border = '1px solid #3f4940';
+        controls.style.borderRadius = '8px';
+        controls.style.display = 'flex';
+        controls.style.gap = '2px';
+        controls.style.padding = '2px';
+        controls.style.pointerEvents = 'auto';
+        
+        const alignments = [
+            { icon: 'format_align_left', value: 'left' },
+            { icon: 'format_align_center', value: 'center' },
+            { icon: 'format_align_right', value: 'right' }
+        ];
+        
+        alignments.forEach(align => {
+            const btn = document.createElement('button');
+            btn.className = 'material-symbols-outlined text-xs p-1 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded transition-colors';
+            btn.style.fontSize = '16px';
+            btn.innerText = align.icon;
+            btn.type = 'button';
+            btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (align.value === 'center') {
+                    el.style.display = 'block';
+                    el.style.margin = '10px auto';
+                    el.style.float = 'none';
+                } else if (align.value === 'left') {
+                    el.style.display = 'inline';
+                    el.style.margin = '10px 10px 10px 0';
+                    el.style.float = 'left';
+                } else if (align.value === 'right') {
+                    el.style.display = 'inline';
+                    el.style.margin = '10px 0 10px 10px';
+                    el.style.float = 'right';
+                }
+                updateOverlayPos();
+                if (quill) quill.update();
+            };
+            controls.appendChild(btn);
+        });
+
+        // Delete button
+        const delBtn = document.createElement('button');
+        delBtn.className = 'material-symbols-outlined text-xs p-1 text-error hover:bg-error/15 rounded transition-colors';
+        delBtn.style.fontSize = '16px';
+        delBtn.innerText = 'delete';
+        delBtn.type = 'button';
+        delBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const blot = Quill.find(el);
+            if (blot) {
+                blot.deleteAt(0, 1);
+            } else {
+                el.remove();
+            }
+            hideResizer();
+            if (quill) quill.update();
+        };
+        controls.appendChild(delBtn);
+        
+        resizerOverlay.appendChild(handle);
+        resizerOverlay.appendChild(controls);
+        container.style.position = 'relative'; // ensure overlay coordinates map correctly
+        container.appendChild(resizerOverlay);
+    }
+    
+    updateOverlayPos();
+    resizerOverlay.style.display = 'block';
+}
+
+function updateOverlayPos() {
+    if (!currentResizeTarget || !resizerOverlay) return;
+    const container = document.getElementById('editor-container');
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = currentResizeTarget.getBoundingClientRect();
+    
+    resizerOverlay.style.left = (targetRect.left - containerRect.left + container.scrollLeft) + 'px';
+    resizerOverlay.style.top = (targetRect.top - containerRect.top + container.scrollTop) + 'px';
+    resizerOverlay.style.width = targetRect.width + 'px';
+    resizerOverlay.style.height = targetRect.height + 'px';
+}
+
+function hideResizer() {
+    currentResizeTarget = null;
+    if (resizerOverlay) {
+        resizerOverlay.style.display = 'none';
+    }
+}
+
 // ── Init ────────────────────────────────────────────────────────────────────
 let quill = null;
 let editingArticleId = null;
@@ -1056,6 +1219,26 @@ function initEditor() {
     if (qEditor) {
         qEditor.style.minHeight = '320px';
     }
+
+    // Image/Video Resize listeners
+    quill.root.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.tagName === 'IMG' || target.tagName === 'IFRAME') {
+            showResizer(target);
+        } else {
+            hideResizer();
+        }
+    });
+
+    if (qEditor) {
+        qEditor.addEventListener('scroll', () => {
+            if (currentResizeTarget) updateOverlayPos();
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        if (currentResizeTarget) updateOverlayPos();
+    });
 
     quill.on('text-change', () => {
         updateWordCount();

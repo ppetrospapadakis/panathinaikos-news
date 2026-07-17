@@ -287,6 +287,49 @@ function selectRun(runId) {
         `;
     });
 
+    // Generate skipped details list
+    const skippedDetails = run.stats?.skipped_details || [];
+    let skippedDetailsHtml = '';
+    if (skippedDetails.length > 0) {
+        const itemsHtml = skippedDetails.map(item => {
+            let reasonBadge = '';
+            if (item.reason === 'relevance') reasonBadge = '<span class="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">ΑΣΧΕΤΟ</span>';
+            else if (item.reason === 'size') reasonBadge = '<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">ΜΙΚΡΟ</span>';
+            else if (item.reason === 'promo') reasonBadge = '<span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">ΠΡΟΩΘΗΤΙΚΟ</span>';
+            else if (item.reason === 'crawling_failed') reasonBadge = '<span class="bg-red-500/10 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">CRAWL FAIL</span>';
+
+            return `
+                <div class="p-2.5 bg-surface-container rounded-lg border border-outline-variant/10 flex flex-col gap-1 text-[11px] text-left">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="font-bold text-on-surface leading-tight break-all flex-1">${item.title}</div>
+                        <div class="shrink-0 flex items-center gap-1.5">${reasonBadge}</div>
+                    </div>
+                    <div class="flex justify-between items-center text-[9px] text-on-surface-variant/60 mt-1">
+                        <span>Πηγή: <strong class="text-primary">${item.source}</strong></span>
+                        ${item.details ? `<span class="italic text-on-surface-variant/40">${item.details}</span>` : ''}
+                    </div>
+                    <a href="${item.url}" target="_blank" class="text-[9px] text-primary/70 hover:underline break-all mt-0.5 font-mono">${item.url}</a>
+                </div>
+            `;
+        }).join('');
+        
+        skippedDetailsHtml = `
+            <div class="mt-5 pt-5 border-t border-outline-variant/20">
+                <h6 class="text-[11px] uppercase tracking-wider text-on-surface-variant font-bold mb-3">Λεπτομέρειες Απορρίψεων (έως 100)</h6>
+                <div class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                    ${itemsHtml}
+                </div>
+            </div>
+        `;
+    } else {
+        skippedDetailsHtml = `
+            <div class="mt-5 pt-5 border-t border-outline-variant/20">
+                <h6 class="text-[11px] uppercase tracking-wider text-on-surface-variant font-bold mb-1">Λεπτομέρειες Απορρίψεων</h6>
+                <div class="text-on-surface-variant/40 italic text-xs py-1 text-left">Δεν καταγράφηκαν λεπτομέρειες απορρίψεων σε αυτή την εκτέλεση.</div>
+            </div>
+        `;
+    }
+
     inspector.innerHTML = `
         <!-- Header details -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30 text-left">
@@ -412,6 +455,8 @@ function selectRun(runId) {
                     <strong class="font-mono text-on-surface">${totals.skipped_other || 0}</strong>
                 </div>
             </div>
+
+            ${skippedDetailsHtml}
         </div>
 
         <!-- Target by Target stats table -->
