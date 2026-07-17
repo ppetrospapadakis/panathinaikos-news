@@ -819,6 +819,7 @@
                     </button>
                 </div>
             </div>`;
+            setTimeout(fetchCommentCounts, 150);
         }
 
         function renderMoreNews(articles, container) {
@@ -830,6 +831,7 @@
 
             const grid = document.getElementById('bottom-grid-cards');
             articles.forEach(a => grid.insertAdjacentHTML('beforeend', gridCardHtml(a)));
+            setTimeout(fetchCommentCounts, 150);
         }
 
         // ── Sentinel (bottom page infinite scroll for more API pages) ──────────
