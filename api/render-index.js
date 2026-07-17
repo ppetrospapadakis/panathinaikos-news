@@ -102,8 +102,9 @@ module.exports = async (req, res) => {
                 'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
             ];
             const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
-            let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
-            if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
+            const isInternal = u.hostname.includes('localhost') || u.hostname.includes('panathinaikosnews.gr') || imageUrl.startsWith('/');
+            let isBranding = !isInternal && filenameBrandingIndicators.some(ind => filename.includes(ind));
+            if (!isInternal && !isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
             } else if (!u.hostname.includes('localhost') && !u.hostname.includes('panathinaikosnews.gr') && !u.hostname.includes('wsrv.nl')) {
