@@ -55,6 +55,21 @@
     setTimeout(loadGtag, 8000); // Fallback
   })();
 </script>
+    <style>
+      /* Article title responsive sizing */
+      @media (max-width: 768px) {
+          #article-title {
+              font-size: 1.75rem !important;
+              line-height: 2.25rem !important;
+          }
+      }
+      @media (min-width: 769px) {
+          #article-title {
+              font-size: 2.75rem !important;
+              line-height: 3.25rem !important;
+          }
+      }
+    </style>
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden overflow-y-scroll">
 
