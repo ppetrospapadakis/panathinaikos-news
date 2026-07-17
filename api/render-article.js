@@ -59,9 +59,9 @@ function formatBodyContent(text) {
 }
 
 module.exports = async (req, res) => {
-    // Enable Vercel Edge caching - July 10, 2026
+    // Enable Vercel Edge caching
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=30');
 
     const { id } = req.query;
 
