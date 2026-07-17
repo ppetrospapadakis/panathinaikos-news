@@ -80,7 +80,7 @@ const SCRAPE_TARGETS = [
         category: 'Ερασιτέχνης', // default fallback — detectCategoryFromUrl() will override to Football/Basketball based on article URL
         name: 'SDNA',
         url: 'https://www.sdna.gr/teams/panathinaikos',
-        articleLinkSelectors: ['a[href*="/podosfairo/"]', 'a[href*="/mpasket/"]', 'a[href*="/bolei/"]', 'a[href*="/polo/"]', 'a[href*="/stivos/"]'],
+        articleLinkSelectors: ['.split-content__main a[href*="/podosfairo/"]', '.split-content__main a[href*="/mpasket/"]', '.split-content__main a[href*="/bolei/"]', '.split-content__main a[href*="/polo/"]', '.split-content__main a[href*="/stivos/"]'],
         baseUrl: 'https://www.sdna.gr',
         retryOn403: true,
         sdnaNumericOnly: true, // filter: only accept links that contain a numeric article ID
