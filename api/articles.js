@@ -111,8 +111,8 @@ module.exports = async (req, res) => {
             .not('category', 'eq', 'SYSTEMROSTER');
 
         // Page 1: surface any pinned article first using B-Tree index on pinned_at.
-        // Pinned window is 3 hours (validated client-side).
-        if (page === 1) {
+        // Pinned window is 3 hours. Bypassed for hero queries (limit=1) to keep strictly chronological hero views.
+        if (page === 1 && req.query.limit !== '1') {
             query = query
                 .order('pinned_at', { ascending: false, nullsFirst: false })
                 .order('created_at', { ascending: false })
