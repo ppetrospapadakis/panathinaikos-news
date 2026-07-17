@@ -167,7 +167,7 @@ module.exports = async (req, res) => {
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge}</span>
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge} <span id="comments-badge-${article.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
                     <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
                     <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
                     <div class="mt-auto overflow-hidden">
