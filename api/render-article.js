@@ -247,8 +247,8 @@ module.exports = async (req, res) => {
 
         // Category
         html = html.replace(
-            /<span id="article-category">Κατηγορία<\/span>/g,
-            `<span id="article-category">${article.category || 'Ποδόσφαιρο'}</span>`
+            /<span id="article-category" class="text-primary"><\/span>/g,
+            `<span id="article-category" class="text-primary">${article.category || 'Ποδόσφαιρο'}</span>`
         );
 
         // Date
