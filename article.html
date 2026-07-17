@@ -26,7 +26,11 @@
     <title>Διαβάστε το άρθρο - PanathinaikosNews</title>
     <meta name="robots" content="max-image-preview:large"/>
     <!-- {{SEO_META_PLACEHOLDER}} -->
+    
+    <!-- Critical Rendering Path: Preload Tailwind CSS to prevent rendering blocks -->
+    <link rel="preload" href="https://cdn.tailwindcss.com?plugins=forms,container-queries" as="script">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
@@ -52,15 +56,24 @@
             theme:{
                 extend:{
                     colors:{
-                        "secondary-container":"#32a45b","outline-variant":"#3f4940","tertiary":"#ebc23e",
-                        "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
-                        "surface":"#111317","primary":"#84d999","on-primary":"#00391a",
-                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20",
-                        "on-background":"#e2e2e8","surface-container-highest":"#333539",
-                        "on-surface":"#e2e2e8","surface-container-lowest":"#0c0e12",
-                        "surface-container-high":"#282a2e","on-secondary":"#003918",
-                        "surface-container":"#1e2024","on-surface-variant":"#bfc9bd",
-                        "on-tertiary":"#3c2f00","on-error-container":"#ffdad6"
+                        primary:"#84d999",
+                        secondary:"#b2d1b7",
+                        tertiary:"#a2ced5",
+                        error:"#ffb4ab",
+                        background:"#111317",
+                        "on-primary":"#00391c",
+                        "on-secondary":"#1f3525",
+                        "on-tertiary":"#00363d",
+                        "on-error":"#690005",
+                        "on-background":"#e2e2e8",
+                        "surface-container-lowest":"#0b0e12",
+                        "surface-container-low":"#1a1c20",
+                        "surface-container":"#1e2024",
+                        "surface-container-high":"#282b30",
+                        "on-surface":"#e2e2e8",
+                        "on-surface-variant":"#c0c9be",
+                        "outline":"#8a9389",
+                        "outline-variant":"#3f4940"
                     },
                     borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
                     spacing:{"4":"4px","8":"8px","16":"16px","24":"24px","32":"32px","48":"48px","64":"64px","96":"96px"},
@@ -100,7 +113,7 @@
             <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain" width="200" height="74"/></a>
+            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-[200px] object-contain" width="200" height="74"/></a>
             <div class="w-6 h-6"></div>
         </div>
     </header>
@@ -108,7 +121,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-auto object-contain" width="200" height="96"/></a>
+            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-[200px] object-contain" width="200" height="96"/></a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
         <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>

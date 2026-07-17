@@ -40,7 +40,11 @@
     <meta name="twitter:description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ." />
     <meta name="twitter:image" content="https://www.panathinaikosnews.gr/favicon.png" />
     <link rel="canonical" href="https://www.panathinaikosnews.gr/"/>
+    
+    <!-- Critical Rendering Path: Preload Tailwind CSS to prevent rendering blocks -->
+    <link rel="preload" href="https://cdn.tailwindcss.com?plugins=forms,container-queries" as="script">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block&v=2.0.3" rel="stylesheet"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
@@ -58,43 +62,28 @@
             theme:{
                 extend:{
                     colors:{
-                        "secondary-container":"#32a45b","outline-variant":"#3f4940","surface-tint":"#84d999",
-                        "on-tertiary":"#3c2f00","inverse-surface":"#e2e2e8","tertiary":"#ebc23e",
-                        "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
-                        "surface":"#111317","primary":"#84d999","on-error":"#690005",
-                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20",
-                        "inverse-primary":"#0f6d39","on-background":"#e2e2e8",
-                        "surface-container-highest":"#333539","secondary":"#6edd8c",
-                        "inverse-on-surface":"#2f3035","surface-variant":"#333539","outline":"#899488",
-                        "on-surface":"#e2e2e8","surface-container-lowest":"#0c0e12",
-                        "surface-container-high":"#282a2e","primary-fixed":"#9ff6b4",
-                        "on-secondary":"#003918","on-primary":"#00391a","surface-container":"#1e2024",
-                        "on-surface-variant":"#bfc9bd","on-primary-container":"#8ce1a1",
-                        "primary-container":"#006633","tertiary-container":"#cda721","on-error-container":"#ffdad6"
-                    },
-                    borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
-                    spacing:{"4":"4px","8":"8px","16":"16px","24":"24px","32":"32px","48":"48px","64":"64px","96":"96px"},
-                    fontFamily:{
-                        "h1":["Geist"],"h2":["Geist"],"h3":["Geist"],"h4":["Geist"],
-                        "body":["Geist"],"body-sm":["Geist"],"body-lg":["Geist"],
-                        "label":["Geist"],"caption":["Geist"],"display-l":["Geist"],"display-l-mobile":["Geist"]
-                    },
-                    fontSize:{
-                        "h1":["32px",{lineHeight:"40px",fontWeight:"600"}],
-                        "h2":["24px",{lineHeight:"32px",fontWeight:"600"}],
-                        "h3":["20px",{lineHeight:"28px",fontWeight:"600"}],
-                        "h4":["18px",{lineHeight:"24px",fontWeight:"600"}],
-                        "body":["16px",{lineHeight:"24px",fontWeight:"400"}],
-                        "body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],
-                        "body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],
-                        "label":["12px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"600"}],
-                        "caption":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"400"}],
-                        "display-l":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"700"}],
-                        "display-l-mobile":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}]
+                        primary:"#84d999",
+                        secondary:"#b2d1b7",
+                        tertiary:"#a2ced5",
+                        error:"#ffb4ab",
+                        background:"#111317",
+                        "on-primary":"#00391c",
+                        "on-secondary":"#1f3525",
+                        "on-tertiary":"#00363d",
+                        "on-error":"#690005",
+                        "on-background":"#e2e2e8",
+                        "surface-container-lowest":"#0b0e12",
+                        "surface-container-low":"#1a1c20",
+                        "surface-container":"#1e2024",
+                        "surface-container-high":"#282b30",
+                        "on-surface":"#e2e2e8",
+                        "on-surface-variant":"#c0c9be",
+                        "outline":"#8a9389",
+                        "outline-variant":"#3f4940"
                     }
                 }
             }
-        }
+        };
     </script>
     <script>
         // Reveal icons only after Material Symbols font is loaded to avoid flash of raw text
@@ -113,7 +102,7 @@
             <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain" width="200" height="74"/></a>
+            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-[200px] object-contain" width="200" height="74"/></a>
             <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()" aria-label="Search">
                 <span class="material-symbols-outlined text-primary">search</span>
             </button>
@@ -123,7 +112,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-auto object-contain" width="200" height="96"/></a>
+            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-[200px] object-contain" width="200" height="96"/></a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
 
@@ -200,11 +189,11 @@
 
         <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
             <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
-                <a id="tab-all" href="javascript:void(0)" onclick="filterFeed(null,'nav-all')" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
-                <a id="tab-football" href="javascript:void(0)" onclick="filterFeed('Ποδόσφαιρο','nav-football')" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
-                <a id="tab-basketball" href="javascript:void(0)" onclick="filterFeed('Μπάσκετ','nav-basketball')" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
-                <a id="tab-amateur" href="javascript:void(0)" onclick="filterFeed('Ερασιτέχνης','nav-amateur')" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">☘️ Ερασιτέχνης</a>
-                <a id="tab-opinion" href="javascript:void(0)" onclick="filterFeed('Άποψη','nav-opinion')" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
+                <a id="tab-all" href="/" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed(null,'tab-all');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
+                <a id="tab-football" href="/podosfairo" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ποδόσφαιρο','tab-football');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball" href="/basket" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Μπάσκετ','tab-basketball');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="/erasitexnis" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ερασιτέχνης','tab-amateur');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">☘️ Ερασιτέχνης</a>
+                <a id="tab-opinion" href="/apopsi" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Άποψη','tab-opinion');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
                 <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📊 ΡΟΣΤΕΡ</a>
             </div>
         </div>
@@ -375,7 +364,12 @@
                 const BRANDING_FN = ['logo','icon','avatar','branding','placeholder','fallback','watermark','og-image','og_image','site-logo','site_logo','default-image','default_image','noimage','no-image','blank','generic','share-image','share_image'];
                 const BRANDING_PATH = ['/logos/','/logo/','/brand/','/branding/','/default_images/','/default-images/','/assets/images/','/site-assets/'];
                 const isBranding = BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p));
-                if (isBranding) a.image_url = DEFAULT_IMG;
+                if (isBranding) {
+                    a.image_url = DEFAULT_IMG;
+                } else if (!imageUrl.startsWith('/') && !imageUrl.includes('localhost') && !imageUrl.includes('panathinaikosnews.gr')) {
+                    // Proxy external image to reduce network payload & serve optimized WebP
+                    a.image_url = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=480&output=webp&q=80`;
+                }
             } catch(_) {}
             return a;
         }
@@ -468,8 +462,8 @@
             const url       = `/${catPath}/${slug}-id=${a.id}`;
             const isOwn     = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
-            const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
-            const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+            const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+            const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
             const imgBoxClass = isOwn ? 'w-[128px] h-[72px]' : 'w-[72px] h-[72px]';
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             return `<a class="group cursor-pointer flex gap-3 items-start bg-surface-container/30 p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border border-outline-variant/10 text-left" href="${url}">
@@ -489,8 +483,8 @@
             const url      = `/${catPath}/${slug}-id=${a.id}`;
             const isOwn    = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
-            const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain"/></span>` : '';
-            const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+            const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+            const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
             const border   = isOwn ? 'border-primary/30 bg-primary/5' : 'border-outline-variant/10 bg-surface-container/30';
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             let bulletsHtml = '';
@@ -533,7 +527,7 @@
             const latestBadge = showLatest
                 ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold tracking-wider">LATEST</div>`
                 : '';
-            const officialHeroBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+            const officialHeroBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
 
             let bulletsHtml = '';
             if (a.bullets && a.bullets.length > 0) {
@@ -547,13 +541,15 @@
 
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
 
+            const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+
             heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                     <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${formatExactDate(a.created_at)}</span>
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge}</span>
                     <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
                     <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
                     <div class="mt-auto overflow-hidden">

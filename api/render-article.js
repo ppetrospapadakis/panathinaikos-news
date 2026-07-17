@@ -106,6 +106,9 @@ module.exports = async (req, res) => {
                 if (!isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
                 if (isBranding) {
                     imageUrl = DEFAULT_IMG;
+                } else if (!imageUrl.startsWith('/') && !imageUrl.includes('localhost') && !imageUrl.includes('panathinaikosnews.gr')) {
+                    // Proxy external image to compress payloads and load fast on mobile (WebP)
+                    imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=800&output=webp&q=82`;
                 }
             } catch (_) {}
         } else {

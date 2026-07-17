@@ -93,6 +93,9 @@ module.exports = async (req, res) => {
             const isBranding = filenameBrandingIndicators.some(ind => pathLower.includes(ind));
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
+            } else if (!imageUrl.startsWith('/') && !imageUrl.includes('localhost') && !imageUrl.includes('panathinaikosnews.gr')) {
+                // Compress external image on-the-fly to tiny WebP/AVIF format
+                imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=800&output=webp&q=82`;
             }
         } catch (e) {}
 
@@ -102,6 +105,7 @@ module.exports = async (req, res) => {
         const pubDate = formatExactDate(article.created_at);
 
         const isOwn = (article.source_url||'').toLowerCase().includes('manual') || (article.source_url||'').toLowerCase().includes('opinion://');
+        const isOfficial = (article.source_url||'').toLowerCase().includes('pao.gr') || (article.source_url||'').toLowerCase().includes('pao1908.com') || (article.source_url||'').toLowerCase().includes('paobc.gr');
         const ageMs = Date.now() - new Date(article.created_at).getTime();
         const isFresh = ageMs < 60 * 60 * 1000;
         const showLatest = !isOwn && article.category !== 'Άποψη' && isFresh;
@@ -133,6 +137,8 @@ module.exports = async (req, res) => {
         });
 
         const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
+        const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+        const ownBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
         const heroHtml = `
             <a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
@@ -141,7 +147,7 @@ module.exports = async (req, res) => {
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2">${pubDate}</span>
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge}</span>
                     <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
                     <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
                     <div class="mt-auto overflow-hidden">
