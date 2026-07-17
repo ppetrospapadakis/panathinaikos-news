@@ -71,6 +71,23 @@
     setTimeout(loadGtag, 8000); // Fallback
   })();
 </script>
+    <!-- Sync tab highlight: runs before paint to prevent flicker -->
+    <script>
+    (function() {
+        var TAB_ACTIVE   = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
+        var TAB_INACTIVE = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center';
+        var catMap = { 'football': 'tab-football', 'podosfairo': 'tab-football', 'basket': 'tab-basketball', 'basketball': 'tab-basketball', 'erasitexnis': 'tab-amateur', 'apopsi': 'tab-opinion', 'metagrafes': null, 'agones': null };
+        var cat = new URLSearchParams(window.location.search).get('category') || '';
+        var activeTabId = catMap[cat.toLowerCase()] || (cat === '' ? 'tab-all' : null);
+        // Apply before DOM is fully painted by hooking into DOMContentLoaded at capture phase
+        document.addEventListener('DOMContentLoaded', function() {
+            ['tab-all','tab-football','tab-basketball','tab-amateur','tab-opinion'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.className = (id === activeTabId) ? TAB_ACTIVE : TAB_INACTIVE;
+            });
+        }, true); // capture phase = runs before other listeners
+    })();
+    </script>
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden overflow-y-scroll">
 
@@ -156,7 +173,7 @@
 
         <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
             <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
-                <a id="tab-all" href="/" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed(null,'tab-all');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
+                <a id="tab-all" href="/" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed(null,'tab-all');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
                 <a id="tab-football" href="/podosfairo" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ποδόσφαιρο','tab-football');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
                 <a id="tab-basketball" href="/basket" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Μπάσκετ','tab-basketball');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
                 <a id="tab-amateur" href="/erasitexnis" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ερασιτέχνης','tab-amateur');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">☘️ Ερασιτέχνης</a>
