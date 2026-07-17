@@ -529,7 +529,8 @@ async function scrapeArticlePage(url, categoryHint) {
         }
 
         const isSportdog = url.includes('sportdog.gr');
-        const minLength = isSportdog ? 300 : 150;
+        // Increase minimum character limit to filter out short stubs with boilerplate
+        const minLength = isSportdog ? 800 : 700;
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
