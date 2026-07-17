@@ -6,6 +6,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link rel="icon" type="image/png" href="/logo.png">
     <title>Panathinaikos - ΡΟΣΤΕΡ</title>
     <meta name="description" content="Ρόστερ και ανάλυση Παναθηναϊκού — Ποδόσφαιρο & Μπάσκετ."/>
     
@@ -442,20 +443,24 @@
                 try {
                     const res = await fetch(`/api/articles?page=${streamPage}`);
                     const data = await res.json();
-                    if (data.articles && data.articles.length > 0) {
+                    // API returns a plain array (not {articles:[]})
+                    const articles = Array.isArray(data) ? data : (data.articles || []);
+                    if (articles.length > 0) {
                         const grid = document.getElementById('more-news-grid');
-                        const html = data.articles.map(a => {
+                        const html = articles.map(a => {
                             const date = new Date(a.created_at).toLocaleDateString('el-GR', {day:'2-digit', month:'2-digit', year:'numeric'});
                             const slug = (a.title || '').toLowerCase().replace(/[^a-z0-9\u0370-\u03ff]+/g, '-').replace(/(^-|-$)/g, '');
                             let cat = 'podosfairo';
-                            if (a.category === 'Μπάσκετ') cat = 'basket';
-                            if (a.category === 'Ερασιτέχνης') cat = 'erasitexnis';
-                            const url = `/${cat}/${slug}-id=${a.id}`;
-                            const img = a.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+                            const rawCat = (a.category || '').toLowerCase();
+                            if (rawCat.includes('μπάσκετ') || rawCat.includes('basket')) cat = 'basket';
+                            else if (rawCat.includes('ερασιτ')) cat = 'erasitexnis';
+                            else if (rawCat.includes('αποψη') || rawCat.includes('apopsi')) cat = 'apopsi';
+                            const url = `/article.html?id=${a.id}`;
+                            const img = a.image_url || '/logo.png';
                             return `
                             <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY'"/>
+                                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.style.display='none'"/>
                                 </div>
                                 <div class="p-5 flex flex-col flex-1">
                                     <span class="font-label text-label text-primary uppercase mb-1">${date}</span>
@@ -467,7 +472,8 @@
                         document.getElementById('more-news-section').classList.remove('hidden');
                         streamPage++;
                     }
-                    if (!data.has_more) {
+                    // Detect end of pages: if fewer than 20 results returned, no more pages
+                    if (articles.length < 20) {
                         streamHasMore = false;
                         const sentinel = document.getElementById('roster-sentinel');
                         if (sentinel) sentinel.style.display = 'none';
