@@ -424,6 +424,75 @@
         // ─────────────────────────────────────────────────────────────────
         // INIT & DYNAMIC SUPABASE LOADING
         // ─────────────────────────────────────────────────────────────────
+        let streamPage = 1;
+        let streamHasMore = true;
+        let isFetchingMore = false;
+
+        async function fetchMoreRosterNews() {
+            if (isFetchingMore || !streamHasMore) return;
+            isFetchingMore = true;
+            const sentinel = document.getElementById('roster-sentinel');
+            try {
+                const res = await fetch(`/api/articles?page=${streamPage}`);
+                const data = await res.json();
+                // API returns a plain array (not {articles:[]})
+                const articles = Array.isArray(data) ? data : (data.articles || []);
+                if (articles.length > 0) {
+                    const section = document.getElementById('more-news-section');
+                    const grid = document.getElementById('more-news-grid');
+                    const html = articles.map(a => {
+                        const date = new Date(a.created_at).toLocaleDateString('el-GR', {day:'2-digit', month:'2-digit', year:'numeric'});
+                        const url = `/article.html?id=${a.id}`;
+                        const img = a.image_url || '/logo.png';
+                        return `
+                        <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                            <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                                <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.style.display='none'"/>
+                            </div>
+                            <div class="p-5 flex flex-col flex-1">
+                                <span class="font-label text-label text-primary uppercase mb-1">${date}</span>
+                                <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                            </div>
+                        </a>`;
+                    }).join('');
+                    grid.insertAdjacentHTML('beforeend', html);
+                    // Reveal the section on first successful batch
+                    section.classList.remove('hidden');
+                    streamPage++;
+                }
+                // End of pages: fewer than 20 results means no more
+                if (articles.length < 20) {
+                    streamHasMore = false;
+                    if (sentinel) sentinel.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Error fetching more news:', err);
+            } finally {
+                isFetchingMore = false;
+            }
+        }
+
+        function initMoreNewsScroll() {
+            // 1. Inject sentinel into DOM FIRST (before first fetch)
+            const moreNewsSection = document.getElementById('more-news-section');
+            moreNewsSection.insertAdjacentHTML('afterend',
+                `<div id="roster-sentinel" class="w-full flex justify-center py-10">
+                    <div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                </div>`
+            );
+
+            const sentinel = document.getElementById('roster-sentinel');
+
+            // 2. Observe sentinel immediately — fetch triggers when it enters viewport
+            const observer = new IntersectionObserver(async entries => {
+                if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
+                    await fetchMoreRosterNews();
+                }
+            }, { rootMargin: '300px' }); // start loading 300px before user reaches bottom
+
+            observer.observe(sentinel);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Scroll active tab into view horizontally
             const el = document.getElementById('tab-roster');
@@ -431,75 +500,6 @@
                 const container = el.parentElement;
                 const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
                 container.scrollTo({ left: scrollLeft });
-            }
-
-            let streamPage = 1;
-            let streamHasMore = true;
-            let isFetchingMore = false;
-
-            async function fetchMoreRosterNews() {
-                if (isFetchingMore || !streamHasMore) return;
-                isFetchingMore = true;
-                try {
-                    const res = await fetch(`/api/articles?page=${streamPage}`);
-                    const data = await res.json();
-                    // API returns a plain array (not {articles:[]})
-                    const articles = Array.isArray(data) ? data : (data.articles || []);
-                    if (articles.length > 0) {
-                        const grid = document.getElementById('more-news-grid');
-                        const html = articles.map(a => {
-                            const date = new Date(a.created_at).toLocaleDateString('el-GR', {day:'2-digit', month:'2-digit', year:'numeric'});
-                            const slug = (a.title || '').toLowerCase().replace(/[^a-z0-9\u0370-\u03ff]+/g, '-').replace(/(^-|-$)/g, '');
-                            let cat = 'podosfairo';
-                            const rawCat = (a.category || '').toLowerCase();
-                            if (rawCat.includes('μπάσκετ') || rawCat.includes('basket')) cat = 'basket';
-                            else if (rawCat.includes('ερασιτ')) cat = 'erasitexnis';
-                            else if (rawCat.includes('αποψη') || rawCat.includes('apopsi')) cat = 'apopsi';
-                            const url = `/article.html?id=${a.id}`;
-                            const img = a.image_url || '/logo.png';
-                            return `
-                            <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
-                                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.style.display='none'"/>
-                                </div>
-                                <div class="p-5 flex flex-col flex-1">
-                                    <span class="font-label text-label text-primary uppercase mb-1">${date}</span>
-                                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
-                                </div>
-                            </a>`;
-                        }).join('');
-                        grid.insertAdjacentHTML('beforeend', html);
-                        document.getElementById('more-news-section').classList.remove('hidden');
-                        streamPage++;
-                    }
-                    // Detect end of pages: if fewer than 20 results returned, no more pages
-                    if (articles.length < 20) {
-                        streamHasMore = false;
-                        const sentinel = document.getElementById('roster-sentinel');
-                        if (sentinel) sentinel.style.display = 'none';
-                    }
-                } catch (err) {
-                    console.error('Error fetching more news:', err);
-                } finally {
-                    isFetchingMore = false;
-                }
-            }
-
-            function initMoreNewsScroll() {
-                fetchMoreRosterNews();
-                const sentinelHTML = `<div id="roster-sentinel" class="py-12 flex justify-center hidden"><div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div></div>`;
-                document.getElementById('more-news-section').insertAdjacentHTML('afterend', sentinelHTML);
-                
-                const sentinel = document.getElementById('roster-sentinel');
-                if (sentinel && streamHasMore) {
-                    sentinel.classList.remove('hidden');
-                    const observer = new IntersectionObserver(async entries => {
-                        if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
-                            await fetchMoreRosterNews();
-                        }
-                    }, { rootMargin: '200px' });
-                    observer.observe(sentinel);
-                }
             }
 
             // Load Supabase script dynamically
