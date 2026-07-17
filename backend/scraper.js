@@ -528,9 +528,8 @@ async function scrapeArticlePage(url, categoryHint) {
             }
         }
 
-        const isSportdog = url.includes('sportdog.gr');
-        // Minimum character limit to filter out short stubs
-        const minLength = isSportdog ? 300 : 200;
+        const isOfficial = url.includes('pao.gr') || url.includes('paobc.gr') || url.includes('pao1908.com');
+        const minLength = isOfficial ? 0 : 350;
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
