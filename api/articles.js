@@ -111,7 +111,7 @@ module.exports = async (req, res) => {
             .not('category', 'eq', 'SYSTEMROSTER');
 
         // Page 1: surface any pinned article first using B-Tree index on pinned_at.
-        // Pages 2+: normal recency order (pinned window is 2h, irrelevant for older pages).
+        // Pinned window is 3 hours (validated client-side).
         if (page === 1) {
             query = query
                 .order('pinned_at', { ascending: false, nullsFirst: false })

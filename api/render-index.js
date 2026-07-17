@@ -62,12 +62,9 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // Single-query ordering: pinned articles surface first (nulls last), then by recency.
-        // The B-Tree index on pinned_at makes this sort cost <1ms.
         let query = supabase.from('articles').select('*')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
-            .order('pinned_at', { ascending: false, nullsFirst: false })
             .order('created_at', { ascending: false })
             .order('id', { ascending: false })
             .limit(1);
@@ -131,16 +128,10 @@ module.exports = async (req, res) => {
         const ageMs = Date.now() - new Date(article.created_at).getTime();
         const isFresh = ageMs < 60 * 60 * 1000;
 
-        // Pin is active if pinned_at is set and within last 2 hours
-        const pinAgeMs = article.pinned_at ? Date.now() - new Date(article.pinned_at).getTime() : Infinity;
-        const isPinActive = pinAgeMs < 2 * 60 * 60 * 1000;
-
-        const showLatest = !isOwn && article.category !== 'Άποψη' && isFresh && !isPinActive;
-        const latestBadge = isPinActive
-            ? `<div class="absolute top-3 left-3 px-3 py-1 bg-primary text-on-primary font-label text-label rounded font-bold tracking-wider flex items-center gap-1">📌 PINNED</div>`
-            : showLatest
-                ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold tracking-wider">LATEST</div>`
-                : '';
+        const showLatest = !isOwn && article.category !== 'Άποψη' && isFresh;
+        const latestBadge = showLatest
+            ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold tracking-wider">LATEST</div>`
+            : '';
 
         let bulletsHtml = '';
         let parsedBullets = [];
