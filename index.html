@@ -545,9 +545,11 @@
                 </div>`;
             }
 
+            const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
+
             heroEl.innerHTML = `<a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">

@@ -132,10 +132,12 @@ module.exports = async (req, res) => {
             created_at: article.created_at
         });
 
+        const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
+
         const heroHtml = `
             <a class="group cursor-pointer bg-surface-container rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
