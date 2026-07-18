@@ -378,8 +378,8 @@ async function scrapeArticleLinks(target, logErrorCallback) {
 function sanitizeImageUrl(scrapedImg) {
     if (!scrapedImg || typeof scrapedImg !== 'string') return '';
     let cleaned = scrapedImg.trim();
-    // Clean SDNA watermark styles
-    if (cleaned.toLowerCase().includes('sdna.gr') || cleaned.includes('/styles/og_image/')) {
+    // Clean SDNA watermark styles (only for sdna.gr domains, since others don't have watermarks and styles/main might not exist)
+    if (cleaned.toLowerCase().includes('sdna.gr')) {
         cleaned = cleaned.replace('/styles/og_image/', '/styles/main/');
     }
     // Strip dynamic watermark folders: e.g. /thumbnails/, /wm/
