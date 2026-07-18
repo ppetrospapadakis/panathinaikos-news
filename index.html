@@ -93,14 +93,16 @@
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
-        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8">
-            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8 relative">
+            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" onclick="toggleDrawer()" aria-label="Menu">
                 <span class="material-symbols-outlined text-primary">menu</span>
             </button>
-            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-[200px] object-contain" width="200" height="74"/></a>
-            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSearch()" aria-label="Search">
-                <span class="material-symbols-outlined text-primary">search</span>
-            </button>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <a href="/" class="flex items-center pointer-events-auto">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain" width="200" height="74"/>
+                </a>
+            </div>
+            <div class="w-6 h-6 z-10"></div>
         </div>
     </header>
 
@@ -150,21 +152,7 @@
     </aside>
     <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
 
-    <!-- ═══ SEARCH OVERLAY ═══ -->
-    <div id="search-overlay" class="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col opacity-0 pointer-events-none search-reveal">
-        <div class="p-8 flex items-center justify-between border-b border-outline-variant">
-            <input id="search-input" class="bg-transparent border-none text-h2 font-h2 text-primary focus:ring-0 w-full placeholder:text-on-surface-variant/40" placeholder="Αναζήτηση ειδήσεων..." type="text" oninput="handleSearch(this.value)"/>
-            <button class="material-symbols-outlined text-on-surface-variant text-4xl" onclick="toggleSearch()">close</button>
-        </div>
-        <div class="p-8">
-            <p class="font-label text-label text-on-surface-variant uppercase tracking-widest mb-4">Trending Topics</p>
-            <div class="flex flex-wrap gap-4">
-                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='OAKA'; handleSearch('OAKA')">#OAKA</span>
-                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='Euroleague'; handleSearch('Euroleague')">#Basketball</span>
-                <span class="px-4 py-2 bg-surface-container border border-outline-variant rounded-full text-body-sm font-body cursor-pointer hover:border-primary transition-colors" onclick="document.getElementById('search-input').value='Gate 13'; handleSearch('Gate 13')">#Gate13</span>
-            </div>
-        </div>
-    </div>
+
 
     <!-- ═══ MAIN CONTENT ═══ -->
     <main class="mt-[80px]">
@@ -285,15 +273,7 @@
         }
         window.toggleDrawer = toggleDrawer;
 
-        function toggleSearch() {
-            const el = document.getElementById('search-overlay');
-            el.classList.toggle('opacity-0');
-            el.classList.toggle('pointer-events-none');
-            if (!el.classList.contains('opacity-0')) {
-                setTimeout(() => document.getElementById('search-input').focus(), 100);
-            }
-        }
-        window.toggleSearch = toggleSearch;
+
 
         function timeAgo(dateStr) {
             try {
@@ -433,18 +413,7 @@
             if (liveLabel) liveLabel.style.display = category === 'Άποψη' ? 'none' : 'block';
         }
 
-        // ── Search ─────────────────────────────────────────────────────────────
-        function handleSearch(query) {
-            if (!query.trim()) { renderStream(allArticles); return; }
-            const q = query.toLowerCase();
-            const filtered = allArticles.filter(a =>
-                (a.title||'').toLowerCase().includes(q) ||
-                (a.summary||'').toLowerCase().includes(q) ||
-                (a.category||'').toLowerCase().includes(q)
-            );
-            renderStream(filtered);
-        }
-        window.handleSearch = handleSearch;
+
 
         window.scrollCarousel = function(direction) {
             const c = document.getElementById('own-carousel-container');
@@ -997,10 +966,6 @@
             activeCategory = cat;
             updateNavStyles(cat);
             startLoad();
-
-            if (new URLSearchParams(window.location.search).get('search') === 'open') {
-                setTimeout(() => toggleSearch(), 300);
-            }
         }
 
         // Admin Inline Pinning Function (destined for homepage sidebar)
