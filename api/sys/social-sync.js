@@ -111,11 +111,12 @@ module.exports = async (req, res) => {
         
         const emoji = getCategoryEmoji(article.category);
         let displayTitle = article.title;
-        if (displayTitle.length > 230) {
-            displayTitle = displayTitle.substring(0, 227) + '...';
+        // Truncate title if too long (280 max - 23 url - 34 hashtags - 10 formatting/emoji = 213 chars max)
+        if (displayTitle.length > 200) {
+            displayTitle = displayTitle.substring(0, 197) + '...';
         }
         
-        const tweetText = `${emoji} ${displayTitle}\n\n👉 ${url}`;
+        const tweetText = `${emoji} ${displayTitle}\n\n👉 ${url}\n\n#PAO #Panathinaikos #PaoNews #Gate13`;
 
         // Send to Twitter API v2 directly using OAuth 1.0a
         const twitterEndpoint = 'https://api.twitter.com/2/tweets';
