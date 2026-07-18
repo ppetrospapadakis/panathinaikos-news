@@ -64,17 +64,21 @@ module.exports = async (req, res) => {
     try {
         let query = supabase.from('articles').select('*')
             .not('category', 'eq', 'SystemRoster')
-            .not('category', 'eq', 'SYSTEMROSTER')
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: false })
-            .limit(1);
+            .not('category', 'eq', 'SYSTEMROSTER');
         if (categoryFilter) {
             if (categoryFilter === 'Άποψη') {
                 query = query.ilike('category', '%Άποψη%');
             } else {
                 query = query.ilike('category', `%${categoryFilter}%`);
             }
+        } else {
+            // Exclude 'Ερασιτέχνης' from the general homepage hero article
+            query = query.not('category', 'eq', 'Ερασιτέχνης');
         }
+
+        query = query.order('created_at', { ascending: false })
+            .order('id', { ascending: false })
+            .limit(1);
 
         const { data: articles, error } = await query;
         let article = (articles && articles.length > 0) ? articles[0] : null;

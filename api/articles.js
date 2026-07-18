@@ -123,7 +123,8 @@ module.exports = async (req, res) => {
                 .order('id', { ascending: false });
         }
           
-        if (req.query.category && req.query.category !== 'all' && req.query.category !== '') {
+        const hasCategoryFilter = req.query.category && req.query.category !== 'all' && req.query.category !== '';
+        if (hasCategoryFilter) {
           const categoryMap = {
             'football': 'Ποδόσφαιρο',
             'podosfairo': 'Ποδόσφαιρο',
@@ -138,6 +139,11 @@ module.exports = async (req, res) => {
           };
           const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;
           query = query.ilike('category', `%${dbCategory}%`);
+        }
+
+        // Exclude 'Ερασιτέχνης' articles from the general Hero slot (when limit=1 and no category filter)
+        if (req.query.limit === '1' && !hasCategoryFilter) {
+            query = query.not('category', 'eq', 'Ερασιτέχνης');
         }
 
         if (req.query.limit) {
