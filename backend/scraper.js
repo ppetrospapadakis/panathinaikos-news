@@ -481,23 +481,8 @@ async function scrapeArticlePage(url, categoryHint) {
         }
         
         // ── Published date ─────────────────────────────────────────────────────
-        const dateStr = (
-            $('meta[property="article:published_time"]').attr('content') ||
-            $('time').first().attr('datetime') ||
-            $('[class*="date"], [class*="time"]').first().text().trim() ||
-            new Date().toISOString()
-        );
-        let created_at;
-        try {
-            const parsedDate = new Date(dateStr);
-            if (isNaN(parsedDate.getTime())) {
-                created_at = new Date().toISOString().split('Z')[0] + '+00:00';
-            } else {
-                created_at = parsedDate.toISOString().split('Z')[0] + '+00:00';
-            }
-        } catch (e) {
-            created_at = new Date().toISOString().split('Z')[0] + '+00:00';
-        }
+        // User requested: Ignore source's specified time and always use the exact time we scrape it
+        let created_at = new Date().toISOString();
 
         // ── Body text ──────────────────────────────────────────────────────────
         // Try progressively more specific selectors
