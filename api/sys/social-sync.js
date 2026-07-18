@@ -107,7 +107,8 @@ module.exports = async (req, res) => {
         const cleanCat = getCategoryCleanName(article.category);
         const cleanSlug = slugify(article.title);
         const domain = 'https://www.panathinaikosnews.gr';
-        const url = `${domain}/${cleanCat}/${cleanSlug}-id=${article.id}`;
+        const path = `/${cleanCat}/${cleanSlug}-id=${article.id}`;
+        const url = `${domain}${encodeURI(path)}`;
         
         const emoji = getCategoryEmoji(article.category);
         let displayTitle = article.title;
