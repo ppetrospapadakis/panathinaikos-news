@@ -1,0 +1,19 @@
+name: 🐦 Twitter/X Social Sync
+
+on:
+  schedule:
+    # Run every hour at minute 0, from 05:00 to 21:00 UTC (08:00 AM to 12:00 AM Athens EEST)
+    - cron: '0 5-21 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  sync:
+    name: Sync Articles to Twitter
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 🔗 Trigger Twitter/X Social Sync Endpoint
+        run: |
+          curl -f -X GET "https://www.panathinaikosnews.gr/api/sys/social-sync?secret=pao_social_sync_secret_123"

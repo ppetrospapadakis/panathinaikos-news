@@ -91,7 +91,10 @@ module.exports = async (req, res) => {
             .eq('twitter_posted', false)
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
-            .order('created_at', { ascending: true })
+            .not('category', 'eq', 'Ερασιτέχνης')
+            .not('category', 'eq', 'erasitexnis')
+            .not('category', 'eq', 'Amateur')
+            .order('created_at', { ascending: false })
             .limit(1);
 
         if (fetchErr) throw fetchErr;
