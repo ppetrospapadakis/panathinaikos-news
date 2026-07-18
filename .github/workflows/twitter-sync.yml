@@ -2,8 +2,8 @@ name: 🐦 Twitter/X Social Sync
 
 on:
   schedule:
-    # Run every hour at minute 0, from 05:00 to 21:00 UTC (08:00 AM to 12:00 AM Athens EEST)
-    - cron: '0 5-21 * * *'
+    # Run at 07:00 and 16:00 UTC (10:00 AM and 19:00 PM Athens EEST)
+    - cron: '0 7,16 * * *'
   workflow_dispatch:
     # Allow manual trigger from GitHub Actions UI
 
