@@ -389,8 +389,10 @@
                     el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
                     const container = el.parentElement;
                     if (container) {
-                        const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
-                        container.scrollTo({ left: scrollLeft });
+                        requestAnimationFrame(() => {
+                            const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
+                            container.scrollTo({ left: scrollLeft });
+                        });
                     }
                 }
             }
