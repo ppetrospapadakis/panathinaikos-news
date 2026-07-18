@@ -51,8 +51,12 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
 
+      - name: ⏱️ Check Schedule Slot
+        id: check-schedule
+        run: node backend/check-schedule.js
+
       - name: 🗞️ Run scraper (live)
-        if: ${{ github.event.inputs.dry_run != 'true' }}
+        if: ${{ (github.event_name != 'schedule' || steps.check-schedule.outputs.should_run == 'true') && github.event.inputs.dry_run != 'true' }}
         run: npm run scrape
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -61,7 +65,7 @@ jobs:
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
 
       - name: 🧪 Run scraper (dry-run)
-        if: ${{ github.event.inputs.dry_run == 'true' }}
+        if: ${{ (github.event_name != 'schedule' || steps.check-schedule.outputs.should_run == 'true') && github.event.inputs.dry_run == 'true' }}
         run: npm run scrape:dry
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
