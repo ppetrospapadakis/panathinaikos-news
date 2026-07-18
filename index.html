@@ -1033,7 +1033,9 @@
         }
         window.togglePin = togglePin;
 
+        let initialLoadDone = false;
         async function fetchCommentCounts() {
+            if (!initialLoadDone) return;
             const badgeElements = document.querySelectorAll('[id^="comments-badge-"]');
             const articleIds = Array.from(badgeElements).map(el => el.id.replace('comments-badge-', ''));
             if (articleIds.length === 0) return;
@@ -1060,7 +1062,10 @@
 
         window.addEventListener('load', () => {
             // Defer completely to unblock PageSpeed critical request chains
-            setTimeout(fetchCommentCounts, 2000);
+            setTimeout(() => {
+                initialLoadDone = true;
+                fetchCommentCounts();
+            }, 2500);
         });
 
     })();
