@@ -4,8 +4,14 @@ on:
   repository_dispatch:
     types: [trigger-scrape]
   schedule:
-    # Run every 30 minutes, 24/7 (GitHub min interval is 5min, but 30min is safer for free tier)
-    - cron: '*/15 * * * *'
+    # 08:00 - 00:45 EEST (05:00 - 21:45 UTC): Every 15 minutes
+    - cron: '*/15 5-21 * * *'
+    # 01:00, 01:30 EEST (22:00, 22:30 UTC): Every 30 minutes
+    - cron: '0,30 22 * * *'
+    # 02:00, 04:00 EEST (23:00, 01:00 UTC): Every 2 hours
+    - cron: '0 23,1 * * *'
+    # 06:00, 06:30, 07:00, 07:30 EEST (03:00, 03:30, 04:00, 04:30 UTC): Every 30 minutes
+    - cron: '0,30 3,4 * * *'
   workflow_dispatch:
     # Allow manual trigger from GitHub Actions UI
     inputs:
@@ -51,12 +57,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
 
-      - name: ⏱️ Check Schedule Slot
-        id: check-schedule
-        run: node backend/check-schedule.js
-
       - name: 🗞️ Run scraper (live)
-        if: ${{ (github.event_name != 'schedule' || steps.check-schedule.outputs.should_run == 'true') && github.event.inputs.dry_run != 'true' }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         run: npm run scrape
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -65,7 +67,7 @@ jobs:
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
 
       - name: 🧪 Run scraper (dry-run)
-        if: ${{ (github.event_name != 'schedule' || steps.check-schedule.outputs.should_run == 'true') && github.event.inputs.dry_run == 'true' }}
+        if: ${{ github.event.inputs.dry_run == 'true' }}
         run: npm run scrape:dry
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
