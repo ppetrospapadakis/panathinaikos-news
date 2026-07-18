@@ -75,6 +75,7 @@ function generateOAuthHeader(method, url, oauthParams, consumerSecret, tokenSecr
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
     const secret = req.query.secret || (req.body && req.body.secret);
     const expectedSecret = process.env.SYS_SECRET || 'pao_social_sync_secret_123';
