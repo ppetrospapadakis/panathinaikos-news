@@ -248,10 +248,22 @@ module.exports = async (req, res) => {
         );
 
         // Category
-        html = html.replace(
-            /<span id="article-category" class="text-primary"><\/span>/g,
-            `<span id="article-category" class="text-primary">${article.category || 'Ποδόσφαιρο'}</span>`
-        );
+        const isGenika = article.category === 'Γενικά' || !article.category;
+        if (isGenika) {
+            html = html.replace(
+                /<span id="article-category-dot" class="w-1.5 h-1.5 rounded-full bg-primary\/40"><\/span>/g,
+                ''
+            );
+            html = html.replace(
+                /<span id="article-category" class="text-primary"><\/span>/g,
+                ''
+            );
+        } else {
+            html = html.replace(
+                /<span id="article-category" class="text-primary"><\/span>/g,
+                `<span id="article-category" class="text-primary">${article.category}</span>`
+            );
+        }
 
         // Date
         html = html.replace(

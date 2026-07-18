@@ -160,7 +160,7 @@
                 <div class="px-4 md:px-0">
                     <div class="flex items-center flex-wrap gap-4 text-sm text-on-surface-variant font-label uppercase tracking-widest font-bold mb-4">
                         <span id="article-date"></span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
+                        <span id="article-category-dot" class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
                         <span id="article-category" class="text-primary"></span>
                         <span id="article-official-badge"></span>
                         <!-- Comments Badge in Article Header next to date -->
@@ -422,7 +422,20 @@
             }
 
             document.getElementById('article-date').textContent = formatExactDate(article.created_at);
-            document.getElementById('article-category').textContent = article.category || 'Ποδόσφαιρο';
+            
+            const isCategoryGenika = article.category === 'Γενικά' || !article.category;
+            const catEl = document.getElementById('article-category');
+            const dotEl = document.getElementById('article-category-dot');
+            if (isCategoryGenika) {
+                if (catEl) catEl.style.display = 'none';
+                if (dotEl) dotEl.style.display = 'none';
+            } else {
+                if (catEl) {
+                    catEl.textContent = article.category;
+                    catEl.style.display = '';
+                }
+                if (dotEl) dotEl.style.display = '';
+            }
 
             const isOfficialMain= (article.source_url||'').toLowerCase().includes('pao.gr') || (article.source_url||'').toLowerCase().includes('pao1908.com') || (article.source_url||'').toLowerCase().includes('paobc.gr');
             const offEl = document.getElementById('article-official-badge');
