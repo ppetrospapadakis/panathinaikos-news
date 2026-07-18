@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 
 const supabaseUrl = "https://rctltbuiitdnqlxizlym.supabase.co".trim();
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI".trim();
@@ -34,10 +35,47 @@ function getCategoryEmoji(category) {
     return '🟢';
 }
 
+function percentEncode(str) {
+    return encodeURIComponent(str)
+        .replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+}
+
+function generateOAuthHeader(method, url, oauthParams, consumerSecret, tokenSecret) {
+    const sortedKeys = Object.keys(oauthParams).sort();
+    const parameterParts = [];
+    for (const key of sortedKeys) {
+        parameterParts.push(`${percentEncode(key)}=${percentEncode(oauthParams[key])}`);
+    }
+    const parameterString = parameterParts.join('&');
+
+    const signatureBaseString = [
+        method.toUpperCase(),
+        percentEncode(url),
+        percentEncode(parameterString)
+    ].join('&');
+
+    const signingKey = [
+        percentEncode(consumerSecret),
+        percentEncode(tokenSecret)
+    ].join('&');
+
+    const signature = crypto
+        .createHmac('sha1', signingKey)
+        .update(signatureBaseString)
+        .digest('base64');
+
+    const headerParams = { ...oauthParams, oauth_signature: signature };
+    const headerParts = [];
+    for (const key of Object.keys(headerParams).sort()) {
+        headerParts.push(`${percentEncode(key)}="${percentEncode(headerParams[key])}"`);
+    }
+
+    return 'OAuth ' + headerParts.join(', ');
+}
+
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
-    // 1. Authorization Check (using SYS_SECRET env or fallback)
     const secret = req.query.secret || (req.body && req.body.secret);
     const expectedSecret = process.env.SYS_SECRET || 'pao_social_sync_secret_123';
     
@@ -46,7 +84,6 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // 2. Fetch the OLDEST unposted article to post in chronological order
         const { data: articles, error: fetchErr } = await supabase
             .from('articles')
             .select('id, title, category, created_at')
@@ -68,10 +105,7 @@ module.exports = async (req, res) => {
         const domain = 'https://www.panathinaikosnews.gr';
         const url = `${domain}/${cleanCat}/${cleanSlug}-id=${article.id}`;
         
-        // 3. Format Tweet Text (Max 280 chars, URL counts as 23)
         const emoji = getCategoryEmoji(article.category);
-        
-        // Truncate title if too long (280 - 23 (link) - 10 (spacing/emoji) = 247)
         let displayTitle = article.title;
         if (displayTitle.length > 230) {
             displayTitle = displayTitle.substring(0, 227) + '...';
@@ -79,34 +113,46 @@ module.exports = async (req, res) => {
         
         const tweetText = `${emoji} ${displayTitle}\n\n👉 ${url}`;
 
-        const payload = {
-            id: article.id,
-            title: article.title,
-            category: article.category,
-            url: url,
-            tweet_text: tweetText
-        };
+        // Send to Twitter API v2 directly using OAuth 1.0a
+        const twitterEndpoint = 'https://api.twitter.com/2/tweets';
+        const consumerKey = process.env.TWITTER_CONSUMER_KEY;
+        const consumerSecret = process.env.TWITTER_CONSUMER_SECRET;
+        const accessToken = process.env.TWITTER_ACCESS_TOKEN;
+        const accessSecret = process.env.TWITTER_ACCESS_SECRET;
 
-        const webhookUrl = process.env.SOCIAL_WEBHOOK_URL;
-
-        if (webhookUrl) {
-            console.log(`[Social Sync] Sending payload to webhook:`, JSON.stringify(payload));
-            const response = await fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`Webhook responded with status ${response.status}: ${text}`);
-            }
-            console.log(`[Social Sync] Webhook responded with status: ${response.status}`);
-        } else {
-            console.warn(`[Social Sync] SOCIAL_WEBHOOK_URL env variable is not set. Simulating webhook success.`);
+        if (!consumerKey || !consumerSecret || !accessToken || !accessSecret) {
+            throw new Error('Missing Twitter API OAuth 1.0a environment variables.');
         }
 
-        // 4. Mark as posted in the database
+        const oauthParams = {
+            oauth_consumer_key: consumerKey,
+            oauth_nonce: crypto.randomBytes(16).toString('hex'),
+            oauth_signature_method: 'HMAC-SHA1',
+            oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+            oauth_token: accessToken,
+            oauth_version: '1.0'
+        };
+
+        const authHeader = generateOAuthHeader('POST', twitterEndpoint, oauthParams, consumerSecret, accessSecret);
+
+        const twitterRes = await fetch(twitterEndpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: tweetText })
+        });
+
+        const resData = await twitterRes.json().catch(() => ({}));
+
+        if (!twitterRes.ok) {
+            throw new Error(`Twitter API error (${twitterRes.status}): ${JSON.stringify(resData)}`);
+        }
+
+        console.log(`[Twitter Sync] Successfully posted tweet. Twitter response:`, JSON.stringify(resData));
+
+        // Mark as posted in the database
         const { error: updateErr } = await supabase
             .from('articles')
             .update({ twitter_posted: true })
@@ -121,11 +167,12 @@ module.exports = async (req, res) => {
                 id: article.id,
                 title: article.title,
                 url: url
-            }
+            },
+            twitter_response: resData
         });
 
     } catch (err) {
-        console.error('[Social Sync Exception]:', err);
+        console.error('[Twitter Sync Exception]:', err);
         return res.status(500).json({ error: err.message });
     }
 };
