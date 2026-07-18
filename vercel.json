@@ -31,6 +31,7 @@
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
     { "source": "/terms-of-service", "destination": "/terms-of-service.html" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/feed.xml", "destination": "/api/feed" },
     { "source": "/:category/:slug-id=:id", "destination": "/api/render-article?id=:id" },
     { "source": "/", "destination": "/api/render-index" }
   ]
