@@ -928,6 +928,7 @@
         window.filterFeed = filterFeed;
 
         function filterFeedWithoutPush(category) {
+            window.scrollTo({ top: 0, behavior: 'instant' });
             activeCategory = category;
             updateNavStyles(category);
             const heroEl = document.getElementById('hero-container');
