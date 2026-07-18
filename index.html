@@ -100,7 +100,7 @@
             </button>
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <a href="/" class="flex items-center pointer-events-auto">
-                    <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain" width="200" height="74"/>
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain" width="200" height="74" style="aspect-ratio: 200 / 74;"/>
                 </a>
             </div>
             <div class="w-6 h-6 z-10"></div>
@@ -110,7 +110,7 @@
     <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
     <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
         <div class="flex items-center justify-between mb-8">
-            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-[200px] object-contain" width="200" height="96"/></a>
+            <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-[200px] object-contain" width="200" height="96" style="aspect-ratio: 200 / 96;"/></a>
             <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
         </div>
 
@@ -186,7 +186,7 @@
                     <!-- HERO_END -->
                 </div>
                 <!-- Stream: right 4 cols — Phase 2 skeletons initially -->
-                <div id="stream-container" class="md:col-span-4 flex flex-col gap-3 px-4 md:px-0" style="max-height:700px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
+                <div id="stream-container" class="md:col-span-4 flex flex-col gap-3 px-4 md:px-0 min-h-[800px] md:min-h-[500px]" style="max-height:700px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
                     <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
                         <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
                         <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div><div class="h-3 bg-surface-container-high w-1/2 rounded"></div></div>
@@ -610,7 +610,14 @@
             });
 
             // Hero logic with cache mismatch handling
-            let candidateHeroGroup = activeCategory === 'Άποψη' ? null : (scraperGroups[0] || ownGroups[0]);
+            let candidateHeroGroup = null;
+            if (activeCategory !== 'Άποψη') {
+                if (activeCategory === null) {
+                    candidateHeroGroup = scraperGroups.find(g => !(g.main.category || '').includes('Ερασιτέχνης')) || ownGroups[0];
+                } else {
+                    candidateHeroGroup = scraperGroups[0] || ownGroups[0];
+                }
+            }
             
             if (candidateHeroGroup) {
                 if (!window.currentHeroId) {
@@ -776,7 +783,7 @@
 
             container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30 px-4 md:px-0">
                 <h2 class="font-h2 text-h2 mb-6 flex items-center gap-3 flex-wrap">
-                    <img src="/logo.png" alt="PanathinaikosNews" class="h-10 md:h-12 w-auto object-contain" width="200" height="48"/>
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-10 md:h-12 w-auto object-contain" width="200" height="48" style="aspect-ratio: 200 / 48;"/>
                     <span class="text-on-surface/90 font-semibold">- Αρθρογραφία</span>
                 </h2>
                 <div class="relative group/carousel">
