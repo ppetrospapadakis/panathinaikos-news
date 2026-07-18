@@ -193,13 +193,15 @@ module.exports = async (req, res) => {
     <!-- Dynamic SEO and OpenGraph Metadata -->
     <meta property="og:title" content="${escapeHtml(article.title)}"/>
     <meta property="og:description" content="${escapeHtml(article.summary || '')}"/>
-    <meta property="og:image" content="${imageUrl}"/>
+    <meta property="og:image" content="${article.image_url || DEFAULT_IMG}"/>
     <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
     <meta property="og:type" content="article"/>
     <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:site" content="@PanaNewsGr"/>
+    <meta name="twitter:creator" content="@PanaNewsGr"/>
     <meta name="twitter:title" content="${escapeHtml(article.title)}"/>
     <meta name="twitter:description" content="${escapeHtml(article.summary || '')}"/>
-    <meta name="twitter:image" content="${imageUrl}"/>
+    <meta name="twitter:image" content="${article.image_url || DEFAULT_IMG}"/>
     <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
     <script type="application/ld+json">
     {
@@ -208,7 +210,7 @@ module.exports = async (req, res) => {
       "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}",
       "headline": ${JSON.stringify(article.title)},
       "image": [
-        ${JSON.stringify(imageUrl)}
+        ${JSON.stringify(article.image_url || DEFAULT_IMG)}
       ],
       "datePublished": ${JSON.stringify(article.created_at)},
       "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},
