@@ -1,0 +1,2576 @@
+﻿commit d5f8511a336c22d6067705cebf3c7d61842454b0
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Fri Jul 17 15:25:53 2026 +0300
+
+    fix: downgrade to tailwindcss v3, add missing plugins, and remove all remaining tailwind CDNs
+
+diff --git a/login.html b/login.html
+index 6ec476d..c449cbe 100644
+--- a/login.html
++++ b/login.html
+@@ -8,7 +8,7 @@
+     <meta name="description" content="╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖ ╬┤╬╣╬║╬« ╧â╬┐╧à ╬¼╧Ç╬┐╧ê╬╖ ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬▒╬╜╬▒╬╕╬╖╬╜╬▒╧è╬║╧î."/>
+     <meta name="robots" content="noindex, nofollow"/>
+     <link rel="canonical" href="https://panathinaikos-news.vercel.app/apopsi"/>
+-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
++    
+     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     <!-- Quill stylesheet and library -->
+@@ -21,6 +21,9 @@
+             document.documentElement.classList.add('icons-loaded');
+         }).catch(() => { document.documentElement.classList.add('icons-loaded'); });
+     </script>
++    <!-- Compiled Tailwind CSS -->
++    <link rel="preload" href="/style.css?v=4" as="style">
++    <link rel="stylesheet" href="/style.css?v=4">
+ </head>
+ <body class="bg-background text-on-surface overflow-x-hidden">
+ 
+
+commit c3e34d0211d6fbb02cd36ed3784c297ec76c525b
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Fri Jul 17 15:06:05 2026 +0300
+
+    perf: compile tailwindcss to static css and fix wsrv proxy logic
+
+diff --git a/login.html b/login.html
+index 48adf8b..6ec476d 100644
+--- a/login.html
++++ b/login.html
+@@ -14,286 +14,8 @@
+     <!-- Quill stylesheet and library -->
+     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet"/>
+     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+-    <style>
+-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=block');
+-        
+-        /* Quill Dark Mode Customization */
+-        .ql-toolbar.ql-snow {
+-            border-color: rgba(63, 73, 64, 0.3) !important;
+-            background-color: #1a1c20 !important;
+-            border-radius: 12px 12px 0 0 !important;
+-        }
+-        .ql-container.ql-snow {
+-            border-color: rgba(63, 73, 64, 0.3) !important;
+-            border-radius: 0 0 12px 12px !important;
+-            font-size: 15px !important;
+-            font-family: 'Geist', sans-serif !important;
+-            color: #e2e2e8 !important;
+-            background-color: #1e2024 !important;
+-        }
+-        .ql-editor.ql-blank::before {
+-            color: rgba(226, 226, 232, 0.3) !important;
+-            font-style: normal !important;
+-        }
+-        .ql-snow .ql-stroke {
+-            stroke: #bfc9bd !important;
+-        }
+-        .ql-snow .ql-fill {
+-            fill: #bfc9bd !important;
+-        }
+-        .ql-snow .ql-picker {
+-            color: #bfc9bd !important;
+-        }
+-        
+-        body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
+-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; opacity:0; transition:opacity 0.15s ease; }
+-        .icons-loaded .material-symbols-outlined { opacity:1; }
+-        .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
+-        .card-hover:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
+-
+-        /* Lock Screen */
+-        #lock-screen { position:fixed; inset:0; z-index:200; background:#111317; display:flex; align-items:center; justify-content:center; }
+-        .lock-card { background:#1a1c20; border:1px solid #3f4940; border-radius:24px; padding:48px; max-width:420px; width:100%; text-align:center; }
+-        .lock-card .icon { font-size:56px; color:#84d999; margin-bottom:24px; }
+-        .lock-card h1 { font-size:28px; font-weight:700; color:#e2e2e8; margin-bottom:8px; }
+-        .lock-card p { color:#bfc9bd; margin-bottom:32px; font-size:15px; }
+-        .lock-input { width:100%; background:#111317; border:1.5px solid #3f4940; border-radius:12px; padding:14px 18px; color:#e2e2e8; font-size:16px; outline:none; transition:border-color 0.2s; text-align:center; letter-spacing:4px; font-family:'Geist',sans-serif; }
+-        .lock-input:focus { border-color:#84d999; }
+-        .lock-btn { margin-top:16px; width:100%; background:#84d999; color:#00391a; font-weight:700; font-size:15px; padding:14px; border-radius:12px; border:none; cursor:pointer; transition:background 0.2s, transform 0.1s; }
+-        .lock-btn:hover { background:#a8e6b8; }
+-        .lock-btn:active { transform:scale(0.98); }
+-        .lock-error { color:#ffb4ab; font-size:13px; margin-top:10px; min-height:20px; }
+-
+-        /* Editor */
+-        .editor-input { background:#1a1c20; border:1.5px solid #3f4940; border-radius:12px; padding:16px 20px; color:#e2e2e8; font-size:15px; font-family:'Geist',sans-serif; width:100%; outline:none; transition:border-color 0.2s; resize:none; }
+-        .editor-input:focus { border-color:#84d999; }
+-        .editor-input::placeholder { color:#5a6360; }
+-
+-        /* Toolbar */
+-        .toolbar-btn { background:#1e2024; border:1px solid #3f4940; border-radius:8px; padding:6px 10px; color:#bfc9bd; cursor:pointer; font-size:13px; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; }
+-        .toolbar-btn:hover { background:#2a2d31; border-color:#84d999; color:#84d999; }
+-
+-        /* Word count */
+-        .word-count { font-size:12px; color:#5a6360; }
+-
+-        /* Article cards */
+-        .opinion-card { background:#1a1c20; border:1px solid #3f4940; border-radius:16px; overflow:hidden; cursor:pointer; transition:all 0.2s; }
+-        .opinion-card:hover { border-color:#84d999; transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
+-
+-        /* Status badge */
+-        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:full; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+-        .status-success { background:rgba(132,217,153,0.12); color:#84d999; border:1px solid rgba(132,217,153,0.3); border-radius:999px; }
+-        .status-error { background:rgba(255,180,171,0.12); color:#ffb4ab; border:1px solid rgba(255,180,171,0.3); border-radius:999px; }
+-
+-        /* Scrollbar */
+-        ::-webkit-scrollbar { width:6px; }
+-        ::-webkit-scrollbar-track { background:transparent; }
+-        ::-webkit-scrollbar-thumb { background:#3f4940; border-radius:3px; }
+-        ::-webkit-scrollbar-thumb:hover { background:#84d999; }
+-    /* Football Pitch Styles for Admin Visual Editor */
+-    .admin-pitch-canvas {
+-        background: #0b3d0b;
+-        border: 3px solid rgba(255,255,255,0.25);
+-        position: relative;
+-        overflow: hidden;
+-    }
+-    .admin-pitch-canvas::before {
+-        content: '';
+-        position: absolute;
+-        inset: 0;
+-        border: 3px solid rgba(255,255,255,0.3);
+-        margin: 12px;
+-        pointer-events: none;
+-    }
+-    .pitch-centre-circle {
+-        position: absolute;
+-        top: 50%; left: 50%;
+-        transform: translate(-50%, -50%);
+-        width: 80px; height: 80px;
+-        border: 2px solid rgba(255,255,255,0.3);
+-        border-radius: 50%;
+-    }
+-    .pitch-centre-line {
+-        position: absolute;
+-        top: 50%; left: 12px; right: 12px;
+-        height: 2px;
+-        background: rgba(255,255,255,0.3);
+-        transform: translateY(-50%);
+-    }
+-    .pitch-penalty-top, .pitch-penalty-bottom {
+-        position: absolute;
+-        left: 50%; transform: translateX(-50%);
+-        width: 55%; height: 18%;
+-        border: 2px solid rgba(255,255,255,0.3);
+-    }
+-    .pitch-penalty-top { top: 12px; }
+-    .pitch-penalty-bottom { bottom: 12px; }
+-    .pitch-goal-top, .pitch-goal-bottom {
+-        position: absolute;
+-        left: 50%; transform: translateX(-50%);
+-        width: 28%; height: 6%;
+-        border: 2px solid rgba(255,255,255,0.3);
+-        background: rgba(255,255,255,0.04);
+-    }
+-    .pitch-goal-top { top: 12px; }
+-    .pitch-goal-bottom { bottom: 12px; }
+-
+-    /* Basketball Court Styles for Admin Visual Editor */
+-    .court {
+-        background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+-        border: 3px solid rgba(255,255,255,0.20);
+-        position: relative;
+-        overflow: hidden;
+-    }
+-    .court::before {
+-        content: '';
+-        position: absolute;
+-        inset: 12px;
+-        border: 2px solid rgba(255,255,255,0.25);
+-        pointer-events: none;
+-    }
+-    .court-centre-circle {
+-        position: absolute;
+-        top: 50%; left: 50%;
+-        transform: translate(-50%, -50%);
+-        width: 72px; height: 72px;
+-        border: 2px solid rgba(255,255,255,0.25);
+-        border-radius: 50%;
+-    }
+-    .court-centre-line {
+-        position: absolute;
+-        top: 50%; left: 12px; right: 12px;
+-        height: 2px;
+-        background: rgba(255,255,255,0.25);
+-        transform: translateY(-50%);
+-    }
+-    .court-arc-top, .court-arc-bottom {
+-        position: absolute;
+-        left: 50%; transform: translateX(-50%);
+-        width: 80%; height: 38%;
+-        border: 2px solid rgba(255,255,255,0.25);
+-        border-radius: 0 0 50% 50%;
+-    }
+-    .court-arc-top { top: 12px; border-radius: 0 0 50% 50%; }
+-    .court-arc-bottom { bottom: 12px; border-radius: 50% 50% 0 0; }
+-    .court-key-top, .court-key-bottom {
+-        position: absolute;
+-        left: 50%; transform: translateX(-50%);
+-        width: 32%; height: 28%;
+-        border: 2px solid rgba(255,255,255,0.25);
+-        background: rgba(255,255,255,0.03);
+-    }
+-    .court-key-top { top: 12px; }
+-    .court-key-bottom { bottom: 12px; }
+-
+-    /* Draggable Player Tokens */
+-    .draggable-player {
+-        position: absolute;
+-        transform: translate(-50%, -50%);
+-        display: flex;
+-        flex-direction: column;
+-        align-items: center;
+-        gap: 3px;
+-        cursor: grab;
+-        z-index: 10;
+-        user-select: none;
+-    }
+-    .draggable-player.dragging {
+-        cursor: grabbing;
+-        z-index: 100;
+-        opacity: 0.8;
+-    }
+-    .draggable-player.selected .avatar {
+-        border-color: #ebc23e !important;
+-        box-shadow: 0 0 16px rgba(235,194,62,0.6) !important;
+-    }
+-    .draggable-player .avatar {
+-        width: 44px;
+-        height: 44px;
+-        border-radius: 50%;
+-        border: 2.5px solid #84d999;
+-        background: #006633;
+-        display: flex;
+-        align-items: center;
+-        justify-content: center;
+-        font-size: 13px;
+-        font-weight: 700;
+-        color: #84d999;
+-        box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+-        position: relative;
+-    }
+-    .draggable-player.basketball .avatar {
+-        background: #1a4a1a;
+-    }
+-    .draggable-player .name-tag {
+-        background: rgba(0,0,0,0.75);
+-        backdrop-filter: blur(4px);
+-        padding: 1px 6px;
+-        border-radius: 4px;
+-        font-size: 10px;
+-        font-weight: 600;
+-        color: #fff;
+-        white-space: nowrap;
+-        max-width: 80px;
+-        overflow: hidden;
+-        text-overflow: ellipsis;
+-    }
+-    .draggable-player .badge {
+-        position: absolute;
+-        top: -4px;
+-        right: -4px;
+-        background: #ebc23e;
+-        color: #2a1800;
+-        width: 18px;
+-        height: 18px;
+-        border-radius: 50%;
+-        font-size: 8px;
+-        font-weight: 800;
+-        display: flex;
+-        align-items: center;
+-        justify-content: center;
+-    }
+-    .draggable-player.football .badge {
+-        background: #84d999;
+-        color: #003300;
+-    }
+-
+-    /* Player edit popover modal */
+-    .player-popover {
+-        position: absolute;
+-        z-index: 150;
+-        width: 200px;
+-        background: #1e2024;
+-        border: 1px solid #3f4940;
+-        border-radius: 12px;
+-        padding: 12px;
+-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+-        display: flex;
+-        flex-direction: column;
+-        gap: 8px;
+-    }
+-    </style>
+-    <script>
+-        tailwind.config = {
+-            darkMode:"class",
+-            theme:{
+-                extend:{
+-                    colors:{
+-                        "secondary-container":"#32a45b","outline-variant":"#3f4940","surface-tint":"#84d999",
+-                        "on-tertiary":"#3c2f00","inverse-surface":"#e2e2e8","tertiary":"#ebc23e",
+-                        "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
+-                        "surface":"#111317","primary":"#84d999","on-error":"#690005",
+-                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20","surface-container-lowest":"#0b0d10",
+-                        "inverse-primary":"#0f6d39","on-background":"#e2e2e8",
+-                        "on-surface":"#e2e2e8","secondary":"#a0cfaa","on-secondary":"#003918",
+-                        "on-primary":"#00391a","surface-container":"#1e2024",
+-                        "on-surface-variant":"#bfc9bd","on-primary-container":"#8ce1a1",
+-                        "primary-container":"#006633","tertiary-container":"#cda721","on-error-container":"#ffdad6"
+-                    }
+-                }
+-            }
+-        }
+-    </script>
++    
++    
+     <script>
+         document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
+             document.documentElement.classList.add('icons-loaded');
+
+commit 5e06ca2e75904fb059a447f7170b8720be8c2738
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Fri Jul 17 13:47:57 2026 +0300
+
+    feat: ingestion filter, sorting, dynamic headers, and remove UTC
+
+diff --git a/login.html b/login.html
+index efebaee..48adf8b 100644
+--- a/login.html
++++ b/login.html
+@@ -46,7 +46,8 @@
+         }
+         
+         body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
+-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
++        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; opacity:0; transition:opacity 0.15s ease; }
++        .icons-loaded .material-symbols-outlined { opacity:1; }
+         .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
+         .card-hover:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
+ 
+@@ -293,6 +294,11 @@
+             }
+         }
+     </script>
++    <script>
++        document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
++            document.documentElement.classList.add('icons-loaded');
++        }).catch(() => { document.documentElement.classList.add('icons-loaded'); });
++    </script>
+ </head>
+ <body class="bg-background text-on-surface overflow-x-hidden">
+ 
+@@ -384,13 +390,13 @@
+         <!-- Page Header -->
+         <div class="mb-10">
+             <div class="flex items-center gap-3 mb-4">
+-                <span class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
++                <span id="page-header-icon" class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
+                 <div>
+-                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
+-                    <h1 class="text-3xl font-bold text-on-surface">╬ù ╬å╧Ç╬┐╧ê╬« ╬£╬┐╧à</h1>
++                    <p id="page-header-tag" class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
++                    <h1 id="page-header-title" class="text-3xl font-bold text-on-surface">╬ù ╬å╧Ç╬┐╧ê╬« ╬£╬┐╧à</h1>
+                 </div>
+             </div>
+-            <p class="text-on-surface-variant max-w-xl">╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖ ╬┤╬╣╬║╬« ╧â╬┐╧à ╬▒╬╕╬╗╬╖╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖, ╬¼╧Ç╬┐╧ê╬╖ ╬« ╧â╧ç╧î╬╗╬╣╬┐ ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬▒╬╜╬▒╬╕╬╖╬╜╬▒╧è╬║╧î. ╬ñ╬▒ ╬¼╧ü╬╕╧ü╬▒ ╧â╬┐╧à ╬╡╬╝╧å╬▒╬╜╬»╬╢╬┐╬╜╧ä╬▒╬╣ ╧â╧ä╬╖ ╧ü╬┐╬« ╬╡╬╣╬┤╬«╧â╬╡╧ë╬╜ ╬╝╬╡ ╧ä╬╖╬╜ ╬║╬▒╧ä╬╖╬│╬┐╧ü╬»╬▒ <span class="text-primary font-semibold">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</span>.</p>
++            <p id="page-header-desc" class="text-on-surface-variant max-w-xl">╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖ ╬┤╬╣╬║╬« ╧â╬┐╧à ╬▒╬╕╬╗╬╖╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖, ╬¼╧Ç╬┐╧ê╬╖ ╬« ╧â╧ç╧î╬╗╬╣╬┐ ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬▒╬╜╬▒╬╕╬╖╬╜╬▒╧è╬║╧î. ╬ñ╬▒ ╬¼╧ü╬╕╧ü╬▒ ╧â╬┐╧à ╬╡╬╝╧å╬▒╬╜╬»╬╢╬┐╬╜╧ä╬▒╬╣ ╧â╧ä╬╖ ╧ü╬┐╬« ╬╡╬╣╬┤╬«╧â╬╡╧ë╬╜ ╬╝╬╡ ╧ä╬╖╬╜ ╬║╬▒╧ä╬╖╬│╬┐╧ü╬»╬▒ <span class="text-primary font-semibold">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</span>.</p>
+         </div>
+ 
+         <!-- Admin Sub-navigation Tabs (only shown when authenticated) -->
+@@ -758,9 +764,27 @@
+                     <h2 class="text-xl font-bold text-primary mb-2">Ingestion Analytics & Crawler Logs</h2>
+                     <p class="text-sm text-on-surface-variant">╬ö╬╡╬»╧ä╬╡ ╧ä╬▒ ╧â╧ä╬▒╧ä╬╣╧â╧ä╬╣╬║╬¼ ╧â╧ä╬┐╬╣╧ç╬╡╬»╬▒ ╬║╬▒╬╣ ╧ä╬▒ ╧â╧å╬¼╬╗╬╝╬▒╧ä╬▒ ╬▒╧Ç╧î ╧ä╬▒ ╧ä╧ü╬╡╬╛╬»╬╝╬▒╧ä╬▒ ╧ä╬┐╧à crawler (╬▒╬╜╬¼ 15 ╬╗╬╡╧Ç╧ä╬¼).</p>
+                 </div>
+-                <button onclick="loadScraperRuns()" class="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary py-2.5 px-4 rounded-xl text-xs font-bold hover:bg-primary/20 transition-all select-none">
+-                    <span class="material-symbols-outlined animate-none" id="refresh-runs-icon">refresh</span> ╬æ╬╜╬▒╬╜╬¡╧ë╧â╬╖
+-                </button>
++                <div class="flex items-center gap-4">
++                    <!-- Dropdown Filter for Ingestion Sources -->
++                    <div class="flex items-center gap-2">
++                        <label for="ingestion-site-filter" class="text-xs font-bold text-on-surface-variant uppercase tracking-wider select-none">╬ª╬»╬╗╧ä╧ü╬┐ ╬á╬╖╬│╬«╧é:</label>
++                        <select id="ingestion-site-filter" onchange="applyIngestionFilter()" class="editor-input py-2 px-3 text-xs w-48 font-medium" style="background:#111317; border-radius:10px;">
++                            <option value="ALL">╬î╬╗╬╡╧é ╬┐╬╣ ╧Ç╬╖╬│╬¡╧é</option>
++                            <option value="Sport-FM">Sport-FM</option>
++                            <option value="SDNA">SDNA</option>
++                            <option value="Sportal">Sportal</option>
++                            <option value="Sport24">Sport24</option>
++                            <option value="Gazzetta">Gazzetta</option>
++                            <option value="Athletiko">Athletiko</option>
++                            <option value="Monobala">Monobala</option>
++                            <option value="PAO Official">PAO Official</option>
++                            <option value="PAO1908 Official">PAO1908 Official</option>
++                        </select>
++                    </div>
++                    <button onclick="loadScraperRuns()" class="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary py-2.5 px-4 rounded-xl text-xs font-bold hover:bg-primary/20 transition-all select-none">
++                        <span class="material-symbols-outlined animate-none" id="refresh-runs-icon">refresh</span> ╬æ╬╜╬▒╬╜╬¡╧ë╧â╬╖
++                    </button>
++                </div>
+             </div>
+ 
+             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+@@ -970,7 +994,7 @@
+     </div>
+ </div>
+ 
+-<script src="opinion_admin.js?v=2.0.3"></script>
++<script src="opinion_admin.js?v=2.0.4"></script>
+ <script>
+ // ΓöÇΓöÇ Config ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+ const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+
+commit d76f0aa4b61f89989be3e68a68edea13b37b763b
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Fri Jul 17 11:17:59 2026 +0300
+
+    Fix opacity bug, implement image/video resizer in Quill editor, update PAO BC scraper to use sitemap, and add detailed logs of skipped articles in Ingestion Stats
+
+diff --git a/login.html b/login.html
+index 2cec1f0..efebaee 100644
+--- a/login.html
++++ b/login.html
+@@ -282,7 +282,7 @@
+                         "on-tertiary":"#3c2f00","inverse-surface":"#e2e2e8","tertiary":"#ebc23e",
+                         "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
+                         "surface":"#111317","primary":"#84d999","on-error":"#690005",
+-                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20",
++                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20","surface-container-lowest":"#0b0d10",
+                         "inverse-primary":"#0f6d39","on-background":"#e2e2e8",
+                         "on-surface":"#e2e2e8","secondary":"#a0cfaa","on-secondary":"#003918",
+                         "on-primary":"#00391a","surface-container":"#1e2024",
+@@ -1005,6 +1005,169 @@ function checkPassword() {
+     }
+ }
+ 
++// ΓöÇΓöÇ Quill Visual Resizer & Align Controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++let currentResizeTarget = null;
++let resizerOverlay = null;
++
++function showResizer(el) {
++    currentResizeTarget = el;
++    const container = document.getElementById('editor-container');
++    if (!container) return;
++
++    if (!resizerOverlay) {
++        resizerOverlay = document.createElement('div');
++        resizerOverlay.id = 'quill-resizer-overlay';
++        resizerOverlay.style.position = 'absolute';
++        resizerOverlay.style.border = '2px dashed #84d999';
++        resizerOverlay.style.zIndex = '1000';
++        resizerOverlay.style.pointerEvents = 'none';
++        resizerOverlay.style.boxSizing = 'border-box';
++        
++        // Handle
++        const handle = document.createElement('div');
++        handle.style.position = 'absolute';
++        handle.style.width = '14px';
++        handle.style.height = '14px';
++        handle.style.background = '#84d999';
++        handle.style.border = '2px solid #111317';
++        handle.style.right = '-7px';
++        handle.style.bottom = '-7px';
++        handle.style.cursor = 'se-resize';
++        handle.style.pointerEvents = 'auto';
++        handle.style.borderRadius = '50%';
++        
++        // Drag logic
++        handle.addEventListener('mousedown', (e) => {
++            e.preventDefault();
++            e.stopPropagation();
++            const startWidth = el.offsetWidth || el.getBoundingClientRect().width;
++            const startHeight = el.offsetHeight || el.getBoundingClientRect().height;
++            const startX = e.clientX;
++            const startY = e.clientY;
++            
++            function onMouseMove(moveEv) {
++                const deltaX = moveEv.clientX - startX;
++                const newWidth = Math.max(50, startWidth + deltaX);
++                
++                if (el.tagName === 'IMG') {
++                    el.style.width = newWidth + 'px';
++                    el.style.height = 'auto';
++                } else {
++                    const ratio = startHeight / startWidth;
++                    el.style.width = newWidth + 'px';
++                    el.style.height = (newWidth * ratio) + 'px';
++                }
++                updateOverlayPos();
++            }
++            
++            function onMouseUp() {
++                document.removeEventListener('mousemove', onMouseMove);
++                document.removeEventListener('mouseup', onMouseUp);
++                if (quill) quill.update();
++            }
++            
++            document.addEventListener('mousemove', onMouseMove);
++            document.addEventListener('mouseup', onMouseUp);
++        });
++        
++        // Align controls
++        const controls = document.createElement('div');
++        controls.style.position = 'absolute';
++        controls.style.top = '-36px';
++        controls.style.left = '50%';
++        controls.style.transform = 'translateX(-50%)';
++        controls.style.background = '#1a1c20';
++        controls.style.border = '1px solid #3f4940';
++        controls.style.borderRadius = '8px';
++        controls.style.display = 'flex';
++        controls.style.gap = '2px';
++        controls.style.padding = '2px';
++        controls.style.pointerEvents = 'auto';
++        
++        const alignments = [
++            { icon: 'format_align_left', value: 'left' },
++            { icon: 'format_align_center', value: 'center' },
++            { icon: 'format_align_right', value: 'right' }
++        ];
++        
++        alignments.forEach(align => {
++            const btn = document.createElement('button');
++            btn.className = 'material-symbols-outlined text-xs p-1 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded transition-colors';
++            btn.style.fontSize = '16px';
++            btn.innerText = align.icon;
++            btn.type = 'button';
++            btn.onclick = (e) => {
++                e.preventDefault();
++                e.stopPropagation();
++                if (align.value === 'center') {
++                    el.style.display = 'block';
++                    el.style.margin = '10px auto';
++                    el.style.float = 'none';
++                } else if (align.value === 'left') {
++                    el.style.display = 'inline';
++                    el.style.margin = '10px 10px 10px 0';
++                    el.style.float = 'left';
++                } else if (align.value === 'right') {
++                    el.style.display = 'inline';
++                    el.style.margin = '10px 0 10px 10px';
++                    el.style.float = 'right';
++                }
++                updateOverlayPos();
++                if (quill) quill.update();
++            };
++            controls.appendChild(btn);
++        });
++
++        // Delete button
++        const delBtn = document.createElement('button');
++        delBtn.className = 'material-symbols-outlined text-xs p-1 text-error hover:bg-error/15 rounded transition-colors';
++        delBtn.style.fontSize = '16px';
++        delBtn.innerText = 'delete';
++        delBtn.type = 'button';
++        delBtn.onclick = (e) => {
++            e.preventDefault();
++            e.stopPropagation();
++            const blot = Quill.find(el);
++            if (blot) {
++                blot.deleteAt(0, 1);
++            } else {
++                el.remove();
++            }
++            hideResizer();
++            if (quill) quill.update();
++        };
++        controls.appendChild(delBtn);
++        
++        resizerOverlay.appendChild(handle);
++        resizerOverlay.appendChild(controls);
++        container.style.position = 'relative'; // ensure overlay coordinates map correctly
++        container.appendChild(resizerOverlay);
++    }
++    
++    updateOverlayPos();
++    resizerOverlay.style.display = 'block';
++}
++
++function updateOverlayPos() {
++    if (!currentResizeTarget || !resizerOverlay) return;
++    const container = document.getElementById('editor-container');
++    if (!container) return;
++    const containerRect = container.getBoundingClientRect();
++    const targetRect = currentResizeTarget.getBoundingClientRect();
++    
++    resizerOverlay.style.left = (targetRect.left - containerRect.left + container.scrollLeft) + 'px';
++    resizerOverlay.style.top = (targetRect.top - containerRect.top + container.scrollTop) + 'px';
++    resizerOverlay.style.width = targetRect.width + 'px';
++    resizerOverlay.style.height = targetRect.height + 'px';
++}
++
++function hideResizer() {
++    currentResizeTarget = null;
++    if (resizerOverlay) {
++        resizerOverlay.style.display = 'none';
++    }
++}
++
+ // ΓöÇΓöÇ Init ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+ let quill = null;
+ let editingArticleId = null;
+@@ -1057,6 +1220,26 @@ function initEditor() {
+         qEditor.style.minHeight = '320px';
+     }
+ 
++    // Image/Video Resize listeners
++    quill.root.addEventListener('click', (e) => {
++        const target = e.target;
++        if (target.tagName === 'IMG' || target.tagName === 'IFRAME') {
++            showResizer(target);
++        } else {
++            hideResizer();
++        }
++    });
++
++    if (qEditor) {
++        qEditor.addEventListener('scroll', () => {
++            if (currentResizeTarget) updateOverlayPos();
++        });
++    }
++
++    window.addEventListener('resize', () => {
++        if (currentResizeTarget) updateOverlayPos();
++    });
++
+     quill.on('text-change', () => {
+         updateWordCount();
+         updatePreviewCard();
+
+commit bdf91cc006d2e06c3ce71d282b4fa2e13724c263
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Thu Jul 16 17:24:46 2026 +0300
+
+    fix(dashboard): dynamically detect and show usage for extra Gemini keys used by scraper; fix X-axis dynamic labeling
+
+diff --git a/login.html b/login.html
+index 7cc4dd4..2cec1f0 100644
+--- a/login.html
++++ b/login.html
+@@ -856,14 +856,14 @@
+                         </div>
+                         
+                         <!-- X-axis -->
+-                        <div class="flex justify-between text-[9px] text-on-surface-variant/60 pt-2 px-2 font-mono font-semibold">
+-                            <span>00:00</span>
+-                            <span>04:00</span>
+-                            <span>08:00</span>
+-                            <span>12:00</span>
+-                            <span>16:00</span>
+-                            <span>20:00</span>
+-                            <span>23:00</span>
++                        <div class="flex justify-between text-[9px] text-on-surface-variant/60 pt-2 px-2 font-mono font-semibold" id="chart-x-axis-labels">
++                            <span id="x-axis-val-0">00:00</span>
++                            <span id="x-axis-val-4">04:00</span>
++                            <span id="x-axis-val-8">08:00</span>
++                            <span id="x-axis-val-12">12:00</span>
++                            <span id="x-axis-val-16">16:00</span>
++                            <span id="x-axis-val-20">20:00</span>
++                            <span id="x-axis-val-23">23:00</span>
+                         </div>
+                     </div>
+                 </div>
+
+commit 97c18497d8984f5c0aca8e585191926f7a1b9055
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Thu Jul 16 11:53:01 2026 +0300
+
+    feat(analytics): add error badges on 0-scraped sources, RELEVANCE column, real last-24h chart with source breakdown tooltips, time context on cards, dual Gemini key support
+
+diff --git a/login.html b/login.html
+index dc10bc0..7cc4dd4 100644
+--- a/login.html
++++ b/login.html
+@@ -798,6 +798,7 @@
+                     <div>
+                         <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬ú╧ì╬╜╬┐╬╗╬┐ ╬å╧ü╬╕╧ü╧ë╬╜ ╧â╧ä╬╖ ╬Æ╬¼╧â╬╖</p>
+                         <h4 id="total-articles-count" class="text-2xl font-bold text-on-surface mt-1">...</h4>
++                        <p class="text-[10px] text-on-surface-variant/40 mt-0.5">╬æ╬╕╧ü╬┐╬╣╧â╧ä╬╣╬║╬¼ ΓÇö ever</p>
+                     </div>
+                 </div>
+                 <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
+@@ -807,6 +808,7 @@
+                     <div>
+                         <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬£╬╖ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒ ╬å╧ü╬╕╧ü╬▒ (Opinions)</p>
+                         <h4 id="manual-opinions-count" class="text-2xl font-bold text-on-surface mt-1">...</h4>
++                        <p class="text-[10px] text-on-surface-variant/40 mt-0.5">╬æ╬╕╧ü╬┐╬╣╧â╧ä╬╣╬║╬¼ ΓÇö ever</p>
+                     </div>
+                 </div>
+                 <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
+@@ -816,6 +818,7 @@
+                     <div>
+                         <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬ò╬║╧ä╬╡╬╗╬¡╧â╬╡╬╣╧é Crawler</p>
+                         <h4 id="total-runs-count" class="text-2xl font-bold text-green-400 mt-1">...</h4>
++                        <p class="text-[10px] text-on-surface-variant/40 mt-0.5">╬æ╬╕╧ü╬┐╬╣╧â╧ä╬╣╬║╬¼ ΓÇö ever</p>
+                     </div>
+                 </div>
+             </div>
+@@ -825,7 +828,7 @@
+                 <div class="mb-6 flex justify-between items-center">
+                     <div>
+                         <h4 class="text-base font-bold text-on-surface">╬ú╧à╧ç╬╜╧î╧ä╬╖╧ä╬▒ ╬å╧ü╬╕╧ü╧ë╬╜ ╬▒╬╜╬¼ ╬Å╧ü╬▒ (24h Post Activity)</h4>
+-                        <p class="text-xs text-on-surface-variant">╬ú╧à╬╜╬┐╬╗╬╣╬║╬¼ ╬¼╧ü╬╕╧ü╬▒ ╧Ç╬┐╧à ╬┤╬╖╬╝╬┐╧â╬╣╬╡╧ì╬╕╬╖╬║╬▒╬╜ ╬▒╬╜╬¼ ╧Ä╧ü╬▒ ╧ä╬╖╧é ╬╖╬╝╬¡╧ü╬▒╧é ╧ä╬╣╧é ╧ä╬╡╬╗╬╡╧à╧ä╬▒╬»╬╡╧é 7 ╬╖╬╝╬¡╧ü╬╡╧é.</p>
++                        <p id="chart-subtitle" class="text-xs text-on-surface-variant">╬å╧ü╬╕╧ü╬▒ ╧Ç╬┐╧à ╬┤╬╖╬╝╬┐╧â╬╣╬╡╧ì╬╕╬╖╬║╬▒╬╜ ╬▒╬╜╬¼ ╧Ä╧ü╬▒ ΓÇö ╧ä╬╡╬╗╬╡╧à╧ä╬▒╬»╬╡╧é 24h.</p>
+                     </div>
+                     <span class="text-xs text-on-surface-variant/60 font-mono">Live Sync: Active</span>
+                 </div>
+@@ -908,7 +911,7 @@
+                             </div>
+                         </div>
+                         <p class="text-[11px] text-on-surface-variant/80 mt-1">
+-                            ╬£╬╖╬╜╬╣╬▒╬»╬▒ ╧ç╧ü╬«╧â╬╖: <strong class="text-on-surface font-mono">~1,440 ╬╗╬╡╧Ç╧ä╬¼</strong> / <strong>2,000 min</strong> (╬ò╬╗╬╡╧ì╬╕╬╡╧ü╬┐ ╧â╬╡ ╬ö╬╖╬╝╧î╧â╬╣╬▒ Repos)
++                            ╬£╬╖╬╜╬╣╬▒╬»╬▒ ╧ç╧ü╬«╧â╬╖: <strong class="text-on-surface font-mono">~1,440 ╬╗╬╡╧Ç╧ä╬¼</strong> / <strong>2,000 min</strong> (╬ò╬╗╬╡╧ì╬╕╬╡╧ü╬┐ ╧â╬╡ ╬ö╬╖╬╝╧î╧â╬╣╬▒ Repos) ┬╖ <span class="text-on-surface-variant/50 text-[10px]">╬æ╬╜╬¼ ╬╝╬«╬╜╬▒</span>
+                         </p>
+                     </div>
+                 </div>
+
+commit e813b99ad1d3307cbaa80f40c7db5f3fb3a9de03
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Thu Jul 16 11:31:37 2026 +0300
+
+    feat(analytics): replace mock analytics with real DB metrics, dynamic 24h posts chart, opaque tooltips, and limits widget
+
+diff --git a/login.html b/login.html
+index a965ee0..dc10bc0 100644
+--- a/login.html
++++ b/login.html
+@@ -785,37 +785,37 @@
+         <!-- ΓöÇΓöÇ TAB 5: READER TRAFFIC ΓöÇΓöÇ -->
+         <div id="panel-section-analytics-engagement" class="admin-panel-content hidden">
+             <div class="mb-8">
+-                <h2 class="text-xl font-bold text-primary mb-2">Reader Traffic & Engagement Analytics</h2>
+-                <p class="text-sm text-on-surface-variant">╬ú╧ä╬▒╧ä╬╣╧â╧ä╬╣╬║╬¼ ╧â╧ä╬┐╬╣╧ç╬╡╬»╬▒ ╬╡╧Ç╬╣╧â╬║╬╡╧ê╬╣╬╝╧î╧ä╬╖╧ä╬▒╧é ╬║╬▒╬╣ ╬▒╬╗╬╗╬╖╬╗╬╡╧Ç╬»╬┤╧ü╬▒╧â╬╖╧é ╬▒╬╜╬▒╬│╬╜╧ë╧â╧ä╧Ä╬╜ ╬╝╬╡ ╧ä╬▒ ╬¼╧ü╬╕╧ü╬▒.</p>
++                <h2 class="text-xl font-bold text-primary mb-2">System Analytics & Resource Monitoring</h2>
++                <p class="text-sm text-on-surface-variant">╬ú╧ä╬▒╧ä╬╣╧â╧ä╬╣╬║╬¼ ╧â╧ä╬┐╬╣╧ç╬╡╬»╬▒ ╬▓╬¼╧â╬╖╧é ╬┤╬╡╬┤╬┐╬╝╬¡╬╜╧ë╬╜, ╧â╧à╧ç╬╜╧î╧ä╬╖╧ä╬▒╧é ╬┤╬╖╬╝╬┐╧â╬╣╬╡╧ì╧â╬╡╧ë╬╜ ╬║╬▒╬╣ ╬┐╧ü╬»╧ë╬╜ ╧ç╧ü╬«╧â╬╖╧é API.</p>
+             </div>
+ 
+             <!-- Overview Cards -->
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                 <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
+                     <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+-                        <span class="material-symbols-outlined" style="font-size:28px">visibility</span>
++                        <span class="material-symbols-outlined" style="font-size:28px">database</span>
+                     </div>
+                     <div>
+-                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬æ╬╜╬▒╬│╬╜╧Ä╧â╬╡╬╣╧é 24╧Ä╧ü╬┐╧à</p>
+-                        <h4 class="text-2xl font-bold text-on-surface mt-1">142.8k</h4>
++                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬ú╧ì╬╜╬┐╬╗╬┐ ╬å╧ü╬╕╧ü╧ë╬╜ ╧â╧ä╬╖ ╬Æ╬¼╧â╬╖</p>
++                        <h4 id="total-articles-count" class="text-2xl font-bold text-on-surface mt-1">...</h4>
+                     </div>
+                 </div>
+                 <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
+                     <div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0">
+-                        <span class="material-symbols-outlined" style="font-size:28px">thumb_up</span>
++                        <span class="material-symbols-outlined" style="font-size:28px">rate_review</span>
+                     </div>
+                     <div>
+-                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬ú╧à╬╜╧ä╬╡╬╗╬╡╧â╧ä╬«╧é Engagement</p>
+-                        <h4 class="text-2xl font-bold text-on-surface mt-1">8.2%</h4>
++                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬£╬╖ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒ ╬å╧ü╬╕╧ü╬▒ (Opinions)</p>
++                        <h4 id="manual-opinions-count" class="text-2xl font-bold text-on-surface mt-1">...</h4>
+                     </div>
+                 </div>
+                 <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
+                     <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
+-                        <span class="material-symbols-outlined" style="font-size:28px">rss_feed</span>
++                        <span class="material-symbols-outlined" style="font-size:28px">sync</span>
+                     </div>
+                     <div>
+-                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">Crawler Health</p>
+-                        <h4 class="text-2xl font-bold text-green-400 mt-1">100% Active</h4>
++                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬ò╬║╧ä╬╡╬╗╬¡╧â╬╡╬╣╧é Crawler</p>
++                        <h4 id="total-runs-count" class="text-2xl font-bold text-green-400 mt-1">...</h4>
+                     </div>
+                 </div>
+             </div>
+@@ -824,8 +824,8 @@
+             <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                 <div class="mb-6 flex justify-between items-center">
+                     <div>
+-                        <h4 class="text-base font-bold text-on-surface">╬ò╧Ç╬╣╧â╬║╬╡╧ê╬╣╬╝╧î╧ä╬╖╧ä╬▒ ╬▒╬╜╬¼ ╬Å╧ü╬▒ (24h Traffic)</h4>
+-                        <p class="text-xs text-on-surface-variant">╬£╬¡╧â╬┐╧é ╧î╧ü╬┐╧é ╬╝╬┐╬╜╬▒╬┤╬╣╬║╧Ä╬╜ ╬▒╬╜╬▒╬│╬╜╧ë╧â╧ä╧Ä╬╜ ╬▒╬╜╬¼ ╧Ä╧ü╬▒ ╧ä╬╖╧é ╬╖╬╝╬¡╧ü╬▒╧é.</p>
++                        <h4 class="text-base font-bold text-on-surface">╬ú╧à╧ç╬╜╧î╧ä╬╖╧ä╬▒ ╬å╧ü╬╕╧ü╧ë╬╜ ╬▒╬╜╬¼ ╬Å╧ü╬▒ (24h Post Activity)</h4>
++                        <p class="text-xs text-on-surface-variant">╬ú╧à╬╜╬┐╬╗╬╣╬║╬¼ ╬¼╧ü╬╕╧ü╬▒ ╧Ç╬┐╧à ╬┤╬╖╬╝╬┐╧â╬╣╬╡╧ì╬╕╬╖╬║╬▒╬╜ ╬▒╬╜╬¼ ╧Ä╧ü╬▒ ╧ä╬╖╧é ╬╖╬╝╬¡╧ü╬▒╧é ╧ä╬╣╧é ╧ä╬╡╬╗╬╡╧à╧ä╬▒╬»╬╡╧é 7 ╬╖╬╝╬¡╧ü╬╡╧é.</p>
+                     </div>
+                     <span class="text-xs text-on-surface-variant/60 font-mono">Live Sync: Active</span>
+                 </div>
+@@ -833,62 +833,83 @@
+                 <!-- Custom premium Bar Chart -->
+                 <div class="flex h-[320px] bg-surface-container-low border border-outline-variant/20 rounded-2xl p-6 relative">
+                     <!-- Y-axis -->
+-                    <div class="flex flex-col justify-between text-[11px] text-on-surface-variant/60 pr-4 h-[220px] font-mono text-right w-8">
+-                        <span>30k</span>
+-                        <span>20k</span>
+-                        <span>10k</span>
++                    <div class="flex flex-col justify-between text-[10px] text-on-surface-variant/60 pr-4 h-[220px] font-mono text-right w-8 select-none">
++                        <span id="y-axis-val-3">Peak</span>
++                        <span id="y-axis-val-2">Mid</span>
++                        <span id="y-axis-val-1">Low</span>
+                         <span>0</span>
+                     </div>
+                     
+                     <!-- Chart area -->
+                     <div class="flex-1 flex flex-col h-full">
+                         <!-- Grid & bars container -->
+-                        <div class="flex-1 flex items-end justify-between gap-4 h-[220px] border-b border-outline-variant/30 pb-2 relative px-2">
++                        <div id="chart-bars-container" class="flex-1 flex items-end justify-between gap-1.5 h-[220px] border-b border-outline-variant/30 pb-2 relative px-2">
+                             <!-- Grid lines -->
+                             <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+                             <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                             <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                             
+-                            <!-- Bar 6am -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[40%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">6am: 12,400 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
+-                            </div>
+-                            <!-- Bar 9am -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[60%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">9am: 18,200 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
+-                            </div>
+-                            <!-- Bar 12pm -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[85%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">12pm: 24,500 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
+-                            </div>
+-                            <!-- Bar 3pm -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[70%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">3pm: 21,000 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            <!-- Dynamic bars populated via Javascript -->
++                        </div>
++                        
++                        <!-- X-axis -->
++                        <div class="flex justify-between text-[9px] text-on-surface-variant/60 pt-2 px-2 font-mono font-semibold">
++                            <span>00:00</span>
++                            <span>04:00</span>
++                            <span>08:00</span>
++                            <span>12:00</span>
++                            <span>16:00</span>
++                            <span>20:00</span>
++                            <span>23:00</span>
++                        </div>
++                    </div>
++                </div>
++            </div>
++
++            <!-- System Resources Widget -->
++            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 mt-8">
++                <h4 class="text-base font-bold text-on-surface mb-2">╬î╧ü╬╣╬▒ & ╬Ü╬▒╧ä╬▒╬╜╬¼╬╗╧ë╧â╬╖ ╬á╧î╧ü╧ë╬╜ ╬ú╧à╧â╧ä╬«╬╝╬▒╧ä╬┐╧é</h4>
++                <p class="text-xs text-on-surface-variant mb-6">╬á╬▒╧ü╬▒╬║╬┐╬╗╬┐╧ì╬╕╬╖╧â╬╖ ╧ä╬╖╧é ╧ç╧ü╬«╧â╬╖╧é ╧ä╧ë╬╜ ╬┤╧ë╧ü╬╡╬¼╬╜ ╬┐╧ü╬»╧ë╬╜ (Free Tier limits) ╧ä╧ë╬╜ ╧â╧à╬╜╬┤╬╡╬┤╬╡╬╝╬¡╬╜╧ë╬╜ ╧à╧Ç╬╖╧ü╬╡╧â╬╣╧Ä╬╜.</p>
++                
++                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
++                    <!-- Column 1: Database Size -->
++                    <div class="flex flex-col justify-between min-h-[90px]">
++                        <div>
++                            <div class="flex items-center justify-between text-xs font-bold text-on-surface mb-2">
++                                <span>╬Æ╬¼╧â╬╖ ╬ö╬╡╬┤╬┐╬╝╬¡╬╜╧ë╬╜ (Supabase)</span>
++                                <span id="db-percentage" class="text-primary font-mono">0%</span>
+                             </div>
+-                            <!-- Bar 6pm -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[95%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">6pm: 29,800 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            <div class="w-full bg-surface-container-low border border-outline-variant/20 rounded-full h-3 mb-2 overflow-hidden">
++                                <div id="db-progress" class="bg-primary h-full transition-all duration-500" style="width: 0%"></div>
+                             </div>
+-                            <!-- Bar 9pm -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[55%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">9pm: 15,600 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                        </div>
++                        <p class="text-[11px] text-on-surface-variant/80 mt-1">
++                            ╬º╧ü╬«╧â╬╖: <strong id="db-usage-text" class="text-on-surface font-mono">0.0 MB</strong> / <strong>500 MB</strong>
++                        </p>
++                    </div>
++
++                    <!-- Column 2: Gemini API Quota -->
++                    <div class="flex flex-col gap-3">
++                        <div class="text-xs font-bold text-on-surface">Gemini API Credits (Daily)</div>
++                        <div id="gemini-keys-container" class="flex flex-col gap-3">
++                            <div class="text-[11px] text-on-surface-variant/40 italic">╬ª╧î╧ü╧ä╧ë╧â╬╖ ╬║╬╗╬╡╬╣╬┤╬╣╧Ä╬╜...</div>
++                        </div>
++                    </div>
++
++                    <!-- Column 3: GitHub Actions -->
++                    <div class="flex flex-col justify-between min-h-[90px]">
++                        <div>
++                            <div class="flex items-center justify-between text-xs font-bold text-on-surface mb-2">
++                                <span>GitHub Action Crawler</span>
++                                <span class="text-green-400 font-semibold text-[11px] uppercase tracking-wider">╬ò╬╗╬╡╧ì╬╕╬╡╧ü╬┐</span>
+                             </div>
+-                            <!-- Bar 12am -->
+-                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[30%] cursor-pointer relative group">
+-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">12am: 8,400 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            <div class="w-full bg-surface-container-low border border-outline-variant/20 rounded-full h-3 mb-2 overflow-hidden">
++                                <div class="bg-green-400 h-full w-[72%]"></div>
+                             </div>
+                         </div>
+-                        
+-                        <!-- X-axis -->
+-                        <div class="flex justify-between text-[11px] text-on-surface-variant/60 pt-2 px-6 font-semibold">
+-                            <span>6am</span>
+-                            <span>9am</span>
+-                            <span>12pm</span>
+-                            <span>3pm</span>
+-                            <span>6pm</span>
+-                            <span>9pm</span>
+-                            <span>12am</span>
+-                        </div>
++                        <p class="text-[11px] text-on-surface-variant/80 mt-1">
++                            ╬£╬╖╬╜╬╣╬▒╬»╬▒ ╧ç╧ü╬«╧â╬╖: <strong class="text-on-surface font-mono">~1,440 ╬╗╬╡╧Ç╧ä╬¼</strong> / <strong>2,000 min</strong> (╬ò╬╗╬╡╧ì╬╕╬╡╧ü╬┐ ╧â╬╡ ╬ö╬╖╬╝╧î╧â╬╣╬▒ Repos)
++                        </p>
+                     </div>
+                 </div>
+             </div>
+
+commit e16a58fe7f46bbe6aea278ff8a6228b99267c14f
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Thu Jul 16 11:19:20 2026 +0300
+
+    feat(admin): restructure admin panel, secure analytics views inside lock screen, block indexation, and clean up redundant static files
+
+diff --git a/login.html b/login.html
+index 080a804..a965ee0 100644
+--- a/login.html
++++ b/login.html
+@@ -1,4 +1,4 @@
+-∩╗┐<!DOCTYPE html>
++<!DOCTYPE html>
+ <html class="dark" lang="el">
+ <head>
+     <meta charset="utf-8"/>
+@@ -6,7 +6,7 @@
+     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+     <title>╬ù ╬å╧Ç╬┐╧ê╬« ╬£╬┐╧à ΓÇô Panathinaikos News</title>
+     <meta name="description" content="╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖ ╬┤╬╣╬║╬« ╧â╬┐╧à ╬¼╧Ç╬┐╧ê╬╖ ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬▒╬╜╬▒╬╕╬╖╬╜╬▒╧è╬║╧î."/>
+-    <meta name="robots" content="max-image-preview:large"/>
++    <meta name="robots" content="noindex, nofollow"/>
+     <link rel="canonical" href="https://panathinaikos-news.vercel.app/apopsi"/>
+     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
+@@ -314,9 +314,9 @@
+ </div>
+ 
+ <!-- ΓòÉΓòÉΓòÉ TOP HEADER ΓòÉΓòÉΓòÉ -->
+-    <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
++    <header id="admin-header" class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant transition-all duration-300">
+         <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
+-            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
++            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleSidebar()" aria-label="Menu">
+                 <span class="material-symbols-outlined text-primary">menu</span>
+             </button>
+             <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/></a>
+@@ -327,44 +327,58 @@
+         </div>
+     </header>
+ 
+-<!-- ΓòÉΓòÉΓòÉ NAVIGATION DRAWER ΓòÉΓòÉΓòÉ -->
+-<aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
+-    <div class="flex items-center justify-between mb-8">
+-        <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-auto object-contain"/></a>
+-        <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
++<!-- ΓòÉΓòÉΓòÉ ADMIN SIDEBAR ΓòÉΓòÉΓòÉ -->
++<aside id="admin-sidebar" class="fixed inset-y-0 left-0 w-[260px] z-[60] bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full p-4 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out hidden">
++    <div class="flex items-center justify-between mb-8 px-2 pt-2">
++        <div>
++            <h2 class="font-h2 text-[20px] font-bold text-primary cursor-pointer" onclick="window.location.href='/'">Editorial</h2>
++            <p class="text-[11px] text-on-surface-variant opacity-60">Admin Controls</p>
++        </div>
++        <button class="md:hidden material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleSidebar()">close</button>
+     </div>
+-    <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">╬Ü╬▒╧ä╬╖╬│╬┐╧ü╬»╬╡╧é</p>
+-    <nav class="flex flex-col gap-1">
+-        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/">
+-            <span class="material-symbols-outlined">feed</span><span>╬í╬┐╬« ╬ò╬╣╬┤╬«╧â╬╡╧ë╬╜</span>
+-        </a>
+-        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/podosfairo">
+-            <span class="material-symbols-outlined">sports_soccer</span><span>╬á╬┐╬┤╧î╧â╧å╬▒╬╣╧ü╬┐</span>
+-        </a>
+-        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/basket">
+-            <span class="material-symbols-outlined">sports_basketball</span><span>╬£╧Ç╬¼╧â╬║╬╡╧ä</span>
+-        </a>
+-        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/erasitechnis">
+-            <span class="material-symbols-outlined">sports</span><span>╬ò╧ü╬▒╧â╬╣╧ä╬¡╧ç╬╜╬╖╧é</span>
+-        </a>
+-        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/apopsi">
+-            <span class="material-symbols-outlined">rate_review</span><span>╬å╧Ç╬┐╧ê╬╖</span>
+-        </a>
+-        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
+-            <span class="material-symbols-outlined">groups</span><span>╬í╧î╧â╧ä╬╡╧ü</span>
+-        </a>
++    
++    <nav class="flex-grow flex flex-col gap-2">
++        <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left">
++            <span class="material-symbols-outlined">edit_note</span>
++            <span>Article Editor</span>
++        </button>
++        <button id="admin-tab-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
++            <span class="material-symbols-outlined">sports_soccer</span>
++            <span>Roster ╬á╬┐╬┤╬┐╧â╧å╬▒╬»╧ü╬┐╧à</span>
++        </button>
++        <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
++            <span class="material-symbols-outlined">sports_basketball</span>
++            <span>Roster ╬£╧Ç╬¼╧â╬║╬╡╧ä</span>
++        </button>
++        
++        <div class="pt-4 border-t border-outline-variant/30 mt-2 flex flex-col gap-2">
++            <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 px-4 mb-1">Analytics</p>
++            <button id="admin-tab-analytics-ingestion" onclick="switchAdminTab('analytics-ingestion')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
++                <span class="material-symbols-outlined">insights</span>
++                <span>Ingestion Stats</span>
++            </button>
++            <button id="admin-tab-analytics-engagement" onclick="switchAdminTab('analytics-engagement')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
++                <span class="material-symbols-outlined">bar_chart</span>
++                <span>Reader Traffic</span>
++            </button>
++        </div>
+     </nav>
+-    <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
+-        <p class="font-caption text-caption text-on-surface-variant/50">┬⌐ 2026 PanathinaikosNews Editorial</p>
+-        <a href="/login.html" class="text-on-surface-variant/30 hover:text-primary transition-colors animate-pulse" title="Admin Panel">
+-            <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
++    
++    <div class="mt-auto pt-4 border-t border-outline-variant flex flex-col gap-2">
++        <a class="flex items-center gap-4 px-4 py-2.5 text-on-surface-variant hover:text-primary transition-colors text-sm" href="/">
++            <span class="material-symbols-outlined">arrow_back</span>
++            <span>Back to site</span>
+         </a>
++        <button class="w-full flex items-center gap-4 px-4 py-2.5 text-error hover:text-error/80 transition-colors text-sm text-left" onclick="adminLogout()">
++            <span class="material-symbols-outlined">logout</span>
++            <span>Logout</span>
++        </button>
+     </div>
+ </aside>
+-<div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
++<div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-300 md:hidden" onclick="toggleSidebar()"></div>
+ 
+ <!-- ΓòÉΓòÉΓòÉ MAIN CONTENT ΓòÉΓòÉΓòÉ -->
+-<main class="mt-[80px] min-h-screen">
++<main id="admin-main" class="mt-[80px] min-h-screen transition-all duration-300">
+     <div class="max-w-[1200px] mx-auto px-6 py-12">
+ 
+         <!-- Page Header -->
+@@ -736,6 +750,149 @@
+                 <div id="roster-basketball-status" class="hidden text-center text-sm font-semibold"></div>
+             </div>
+         </div>
++
++        <!-- ΓöÇΓöÇ TAB 4: INGESTION ANALYTICS ΓöÇΓöÇ -->
++        <div id="panel-section-analytics-ingestion" class="admin-panel-content hidden">
++            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
++                <div>
++                    <h2 class="text-xl font-bold text-primary mb-2">Ingestion Analytics & Crawler Logs</h2>
++                    <p class="text-sm text-on-surface-variant">╬ö╬╡╬»╧ä╬╡ ╧ä╬▒ ╧â╧ä╬▒╧ä╬╣╧â╧ä╬╣╬║╬¼ ╧â╧ä╬┐╬╣╧ç╬╡╬»╬▒ ╬║╬▒╬╣ ╧ä╬▒ ╧â╧å╬¼╬╗╬╝╬▒╧ä╬▒ ╬▒╧Ç╧î ╧ä╬▒ ╧ä╧ü╬╡╬╛╬»╬╝╬▒╧ä╬▒ ╧ä╬┐╧à crawler (╬▒╬╜╬¼ 15 ╬╗╬╡╧Ç╧ä╬¼).</p>
++                </div>
++                <button onclick="loadScraperRuns()" class="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary py-2.5 px-4 rounded-xl text-xs font-bold hover:bg-primary/20 transition-all select-none">
++                    <span class="material-symbols-outlined animate-none" id="refresh-runs-icon">refresh</span> ╬æ╬╜╬▒╬╜╬¡╧ë╧â╬╖
++                </button>
++            </div>
++
++            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
++                <!-- Left: Runs List -->
++                <div class="lg:col-span-1 flex flex-col gap-4">
++                    <h3 class="text-xs uppercase tracking-widest text-primary font-bold px-1">╬Ö╧â╧ä╬┐╧ü╬╣╬║╧î ╬ò╬║╧ä╬╡╬╗╬¡╧â╬╡╧ë╬╜</h3>
++                    <div id="runs-list-container" class="flex flex-col gap-3 max-h-[640px] overflow-y-auto pr-2">
++                        <div class="text-center text-on-surface-variant/40 py-8">╬ª╧î╧ü╧ä╧ë╧â╬╖ ╬╡╬║╧ä╬╡╬╗╬¡╧â╬╡╧ë╬╜...</div>
++                    </div>
++                </div>
++
++                <!-- Right: Run Inspector -->
++                <div class="lg:col-span-2 flex flex-col gap-6">
++                    <h3 class="text-xs uppercase tracking-widest text-primary font-bold px-1">╬æ╬╜╬¼╬╗╧à╧â╬╖ ╬ò╧Ç╬╣╬╗╬╡╬│╬╝╬¡╬╜╬╖╧é ╬ò╬║╧ä╬¡╬╗╬╡╧â╬╖╧é</h3>
++                    <div id="run-inspector-card" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex flex-col gap-6">
++                        <div class="text-center text-on-surface-variant/40 py-16">╬ò╧Ç╬╣╬╗╬¡╬╛╧ä╬╡ ╬╝╬╣╬▒ ╬╡╬║╧ä╬¡╬╗╬╡╧â╬╖ ╬▒╧Ç╧î ╧ä╬╖ ╬╗╬»╧â╧ä╬▒ ╬│╬╣╬▒ ╬╜╬▒ ╬┤╬╡╬»╧ä╬╡ ╧ä╬▒ ╧â╧ä╬▒╧ä╬╣╧â╧ä╬╣╬║╬¼.</div>
++                    </div>
++                </div>
++            </div>
++        </div>
++
++        <!-- ΓöÇΓöÇ TAB 5: READER TRAFFIC ΓöÇΓöÇ -->
++        <div id="panel-section-analytics-engagement" class="admin-panel-content hidden">
++            <div class="mb-8">
++                <h2 class="text-xl font-bold text-primary mb-2">Reader Traffic & Engagement Analytics</h2>
++                <p class="text-sm text-on-surface-variant">╬ú╧ä╬▒╧ä╬╣╧â╧ä╬╣╬║╬¼ ╧â╧ä╬┐╬╣╧ç╬╡╬»╬▒ ╬╡╧Ç╬╣╧â╬║╬╡╧ê╬╣╬╝╧î╧ä╬╖╧ä╬▒╧é ╬║╬▒╬╣ ╬▒╬╗╬╗╬╖╬╗╬╡╧Ç╬»╬┤╧ü╬▒╧â╬╖╧é ╬▒╬╜╬▒╬│╬╜╧ë╧â╧ä╧Ä╬╜ ╬╝╬╡ ╧ä╬▒ ╬¼╧ü╬╕╧ü╬▒.</p>
++            </div>
++
++            <!-- Overview Cards -->
++            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
++                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
++                        <span class="material-symbols-outlined" style="font-size:28px">visibility</span>
++                    </div>
++                    <div>
++                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬æ╬╜╬▒╬│╬╜╧Ä╧â╬╡╬╣╧é 24╧Ä╧ü╬┐╧à</p>
++                        <h4 class="text-2xl font-bold text-on-surface mt-1">142.8k</h4>
++                    </div>
++                </div>
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
++                    <div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0">
++                        <span class="material-symbols-outlined" style="font-size:28px">thumb_up</span>
++                    </div>
++                    <div>
++                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">╬ú╧à╬╜╧ä╬╡╬╗╬╡╧â╧ä╬«╧é Engagement</p>
++                        <h4 class="text-2xl font-bold text-on-surface mt-1">8.2%</h4>
++                    </div>
++                </div>
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 flex items-center gap-4">
++                    <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
++                        <span class="material-symbols-outlined" style="font-size:28px">rss_feed</span>
++                    </div>
++                    <div>
++                        <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50">Crawler Health</p>
++                        <h4 class="text-2xl font-bold text-green-400 mt-1">100% Active</h4>
++                    </div>
++                </div>
++            </div>
++
++            <!-- Bar Chart card -->
++            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                <div class="mb-6 flex justify-between items-center">
++                    <div>
++                        <h4 class="text-base font-bold text-on-surface">╬ò╧Ç╬╣╧â╬║╬╡╧ê╬╣╬╝╧î╧ä╬╖╧ä╬▒ ╬▒╬╜╬¼ ╬Å╧ü╬▒ (24h Traffic)</h4>
++                        <p class="text-xs text-on-surface-variant">╬£╬¡╧â╬┐╧é ╧î╧ü╬┐╧é ╬╝╬┐╬╜╬▒╬┤╬╣╬║╧Ä╬╜ ╬▒╬╜╬▒╬│╬╜╧ë╧â╧ä╧Ä╬╜ ╬▒╬╜╬¼ ╧Ä╧ü╬▒ ╧ä╬╖╧é ╬╖╬╝╬¡╧ü╬▒╧é.</p>
++                    </div>
++                    <span class="text-xs text-on-surface-variant/60 font-mono">Live Sync: Active</span>
++                </div>
++
++                <!-- Custom premium Bar Chart -->
++                <div class="flex h-[320px] bg-surface-container-low border border-outline-variant/20 rounded-2xl p-6 relative">
++                    <!-- Y-axis -->
++                    <div class="flex flex-col justify-between text-[11px] text-on-surface-variant/60 pr-4 h-[220px] font-mono text-right w-8">
++                        <span>30k</span>
++                        <span>20k</span>
++                        <span>10k</span>
++                        <span>0</span>
++                    </div>
++                    
++                    <!-- Chart area -->
++                    <div class="flex-1 flex flex-col h-full">
++                        <!-- Grid & bars container -->
++                        <div class="flex-1 flex items-end justify-between gap-4 h-[220px] border-b border-outline-variant/30 pb-2 relative px-2">
++                            <!-- Grid lines -->
++                            <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
++                            <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
++                            <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
++                            
++                            <!-- Bar 6am -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[40%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">6am: 12,400 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                            <!-- Bar 9am -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[60%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">9am: 18,200 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                            <!-- Bar 12pm -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[85%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">12pm: 24,500 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                            <!-- Bar 3pm -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[70%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">3pm: 21,000 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                            <!-- Bar 6pm -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[95%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">6pm: 29,800 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                            <!-- Bar 9pm -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[55%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">9pm: 15,600 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                            <!-- Bar 12am -->
++                            <div class="w-full bg-primary/20 hover:bg-primary transition-all duration-300 rounded-t h-[30%] cursor-pointer relative group">
++                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-surface border border-outline-variant px-3 py-1.5 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-30 pointer-events-none shadow-lg">12am: 8,400 ╬▒╬╜╬▒╬│╬╜╧Ä╧â╧ä╬╡╧é</div>
++                            </div>
++                        </div>
++                        
++                        <!-- X-axis -->
++                        <div class="flex justify-between text-[11px] text-on-surface-variant/60 pt-2 px-6 font-semibold">
++                            <span>6am</span>
++                            <span>9am</span>
++                            <span>12pm</span>
++                            <span>3pm</span>
++                            <span>6pm</span>
++                            <span>9pm</span>
++                            <span>12am</span>
++                        </div>
++                    </div>
++                </div>
++            </div>
++        </div>
+     </div>
+     
+     <!-- Floating Popover for player editing -->
+@@ -809,6 +966,12 @@ function checkPassword() {
+     if (input === EDITOR_PASSWORD) {
+         sessionStorage.setItem('op_auth', '1');
+         document.getElementById('lock-screen').style.display = 'none';
++        
++        // Show sidebar and apply margins
++        document.getElementById('admin-sidebar').classList.remove('hidden');
++        document.getElementById('admin-main').classList.add('md:pl-[260px]');
++        document.getElementById('admin-header').classList.add('md:pl-[260px]');
++        
+         initEditor();
+     } else {
+         err.textContent = '╬¢╬¼╬╕╬┐╧é ╬║╧ë╬┤╬╣╬║╧î╧é. ╬ö╬┐╬║╬»╬╝╬▒╧â╬╡ ╬╛╬▒╬╜╬¼.';
+@@ -875,10 +1038,9 @@ function initEditor() {
+         updatePreviewCard();
+     });
+ 
+-    // Show admin tabs and load roster datasets
+-    const tabs = document.getElementById('admin-tabs');
+-    if (tabs) tabs.classList.remove('hidden');
++    // Load roster datasets and switch to default editor tab
+     loadRostersForEditing();
++    switchAdminTab('opinion');
+ 
+     loadOpinionArticles();
+     updateWordCount();
+@@ -1163,11 +1325,33 @@ document.head.appendChild(style);
+ window.addEventListener('DOMContentLoaded', () => {
+     if (sessionStorage.getItem('op_auth') === '1') {
+         document.getElementById('lock-screen').style.display = 'none';
++        
++        // Show sidebar and apply margins
++        document.getElementById('admin-sidebar').classList.remove('hidden');
++        document.getElementById('admin-main').classList.add('md:pl-[260px]');
++        document.getElementById('admin-header').classList.add('md:pl-[260px]');
++        
+         initEditor();
+     } else {
+         setTimeout(() => document.getElementById('lock-password').focus(), 200);
+     }
+ });
++
++function toggleSidebar() {
++    const sidebar = document.getElementById('admin-sidebar');
++    const overlay = document.getElementById('drawer-overlay');
++    const isOpen = !sidebar.classList.contains('-translate-x-full');
++    sidebar.classList.toggle('-translate-x-full', isOpen);
++    overlay.classList.toggle('opacity-0', isOpen);
++    overlay.classList.toggle('pointer-events-none', isOpen);
++}
++window.toggleSidebar = toggleSidebar;
++
++function adminLogout() {
++    sessionStorage.removeItem('op_auth');
++    window.location.reload();
++}
++window.adminLogout = adminLogout;
+ </script>
+ </body>
+ </html>
+
+commit ec0df357d7e8f6971823a3546066a10df5a7e7aa
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 12:28:46 2026 +0300
+
+    fix(ui): use object-contain for user's own articles to prevent cropping of logos, and fix cache alternating issue by adding deterministic sort
+
+diff --git a/login.html b/login.html
+index 1b9a782..080a804 100644
+--- a/login.html
++++ b/login.html
+@@ -520,7 +520,7 @@
+                 <!-- Preview Card (updates live) -->
+                 <div id="preview-card" class="bg-surface-container rounded-2xl border border-outline-variant/30 overflow-hidden hidden">
+                     <div class="relative w-full shrink-0 overflow-hidden bg-surface-container-low" style="padding-top: 56.25%;">
+-                        <img id="preview-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover"/>
++                        <img id="preview-img" src="" alt="" class="absolute inset-0 w-full h-full object-contain bg-surface-container/50"/>
+                         <div class="absolute top-3 left-3 px-3 py-1 bg-primary/20 backdrop-blur text-primary text-xs font-bold rounded-full border border-primary/30">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</div>
+                     </div>
+                     <div class="p-5">
+
+commit 54f83cb186467d25616a96c8f272b255bbca74b6
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 11:16:37 2026 +0300
+
+    fix: replace aspect-ratio with padding-top hack to ensure 16:9 aspect ratio works across all browsers and flex containers
+
+diff --git a/login.html b/login.html
+index ced6481..1b9a782 100644
+--- a/login.html
++++ b/login.html
+@@ -1,4 +1,4 @@
+-<!DOCTYPE html>
++∩╗┐<!DOCTYPE html>
+ <html class="dark" lang="el">
+ <head>
+     <meta charset="utf-8"/>
+@@ -519,8 +519,8 @@
+ 
+                 <!-- Preview Card (updates live) -->
+                 <div id="preview-card" class="bg-surface-container rounded-2xl border border-outline-variant/30 overflow-hidden hidden">
+-                    <div class="relative w-full shrink-0 overflow-hidden bg-surface-container-low" style="aspect-ratio: 16/9;">
+-                        <img id="preview-img" src="" alt="" class="w-full h-full object-cover"/>
++                    <div class="relative w-full shrink-0 overflow-hidden bg-surface-container-low" style="padding-top: 56.25%;">
++                        <img id="preview-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover"/>
+                         <div class="absolute top-3 left-3 px-3 py-1 bg-primary/20 backdrop-blur text-primary text-xs font-bold rounded-full border border-primary/30">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</div>
+                     </div>
+                     <div class="p-5">
+
+commit f05f0a0daeb0492b7e0b26a1f13eaf9e2a4d79ab
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 10:50:00 2026 +0300
+
+    Restore skeleton loaders, add paobc.gr source, bypass AI for official sources, and display Official labels on frontend
+
+diff --git a/login.html b/login.html
+index aea4248..ced6481 100644
+--- a/login.html
++++ b/login.html
+@@ -534,6 +534,14 @@
+                 <div>
+                     <p class="text-xs uppercase tracking-widest text-primary font-bold mb-4 px-1">╬ö╬╖╬╝╬┐╧â╬╣╬╡╧à╬╝╬¡╬╜╬▒ ╬å╧ü╬╕╧ü╬▒</p>
+                     <div id="opinions-list" class="flex flex-col gap-3">
++                        <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
++                            <div class="w-[112px] h-[63px] bg-surface-container-high rounded-lg shrink-0"></div>
++                            <div class="space-y-2 w-full mt-1"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
++                        </div>
++                        <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl">
++                            <div class="w-[112px] h-[63px] bg-surface-container-high rounded-lg shrink-0"></div>
++                            <div class="space-y-2 w-full mt-1"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
++                        </div>
+                     </div>
+                 </div>
+             </div>
+
+commit 8438e4c8801c5833818b3741499aa2a443df2bf2
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 10:40:15 2026 +0300
+
+    Fix aspect ratio for own articles (carousel and preview) by explicitly setting style='aspect-ratio: 16/9;' and shrink-0 to prevent flexbox distortion
+
+diff --git a/login.html b/login.html
+index 7f22ee6..aea4248 100644
+--- a/login.html
++++ b/login.html
+@@ -519,7 +519,7 @@
+ 
+                 <!-- Preview Card (updates live) -->
+                 <div id="preview-card" class="bg-surface-container rounded-2xl border border-outline-variant/30 overflow-hidden hidden">
+-                    <div class="relative aspect-video overflow-hidden bg-surface-container-low">
++                    <div class="relative w-full shrink-0 overflow-hidden bg-surface-container-low" style="aspect-ratio: 16/9;">
+                         <img id="preview-img" src="" alt="" class="w-full h-full object-cover"/>
+                         <div class="absolute top-3 left-3 px-3 py-1 bg-primary/20 backdrop-blur text-primary text-xs font-bold rounded-full border border-primary/30">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</div>
+                     </div>
+
+commit af98e93829463c9bf6602dd9a4a240cc4b0b4c8f
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 10:35:41 2026 +0300
+
+    Remove skeleton loaders and default placeholder text from all pages to prevent flash before data loads
+
+diff --git a/login.html b/login.html
+index 15c4116..7f22ee6 100644
+--- a/login.html
++++ b/login.html
+@@ -534,7 +534,6 @@
+                 <div>
+                     <p class="text-xs uppercase tracking-widest text-primary font-bold mb-4 px-1">╬ö╬╖╬╝╬┐╧â╬╣╬╡╧à╬╝╬¡╬╜╬▒ ╬å╧ü╬╕╧ü╬▒</p>
+                     <div id="opinions-list" class="flex flex-col gap-3">
+-                        <div class="text-sm text-on-surface-variant/50 text-center py-6 animate-pulse">╬ª╧î╧ü╧ä╧ë╧â╬╖...</div>
+                     </div>
+                 </div>
+             </div>
+
+commit 456ae3d49a6aa379b637b188fcea1b1b59af79cf
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 10:29:33 2026 +0300
+
+    Fix font flash by using display=block, remove default players flash on roster.html
+
+diff --git a/login.html b/login.html
+index b699afb..15c4116 100644
+--- a/login.html
++++ b/login.html
+@@ -9,13 +9,13 @@
+     <meta name="robots" content="max-image-preview:large"/>
+     <link rel="canonical" href="https://panathinaikos-news.vercel.app/apopsi"/>
+     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
++    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     <!-- Quill stylesheet and library -->
+     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet"/>
+     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+     <style>
+-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
++        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=block');
+         
+         /* Quill Dark Mode Customization */
+         .ql-toolbar.ql-snow {
+
+commit 86fb8d9fe12bf518c0c7b04e6f662805883a3edd
+Author: ppetrospapadakis <ppetrospapadakis@users.noreply.github.com>
+Date:   Wed Jul 15 10:25:21 2026 +0300
+
+    Rename opinion.html to login.html, add click outside to close, remove monobala
+
+diff --git a/login.html b/login.html
+new file mode 100644
+index 0000000..b699afb
+--- /dev/null
++++ b/login.html
+@@ -0,0 +1,1166 @@
++<!DOCTYPE html>
++<html class="dark" lang="el">
++<head>
++    <meta charset="utf-8"/>
++    <link rel="icon" type="image/png" href="/favicon.png"/>
++    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
++    <title>╬ù ╬å╧Ç╬┐╧ê╬« ╬£╬┐╧à ΓÇô Panathinaikos News</title>
++    <meta name="description" content="╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖ ╬┤╬╣╬║╬« ╧â╬┐╧à ╬¼╧Ç╬┐╧ê╬╖ ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬▒╬╜╬▒╬╕╬╖╬╜╬▒╧è╬║╧î."/>
++    <meta name="robots" content="max-image-preview:large"/>
++    <link rel="canonical" href="https://panathinaikos-news.vercel.app/apopsi"/>
++    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
++    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
++    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
++    <!-- Quill stylesheet and library -->
++    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet"/>
++    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
++    <style>
++        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
++        
++        /* Quill Dark Mode Customization */
++        .ql-toolbar.ql-snow {
++            border-color: rgba(63, 73, 64, 0.3) !important;
++            background-color: #1a1c20 !important;
++            border-radius: 12px 12px 0 0 !important;
++        }
++        .ql-container.ql-snow {
++            border-color: rgba(63, 73, 64, 0.3) !important;
++            border-radius: 0 0 12px 12px !important;
++            font-size: 15px !important;
++            font-family: 'Geist', sans-serif !important;
++            color: #e2e2e8 !important;
++            background-color: #1e2024 !important;
++        }
++        .ql-editor.ql-blank::before {
++            color: rgba(226, 226, 232, 0.3) !important;
++            font-style: normal !important;
++        }
++        .ql-snow .ql-stroke {
++            stroke: #bfc9bd !important;
++        }
++        .ql-snow .ql-fill {
++            fill: #bfc9bd !important;
++        }
++        .ql-snow .ql-picker {
++            color: #bfc9bd !important;
++        }
++        
++        body { font-family:'Geist',sans-serif; background-color:#111317; color:#e2e2e8; -webkit-font-smoothing:antialiased; }
++        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
++        .card-hover { transition:transform 0.2s ease,box-shadow 0.2s ease; }
++        .card-hover:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
++
++        /* Lock Screen */
++        #lock-screen { position:fixed; inset:0; z-index:200; background:#111317; display:flex; align-items:center; justify-content:center; }
++        .lock-card { background:#1a1c20; border:1px solid #3f4940; border-radius:24px; padding:48px; max-width:420px; width:100%; text-align:center; }
++        .lock-card .icon { font-size:56px; color:#84d999; margin-bottom:24px; }
++        .lock-card h1 { font-size:28px; font-weight:700; color:#e2e2e8; margin-bottom:8px; }
++        .lock-card p { color:#bfc9bd; margin-bottom:32px; font-size:15px; }
++        .lock-input { width:100%; background:#111317; border:1.5px solid #3f4940; border-radius:12px; padding:14px 18px; color:#e2e2e8; font-size:16px; outline:none; transition:border-color 0.2s; text-align:center; letter-spacing:4px; font-family:'Geist',sans-serif; }
++        .lock-input:focus { border-color:#84d999; }
++        .lock-btn { margin-top:16px; width:100%; background:#84d999; color:#00391a; font-weight:700; font-size:15px; padding:14px; border-radius:12px; border:none; cursor:pointer; transition:background 0.2s, transform 0.1s; }
++        .lock-btn:hover { background:#a8e6b8; }
++        .lock-btn:active { transform:scale(0.98); }
++        .lock-error { color:#ffb4ab; font-size:13px; margin-top:10px; min-height:20px; }
++
++        /* Editor */
++        .editor-input { background:#1a1c20; border:1.5px solid #3f4940; border-radius:12px; padding:16px 20px; color:#e2e2e8; font-size:15px; font-family:'Geist',sans-serif; width:100%; outline:none; transition:border-color 0.2s; resize:none; }
++        .editor-input:focus { border-color:#84d999; }
++        .editor-input::placeholder { color:#5a6360; }
++
++        /* Toolbar */
++        .toolbar-btn { background:#1e2024; border:1px solid #3f4940; border-radius:8px; padding:6px 10px; color:#bfc9bd; cursor:pointer; font-size:13px; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; }
++        .toolbar-btn:hover { background:#2a2d31; border-color:#84d999; color:#84d999; }
++
++        /* Word count */
++        .word-count { font-size:12px; color:#5a6360; }
++
++        /* Article cards */
++        .opinion-card { background:#1a1c20; border:1px solid #3f4940; border-radius:16px; overflow:hidden; cursor:pointer; transition:all 0.2s; }
++        .opinion-card:hover { border-color:#84d999; transform:translateY(-2px); box-shadow:0 8px 32px rgba(132,217,153,0.08); }
++
++        /* Status badge */
++        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:full; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
++        .status-success { background:rgba(132,217,153,0.12); color:#84d999; border:1px solid rgba(132,217,153,0.3); border-radius:999px; }
++        .status-error { background:rgba(255,180,171,0.12); color:#ffb4ab; border:1px solid rgba(255,180,171,0.3); border-radius:999px; }
++
++        /* Scrollbar */
++        ::-webkit-scrollbar { width:6px; }
++        ::-webkit-scrollbar-track { background:transparent; }
++        ::-webkit-scrollbar-thumb { background:#3f4940; border-radius:3px; }
++        ::-webkit-scrollbar-thumb:hover { background:#84d999; }
++    /* Football Pitch Styles for Admin Visual Editor */
++    .admin-pitch-canvas {
++        background: #0b3d0b;
++        border: 3px solid rgba(255,255,255,0.25);
++        position: relative;
++        overflow: hidden;
++    }
++    .admin-pitch-canvas::before {
++        content: '';
++        position: absolute;
++        inset: 0;
++        border: 3px solid rgba(255,255,255,0.3);
++        margin: 12px;
++        pointer-events: none;
++    }
++    .pitch-centre-circle {
++        position: absolute;
++        top: 50%; left: 50%;
++        transform: translate(-50%, -50%);
++        width: 80px; height: 80px;
++        border: 2px solid rgba(255,255,255,0.3);
++        border-radius: 50%;
++    }
++    .pitch-centre-line {
++        position: absolute;
++        top: 50%; left: 12px; right: 12px;
++        height: 2px;
++        background: rgba(255,255,255,0.3);
++        transform: translateY(-50%);
++    }
++    .pitch-penalty-top, .pitch-penalty-bottom {
++        position: absolute;
++        left: 50%; transform: translateX(-50%);
++        width: 55%; height: 18%;
++        border: 2px solid rgba(255,255,255,0.3);
++    }
++    .pitch-penalty-top { top: 12px; }
++    .pitch-penalty-bottom { bottom: 12px; }
++    .pitch-goal-top, .pitch-goal-bottom {
++        position: absolute;
++        left: 50%; transform: translateX(-50%);
++        width: 28%; height: 6%;
++        border: 2px solid rgba(255,255,255,0.3);
++        background: rgba(255,255,255,0.04);
++    }
++    .pitch-goal-top { top: 12px; }
++    .pitch-goal-bottom { bottom: 12px; }
++
++    /* Basketball Court Styles for Admin Visual Editor */
++    .court {
++        background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
++        border: 3px solid rgba(255,255,255,0.20);
++        position: relative;
++        overflow: hidden;
++    }
++    .court::before {
++        content: '';
++        position: absolute;
++        inset: 12px;
++        border: 2px solid rgba(255,255,255,0.25);
++        pointer-events: none;
++    }
++    .court-centre-circle {
++        position: absolute;
++        top: 50%; left: 50%;
++        transform: translate(-50%, -50%);
++        width: 72px; height: 72px;
++        border: 2px solid rgba(255,255,255,0.25);
++        border-radius: 50%;
++    }
++    .court-centre-line {
++        position: absolute;
++        top: 50%; left: 12px; right: 12px;
++        height: 2px;
++        background: rgba(255,255,255,0.25);
++        transform: translateY(-50%);
++    }
++    .court-arc-top, .court-arc-bottom {
++        position: absolute;
++        left: 50%; transform: translateX(-50%);
++        width: 80%; height: 38%;
++        border: 2px solid rgba(255,255,255,0.25);
++        border-radius: 0 0 50% 50%;
++    }
++    .court-arc-top { top: 12px; border-radius: 0 0 50% 50%; }
++    .court-arc-bottom { bottom: 12px; border-radius: 50% 50% 0 0; }
++    .court-key-top, .court-key-bottom {
++        position: absolute;
++        left: 50%; transform: translateX(-50%);
++        width: 32%; height: 28%;
++        border: 2px solid rgba(255,255,255,0.25);
++        background: rgba(255,255,255,0.03);
++    }
++    .court-key-top { top: 12px; }
++    .court-key-bottom { bottom: 12px; }
++
++    /* Draggable Player Tokens */
++    .draggable-player {
++        position: absolute;
++        transform: translate(-50%, -50%);
++        display: flex;
++        flex-direction: column;
++        align-items: center;
++        gap: 3px;
++        cursor: grab;
++        z-index: 10;
++        user-select: none;
++    }
++    .draggable-player.dragging {
++        cursor: grabbing;
++        z-index: 100;
++        opacity: 0.8;
++    }
++    .draggable-player.selected .avatar {
++        border-color: #ebc23e !important;
++        box-shadow: 0 0 16px rgba(235,194,62,0.6) !important;
++    }
++    .draggable-player .avatar {
++        width: 44px;
++        height: 44px;
++        border-radius: 50%;
++        border: 2.5px solid #84d999;
++        background: #006633;
++        display: flex;
++        align-items: center;
++        justify-content: center;
++        font-size: 13px;
++        font-weight: 700;
++        color: #84d999;
++        box-shadow: 0 2px 12px rgba(0,0,0,0.6);
++        position: relative;
++    }
++    .draggable-player.basketball .avatar {
++        background: #1a4a1a;
++    }
++    .draggable-player .name-tag {
++        background: rgba(0,0,0,0.75);
++        backdrop-filter: blur(4px);
++        padding: 1px 6px;
++        border-radius: 4px;
++        font-size: 10px;
++        font-weight: 600;
++        color: #fff;
++        white-space: nowrap;
++        max-width: 80px;
++        overflow: hidden;
++        text-overflow: ellipsis;
++    }
++    .draggable-player .badge {
++        position: absolute;
++        top: -4px;
++        right: -4px;
++        background: #ebc23e;
++        color: #2a1800;
++        width: 18px;
++        height: 18px;
++        border-radius: 50%;
++        font-size: 8px;
++        font-weight: 800;
++        display: flex;
++        align-items: center;
++        justify-content: center;
++    }
++    .draggable-player.football .badge {
++        background: #84d999;
++        color: #003300;
++    }
++
++    /* Player edit popover modal */
++    .player-popover {
++        position: absolute;
++        z-index: 150;
++        width: 200px;
++        background: #1e2024;
++        border: 1px solid #3f4940;
++        border-radius: 12px;
++        padding: 12px;
++        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
++        display: flex;
++        flex-direction: column;
++        gap: 8px;
++    }
++    </style>
++    <script>
++        tailwind.config = {
++            darkMode:"class",
++            theme:{
++                extend:{
++                    colors:{
++                        "secondary-container":"#32a45b","outline-variant":"#3f4940","surface-tint":"#84d999",
++                        "on-tertiary":"#3c2f00","inverse-surface":"#e2e2e8","tertiary":"#ebc23e",
++                        "error-container":"#93000a","background":"#111317","error":"#ffb4ab",
++                        "surface":"#111317","primary":"#84d999","on-error":"#690005",
++                        "on-secondary-container":"#003114","surface-container-low":"#1a1c20",
++                        "inverse-primary":"#0f6d39","on-background":"#e2e2e8",
++                        "on-surface":"#e2e2e8","secondary":"#a0cfaa","on-secondary":"#003918",
++                        "on-primary":"#00391a","surface-container":"#1e2024",
++                        "on-surface-variant":"#bfc9bd","on-primary-container":"#8ce1a1",
++                        "primary-container":"#006633","tertiary-container":"#cda721","on-error-container":"#ffdad6"
++                    }
++                }
++            }
++        }
++    </script>
++</head>
++<body class="bg-background text-on-surface overflow-x-hidden">
++
++<!-- ΓòÉΓòÉΓòÉ LOCK SCREEN ΓòÉΓòÉΓòÉ -->
++<div id="lock-screen" onclick="window.location.href='/'">
++    <div class="lock-card" onclick="event.stopPropagation()">
++        <div class="icon material-symbols-outlined">lock</div>
++        <h1>Admin Panel</h1>
++        <p>╬ò╬╣╧â╬¼╬│╬╡╧ä╬╡ ╧ä╬┐╬╜ ╬║╧ë╬┤╬╣╬║╧î ╬│╬╣╬▒ ╬╜╬▒ ╬▒╧Ç╬┐╬║╧ä╬«╧â╬╡╧ä╬╡ ╧Ç╧ü╧î╧â╬▓╬▒╧â╬╖ ╧â╧ä╬┐ admin panel.</p>
++        <input class="lock-input" id="lock-password" type="password" placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó" maxlength="30"
++               onkeydown="if(event.key==='Enter') checkPassword()"/>
++        <button class="lock-btn" onclick="checkPassword()">
++            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">arrow_forward</span>
++            ╬ò╬»╧â╬┐╬┤╬┐╧é
++        </button>
++        <div class="lock-error" id="lock-error"></div>
++        <p style="margin-top:24px;font-size:12px;color:#3f4940">Panathinaikos News ┬╖ Private Editor</p>
++    </div>
++</div>
++
++<!-- ΓòÉΓòÉΓòÉ TOP HEADER ΓòÉΓòÉΓòÉ -->
++    <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
++        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-8">
++            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onclick="toggleDrawer()" aria-label="Menu">
++                <span class="material-symbols-outlined text-primary">menu</span>
++            </button>
++            <a href="/" class="flex items-center"><img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain"/></a>
++            <a href="/" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-sm">
++                <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
++                ╬á╬»╧â╧ë
++            </a>
++        </div>
++    </header>
++
++<!-- ΓòÉΓòÉΓòÉ NAVIGATION DRAWER ΓòÉΓòÉΓòÉ -->
++<aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
++    <div class="flex items-center justify-between mb-8">
++        <a href="/" class="flex items-center px-4"><img src="/logo.png" alt="PanathinaikosNews" class="h-20 md:h-24 w-auto object-contain"/></a>
++        <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleDrawer()">close</button>
++    </div>
++    <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">╬Ü╬▒╧ä╬╖╬│╬┐╧ü╬»╬╡╧é</p>
++    <nav class="flex flex-col gap-1">
++        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/">
++            <span class="material-symbols-outlined">feed</span><span>╬í╬┐╬« ╬ò╬╣╬┤╬«╧â╬╡╧ë╬╜</span>
++        </a>
++        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/podosfairo">
++            <span class="material-symbols-outlined">sports_soccer</span><span>╬á╬┐╬┤╧î╧â╧å╬▒╬╣╧ü╬┐</span>
++        </a>
++        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/basket">
++            <span class="material-symbols-outlined">sports_basketball</span><span>╬£╧Ç╬¼╧â╬║╬╡╧ä</span>
++        </a>
++        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/erasitechnis">
++            <span class="material-symbols-outlined">sports</span><span>╬ò╧ü╬▒╧â╬╣╧ä╬¡╧ç╬╜╬╖╧é</span>
++        </a>
++        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/apopsi">
++            <span class="material-symbols-outlined">rate_review</span><span>╬å╧Ç╬┐╧ê╬╖</span>
++        </a>
++        <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
++            <span class="material-symbols-outlined">groups</span><span>╬í╧î╧â╧ä╬╡╧ü</span>
++        </a>
++    </nav>
++    <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
++        <p class="font-caption text-caption text-on-surface-variant/50">┬⌐ 2026 PanathinaikosNews Editorial</p>
++        <a href="/login.html" class="text-on-surface-variant/30 hover:text-primary transition-colors animate-pulse" title="Admin Panel">
++            <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
++        </a>
++    </div>
++</aside>
++<div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
++
++<!-- ΓòÉΓòÉΓòÉ MAIN CONTENT ΓòÉΓòÉΓòÉ -->
++<main class="mt-[80px] min-h-screen">
++    <div class="max-w-[1200px] mx-auto px-6 py-12">
++
++        <!-- Page Header -->
++        <div class="mb-10">
++            <div class="flex items-center gap-3 mb-4">
++                <span class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
++                <div>
++                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
++                    <h1 class="text-3xl font-bold text-on-surface">╬ù ╬å╧Ç╬┐╧ê╬« ╬£╬┐╧à</h1>
++                </div>
++            </div>
++            <p class="text-on-surface-variant max-w-xl">╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖ ╬┤╬╣╬║╬« ╧â╬┐╧à ╬▒╬╕╬╗╬╖╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖, ╬¼╧Ç╬┐╧ê╬╖ ╬« ╧â╧ç╧î╬╗╬╣╬┐ ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬▒╬╜╬▒╬╕╬╖╬╜╬▒╧è╬║╧î. ╬ñ╬▒ ╬¼╧ü╬╕╧ü╬▒ ╧â╬┐╧à ╬╡╬╝╧å╬▒╬╜╬»╬╢╬┐╬╜╧ä╬▒╬╣ ╧â╧ä╬╖ ╧ü╬┐╬« ╬╡╬╣╬┤╬«╧â╬╡╧ë╬╜ ╬╝╬╡ ╧ä╬╖╬╜ ╬║╬▒╧ä╬╖╬│╬┐╧ü╬»╬▒ <span class="text-primary font-semibold">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</span>.</p>
++        </div>
++
++        <!-- Admin Sub-navigation Tabs (only shown when authenticated) -->
++        <div id="admin-tabs" class="flex gap-2 border-b border-outline-variant/40 pb-4 mb-8 hidden">
++            <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="px-5 py-2.5 rounded-xl font-label text-label uppercase bg-primary text-on-primary transition-all flex items-center gap-2">
++                <span class="material-symbols-outlined" style="font-size:18px">edit_note</span> ╬å╧Ç╬┐╧ê╬╖
++            </button>
++            <button id="admin-tab-football" onclick="switchAdminTab('football')" class="px-5 py-2.5 rounded-xl font-label text-label uppercase bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-2">
++                <span class="material-symbols-outlined" style="font-size:18px">sports_soccer</span> Roster ╬á╬┐╬┤╬┐╧â╧å╬▒╬»╧ü╬┐╧à
++            </button>
++            <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="px-5 py-2.5 rounded-xl font-label text-label uppercase bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-2">
++                <span class="material-symbols-outlined" style="font-size:18px">sports_basketball</span> Roster ╬£╧Ç╬¼╧â╬║╬╡╧ä
++            </button>
++        </div>
++
++        <!-- ΓöÇΓöÇ TAB 1: OPINION WRITER ΓöÇΓöÇ -->
++        <div id="panel-section-opinion" class="admin-panel-content">
++            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
++
++            <!-- ΓöÇΓöÇ LEFT: EDITOR ΓöÇΓöÇ -->
++            <div class="lg:col-span-2 flex flex-col gap-6">
++
++                <!-- Title -->
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">╬ñ╬»╧ä╬╗╬┐╧é ╬å╧ü╬╕╧ü╬┐╧à</label>
++                    <input id="op-title" type="text" class="editor-input text-xl font-semibold" placeholder="╧Ç.╧ç. ╬ô╬╣╬▒╧ä╬» ╬┐ ╬æ╧ä╬¼╬╝╬▒╬╜ ╬╡╬»╬╜╬▒╬╣ ╬╖ ╬║╬▒╬╗╧ì╧ä╬╡╧ü╬╖ ╬╡╧Ç╬╣╬╗╬┐╬│╬« ╬│╬╣╬▒ ╧ä╬┐╬╜ ╬á╬æ╬ƒ..." maxlength="250"/>
++                    <div class="flex justify-between mt-2">
++                        <span class="word-count" id="title-count">0 / 250</span>
++                    </div>
++                </div>
++
++                <!-- Content Editor -->
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">╬Ü╬╡╬»╬╝╬╡╬╜╬┐ ╬å╧ü╬╕╧ü╬┐╧à</label>
++
++                    <!-- Toolbar -->
++                    <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b border-outline-variant/30">
++                        <button class="toolbar-btn" onclick="insertText('ΓÜ╜ ')" title="Football emoji">ΓÜ╜</button>
++                        <button class="toolbar-btn" onclick="insertText('≡ƒÅÇ ')" title="Basketball emoji">≡ƒÅÇ</button>
++                        <button class="toolbar-btn" onclick="insertText('≡ƒöÑ ')" title="Fire emoji">≡ƒöÑ</button>
++                        <button class="toolbar-btn" onclick="insertText('≡ƒÆÜ ')" title="Heart emoji">≡ƒÆÜ</button>
++                        <button class="toolbar-btn" onclick="insertText('≡ƒôè ')" title="Stats emoji">≡ƒôè</button>
++                        <button class="toolbar-btn" onclick="insertText('Γ¡É ')" title="Star emoji">Γ¡É</button>
++                        <button class="toolbar-btn" onclick="clearContent()" title="╬Ü╬▒╬╕╬▒╧ü╬╣╧â╬╝╧î╧é" style="margin-left:auto; color:#ffb4ab;">
++                            <span class="material-symbols-outlined" style="font-size:14px">delete</span> ╬Ü╬▒╬╕╬▒╧ü╬╣╧â╬╝╧î╧é
++                        </button>
++                    </div>
++
++                    <!-- Quill Editor -->
++                    <div id="editor-container"></div>
++                    <div class="flex justify-between mt-2">
++                        <span class="word-count" id="word-count">0 ╬╗╬¡╬╛╬╡╬╣╧é</span>
++                        <span class="word-count" id="char-count">0 ╧ç╬▒╧ü╬▒╬║╧ä╬«╧ü╬╡╧é</span>
++                    </div>
++                </div>
++
++                <!-- Summary -->
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">
++                        ╬ú╧ì╬╜╬┐╧ê╬╖ <span class="text-on-surface-variant font-normal normal-case tracking-normal">(╬╡╬╝╧å╬▒╬╜╬»╬╢╬╡╧ä╬▒╬╣ ╧â╧ä╬╣╧é ╬║╬¼╧ü╧ä╬╡╧é ╬╡╬╣╬┤╬«╧â╬╡╧ë╬╜)</span>
++                    </label>
++                    <textarea id="op-summary" class="editor-input" rows="3"
++                        placeholder="╬£╬╣╬▒ ╧â╧ì╬╜╧ä╬┐╬╝╬╖ ╧Ç╬╡╧ü╬╣╬│╧ü╬▒╧å╬« ╧ä╬┐╧à ╬¼╧ü╬╕╧ü╬┐╧à ╧â╬┐╧à (1-2 ╧Ç╧ü╬┐╧ä╬¼╧â╬╡╬╣╧é)..." maxlength="400" oninput="updateSummaryCount()"></textarea>
++                    <div class="flex justify-between mt-2">
++                        <span class="word-count" id="summary-count">0 / 400</span>
++                    </div>
++                </div>
++
++                <!-- Category Co-publishing Checkboxes -->
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">
++                        ╬ú╧à╬╜╬┤╬╖╬╝╬┐╧â╬»╬╡╧à╧â╬╖ ╧â╬╡ ╬Ü╬▒╧ä╬╖╬│╬┐╧ü╬»╬╡╧é <span class="text-on-surface-variant font-normal normal-case tracking-normal">(╧ä╬┐ ╬¼╧ü╬╕╧ü╬┐ ╬╕╬▒ ╬╡╬╝╧å╬▒╬╜╬»╬╢╬╡╧ä╬▒╬╣ ╬║╬▒╬╣ ╧â╬╡ ╬▒╧à╧ä╬¡╧é ╧ä╬╣╧é ╬╡╬╜╧î╧ä╬╖╧ä╬╡╧é)</span>
++                    </label>
++                    <div class="flex flex-wrap gap-4 mt-2">
++                        <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold hover:text-primary transition-colors">
++                            <input type="checkbox" id="cat-football" value="╬á╬┐╬┤╧î╧â╧å╬▒╬╣╧ü╬┐" class="rounded border-outline-variant text-primary focus:ring-primary bg-background w-4.5 h-4.5"/>
++                            <span>ΓÜ╜ ╬á╬┐╬┤╧î╧â╧å╬▒╬╣╧ü╬┐</span>
++                        </label>
++                        <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold hover:text-primary transition-colors">
++                            <input type="checkbox" id="cat-basketball" value="╬£╧Ç╬¼╧â╬║╬╡╧ä" class="rounded border-outline-variant text-primary focus:ring-primary bg-background w-4.5 h-4.5"/>
++                            <span>≡ƒÅÇ ╬£╧Ç╬¼╧â╬║╬╡╧ä</span>
++                        </label>
++                        <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold hover:text-primary transition-colors">
++                            <input type="checkbox" id="cat-amateur" value="╬ò╧ü╬▒╧â╬╣╧ä╬¡╧ç╬╜╬╖╧é" class="rounded border-outline-variant text-primary focus:ring-primary bg-background w-4.5 h-4.5"/>
++                            <span>Γÿÿ∩╕Å ╬ò╧ü╬▒╧â╬╣╧ä╬¡╧ç╬╜╬╖╧é</span>
++                        </label>
++                        <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold hover:text-primary transition-colors">
++                            <input type="checkbox" id="cat-transfers" value="╬£╬╡╧ä╬▒╬│╧ü╬▒╧å╬¡╧é" class="rounded border-outline-variant text-primary focus:ring-primary bg-background w-4.5 h-4.5"/>
++                            <span>≡ƒôï ╬£╬╡╧ä╬▒╬│╧ü╬▒╧å╬¡╧é</span>
++                        </label>
++                    </div>
++                </div>
++
++                <!-- Image URL -->
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold mb-3 block">
++                        URL ╬ò╬╣╬║╧î╬╜╬▒╧é <span class="text-on-surface-variant font-normal normal-case tracking-normal">(╧Ç╧ü╬┐╬▒╬╣╧ü╬╡╧ä╬╣╬║╧î)</span>
++                    </label>
++                    <input id="op-image" type="url" class="editor-input" placeholder="https://..." oninput="previewImage()"/>
++                    <div id="image-preview-wrap" class="mt-4 hidden">
++                        <p class="text-xs text-on-surface-variant mb-2">╬á╧ü╬┐╬╡╧Ç╬╣╧â╬║╧î╧Ç╬╖╧â╬╖:</p>
++                        <img id="image-preview" src="" alt="preview" class="w-full max-h-[220px] object-cover rounded-xl border border-outline-variant/30"
++                             onerror="this.parentElement.classList.add('hidden')"/>
++                    </div>
++                    <p class="text-xs text-on-surface-variant/60 mt-3">╬å╬╜ ╬┤╬╡╬╜ ╬▓╬¼╬╗╬╡╬╣╧é ╬╡╬╣╬║╧î╬╜╬▒, ╬╕╬▒ ╧ç╧ü╬╖╧â╬╣╬╝╬┐╧Ç╬┐╬╣╬╖╬╕╬╡╬» ╬╖ ╧Ç╧ü╬┐╬╡╧Ç╬╣╬╗╬╡╬│╬╝╬¡╬╜╬╖ ╬╡╬╣╬║╧î╬╜╬▒ ╬ƒ╬æ╬Ü╬æ.</p>
++                </div>
++
++                <!-- Publish Button -->
++                <div class="flex gap-4 items-center">
++                    <button id="publish-btn" onclick="publishArticle()"
++                        class="flex-1 bg-primary text-on-primary font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 hover:bg-[#a8e6b8] transition-all text-base">
++                        <span class="material-symbols-outlined">publish</span>
++                        ╬ö╬╖╬╝╬┐╧â╬»╬╡╧à╧â╬╖ ╬å╧ü╬╕╧ü╬┐╧à
++                    </button>
++                    <button onclick="previewArticle()"
++                        class="bg-surface-container border border-outline-variant text-on-surface-variant font-semibold py-4 px-6 rounded-2xl hover:border-primary hover:text-primary transition-all text-sm flex items-center gap-2">
++                        <span class="material-symbols-outlined" style="font-size:18px">preview</span>
++                        ╬á╧ü╬┐╬╡╧Ç╬╣╧â╬║╧î╧Ç╬╖╧â╬╖
++                    </button>
++                </div>
++
++                <!-- Status -->
++                <div id="publish-status" class="hidden text-center py-4"></div>
++            </div>
++
++            <!-- ΓöÇΓöÇ RIGHT: SIDEBAR ΓöÇΓöÇ -->
++            <div class="lg:col-span-1 flex flex-col gap-6">
++
++                <!-- Tips Card -->
++                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
++                    <p class="text-xs uppercase tracking-widest text-primary font-bold mb-4">≡ƒô¥ ╬ƒ╬┤╬╖╬│╬»╬╡╧é ╬ô╧ü╬▒╧å╬«╧é</p>
++                    <ul class="flex flex-col gap-3 text-sm text-on-surface-variant">
++                        <li class="flex gap-3"><span class="text-primary mt-0.5">ΓÇó</span><span>╬º╧ü╬╖╧â╬╣╬╝╬┐╧Ç╬┐╬»╬╖╧â╬╡ <strong class="text-on-surface">╬║╬╡╬╜╬¡╧é ╬│╧ü╬▒╬╝╬╝╬¡╧é</strong> ╬╝╬╡╧ä╬▒╬╛╧ì ╧Ç╬▒╧ü╬▒╬│╧ü╬¼╧å╧ë╬╜</span></li>
++                        <li class="flex gap-3"><span class="text-primary mt-0.5">ΓÇó</span><span>╬ƒ ╧ä╬»╧ä╬╗╬┐╧é ╧Ç╧ü╬¡╧Ç╬╡╬╣ ╬╜╬▒ ╬╡╬»╬╜╬▒╬╣ <strong class="text-on-surface">╧Ç╬╡╧ü╬╣╬╡╬║╧ä╬╣╬║╧î╧é</strong> ╬║╬▒╬╣ ╧Ç╧ü╬┐╧â╬╡╬╗╬║╧à╧â╧ä╬╣╬║╧î╧é</span></li>
++                        <li class="flex gap-3"><span class="text-primary mt-0.5">ΓÇó</span><span>╬ù ╧â╧ì╬╜╬┐╧ê╬╖ ╬╡╬╝╧å╬▒╬╜╬»╬╢╬╡╧ä╬▒╬╣ <strong class="text-on-surface">╧â╧ä╬╣╧é ╬║╬¼╧ü╧ä╬╡╧é</strong> ╧ä╬╖╧é ╬▒╧ü╧ç╬╣╬║╬«╧é ╧â╬╡╬╗╬»╬┤╬▒╧é</span></li>
++                        <li class="flex gap-3"><span class="text-primary mt-0.5">ΓÇó</span><span>╬£╬╖╬╜ ╬╛╬╡╧ç╬¼╧â╬╡╬╣╧é ╬╜╬▒ ╧Ç╧ü╬┐╧â╬╕╬¡╧â╬╡╬╣╧é <strong class="text-on-surface">╬╡╬╣╬║╧î╬╜╬▒</strong> ╬│╬╣╬▒ ╬║╬▒╬╗╧ì╧ä╬╡╧ü╬╖ ╬╡╬╝╧å╬¼╬╜╬╣╧â╬╖</span></li>
++                        <li class="flex gap-3"><span class="text-primary mt-0.5">ΓÇó</span><span>╬ú╧ä╧î╧ç╬╡╧à╧â╬╡ ╧â╬╡ <strong class="text-on-surface">300-600 ╬╗╬¡╬╛╬╡╬╣╧é</strong> ╬│╬╣╬▒ ╬▓╬¡╬╗╧ä╬╣╧â╧ä╬╖ ╬▒╬╜╬¼╬│╬╜╧ë╧â╬╖</span></li>
++                    </ul>
++                </div>
++
++                <!-- Preview Card (updates live) -->
++                <div id="preview-card" class="bg-surface-container rounded-2xl border border-outline-variant/30 overflow-hidden hidden">
++                    <div class="relative aspect-video overflow-hidden bg-surface-container-low">
++                        <img id="preview-img" src="" alt="" class="w-full h-full object-cover"/>
++                        <div class="absolute top-3 left-3 px-3 py-1 bg-primary/20 backdrop-blur text-primary text-xs font-bold rounded-full border border-primary/30">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</div>
++                    </div>
++                    <div class="p-5">
++                        <p class="text-xs text-primary uppercase tracking-widest font-bold mb-2">╬å╧Ç╬┐╧ê╬╖ ΓÇó ╬£╧î╬╗╬╣╧é ╧ä╧Ä╧ü╬▒</p>
++                        <h3 id="preview-title" class="font-bold text-base leading-tight text-on-surface line-clamp-3 mb-2"></h3>
++                        <p id="preview-summary" class="text-sm text-on-surface-variant line-clamp-2"></p>
++                    </div>
++                </div>
++
++                <!-- Published Opinions -->
++                <div>
++                    <p class="text-xs uppercase tracking-widest text-primary font-bold mb-4 px-1">╬ö╬╖╬╝╬┐╧â╬╣╬╡╧à╬╝╬¡╬╜╬▒ ╬å╧ü╬╕╧ü╬▒</p>
++                    <div id="opinions-list" class="flex flex-col gap-3">
++                        <div class="text-sm text-on-surface-variant/50 text-center py-6 animate-pulse">╬ª╧î╧ü╧ä╧ë╧â╬╖...</div>
++                    </div>
++                </div>
++            </div>
++
++        </div>
++        </div>
++
++        <!-- ΓöÇΓöÇ TAB 2: FOOTBALL ROSTER EDITOR ΓöÇΓöÇ -->
++        <div id="panel-section-football" class="admin-panel-content hidden">
++            <div class="max-w-[800px] mx-auto bg-surface-container rounded-2xl border border-outline-variant/30 p-8 flex flex-col gap-8">
++                <div>
++                    <h2 class="text-xl font-bold text-primary mb-2">╬ò╧Ç╬╡╬╛╬╡╧ü╬│╬▒╧â╬»╬▒ Roster ╬á╬┐╬┤╬┐╧â╧å╬▒╬»╧ü╬┐╧à</h2>
++                    <p class="text-sm text-on-surface-variant">╬ò╬┤╧Ä ╬╝╧Ç╬┐╧ü╬╡╬»╧é ╬╜╬▒ ╬▒╬╗╬╗╬¼╬╛╬╡╬╣╧é ╧ä╬╖ ╬▓╬▒╧â╬╣╬║╬« ╬╡╬╜╬┤╬╡╬║╬¼╬┤╬▒, ╧ä╬┐╬╜ ╧Ç╬¼╬│╬║╬┐, ╧ä╬┐ ╧ü╧î╧â╧ä╬╡╧ü ╬║╬▒╬╣ ╧ä╬╖╬╜ ╧ä╬▒╬║╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖ ╧Ç╬┐╬┤╬┐╧â╧å╬▒╬»╧ü╬┐╧à.</p>
++                </div>
++                
++                <div class="flex flex-col gap-2">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold">╬ñ╬▒╬║╧ä╬╣╬║╬« ╬æ╬╜╬¼╬╗╧à╧â╬╖ (╬Ü╬╡╬»╬╝╬╡╬╜╬┐)</label>
++                    <textarea id="roster-football-analysis" class="editor-input" rows="8" placeholder="╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖╬╜ ╧ä╬▒╬║╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖ ╬╡╬┤╧Ä..."></textarea>
++                </div>
++
++                <!-- Visual Editor Section -->
++                <div class="flex flex-col gap-6">
++                    <!-- Starting XI Pitch -->
++                    <div class="flex flex-col gap-3">
++                        <div class="flex items-center justify-between">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">╬Æ╬▒╧â╬╣╬║╬« ╬ò╬╜╬┤╬╡╬║╬¼╬┤╬▒ (Starting XI)</label>
++                            <button onclick="addPlayer('football', 'starting')" class="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary py-1 px-3 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all">
++                                <span class="material-symbols-outlined" style="font-size:16px">add</span> ╬á╧ü╬┐╧â╬╕╬«╬║╬╖ ╬Æ╬▒╧â╬╣╬║╬┐╧ì
++                            </button>
++                        </div>
++                        <p class="text-xs text-on-surface-variant/70">╬ú╧ì╧ü╬╡ ╧ä╬┐╧à╧é ╧Ç╬▒╬»╬║╧ä╬╡╧é ╬│╬╣╬▒ ╬╜╬▒ ╬▒╬╗╬╗╬¼╬╛╬╡╬╣╧é ╧ä╬╖ ╬╕╬¡╧â╬╖ ╧ä╬┐╧à╧é. ╬Ü╬¼╬╜╬╡ ╬║╬╗╬╣╬║ ╧â╬╡ ╬¡╬╜╬▒╬╜ ╧Ç╬▒╬»╬║╧ä╬╖ ╬│╬╣╬▒ ╬╡╧Ç╬╡╬╛╬╡╧ü╬│╬▒╧â╬»╬▒ ╧â╧ä╬┐╬╣╧ç╬╡╬»╧ë╬╜ ╬« ╬┤╬╣╬▒╬│╧ü╬▒╧å╬«.</p>
++                        <div class="pitch admin-pitch-canvas rounded-2xl w-full" style="height:520px;" id="admin-pitch-starting">
++                            <div class="pitch-centre-line"></div>
++                            <div class="pitch-centre-circle"></div>
++                            <div class="pitch-penalty-top"></div>
++                            <div class="pitch-penalty-bottom"></div>
++                            <div class="pitch-goal-top"></div>
++                            <div class="pitch-goal-bottom"></div>
++                        </div>
++                    </div>
++
++                    <!-- Bench Pitch -->
++                    <div class="flex flex-col gap-3">
++                        <div class="flex items-center justify-between">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">╬æ╬╜╬▒╧Ç╬╗╬╖╧ü╧ë╬╝╬▒╧ä╬╣╬║╬┐╬» (Bench)</label>
++                            <button onclick="addPlayer('football', 'bench')" class="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary py-1 px-3 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all">
++                                <span class="material-symbols-outlined" style="font-size:16px">add</span> ╬á╧ü╬┐╧â╬╕╬«╬║╬╖ ╬æ╬╜╬▒╧Ç╬╗╬╖╧ü╧ë╬╝╬▒╧ä╬╣╬║╬┐╧ì
++                            </button>
++                        </div>
++                        <div class="pitch admin-pitch-canvas rounded-2xl w-full" style="height:420px;" id="admin-pitch-bench">
++                            <div class="pitch-centre-line"></div>
++                            <div class="pitch-centre-circle"></div>
++                            <div class="pitch-penalty-top"></div>
++                            <div class="pitch-penalty-bottom"></div>
++                            <div class="pitch-goal-top"></div>
++                            <div class="pitch-goal-bottom"></div>
++                        </div>
++                    </div>
++
++                    <!-- Rest of Squad (Reserves) -->
++                    <div class="flex flex-col gap-3">
++                        <div class="flex items-center justify-between">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">╬Ñ╧Ç╧î╬╗╬┐╬╣╧Ç╬┐ ╬í╧î╧â╧ä╬╡╧ü (Squad Depth)</label>
++                            <button onclick="addReserve('football')" class="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary py-1 px-3 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all">
++                                <span class="material-symbols-outlined" style="font-size:16px">add</span> ╬á╧ü╬┐╧â╬╕╬«╬║╬╖ ╧â╧ä╬┐ ╬Ñ╧Ç╧î╬╗╬┐╬╣╧Ç╬┐ ╬í╧î╧â╧ä╬╡╧ü
++                            </button>
++                        </div>
++                        <div id="admin-reserves-football" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
++                            <!-- Populated dynamically -->
++                        </div>
++                    </div>
++                </div>
++
++                <!-- Advanced mode details disclosure panel -->
++                <details class="border-t border-outline-variant/20 pt-4 mt-4 text-xs font-semibold text-on-surface-variant cursor-pointer select-none">
++                    <summary class="hover:text-primary transition-colors flex items-center gap-1">
++                        <span class="material-symbols-outlined" style="font-size:16px">code</span> Advanced / Developer JSON Editors
++                    </summary>
++                    <div class="flex flex-col gap-4 mt-4 cursor-default">
++                        <div class="flex flex-col gap-2">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">Starting XI (JSON)</label>
++                            <textarea id="roster-football-starting" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('football', 'starting')"></textarea>
++                        </div>
++                        <div class="flex flex-col gap-2">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">Bench (JSON)</label>
++                            <textarea id="roster-football-bench" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('football', 'bench')"></textarea>
++                        </div>
++                        <div class="flex flex-col gap-2">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">Squad (JSON)</label>
++                            <textarea id="roster-football-rest" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('football', 'rest')"></textarea>
++                        </div>
++                    </div>
++                </details>
++
++                <button id="save-football-roster-btn" onclick="saveRoster('football')" class="bg-primary text-on-primary font-bold py-3.5 px-6 rounded-xl hover:bg-[#a8e6b8] transition-all flex items-center justify-center gap-2">
++                    <span class="material-symbols-outlined">save</span> ╬æ╧Ç╬┐╬╕╬«╬║╬╡╧à╧â╬╖ Roster ╬á╬┐╬┤╬┐╧â╧å╬▒╬»╧ü╬┐╧à
++                </button>
++                <div id="roster-football-status" class="hidden text-center text-sm font-semibold"></div>
++            </div>
++        </div>
++
++        <!-- ΓöÇΓöÇ TAB 3: BASKETBALL ROSTER EDITOR ΓöÇΓöÇ -->
++        <div id="panel-section-basketball" class="admin-panel-content hidden">
++            <div class="max-w-[800px] mx-auto bg-surface-container rounded-2xl border border-outline-variant/30 p-8 flex flex-col gap-8">
++                <div>
++                    <h2 class="text-xl font-bold text-primary mb-2">╬ò╧Ç╬╡╬╛╬╡╧ü╬│╬▒╧â╬»╬▒ Roster ╬£╧Ç╬¼╧â╬║╬╡╧ä</h2>
++                    <p class="text-sm text-on-surface-variant">╬ò╬┤╧Ä ╬╝╧Ç╬┐╧ü╬╡╬»╧é ╬╜╬▒ ╬▒╬╗╬╗╬¼╬╛╬╡╬╣╧é ╧ä╬╖╬╜ ╧Ç╧ü╧Ä╧ä╬╖ ╧Ç╬╡╬╜╧ä╬¼╬┤╬▒, ╧ä╬╖ ╬┤╬╡╧ì╧ä╬╡╧ü╬╖ ╧Ç╬╡╬╜╧ä╬¼╬┤╬▒, ╧ä╬┐ ╧ü╧î╧â╧ä╬╡╧ü ╬║╬▒╬╣ ╧ä╬╖╬╜ ╧ä╬▒╬║╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖ ╬╝╧Ç╬¼╧â╬║╬╡╧ä.</p>
++                </div>
++                
++                <div class="flex flex-col gap-2">
++                    <label class="text-xs uppercase tracking-widest text-primary font-bold">╬ñ╬▒╬║╧ä╬╣╬║╬« ╬æ╬╜╬¼╬╗╧à╧â╬╖ (╬Ü╬╡╬»╬╝╬╡╬╜╬┐)</label>
++                    <textarea id="roster-basketball-analysis" class="editor-input" rows="8" placeholder="╬ô╧ü╬¼╧ê╬╡ ╧ä╬╖╬╜ ╧ä╬▒╬║╧ä╬╣╬║╬« ╬▒╬╜╬¼╬╗╧à╧â╬╖ ╬╡╬┤╧Ä..."></textarea>
++                </div>
++
++                <!-- Visual Editor Section -->
++                <div class="flex flex-col gap-6">
++                    <!-- Starting 5 Court -->
++                    <div class="flex flex-col gap-3">
++                        <div class="flex items-center justify-between">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">╬á╧ü╧Ä╧ä╬╖ ╬á╬╡╬╜╧ä╬¼╬┤╬▒ (Starting 5)</label>
++                            <button onclick="addPlayer('basketball', 'starting')" class="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary py-1 px-3 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all">
++                                <span class="material-symbols-outlined" style="font-size:16px">add</span> ╬á╧ü╬┐╧â╬╕╬«╬║╬╖ ╬Æ╬▒╧â╬╣╬║╬┐╧ì
++                            </button>
++                        </div>
++                        <p class="text-xs text-on-surface-variant/70">╬ú╧ì╧ü╬╡ ╧ä╬┐╧à╧é ╧Ç╬▒╬»╬║╧ä╬╡╧é ╬│╬╣╬▒ ╬╜╬▒ ╬▒╬╗╬╗╬¼╬╛╬╡╬╣╧é ╧ä╬╖ ╬╕╬¡╧â╬╖ ╧ä╬┐╧à╧é. ╬Ü╬¼╬╜╬╡ ╬║╬╗╬╣╬║ ╧â╬╡ ╬¡╬╜╬▒╬╜ ╧Ç╬▒╬»╬║╧ä╬╖ ╬│╬╣╬▒ ╬╡╧Ç╬╡╬╛╬╡╧ü╬│╬▒╧â╬»╬▒ ╧â╧ä╬┐╬╣╧ç╬╡╬»╧ë╬╜ ╬« ╬┤╬╣╬▒╬│╧ü╬▒╧å╬«.</p>
++                        <div class="court rounded-2xl w-full" style="height:480px;" id="admin-court-starting">
++                            <div class="court-centre-line"></div>
++                            <div class="court-centre-circle"></div>
++                            <div class="court-arc-top"></div>
++                            <div class="court-arc-bottom"></div>
++                            <div class="court-key-top"></div>
++                            <div class="court-key-bottom"></div>
++                        </div>
++                    </div>
++
++                    <!-- Backup 5 Court -->
++                    <div class="flex flex-col gap-3">
++                        <div class="flex items-center justify-between">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">╬ö╬╡╧ì╧ä╬╡╧ü╬╖ ╬á╬╡╬╜╧ä╬¼╬┤╬▒ (Rotation)</label>
++                            <button onclick="addPlayer('basketball', 'backup')" class="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary py-1 px-3 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all">
++                                <span class="material-symbols-outlined" style="font-size:16px">add</span> ╬á╧ü╬┐╧â╬╕╬«╬║╬╖ Rotation
++                            </button>
++                        </div>
++                        <div class="court rounded-2xl w-full" style="height:380px;" id="admin-court-backup">
++                            <div class="court-centre-line"></div>
++                            <div class="court-centre-circle"></div>
++                            <div class="court-arc-top"></div>
++                            <div class="court-arc-bottom"></div>
++                            <div class="court-key-top"></div>
++                            <div class="court-key-bottom"></div>
++                        </div>
++                    </div>
++
++                    <!-- Rest of Squad (Reserves) -->
++                    <div class="flex flex-col gap-3">
++                        <div class="flex items-center justify-between">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">╬Ñ╧Ç╧î╬╗╬┐╬╣╧Ç╬┐ ╬í╧î╧â╧ä╬╡╧ü (Squad Depth)</label>
++                            <button onclick="addReserve('basketball')" class="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary py-1 px-3 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all">
++                                <span class="material-symbols-outlined" style="font-size:16px">add</span> ╬á╧ü╬┐╧â╬╕╬«╬║╬╖ ╧â╧ä╬┐ ╬Ñ╧Ç╧î╬╗╬┐╬╣╧Ç╬┐ ╬í╧î╧â╧ä╬╡╧ü
++                            </button>
++                        </div>
++                        <div id="admin-reserves-basketball" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
++                            <!-- Populated dynamically -->
++                        </div>
++                    </div>
++                </div>
++
++                <!-- Advanced mode details disclosure panel -->
++                <details class="border-t border-outline-variant/20 pt-4 mt-4 text-xs font-semibold text-on-surface-variant cursor-pointer select-none">
++                    <summary class="hover:text-primary transition-colors flex items-center gap-1">
++                        <span class="material-symbols-outlined" style="font-size:16px">code</span> Advanced / Developer JSON Editors
++                    </summary>
++                    <div class="flex flex-col gap-4 mt-4 cursor-default">
++                        <div class="flex flex-col gap-2">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">Starting 5 (JSON)</label>
++                            <textarea id="roster-basketball-starting" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('basketball', 'starting')"></textarea>
++                        </div>
++                        <div class="flex flex-col gap-2">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">Rotation (JSON)</label>
++                            <textarea id="roster-basketball-backup" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('basketball', 'backup')"></textarea>
++                        </div>
++                        <div class="flex flex-col gap-2">
++                            <label class="text-xs uppercase tracking-widest text-primary font-bold">Squad (JSON)</label>
++                            <textarea id="roster-basketball-rest" class="editor-input font-mono text-xs cursor-text" rows="6" oninput="syncTextareaToState('basketball', 'rest')"></textarea>
++                        </div>
++                    </div>
++                </details>
++
++                <button id="save-basketball-roster-btn" onclick="saveRoster('basketball')" class="bg-primary text-on-primary font-bold py-3.5 px-6 rounded-xl hover:bg-[#a8e6b8] transition-all flex items-center justify-center gap-2">
++                    <span class="material-symbols-outlined">save</span> ╬æ╧Ç╬┐╬╕╬«╬║╬╡╧à╧â╬╖ Roster ╬£╧Ç╬¼╧â╬║╬╡╧ä
++                </button>
++                <div id="roster-basketball-status" class="hidden text-center text-sm font-semibold"></div>
++            </div>
++        </div>
++    </div>
++    
++    <!-- Floating Popover for player editing -->
++    <div id="player-edit-popover" class="player-popover hidden">
++        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
++            <span class="text-xs uppercase tracking-widest text-primary font-bold">╬ò╧Ç╬╡╬╛╬╡╧ü╬│╬▒╧â╬»╬▒ ╬á╬▒╬»╬║╧ä╬╖</span>
++            <button onclick="closePopover()" class="material-symbols-outlined text-xs text-on-surface-variant hover:text-primary">close</button>
++        </div>
++        <div class="flex flex-col gap-2">
++            <label class="text-[11px] text-on-surface-variant uppercase font-bold">╬æ╧ü╧ç╬╣╬║╬¼ (max 3)</label>
++            <input type="text" id="popover-initials" class="editor-input py-1.5 px-3 text-sm" maxlength="3"/>
++        </div>
++        <div class="flex flex-col gap-2">
++            <label class="text-[11px] text-on-surface-variant uppercase font-bold">╬î╬╜╬┐╬╝╬▒</label>
++            <input type="text" id="popover-name" class="editor-input py-1.5 px-3 text-sm"/>
++        </div>
++        <div class="flex flex-col gap-2">
++            <label id="popover-badge-label" class="text-[11px] text-on-surface-variant uppercase font-bold">╬¥╬┐╧ì╬╝╬╡╧ü╬┐</label>
++            <input type="text" id="popover-badge" class="editor-input py-1.5 px-3 text-sm"/>
++        </div>
++        <div id="popover-extra-wrapper" class="flex flex-col gap-2 hidden">
++            <label id="popover-extra-label" class="text-[11px] text-on-surface-variant uppercase font-bold">╬ÿ╬¡╧â╬╖</label>
++            <input type="text" id="popover-extra-input" class="editor-input py-1.5 px-3 text-sm"/>
++        </div>
++        <div class="flex gap-2 mt-2 pt-2 border-t border-outline-variant/30">
++            <button onclick="savePopoverChanges()" class="flex-1 bg-primary text-on-primary font-bold py-2 rounded-lg text-xs hover:bg-[#a8e6b8] transition-colors">
++                ╬ò╬╜╬╖╬╝╬¡╧ü╧ë╧â╬╖
++            </button>
++            <button onclick="deleteSelectedPlayer()" class="bg-red-950 text-red-400 border border-red-500/30 font-bold py-2 px-3 rounded-lg text-xs hover:bg-red-900 transition-colors" title="╬ö╬╣╬▒╬│╧ü╬▒╧å╬«">
++                <span class="material-symbols-outlined" style="font-size:16px">delete</span>
++            </button>
++        </div>
++    </div>
++</main>
++
++<!-- ΓòÉΓòÉΓòÉ PREVIEW MODAL ΓòÉΓòÉΓòÉ -->
++<div id="preview-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 hidden">
++    <div class="bg-surface-container rounded-2xl border border-outline-variant max-w-[720px] w-full max-h-[85vh] overflow-y-auto">
++        <div class="flex items-center justify-between p-6 border-b border-outline-variant/30 sticky top-0 bg-surface-container z-10">
++            <p class="text-sm font-bold text-primary uppercase tracking-widest">╬á╧ü╬┐╬╡╧Ç╬╣╧â╬║╧î╧Ç╬╖╧â╬╖ ╬å╧ü╬╕╧ü╬┐╧à</p>
++            <button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="material-symbols-outlined text-on-surface-variant hover:text-primary">close</button>
++        </div>
++        <div class="p-6">
++            <p class="text-xs text-primary uppercase tracking-widest font-bold mb-3">Γ£ì∩╕Å ╬å╧Ç╬┐╧ê╬╖</p>
++            <h2 id="modal-title" class="text-2xl font-bold mb-4 leading-tight"></h2>
++            <div id="modal-image-wrap" class="hidden mb-6">
++                <img id="modal-image" src="" class="w-full rounded-xl object-cover max-h-[300px]" alt=""/>
++            </div>
++            <div id="modal-body" class="text-on-surface-variant leading-relaxed text-base" style="font-size:16px;line-height:1.8"></div>
++        </div>
++    </div>
++</div>
++
++<script src="opinion_admin.js?v=2.0.3"></script>
++<script>
++// ΓöÇΓöÇ Config ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
++const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
++
++// ΓÜá∩╕Å  CHANGE THIS PASSWORD to something only you know
++const EDITOR_PASSWORD = 'pao1908';
++
++const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
++
++let db = null;
++
++// ΓöÇΓöÇ Auth ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++function checkPassword() {
++    const input = document.getElementById('lock-password').value;
++    const err = document.getElementById('lock-error');
++    if (input === EDITOR_PASSWORD) {
++        sessionStorage.setItem('op_auth', '1');
++        document.getElementById('lock-screen').style.display = 'none';
++        initEditor();
++    } else {
++        err.textContent = '╬¢╬¼╬╕╬┐╧é ╬║╧ë╬┤╬╣╬║╧î╧é. ╬ö╬┐╬║╬»╬╝╬▒╧â╬╡ ╬╛╬▒╬╜╬¼.';
++        document.getElementById('lock-password').value = '';
++        document.getElementById('lock-password').focus();
++        setTimeout(() => { err.textContent = ''; }, 3000);
++    }
++}
++
++// ΓöÇΓöÇ Init ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++let quill = null;
++let editingArticleId = null;
++
++function initEditor() {
++    db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
++    
++    // Initialize Quill
++    quill = new Quill('#editor-container', {
++        theme: 'snow',
++        modules: {
++            toolbar: {
++                container: [
++                    ['bold', 'italic', 'underline'],
++                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
++                    ['link', 'image', 'video'],
++                    ['clean']
++                ],
++                handlers: {
++                    image: function() {
++                        const url = prompt('╬ò╬╣╧â╬¼╬│╬╡╧ä╬╡ ╧ä╬┐ URL ╧ä╬╖╧é ╬╡╬╣╬║╧î╬╜╬▒╧é:');
++                        if (url) {
++                            const range = this.quill.getSelection(true) || { index: this.quill.getLength() };
++                            this.quill.insertEmbed(range.index, 'image', url);
++                        }
++                    },
++                    video: function() {
++                        const url = prompt('╬ò╬╣╧â╬¼╬│╬╡╧ä╬╡ ╧ä╬┐ URL ╧ä╬┐╧à Video (╧Ç.╧ç. YouTube):');
++                        if (url) {
++                            const range = this.quill.getSelection(true) || { index: this.quill.getLength() };
++                            let embedUrl = url;
++                            if (url.includes('youtube.com/watch?v=')) {
++                                const videoId = new URL(url).searchParams.get('v');
++                                embedUrl = `https://www.youtube.com/embed/${videoId}`;
++                            } else if (url.includes('youtu.be/')) {
++                                const videoId = url.split('youtu.be/')[1].split('?')[0];
++                                embedUrl = `https://www.youtube.com/embed/${videoId}`;
++                            }
++                            this.quill.insertEmbed(range.index, 'video', embedUrl);
++                        }
++                    }
++                }
++            }
++        }
++    });
++
++    // Style elements after Quill render to fit dark theme
++    const qEditor = document.querySelector('.ql-editor');
++    if (qEditor) {
++        qEditor.style.minHeight = '320px';
++    }
++
++    quill.on('text-change', () => {
++        updateWordCount();
++        updatePreviewCard();
++    });
++
++    // Show admin tabs and load roster datasets
++    const tabs = document.getElementById('admin-tabs');
++    if (tabs) tabs.classList.remove('hidden');
++    loadRostersForEditing();
++
++    loadOpinionArticles();
++    updateWordCount();
++    updateSummaryCount();
++    
++    document.getElementById('op-title').addEventListener('input', () => {
++        const v = document.getElementById('op-title').value;
++        document.getElementById('title-count').textContent = `${v.length} / 250`;
++        updatePreviewCard();
++    });
++    document.getElementById('op-summary').addEventListener('input', () => {
++        updateSummaryCount();
++        updatePreviewCard();
++    });
++}
++
++// ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++function toggleDrawer() {
++    const drawer = document.getElementById('nav-drawer');
++    const overlay = document.getElementById('drawer-overlay');
++    const isOpen = !drawer.classList.contains('-translate-x-full');
++    drawer.classList.toggle('-translate-x-full', isOpen);
++    overlay.classList.toggle('opacity-0', isOpen);
++    overlay.classList.toggle('pointer-events-none', isOpen);
++}
++
++function updateWordCount() {
++    const text = quill ? quill.getText() : '';
++    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
++    document.getElementById('word-count').textContent = `${words} ╬╗╬¡╬╛╬╡╬╣╧é`;
++    document.getElementById('char-count').textContent = `${Math.max(0, text.length - 1)} ╧ç╬▒╧ü╬▒╬║╧ä╬«╧ü╬╡╧é`;
++}
++
++function updateSummaryCount() {
++    const len = document.getElementById('op-summary').value.length;
++    document.getElementById('summary-count').textContent = `${len} / 400`;
++}
++
++function insertText(txt) {
++    if (quill) {
++        const range = quill.getSelection();
++        if (range) {
++            quill.insertText(range.index, txt);
++            quill.setSelection(range.index + txt.length);
++        } else {
++            quill.insertText(quill.getLength() - 1, txt);
++        }
++    }
++}
++
++function clearContent() {
++    if (confirm('╬ÿ╬¡╬╗╬╡╬╣╧é ╧â╬»╬│╬┐╧à╧ü╬▒ ╬╜╬▒ ╬┤╬╣╬▒╬│╧ü╬¼╧ê╬╡╬╣╧é ╧ä╬┐ ╬║╬╡╬»╬╝╬╡╬╜╬┐;')) {
++        if (quill) quill.setContents([]);
++        updateWordCount();
++    }
++}
++
++function previewImage() {
++    const url = document.getElementById('op-image').value.trim();
++    const wrap = document.getElementById('image-preview-wrap');
++    const img = document.getElementById('image-preview');
++    if (url) {
++        img.src = url;
++        wrap.classList.remove('hidden');
++    } else {
++        wrap.classList.add('hidden');
++    }
++    updatePreviewCard();
++}
++
++function updatePreviewCard() {
++    const title = document.getElementById('op-title').value.trim();
++    const summary = document.getElementById('op-summary').value.trim();
++    const imageUrl = document.getElementById('op-image').value.trim() || DEFAULT_IMG;
++    const card = document.getElementById('preview-card');
++    if (title) {
++        card.classList.remove('hidden');
++        document.getElementById('preview-title').textContent = title;
++        document.getElementById('preview-summary').textContent = summary || '╬ö╬╡╬╜ ╧à╧Ç╬¼╧ü╧ç╬╡╬╣ ╧â╧ì╬╜╬┐╧ê╬╖ ╬▒╬║╧î╬╝╬▒.';
++        document.getElementById('preview-img').src = imageUrl;
++    } else {
++        card.classList.add('hidden');
++    }
++}
++
++function previewArticle() {
++    const title = document.getElementById('op-title').value.trim();
++    const content = quill ? quill.root.innerHTML.trim() : '';
++    const textOnly = quill ? quill.getText().trim() : '';
++    const imageUrl = document.getElementById('op-image').value.trim();
++    if (!title && !textOnly) { alert('╬ö╬╡╬╜ ╧à╧Ç╬¼╧ü╧ç╬╡╬╣ ╧Ç╬╡╧ü╬╣╬╡╧ç╧î╬╝╬╡╬╜╬┐ ╬│╬╣╬▒ ╧Ç╧ü╬┐╬╡╧Ç╬╣╧â╬║╧î╧Ç╬╖╧â╬╖.'); return; }
++
++    document.getElementById('modal-title').textContent = title || '(╬º╧ë╧ü╬»╧é ╧ä╬»╧ä╬╗╬┐)';
++    const imgWrap = document.getElementById('modal-image-wrap');
++    const img = document.getElementById('modal-image');
++    if (imageUrl) { img.src = imageUrl; imgWrap.classList.remove('hidden'); }
++    else imgWrap.classList.add('hidden');
++
++    const body = document.getElementById('modal-body');
++    body.innerHTML = content;
++
++    document.getElementById('preview-modal').classList.remove('hidden');
++}
++
++// ΓöÇΓöÇ Publish ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++async function publishArticle() {
++    const title = document.getElementById('op-title').value.trim();
++    const content = quill ? quill.root.innerHTML.trim() : '';
++    const textOnly = quill ? quill.getText().trim() : '';
++    const summary = document.getElementById('op-summary').value.trim();
++    const imageUrl = document.getElementById('op-image').value.trim() || DEFAULT_IMG;
++
++    if (!title) { showStatus('error', '╬ƒ ╧ä╬»╧ä╬╗╬┐╧é ╬╡╬»╬╜╬▒╬╣ ╧à╧Ç╬┐╧ç╧ü╬╡╧ë╧ä╬╣╬║╧î╧é.'); return; }
++    if (!textOnly || textOnly.length < 10) { showStatus('error', '╬ñ╬┐ ╬║╬╡╬»╬╝╬╡╬╜╬┐ ╧Ç╧ü╬¡╧Ç╬╡╬╣ ╬╜╬▒ ╬¡╧ç╬╡╬╣ ╧ä╬┐╧à╬╗╬¼╧ç╬╣╧â╧ä╬┐╬╜ 10 ╧ç╬▒╧ü╬▒╬║╧ä╬«╧ü╬╡╧é.'); return; }
++
++    const extraCategories = [];
++    if (document.getElementById('cat-football').checked) extraCategories.push('╬á╬┐╬┤╧î╧â╧å╬▒╬╣╧ü╬┐');
++    if (document.getElementById('cat-basketball').checked) extraCategories.push('╬£╧Ç╬¼╧â╬║╬╡╧ä');
++    if (document.getElementById('cat-amateur').checked) extraCategories.push('╬ò╧ü╬▒╧â╬╣╧ä╬¡╧ç╬╜╬╖╧é');
++    if (document.getElementById('cat-transfers').checked) extraCategories.push('╬£╬╡╧ä╬▒╬│╧ü╬▒╧å╬¡╧é');
++
++    const finalCategory = extraCategories.length > 0
++        ? '╬å╧Ç╬┐╧ê╬╖, ' + extraCategories.join(', ')
++        : '╬å╧Ç╬┐╧ê╬╖';
++
++    const btn = document.getElementById('publish-btn');
++    btn.disabled = true;
++    btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="animation:spin 1s linear infinite">refresh</span> ╬ö╬╖╬╝╬┐╧â╬»╬╡╧à╧â╬╖...';
++
++    let result;
++    if (editingArticleId) {
++        result = await db.from('articles').update({
++            title,
++            summary: summary || textOnly.substring(0, 300),
++            content,
++            image_url: imageUrl,
++            category: finalCategory,
++            updated_at: new Date().toISOString()
++        }).eq('id', editingArticleId).select('id');
++    } else {
++        result = await db.from('articles').insert({
++            title,
++            summary: summary || textOnly.substring(0, 300),
++            content,
++            source_url: `opinion://manual-${Date.now()}`,
++            image_url: imageUrl,
++            category: finalCategory,
++            group_id: crypto.randomUUID(),
++            bullets: [],
++            created_at: new Date().toISOString(),
++            updated_at: new Date().toISOString()
++        }).select('id');
++    }
++
++    const { data, error } = result;
++
++    btn.disabled = false;
++    btn.innerHTML = '<span class="material-symbols-outlined">publish</span> ╬ö╬╖╬╝╬┐╧â╬»╬╡╧à╧â╬╖ ╬å╧ü╬╕╧ü╬┐╧à';
++
++    if (error) {
++        showStatus('error', `╬ú╧å╬¼╬╗╬╝╬▒ ╬┤╬╖╬╝╬┐╧â╬»╬╡╧à╧â╬╖╧é: ${error.message}`);
++    } else {
++        showStatus('success', `Γ£à ╬ñ╬┐ ╬¼╧ü╬╕╧ü╬┐ ╬▒╧Ç╬┐╬╕╬╖╬║╬╡╧ì╧ä╬╖╬║╬╡ ╬╡╧Ç╬╣╧ä╧à╧ç╧Ä╧é!`);
++        
++        editingArticleId = null;
++        
++        // Clear form
++        document.getElementById('op-title').value = '';
++        if (quill) quill.setContents([]);
++        document.getElementById('op-summary').value = '';
++        document.getElementById('op-image').value = '';
++        document.getElementById('cat-football').checked = false;
++        document.getElementById('cat-basketball').checked = false;
++        document.getElementById('cat-amateur').checked = false;
++        document.getElementById('cat-transfers').checked = false;
++        document.getElementById('image-preview-wrap').classList.add('hidden');
++        document.getElementById('preview-card').classList.add('hidden');
++        document.getElementById('title-count').textContent = '0 / 250';
++        updateWordCount();
++        updateSummaryCount();
++        // Reload list
++        loadOpinionArticles();
++    }
++}
++
++function showStatus(type, msg) {
++    const el = document.getElementById('publish-status');
++    el.classList.remove('hidden');
++    el.innerHTML = `<span class="status-badge status-${type === 'success' ? 'success' : 'error'}">${msg}</span>`;
++    setTimeout(() => el.classList.add('hidden'), 6000);
++}
++
++// ΓöÇΓöÇ Load published opinions ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++async function loadOpinionArticles() {
++    const list = document.getElementById('opinions-list');
++    if (!db) return;
++    const { data, error } = await db.from('articles')
++        .select('id, title, created_at, image_url, summary, category')
++        .ilike('category', '%╬å╧Ç╬┐╧ê╬╖%')
++        .order('created_at', { ascending: false })
++        .limit(10);
++
++    if (error || !data || data.length === 0) {
++        list.innerHTML = '<div class="text-sm text-on-surface-variant/50 text-center py-6">╬ö╬╡╬╜ ╧à╧Ç╬¼╧ü╧ç╬┐╧à╬╜ ╬┤╬╖╬╝╬┐╧â╬╣╬╡╧à╬╝╬¡╬╜╬▒ ╬¼╧ü╬╕╧ü╬▒ ╬▒╬║╧î╬╝╬▒.</div>';
++        return;
++    }
++
++    list.innerHTML = data.map(a => {
++        const date = new Date(a.created_at);
++        const dateStr = date.toLocaleDateString('el-GR', { day:'numeric', month:'short', year:'numeric' });
++        const img = a.image_url || DEFAULT_IMG;
++        return `
++        <div class="opinion-card group">
++            <div class="flex gap-3 items-start p-4">
++                <div class="w-[112px] h-[63px] flex-shrink-0 rounded-lg overflow-hidden cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
++                    <img src="${img}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='${DEFAULT_IMG}'"/>
++                </div>
++                <div class="flex-1 min-w-0 cursor-pointer" onclick="window.location.href='article.html?id=${a.id}'">
++                    <p class="text-xs text-primary font-bold uppercase tracking-wider mb-1">Γ£ì∩╕Å ${dateStr}</p>
++                    <h4 class="text-sm font-semibold leading-snug line-clamp-2 text-on-surface group-hover:text-primary transition-colors">${a.title}</h4>
++                </div>
++                <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
++                    <button onclick="editOpinion('${a.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-primary hover:bg-primary/10 transition-all" title="╬ò╧Ç╬╡╬╛╬╡╧ü╬│╬▒╧â╬»╬▒">
++                        <span class="material-symbols-outlined" style="font-size:16px">edit</span>
++                    </button>
++                    <button onclick="deleteOpinion('${a.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-all" title="╬ö╬╣╬▒╬│╧ü╬▒╧å╬«">
++                        <span class="material-symbols-outlined" style="font-size:16px">delete</span>
++                    </button>
++                </div>
++            </div>
++        </div>`;
++    }).join('');
++}
++
++async function editOpinion(id) {
++    editingArticleId = id;
++    const { data, error } = await db.from('articles').select('*').eq('id', id).single();
++    if (error || !data) {
++        alert('╬ú╧å╬¼╬╗╬╝╬▒ ╬║╬▒╧ä╬¼ ╧ä╬╖╬╜ ╬▒╬╜╬¼╬║╧ä╬╖╧â╬╖ ╧ä╬┐╧à ╬¼╧ü╬╕╧ü╬┐╧à.');
++        return;
++    }
++    
++    document.getElementById('op-title').value = data.title || '';
++    document.getElementById('op-summary').value = data.summary || '';
++    document.getElementById('op-image').value = data.image_url === DEFAULT_IMG ? '' : (data.image_url || '');
++    
++    if (quill) {
++        quill.root.innerHTML = data.content || '';
++    }
++    
++    const cat = data.category || '';
++    document.getElementById('cat-football').checked = cat.includes('╬á╬┐╬┤╧î╧â╧å╬▒╬╣╧ü╬┐');
++    document.getElementById('cat-basketball').checked = cat.includes('╬£╧Ç╬¼╧â╬║╬╡╧ä');
++    document.getElementById('cat-amateur').checked = cat.includes('╬ò╧ü╬▒╧â╬╣╧ä╬¡╧ç╬╜╬╖╧é');
++    document.getElementById('cat-transfers').checked = cat.includes('╬£╬╡╧ä╬▒╬│╧ü╬▒╧å╬¡╧é');
++    
++    document.getElementById('publish-btn').innerHTML = '<span class="material-symbols-outlined">save</span> ╬æ╧Ç╬┐╬╕╬«╬║╬╡╧à╧â╬╖ ╬æ╬╗╬╗╬▒╬│╧Ä╬╜';
++    
++    document.getElementById('op-title').scrollIntoView({ behavior: 'smooth' });
++    
++    updateWordCount();
++    updateSummaryCount();
++    previewImage();
++}
++
++async function deleteOpinion(id) {
++    if (!confirm('╬ÿ╬¡╬╗╬╡╬╣╧é ╧â╬»╬│╬┐╧à╧ü╬▒ ╬╜╬▒ ╬┤╬╣╬▒╬│╧ü╬¼╧ê╬╡╬╣╧é ╬▒╧à╧ä╧î ╧ä╬┐ ╬¼╧ü╬╕╧ü╬┐;')) return;
++    const { error } = await db.from('articles').delete().eq('id', id);
++    if (error) {
++        alert('╬ú╧å╬¼╬╗╬╝╬▒ ╬┤╬╣╬▒╬│╧ü╬▒╧å╬«╧é: ' + error.message);
++    } else {
++        loadOpinionArticles();
++    }
++}
++
++// ΓöÇΓöÇ Auto-spin animation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++const style = document.createElement('style');
++style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
++document.head.appendChild(style);
++
++// ΓöÇΓöÇ On load: check session auth ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++window.addEventListener('DOMContentLoaded', () => {
++    if (sessionStorage.getItem('op_auth') === '1') {
++        document.getElementById('lock-screen').style.display = 'none';
++        initEditor();
++    } else {
++        setTimeout(() => document.getElementById('lock-password').focus(), 200);
++    }
++});
++</script>
++</body>
++</html>
