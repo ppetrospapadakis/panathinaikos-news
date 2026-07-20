@@ -632,10 +632,7 @@
             
             try {
                 let url = '/api/articles?page=' + sidebarPage;
-                if (currentArticleCategory) {
-                    const catForApi = getCategoryCleanName(currentArticleCategory);
-                    url += `&category=${catForApi}`;
-                }
+                
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch stream');
                 let articles = await response.json();
