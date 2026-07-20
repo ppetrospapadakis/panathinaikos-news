@@ -437,12 +437,18 @@
             if (!isAdmin()) return '';
             const pinAgeMs = pinnedAt ? Date.now() - new Date(pinnedAt).getTime() : Infinity;
             const isPinned = pinAgeMs < 3 * 60 * 60 * 1000;
-            const color = isPinned ? 'text-primary bg-primary/20' : 'text-on-surface/40 hover:text-primary hover:bg-primary/20 bg-background/80';
-            const icon = isPinned ? 'keep_off' : 'keep';
+            const pinColor = isPinned ? 'text-primary bg-primary/20' : 'text-on-surface/40 hover:text-primary hover:bg-primary/20 bg-background/80';
+            const pinIcon = isPinned ? 'keep_off' : 'keep';
+            
             return `
-            <button onclick="window.togglePin('${articleId}', ${isPinned}, event)" class="absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant/30 backdrop-blur transition-all active:scale-90 ${color}" title="${isPinned ? 'Unpin' : 'Pin'}" style="pointer-events: auto;">
-                <span class="material-symbols-outlined" style="font-size:16px">${icon}</span>
-            </button>`;
+            <div class="absolute top-2 right-2 z-20 flex gap-2" style="pointer-events: auto;">
+                <button onclick="window.togglePin('${articleId}', ${isPinned}, event)" class="w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant/30 backdrop-blur transition-all active:scale-90 ${pinColor}" title="${isPinned ? 'Unpin' : 'Pin'}">
+                    <span class="material-symbols-outlined" style="font-size:16px">${pinIcon}</span>
+                </button>
+                <button onclick="window.deleteArticle('${articleId}', event)" class="w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant/30 backdrop-blur transition-all active:scale-90 text-on-surface/40 hover:text-error hover:bg-error/20 bg-background/80" title="Διαγραφή">
+                    <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                </button>
+            </div>`;
         }
 
         // ── Render helpers ─────────────────────────────────────────────────────
@@ -1044,6 +1050,29 @@
             }
         }
         window.togglePin = togglePin;
+
+        async function deleteArticle(articleId, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις οριστικά αυτό το άρθρο;')) return;
+            
+            try {
+                const { error } = await db.from('articles').delete().eq('id', articleId);
+                if (error) throw error;
+                
+                // Remove the article element from the DOM
+                const card = document.querySelector(\`[data-article-id="\${articleId}"]\`);
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 300);
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Σφάλμα κατά τη διαγραφή: ' + e.message);
+            }
+        }
+        window.deleteArticle = deleteArticle;
 
         let initialLoadDone = false;
         async function fetchCommentCounts() {
