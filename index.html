@@ -1060,6 +1060,19 @@
             event.stopPropagation();
             if (!confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις οριστικά αυτό το άρθρο;')) return;
             
+            const SUPABASE_URL = "https://rctltbuiitdnqlxizlym.supabase.co";
+            const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI";
+            
+            if (typeof supabase === 'undefined') {
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+            }
+            const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
             try {
                 const { error } = await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
                 if (error) throw error;
