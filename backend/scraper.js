@@ -1135,7 +1135,7 @@ async function main() {
             // ── Cross-Source Cross-Publishing Deduplication ──────────────────
             const currentScrapedTime = new Date(scraped.created_at);
             
-            // Collect candidates from the last 60/120 minutes in the same category
+            // Collect candidates from the last 120/240 minutes in the same category
             const candidateArticles = existingArticles.filter(art => {
                 const dbTime = new Date(art.created_at);
                 const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
@@ -1143,7 +1143,7 @@ async function main() {
                 const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
                 const isAmateur = (art.category && art.category.includes('Ερασιτέχνης')) || 
                                  (scrapedCategory && scrapedCategory.includes('Ερασιτέχνης'));
-                const maxWindow = isAmateur ? 120 : 60;
+                const maxWindow = isAmateur ? 240 : 120;
                 
                 if (timeDiffMinutes > maxWindow) return false;
                 
