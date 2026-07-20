@@ -1143,7 +1143,7 @@ async function main() {
                 const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
                 const isAmateur = (art.category && art.category.includes('Ερασιτέχνης')) || 
                                  (scrapedCategory && scrapedCategory.includes('Ερασιτέχνης'));
-                const maxWindow = isAmateur ? 240 : 120;
+                const maxWindow = isAmateur ? 360 : 120;
                 
                 if (timeDiffMinutes > maxWindow) return false;
                 
