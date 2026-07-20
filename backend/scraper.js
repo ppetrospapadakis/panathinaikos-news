@@ -501,8 +501,9 @@ async function scrapeArticlePage(url, categoryHint) {
                     els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"]').remove();
                     // Map block elements to lines to preserve paragraph structure
                     const paragraphs = [];
-                    els.find('p, div, br').each((i, el) => {
-                        const t = $(el).text().replace(/[ \t]+/g, ' ').trim();
+                    els.find('p, div, br, li').each((i, el) => {
+                        let t = $(el).text().replace(/[ \t]+/g, ' ').trim();
+                        if ((el.name === 'li' || el.tagName === 'li') && t) t = '• ' + t;
                         if (t) paragraphs.push(t);
                     });
                     if (paragraphs.length > 0) {
@@ -968,7 +969,7 @@ async function main() {
             }
 
             // Skip specific promotional/irrelevant articles by keyword in URL
-            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'ευρωπαϊκή πρεμιέρα', 'προσφορά για τους φιλάθλους'];
+            const skipKeywords = ['back2mpak', 'live-stis', 'back2back'];
             const lowerUrl = articleUrl.toLowerCase();
             if (skipKeywords.some(kw => lowerUrl.includes(kw))) {
                 console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);
