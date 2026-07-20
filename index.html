@@ -1057,7 +1057,7 @@
             if (!confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις οριστικά αυτό το άρθρο;')) return;
             
             try {
-                const { error } = await db.from('articles').delete().eq('id', articleId);
+                const { error } = await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
                 if (error) throw error;
                 
                 // Remove the article element from the DOM

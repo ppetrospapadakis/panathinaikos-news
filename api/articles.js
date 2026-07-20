@@ -108,7 +108,8 @@ module.exports = async (req, res) => {
             .from('articles')
             .select('*')
             .not('category', 'eq', 'SystemRoster')
-            .not('category', 'eq', 'SYSTEMROSTER');
+            .not('category', 'eq', 'SYSTEMROSTER')
+            .not('category', 'eq', 'DELETED');
 
         // Page 1: surface any pinned article first using B-Tree index on pinned_at.
         // Pinned window is 3 hours. Bypassed for hero queries (limit=1) to keep strictly chronological hero views.

@@ -1314,7 +1314,7 @@ async function editOpinion(id) {
 
 async function deleteOpinion(id) {
     if (!confirm('Θέλεις σίγουρα να διαγράψεις αυτό το άρθρο;')) return;
-    const { error } = await db.from('articles').delete().eq('id', id);
+    const { error } = await db.from('articles').update({ category: 'DELETED' }).eq('id', id);
     if (error) {
         alert('Σφάλμα διαγραφής: ' + error.message);
     } else {
