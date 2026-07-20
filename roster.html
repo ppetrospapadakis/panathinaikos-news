@@ -353,20 +353,19 @@
         // BASKETBALL DATA
         // ─────────────────────────────────────────────────────────────────
         const basketballStarting = [
-            // [left%, top%, initials, name, position]
-            [50, 82, 'ΣΛ', 'Σλούκας', 'PG'],
-            [20, 65, 'ΛΟΥ', 'Λούντζης', 'SG'],
-            [80, 65, 'ΗΛ', 'Ηλιόπουλος', 'SF'],
-            [30, 38, 'ΠΑΠ', 'Παπαπέτρου', 'PF'],
-            [70, 38, 'ΜΙΤ', 'Μιτόγλου', 'C'],
+            [50, 82, 'ΣΛ', 'Σλούκας', 10, 'PG'],
+            [20, 65, 'ΛΟΥ', 'Λούντζης', 0, 'SG'],
+            [80, 65, 'ΗΛ', 'Ηλιόπουλος', 77, 'SF'],
+            [30, 38, 'ΠΑΠ', 'Παπαπέτρου', 21, 'PF'],
+            [70, 38, 'ΜΙΤ', 'Μιτόγλου', 44, 'C'],
         ];
 
         const basketballBackup = [
-            [50, 80, 'ΛΑΡ', 'Λαρεντζάκης', 'PG'],
-            [20, 60, 'ΒΟΥ', 'Βουγιούκας', 'SG'],
-            [80, 60, 'ΠΑΛ', 'Παλμέρ', 'SF'],
-            [35, 35, 'ΓΙΑ', 'Γιαννόπουλος', 'PF'],
-            [65, 35, 'ΟΑΥ', 'Ουάιτ', 'C'],
+            [50, 80, 'ΛΑΡ', 'Λαρεντζάκης', 5, 'PG'],
+            [20, 60, 'ΒΟΥ', 'Βουγιούκας', 14, 'SG'],
+            [80, 60, 'ΠΑΛ', 'Παλμέρ', 22, 'SF'],
+            [35, 35, 'ΓΙΑ', 'Γιαννόπουλος', 8, 'PF'],
+            [65, 35, 'ΟΑΥ', 'Ουάιτ', 30, 'C'],
         ];
 
         const basketballRest = [
@@ -403,8 +402,25 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             container.querySelectorAll('.bball-token').forEach(el => el.remove());
-            players.forEach(([left, top, initials, name, pos], index) => {
-                const num = index + 1;
+            players.forEach((player, index) => {
+                const left = player[0];
+                const top = player[1];
+                const initials = player[2];
+                const name = player[3];
+                let num, pos;
+                if (player.length >= 6) {
+                    num = (player[4] !== undefined && player[4] !== '') ? player[4] : (index + 1);
+                    pos = player[5] || '';
+                } else {
+                    const val = player[4];
+                    if (val !== undefined && val !== '' && !isNaN(val)) {
+                        num = val;
+                        pos = player[5] || '';
+                    } else {
+                        num = index + 1;
+                        pos = val || '';
+                    }
+                }
                 const token = document.createElement('div');
                 token.className = 'bball-token';
                 token.style.left = left + '%';

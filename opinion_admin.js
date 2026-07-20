@@ -37,19 +37,19 @@ const footballRestDefault = [
 ];
 
 const basketballStartingDefault = [
-    [50, 82, 'ΣΛ', 'Σλούκας', 'PG'],
-    [20, 65, 'ΛΟΥ', 'Λούντζης', 'SG'],
-    [80, 65, 'ΗΛ', 'Ηλιόπουλος', 'SF'],
-    [30, 38, 'ΠΑΠ', 'Παπαπέτρου', 'PF'],
-    [70, 38, 'ΜΙΤ', 'Μιτόγλου', 'C']
+    [50, 82, 'ΣΛ', 'Σλούκας', 10, 'PG'],
+    [20, 65, 'ΛΟΥ', 'Λούντζης', 0, 'SG'],
+    [80, 65, 'ΗΛ', 'Ηλιόπουλος', 77, 'SF'],
+    [30, 38, 'ΠΑΠ', 'Παπαπέτρου', 21, 'PF'],
+    [70, 38, 'ΜΙΤ', 'Μιτόγλου', 44, 'C']
 ];
 
 const basketballBackupDefault = [
-    [50, 80, 'ΛΑΡ', 'Λαρεντζάκης', 'PG'],
-    [20, 60, 'ΒΟΥ', 'Βουγιούκας', 'SG'],
-    [80, 60, 'ΠΑΛ', 'Παλμέρ', 'SF'],
-    [35, 35, 'ΓΙΑ', 'Γιαννόπουλος', 'PF'],
-    [65, 35, 'ΟΑΥ', 'Ουάιτ', 'C']
+    [50, 80, 'ΛΑΡ', 'Λαρεντζάκης', 5, 'PG'],
+    [20, 60, 'ΒΟΥ', 'Βουγιούκας', 14, 'SG'],
+    [80, 60, 'ΠΑΛ', 'Παλμέρ', 22, 'SF'],
+    [35, 35, 'ΓΙΑ', 'Γιαννόπουλος', 8, 'PF'],
+    [65, 35, 'ΟΑΥ', 'Ουάιτ', 30, 'C']
 ];
 
 const basketballRestDefault = [
@@ -754,8 +754,20 @@ function adminRenderRosterSection(sport, rosterType) {
                 </div>
             `;
         } else {
-            const num = idx + 1;
-            const pos = player[4];
+            let num, pos;
+            if (player.length >= 6) {
+                num = (player[4] !== undefined && player[4] !== null && player[4] !== '') ? player[4] : (idx + 1);
+                pos = player[5] || '';
+            } else {
+                const val = player[4];
+                if (val !== undefined && val !== null && val !== '' && !isNaN(val)) {
+                    num = val;
+                    pos = player[5] || '';
+                } else {
+                    num = idx + 1;
+                    pos = val || '';
+                }
+            }
             avatarInner = `
                 <div class="avatar" style="position:relative;">
                     ${num}
@@ -888,19 +900,31 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     const extraWrapper = document.getElementById('popover-extra-wrapper');
     const extraInput = document.getElementById('popover-extra-input');
     
-    if (sport === 'football') {
-        labelEl.textContent = 'Νούμερο';
-        badgeInput.value = player[4] || '';
-        
-        if (extraWrapper && extraInput) {
-            extraWrapper.classList.remove('hidden');
-            document.getElementById('popover-extra-label').textContent = 'Θέση';
-            extraInput.value = player[5] || '';
-        }
+    labelEl.textContent = 'Νούμερο';
+    
+    let playerNum = '';
+    let playerPos = '';
+    
+    if (player.length >= 6) {
+        playerNum = (player[4] !== undefined && player[4] !== null) ? player[4] : '';
+        playerPos = player[5] || '';
     } else {
-        labelEl.textContent = 'Θέση';
-        badgeInput.value = player[4] || '';
-        if (extraWrapper) extraWrapper.classList.add('hidden');
+        const val = player[4];
+        if (val !== undefined && val !== null && val !== '' && !isNaN(val)) {
+            playerNum = val;
+            playerPos = player[5] || '';
+        } else {
+            playerNum = '';
+            playerPos = val || '';
+        }
+    }
+    
+    badgeInput.value = playerNum;
+    
+    if (extraWrapper && extraInput) {
+        extraWrapper.classList.remove('hidden');
+        document.getElementById('popover-extra-label').textContent = 'Θέση';
+        extraInput.value = playerPos;
     }
     
     const popover = document.getElementById('player-edit-popover');
@@ -935,16 +959,13 @@ function savePopoverChanges() {
     const newName = document.getElementById('popover-name').value.trim() || 'Παίκτης';
     const newBadge = document.getElementById('popover-badge').value.trim() || '';
     
+    const extraInput = document.getElementById('popover-extra-input');
+    const newPos = extraInput ? extraInput.value.trim() : '';
+
     rosterList[idx][2] = newInitials;
     rosterList[idx][3] = newName;
     rosterList[idx][4] = newBadge;
-    
-    if (sport === 'football') {
-        const extraInput = document.getElementById('popover-extra-input');
-        if (extraInput) {
-            rosterList[idx][5] = extraInput.value.trim();
-        }
-    }
+    rosterList[idx][5] = newPos;
     
     const rawId = `roster-${sport}-${rosterType}`;
     const textarea = document.getElementById(rawId);
@@ -976,8 +997,8 @@ function deleteSelectedPlayer() {
 function addPlayer(sport, rosterType) {
     const rosterList = currentRoster[sport][rosterType];
     const defaultPlayer = sport === 'football' 
-        ? [50, 50, 'NEW', 'Νέος Παίκτης', rosterType === 'starting' ? 10 : 12]
-        : [50, 50, 'NEW', 'Νέος Παίκτης', 'SG'];
+        ? [50, 50, 'NEW', 'Νέος Παίκτης', rosterType === 'starting' ? 10 : 12, 'ST']
+        : [50, 50, 'NEW', 'Νέος Παίκτης', 10, 'SG'];
         
     rosterList.push(defaultPlayer);
     
