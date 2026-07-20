@@ -1061,7 +1061,7 @@
                 if (error) throw error;
                 
                 // Remove the article element from the DOM
-                const card = document.querySelector(\`[data-article-id="\${articleId}"]\`);
+                const card = document.querySelector(`[data-article-id="${articleId}"]`);
                 if (card) {
                     card.style.opacity = '0';
                     card.style.transform = 'scale(0.95)';
