@@ -1047,7 +1047,7 @@ async function main() {
 
             // Skip specific promotional/irrelevant articles by keyword in Title
             const lowerTitle = scraped.title.toLowerCase();
-            if (skipKeywords.some(kw => lowerTitle.includes(kw))) {
+            if (skipKeywords.some(kw => lowerTitle.includes(kw)) || /\blive\b/.test(lowerTitle) || /\bαναμονή\b/.test(lowerTitle)) {
                 console.log(`[SKIP] Promotional/Live show article ignored by Title: ${scraped.title}`);
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
