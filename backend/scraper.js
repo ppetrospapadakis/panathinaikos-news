@@ -149,7 +149,7 @@ const SCRAPE_TARGETS = [
     //     baseUrl: 'https://www.sportdog.gr',
     // },
     {
-        category: 'Ποδόσφαιρο',
+        category: 'Γενικά',
         name: 'Monobala Football',
         url: 'https://monobala.gr/category/teams/sl1/panathinaikos/',
         articleLinkSelectors: [
