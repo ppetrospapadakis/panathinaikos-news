@@ -4,14 +4,10 @@ on:
   repository_dispatch:
     types: [trigger-scrape]
   schedule:
-    # 08:00 - 00:45 EEST (05:00 - 21:45 UTC): Every 15 minutes
-    - cron: '*/15 5-21 * * *'
-    # 01:00, 01:30 EEST (22:00, 22:30 UTC): Every 30 minutes
-    - cron: '0,30 22 * * *'
-    # 02:00, 04:00 EEST (23:00, 01:00 UTC): Every 2 hours
-    - cron: '0 23,1 * * *'
-    # 06:00, 06:30, 07:00, 07:30 EEST (03:00, 03:30, 04:00, 04:30 UTC): Every 30 minutes
-    - cron: '0,30 3,4 * * *'
+    # 08:15 - 00:55 EEST (05:15 - 21:55 UTC): Every 20 minutes
+    - cron: '15,35,55 5-21 * * *'
+    # 01:30, 04:30, 07:30 EEST (22:30, 01:30, 04:30 UTC): Every 3 hours
+    - cron: '30 22,1,4 * * *'
   workflow_dispatch:
     # Allow manual trigger from GitHub Actions UI
     inputs:
