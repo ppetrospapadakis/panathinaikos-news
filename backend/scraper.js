@@ -140,6 +140,17 @@ const SCRAPE_TARGETS = [
         ],
         baseUrl: 'https://www.athletiko.gr',
     },
+    {
+        category: 'Γενικά',
+        name: 'Sportime',
+        url: 'https://sportime.gr/panathinaikos',
+        articleLinkSelectors: [
+            'a[href*="sportime.gr/panathinaikos/"]',
+            'a[href*="sportime.gr/podosfairo/"]',
+            'a[href*="sportime.gr/basket/"]'
+        ],
+        baseUrl: 'https://sportime.gr',
+    },
     // Sportdog Football: DISABLED — site uses JavaScript rendering, static scraper gets only matchzone links, no articles.
     // {
     //     category: 'Ποδόσφαιρο',
@@ -955,6 +966,31 @@ async function main() {
             continue;
         }
         if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
+
+        // Hack for Sportime first run to not flood with 30 old articles
+        if (target.name === 'Sportime') {
+            const newLinks = links.filter(l => !existingUrls.has(l));
+            if (newLinks.length > 2) {
+                console.log(`[SPORTIME] First run detected! Ignoring ${newLinks.length - 1} older articles.`);
+                for (let i = 1; i < newLinks.length; i++) {
+                    if (!isDryRun) {
+                        try {
+                            await db.from('articles').insert({
+                                id: `ignored_${crypto.randomUUID()}`,
+                                title: '[IGNORED_OLDER]',
+                                summary: '[IGNORED_OLDER]',
+                                content: '[IGNORED_OLDER]',
+                                source_url: newLinks[i],
+                                category: 'SystemRoster',
+                                group_id: 'IGNORED_URLS',
+                                created_at: new Date().toISOString()
+                            });
+                            existingUrls.add(newLinks[i]);
+                        } catch(e) {}
+                    }
+                }
+            }
+        }
 
         runStats.sources[target.name].scraped += links.length;
         runStats.totals.scraped += links.length;
