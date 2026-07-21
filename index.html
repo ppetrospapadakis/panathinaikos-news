@@ -188,7 +188,11 @@
                     <!-- HERO_END -->
                 </div>
                 <!-- Stream: right 4 cols — Phase 2 skeletons initially -->
-                <div id="stream-container" class="md:col-span-4 flex flex-col gap-3 px-4 md:px-0 min-h-[800px] md:min-h-[500px] lg:max-h-[700px]" style="overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
+                <div class="lg:hidden px-4 mb-2 mt-4 flex items-center gap-2 border-b border-outline-variant/30 pb-2">
+                        <span class="material-symbols-outlined text-primary" style="font-size:22px;">feed</span>
+                        <h2 class="font-h2 text-[20px] m-0 text-on-surface/90 font-semibold">Ροή Ειδήσεων</h2>
+                    </div>
+                    <div id="stream-container" class="md:col-span-4 flex flex-col gap-3 px-4 md:px-0 min-h-[800px] md:min-h-[500px] lg:max-h-[700px]" style="overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
                     <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl min-h-[110px]">
                         <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
                         <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div><div class="h-3 bg-surface-container-high w-1/2 rounded"></div></div>
@@ -651,20 +655,7 @@
             }
 
             // Stream = scraper articles + own articles merged by date
-            let sideCandidates;
-            if (activeCategory === null) {
-                const ownFromCache = ownArticles.map(a => ({ main: a, related: [] }));
-                const filteredOwnCache = window.currentHeroId
-                    ? ownFromCache.filter(g => g.main.id !== window.currentHeroId)
-                    : ownFromCache;
-                const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
-                sideCandidates = [
-                    ...scraperGroups,
-                    ...filteredOwnCache
-                ].sort((a,b) => getTime(b.main.created_at) - getTime(a.main.created_at));
-            } else {
-                sideCandidates = scraperGroups;
-            }
+            let sideCandidates = scraperGroups;
 
             // Prioritize pinned articles (within 3 hours) to the absolute top of the stream candidates
             sideCandidates.sort((a, b) => {
@@ -682,9 +673,56 @@
 
             // Sidebar infinite scroll from local cache + API
             let sideCount = Math.min(20, sideCandidates.length);
+            
+            const loadMoreStream = async () => {
+                if (sideCount >= sideCandidates.length && !isFetchingMore && streamHasMore) {
+                    const oldLength = allArticles.length;
+                    await fetchMorePages();
+                    const newArticles = allArticles.slice(oldLength);
+                    
+                    const newGroupsObj = {};
+                    newArticles.forEach(a => {
+                        const gid = a.group_id || ('solo-' + a.id);
+                        if (!newGroupsObj[gid]) newGroupsObj[gid] = [];
+                        newGroupsObj[gid].push(a);
+                    });
+                    
+                    const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
+                    Object.values(newGroupsObj).forEach(g => {
+                        g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
+                        if (activeCategory !== 'Άποψη' && window.currentHeroId && g[0].id === window.currentHeroId) return;
+                        sideCandidates.push({ main: g[0], related: g.slice(1) });
+                    });
+                }
+
+                if (sideCount < sideCandidates.length) {
+                    const batch = sideCandidates.slice(sideCount, sideCount + 10);
+                    batch.forEach(g => stream.insertAdjacentHTML('beforeend', sideCardHtml(g.main)));
+                    sideCount += batch.length;
+                }
+            };
+            
             stream.addEventListener('scroll', async () => {
                 if (stream.scrollTop + stream.clientHeight >= stream.scrollHeight - 150) {
-                    if (sideCount >= sideCandidates.length && !isFetchingMore && streamHasMore) {
+                    await loadMoreStream();
+                }
+            });
+            
+            if (window.streamMobileScrollHandler) {
+                window.removeEventListener('scroll', window.streamMobileScrollHandler);
+            }
+            window.streamMobileScrollHandler = async () => {
+                if (window.innerWidth >= 1024) return;
+                const rect = stream.getBoundingClientRect();
+                if (rect.bottom <= window.innerHeight + 800) {
+                    await loadMoreStream();
+                }
+            };
+            window.addEventListener('scroll', window.streamMobileScrollHandler);
+            
+            if (false) {
+                if (false) {
+                    if (false) {
                         const oldLength = allArticles.length;
                         await fetchMorePages();
                         const newArticles = allArticles.slice(oldLength);
