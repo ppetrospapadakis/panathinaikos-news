@@ -720,35 +720,6 @@
             };
             window.addEventListener('scroll', window.streamMobileScrollHandler);
             
-            if (false) {
-                if (false) {
-                    if (false) {
-                        const oldLength = allArticles.length;
-                        await fetchMorePages();
-                        const newArticles = allArticles.slice(oldLength);
-                        
-                        const newGroupsObj = {};
-                        newArticles.forEach(a => {
-                            const gid = a.group_id || ('solo-' + a.id);
-                            if (!newGroupsObj[gid]) newGroupsObj[gid] = [];
-                            newGroupsObj[gid].push(a);
-                        });
-                        
-                        const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
-                        Object.values(newGroupsObj).forEach(g => {
-                            g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
-                            if (activeCategory !== 'Άποψη' && window.currentHeroId && g[0].id === window.currentHeroId) return;
-                            sideCandidates.push({ main: g[0], related: g.slice(1) });
-                        });
-                    }
-
-                    if (sideCount < sideCandidates.length) {
-                        const batch = sideCandidates.slice(sideCount, sideCount + 10);
-                        batch.forEach(g => stream.insertAdjacentHTML('beforeend', sideCardHtml(g.main)));
-                        sideCount += batch.length;
-                    }
-                }
-            });
 
             // Phase 3 setup (deferred bottom sections)
             setupPhase3(scraperGroups, ownGroups, sideCandidates);
