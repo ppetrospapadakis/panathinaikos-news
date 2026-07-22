@@ -786,7 +786,7 @@
                             editorialObserver.disconnect();
                             renderEditorial(ownToShow, editorialEl);
                         }
-                    }, { rootMargin: '300px' });
+                    }, { rootMargin: '100px' });
                     editorialObserver.observe(editorialEl);
                 }
             }
@@ -805,7 +805,7 @@
                         // Activate bottom infinite scroll after section renders
                         setupSentinel();
                     }
-                }, { rootMargin: '300px' });
+                }, { rootMargin: '100px' });
                 moreNewsObserver.observe(moreNewsEl);
             }
         }
@@ -871,7 +871,7 @@
                 if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
                     await fetchMorePages();
                 }
-            }, { rootMargin: '200px' });
+            }, { rootMargin: '100px' });
             sentinelObserver.observe(sentinel);
         }
 
@@ -892,6 +892,7 @@
                 const processed = data.map(processImage);
                 allArticles = allArticles.concat(processed);
                 streamPage++;
+                await new Promise(r => setTimeout(r, 400));
 
                 // Append to bottom grid
                 const grid = document.getElementById('bottom-grid-cards');
