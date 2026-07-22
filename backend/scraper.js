@@ -1183,7 +1183,7 @@ async function main() {
                 const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
                 const isAmateur = (art.category && art.category.includes('Ερασιτέχνης')) || 
                                  (scrapedCategory && scrapedCategory.includes('Ερασιτέχνης'));
-                const maxWindow = isAmateur ? 360 : 120;
+                const maxWindow = isAmateur ? 600 : 180; // 10 hours for Amateur (600 mins), 3 hours for General (180 mins)
                 
                 if (timeDiffMinutes > maxWindow) return false;
                 
