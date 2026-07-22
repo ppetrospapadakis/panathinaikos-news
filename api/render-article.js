@@ -8,19 +8,16 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 function slugify(text) {
-            if (!text) return "arthro";
-            try {
-                return (text || "").toString().toLowerCase()
-                    .trim()
-                    .replace(/\s+/g, '-')
-                    .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
-                    .replace(/--+/g, '-')
-                    .replace(/^-+/, '')
-                    .replace(/-+$/, '') || "arthro";
-            } catch(e) {
-                return "arthro";
-            }
-        } catch(e) {
+    if (!text) return "arthro";
+    try {
+        return (text || "").toString().toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+            .replace(/--+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '') || "arthro";
+    } catch(e) {
         return "arthro";
     }
 }

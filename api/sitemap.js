@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 function slugify(text) {
     if (!text) return "arthro";
     try {
-        return text.toString().toLowerCase()
+        return (text || "").toString().toLowerCase()
             .trim()
             .replace(/\s+/g, '-')
             .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
