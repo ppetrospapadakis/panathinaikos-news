@@ -163,22 +163,21 @@
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="max-w-[900px] mx-auto px-4 md:px-8 py-8 min-h-[60vh]">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h1 class="font-h2 text-h2 text-on-surface tracking-tight">Πρόγραμμα & Αποτελέσματα</h1>
-                    <p class="font-body text-body text-on-surface-variant/70 text-sm mt-1">Επίσημοι αγώνες και σκορ της ομάδας μας</p>
-                </div>
-            </div>
-
-            <!-- In-Page Sport Filter Tabs (Request 4: Default 'ΌΛΑ') -->
-            <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto scrollbar-hide py-3 mb-6 border-b border-outline-variant/20">
+        <!-- In-Page Sport Filter Tabs (Sticky right under main horizontal nav) -->
+        <div class="sticky top-[137px] z-20 bg-background border-b border-outline-variant/30 shadow-sm">
+            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-center gap-2 overflow-x-auto scrollbar-hide py-2.5">
                 <button id="fixture-cat-all" onclick="switchCategory('all')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer whitespace-nowrap">ΌΛΑ</button>
                 <button id="fixture-cat-football" onclick="switchCategory('football')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">⚽ Ποδόσφαιρο</button>
                 <button id="fixture-cat-basketball" onclick="switchCategory('basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">🏀 Μπάσκετ</button>
                 <button id="fixture-cat-amateur" onclick="switchCategory('amateur')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">🤾 Ερασιτέχνης</button>
             </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="max-w-[900px] mx-auto px-4 md:px-8 py-8 min-h-[60vh]">
+            
+
+            
 
             <!-- Loading Spinner -->
             <div id="fixtures-loading" class="w-full flex justify-center py-16">
@@ -359,7 +358,7 @@
                     requestAnimationFrame(() => {
                         const el = document.getElementById(currentMatchElId);
                         if (el) {
-                            const headerOffset = 180;
+                            const headerOffset = 210;
                             const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
                             window.scrollTo({
                                 top: elementPosition - headerOffset,
