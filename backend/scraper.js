@@ -969,24 +969,33 @@ async function main() {
 
         // Hack for Sportime first run to not flood with 30 old articles
         if (target.name === 'Sportime') {
+            // Clean & filter links to ensure only actual article pages are processed
+            const cleanLinks = links.filter(l => !l.endsWith('/feed') && !l.endsWith('/panathinaikos') && !l.endsWith('/panathinaikos/') && !l.includes('/category/') && l.length > 35);
+            links = Array.from(new Set(cleanLinks));
+
             const newLinks = links.filter(l => !existingUrls.has(l));
             if (newLinks.length > 2) {
-                console.log(`[SPORTIME] First run detected! Ignoring ${newLinks.length - 1} older articles.`);
+                console.log(`[SPORTIME] First run detected! Processing latest article "${newLinks[0]}" and ignoring ${newLinks.length - 1} older articles.`);
                 for (let i = 1; i < newLinks.length; i++) {
                     if (!isDryRun) {
                         try {
-                            await db.from('articles').insert({
-                                id: `ignored_${crypto.randomUUID()}`,
+                            const { error: insErr } = await db.from('articles').insert({
+                                id: crypto.randomUUID(),
                                 title: '[IGNORED_OLDER]',
                                 summary: '[IGNORED_OLDER]',
                                 content: '[IGNORED_OLDER]',
                                 source_url: newLinks[i],
                                 category: 'SystemRoster',
-                                group_id: 'IGNORED_URLS',
                                 created_at: new Date().toISOString()
                             });
-                            existingUrls.add(newLinks[i]);
-                        } catch(e) {}
+                            if (!insErr) {
+                                existingUrls.add(newLinks[i]);
+                            } else {
+                                console.error(`[SPORTIME DB WARN] ${insErr.message}`);
+                            }
+                        } catch(e) {
+                            console.error(`[SPORTIME DB CATCH] ${e.message}`);
+                        }
                     }
                 }
             }
@@ -996,7 +1005,6 @@ async function main() {
         runStats.totals.scraped += links.length;
 
         for (const articleUrl of links) {
-            // Skip if already in DB
             if (!isDryRun && existingUrls.has(articleUrl)) {
                 totalSkipped++;
                 runStats.sources[target.name].skipped_duplicate++;
@@ -1036,13 +1044,12 @@ async function main() {
                 if (!isDryRun) {
                     try {
                         await db.from('articles').insert({
-                            id: `ignored_${crypto.randomUUID()}`,
+                            id: crypto.randomUUID(),
                             title: '[IGNORED_SIZE]',
                             summary: '[IGNORED_SIZE]',
                             content: '[IGNORED_SIZE]',
                             source_url: articleUrl,
                             category: 'SystemRoster',
-                            group_id: 'IGNORED_URLS',
                             created_at: new Date().toISOString()
                         });
                         existingUrls.add(articleUrl);
@@ -1064,13 +1071,12 @@ async function main() {
                 if (!isDryRun) {
                     try {
                         await db.from('articles').insert({
-                            id: `ignored_${crypto.randomUUID()}`,
+                            id: crypto.randomUUID(),
                             title: '[IGNORED_IRRELEVANT]',
                             summary: '[IGNORED_IRRELEVANT]',
                             content: '[IGNORED_IRRELEVANT]',
                             source_url: articleUrl,
                             category: 'SystemRoster',
-                            group_id: 'IGNORED_URLS',
                             created_at: new Date().toISOString()
                         });
                         existingUrls.add(articleUrl);
@@ -1093,13 +1099,12 @@ async function main() {
                 if (!isDryRun) {
                     try {
                         await db.from('articles').insert({
-                            id: `ignored_${crypto.randomUUID()}`,
+                            id: crypto.randomUUID(),
                             title: '[IGNORED_PROMO]',
                             summary: '[IGNORED_PROMO]',
                             content: '[IGNORED_PROMO]',
                             source_url: articleUrl,
                             category: 'SystemRoster',
-                            group_id: 'IGNORED_URLS',
                             created_at: new Date().toISOString()
                         });
                         existingUrls.add(articleUrl);
@@ -1124,13 +1129,12 @@ async function main() {
                 if (!isDryRun) {
                     try {
                         await db.from('articles').insert({
-                            id: `ignored_${crypto.randomUUID()}`,
+                            id: crypto.randomUUID(),
                             title: '[IGNORED_CROSS_BASKET]',
                             summary: '[IGNORED_CROSS_BASKET]',
                             content: '[IGNORED_CROSS_BASKET]',
                             source_url: articleUrl,
                             category: 'SystemRoster',
-                            group_id: 'IGNORED_URLS',
                             created_at: new Date().toISOString()
                         });
                         existingUrls.add(articleUrl);
@@ -1150,13 +1154,12 @@ async function main() {
                 if (!isDryRun) {
                     try {
                         await db.from('articles').insert({
-                            id: `ignored_${crypto.randomUUID()}`,
+                            id: crypto.randomUUID(),
                             title: '[IGNORED_CROSS_FOOTBALL]',
                             summary: '[IGNORED_CROSS_FOOTBALL]',
                             content: '[IGNORED_CROSS_FOOTBALL]',
                             source_url: articleUrl,
                             category: 'SystemRoster',
-                            group_id: 'IGNORED_URLS',
                             created_at: new Date().toISOString()
                         });
                         existingUrls.add(articleUrl);
@@ -1367,13 +1370,12 @@ async function main() {
                 if (!isDryRun) {
                     try {
                         await db.from('articles').insert({
-                            id: `ignored_${crypto.randomUUID()}`,
+                            id: crypto.randomUUID(),
                             title: '[IGNORED]',
                             summary: '[IGNORED]',
                             content: '[IGNORED]',
                             source_url: articleUrl,
                             category: 'SystemRoster', // Frontend ignores this category
-                            group_id: 'IGNORED_URLS',
                             created_at: new Date().toISOString()
                         });
                         existingUrls.add(articleUrl);
