@@ -445,7 +445,7 @@ async function scrapeArticlePage(url, categoryHint) {
         if (!title || title.length < 10) return null;
 
         // ── Image ──────────────────────────────────────────────────────────────
-        const DEFAULT_STADIUM_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+        const DEFAULT_STADIUM_IMG = '/logo.png';
 
         // ── Build image URL (Node-safe, no DOM dependencies) ───────────────────
         const scrapedImg = (
