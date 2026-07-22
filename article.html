@@ -117,6 +117,7 @@
             <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
                 <span class="material-symbols-outlined">groups</span><span>Ρόστερ</span>
             </a>
+                <a id="tab-fixtures" href="/fixtures" class="hidden px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📅 ΠΡΟΓΡΑΜΜΑ</a>
             <a id="nav-item-fixtures" class="hidden flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
                 <span class="material-symbols-outlined">calendar_month</span><span>Πρόγραμμα</span>
             </a>
@@ -1110,6 +1111,8 @@
             if (sessionStorage.getItem('op_auth') === '1') {
                 const el = document.getElementById('nav-item-fixtures');
                 if (el) el.classList.remove('hidden');
+                const tab = document.getElementById('tab-fixtures');
+                if (tab) tab.classList.remove('hidden');
             }
         }
         if (document.readyState === 'loading') {
