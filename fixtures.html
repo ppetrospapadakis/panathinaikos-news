@@ -240,9 +240,9 @@
         
 
         <!-- Main Content Area -->
-        <div class="max-w-[900px] mx-auto px-4 md:px-8 py-6 min-h-[60vh]">
-            <!-- Top Controls Bar (Filter Dropdown Aligned Top-Left) -->
-            <div class="flex items-center justify-between mb-4 relative z-20">
+        <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6 min-h-[60vh] flex flex-col">
+            <!-- Top Controls Bar (Filter Dropdown Stacked ABOVE Matches Box) -->
+            <div class="flex items-center justify-start mb-4 relative z-20">
                 <div class="relative inline-block text-left" id="filter-dropdown-wrapper">
                     <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
                         <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
@@ -268,7 +268,9 @@
                             <span>🤾</span><span>Ερασιτέχνης</span>
                         </button>
                     </div>
+                </div>
             </div>
+
             <!-- Scrollable Match Box Container (500px mobile / 800px desktop) -->
             <div id="fixtures-box" class="h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
                 <!-- Loading Spinner -->
