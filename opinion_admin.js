@@ -230,8 +230,9 @@ function renderRunsList() {
         const timeStr = date.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
         
         const isSuccess = run.status === 'success';
-        const activeClass = run.id === selectedRunId 
-            ? 'border-primary bg-primary/5' 
+        const isSelected = run.id === selectedRunId;
+        const activeClass = isSelected 
+            ? 'border-2 border-primary bg-primary/15 shadow-md shadow-primary/10 ring-1 ring-primary/40' 
             : 'border-outline-variant/30 hover:border-primary/40 bg-surface-container-low';
             
         const statusDot = isSuccess 
@@ -239,6 +240,7 @@ function renderRunsList() {
             : '<span class="w-2.5 h-2.5 rounded-full bg-error inline-block animate-pulse"></span>';
             
         const card = document.createElement('div');
+        card.dataset.runId = run.id;
         card.className = `p-4 border rounded-xl cursor-pointer transition-all duration-200 active:scale-98 ${activeClass}`;
         card.onclick = () => selectRun(run.id);
         
@@ -276,6 +278,21 @@ function renderRunsList() {
 
 function selectRun(runId) {
     selectedRunId = runId;
+    
+    // Highlight selected run card in DOM list
+    const listContainer = document.getElementById('runs-list-container');
+    if (listContainer) {
+        Array.from(listContainer.children).forEach(child => {
+            if (child.dataset && child.dataset.runId) {
+                const isActive = child.dataset.runId === runId;
+                if (isActive) {
+                    child.className = 'p-4 border-2 border-primary bg-primary/15 shadow-md shadow-primary/10 ring-1 ring-primary/40 rounded-xl cursor-pointer transition-all duration-200 active:scale-98';
+                } else {
+                    child.className = 'p-4 border border-outline-variant/30 hover:border-primary/40 bg-surface-container-low rounded-xl cursor-pointer transition-all duration-200 active:scale-98';
+                }
+            }
+        });
+    }
     
     // Find run, keeping selected highlight updated
     const run = runsCached.find(r => r.id === runId);
@@ -1303,6 +1320,69 @@ async function loadEngagementStats() {
             const chartSubtitle = document.getElementById('chart-subtitle');
             if (chartSubtitle) {
                 chartSubtitle.textContent = `Άρθρα που δημοσιεύθηκαν ανά ώρα — τελευταίες 24h (${startLabel} → ${endLabel})`;
+            }
+        }
+
+        // 5. Render 30-day Post Activity Chart
+        const dailyPosts = data.daily_posts || Array(30).fill(0);
+        const dailyBySource = data.daily_by_source || Array(30).fill(null).map(() => ({}));
+        const dailyLabels = data.daily_labels || Array(30).fill(null).map((_, i) => `H-${30-i}`);
+        const dailyChartContainer = document.getElementById('daily-chart-bars-container');
+        if (dailyChartContainer) {
+            dailyChartContainer.innerHTML = `
+                <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+                <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+            `;
+            
+            const maxValDaily = Math.max(...dailyPosts, 1);
+            
+            const y3 = document.getElementById('daily-y-axis-val-3');
+            const y2 = document.getElementById('daily-y-axis-val-2');
+            const y1 = document.getElementById('daily-y-axis-val-1');
+            if (y3) y3.textContent = Math.round(maxValDaily).toString();
+            if (y2) y2.textContent = Math.round(maxValDaily * 2 / 3).toString();
+            if (y1) y1.textContent = Math.round(maxValDaily * 1 / 3).toString();
+
+            [0, 5, 10, 15, 20, 25, 29].forEach(idx => {
+                const el = document.getElementById(`daily-x-axis-val-${idx}`);
+                if (el) el.textContent = dailyLabels[idx] || '';
+            });
+
+            dailyPosts.forEach((count, idx) => {
+                const label = dailyLabels[idx] || `Hμέρα ${idx+1}`;
+                const pct = ((count / maxValDaily) * 98).toFixed(1);
+                
+                const srcBreakdown = dailyBySource[idx] || {};
+                const srcEntries = Object.entries(srcBreakdown)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([src, n]) => `<span class="flex justify-between gap-3"><span class="text-on-surface-variant/70">${src}</span><strong class="text-on-surface">${n}</strong></span>`)
+                    .join('');
+                const srcHtml = srcEntries
+                    ? `<div class="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-outline-variant/30">${srcEntries}</div>`
+                    : '';
+                
+                const barDiv = document.createElement('div');
+                barDiv.className = 'w-full bg-primary/30 hover:bg-primary/70 transition-all duration-300 rounded-t cursor-pointer relative group';
+                barDiv.style.height = `${Math.max(3, pct)}%`;
+                
+                barDiv.innerHTML = `
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[150px]" style="white-space:normal">
+                        <div class="flex justify-between items-center gap-3 font-bold">
+                            <span class="text-primary">${label}</span>
+                            <span class="text-on-surface">${count} άρθρα</span>
+                        </div>
+                        ${srcHtml}
+                    </div>
+                `;
+                dailyChartContainer.appendChild(barDiv);
+            });
+
+            const firstDate = dailyLabels[0] || '';
+            const lastDate = dailyLabels[dailyLabels.length - 1] || '';
+            const dailyChartSubtitle = document.getElementById('daily-chart-subtitle');
+            if (dailyChartSubtitle) {
+                dailyChartSubtitle.textContent = `Συνολικά άρθρα που δημοσιεύθηκαν ανά ημέρα — τελευταίες 30 ημέρες (${firstDate} → ${lastDate})`;
             }
         }
 

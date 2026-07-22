@@ -39,47 +39,84 @@ module.exports = async (req, res) => {
         // Estimated database size: articles are ~5.2 KB each, runs are ~14.5 KB each (in raw JSONB payload)
         const dbSizeEstimatedMb = Number(((totalArticles * 5.2 + totalRuns * 14.5) / 1024).toFixed(2));
 
-        // 2. Fetch Post Frequency for the REAL last 24h — each slot = one of the past 24 hours
-        // Slot 0 = the hour that started 24h ago, slot 23 = the most recent complete hour
+        // 2. Fetch Post Frequency for 24h and 30d
         const now = Date.now();
-        const last24h = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+        const last24hIso = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+        const last30dIso = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
         const { data: recentArticles } = await supabase
             .from('articles')
             .select('created_at, source_url')
-            .gt('created_at', last24h);
+            .gt('created_at', last30dIso);
 
-        // Build 24 hourly buckets (slot 0 = oldest hour, slot 23 = most recent)
-        // Bucket index = Math.floor((articleTime - windowStart) / 3600000)
         const windowStart = now - 24 * 60 * 60 * 1000; // 24h ago in ms
         const hourlyDistribution = Array(24).fill(0);
-        // Also track breakdown by source per hour
         const hourlyBySource = Array(24).fill(null).map(() => ({}));
+
+        // 30-day daily buckets (Index 0 = 29 days ago, Index 29 = Today)
+        const dailyDistribution = Array(30).fill(0);
+        const dailyBySource = Array(30).fill(null).map(() => ({}));
+        const dailyLabels = [];
+        const dayMap = {};
+
+        const athensDateFormatter = new Intl.DateTimeFormat('el-GR', {
+            day: '2-digit',
+            month: '2-digit',
+            timeZone: 'Europe/Athens'
+        });
+
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(now - i * 24 * 60 * 60 * 1000);
+            const dateStr = athensDateFormatter.format(d);
+            const index = 29 - i;
+            dailyLabels.push(dateStr);
+            dayMap[dateStr] = index;
+        }
 
         if (recentArticles) {
             recentArticles.forEach(art => {
                 if (!art.created_at) return;
-                const artMs = new Date(art.created_at).getTime();
-                const bucket = Math.min(23, Math.floor((artMs - windowStart) / 3600000));
-                if (bucket >= 0 && bucket < 24) {
-                    hourlyDistribution[bucket]++;
+                const artDate = new Date(art.created_at);
+                const artMs = artDate.getTime();
 
-                    // Parse source name from source_url
-                    // source_url is typically a full URL like https://www.sport24.gr/...
-                    // We try to extract a short domain label
-                    let srcLabel = 'Άλλο';
-                    if (art.source_url) {
-                        try {
-                            const domain = new URL(art.source_url).hostname.replace('www.', '');
-                            srcLabel = domain.split('.')[0]; // e.g. "sport24", "gazzetta", etc.
-                        } catch {}
+                let srcLabel = 'Άλλο';
+                if (art.source_url) {
+                    try {
+                        const domain = new URL(art.source_url).hostname.replace('www.', '');
+                        const raw = domain.split('.')[0].toLowerCase();
+                        if (raw.includes('sport-fm') || raw.includes('sportfm')) srcLabel = 'Sport-FM';
+                        else if (raw.includes('sport24')) srcLabel = 'Sport24';
+                        else if (raw.includes('sportime')) srcLabel = 'Sportime';
+                        else if (raw.includes('sportal')) srcLabel = 'Sportal';
+                        else if (raw.includes('sdna')) srcLabel = 'SDNA';
+                        else if (raw.includes('gazzetta')) srcLabel = 'Gazzetta';
+                        else if (raw.includes('athletiko')) srcLabel = 'Athletiko';
+                        else if (raw.includes('monobala')) srcLabel = 'Monobala';
+                        else if (art.source_url.includes('opinion://manual') || art.source_url.includes('manual')) srcLabel = 'Manual';
+                        else srcLabel = raw.charAt(0).toUpperCase() + raw.slice(1);
+                    } catch {}
+                }
+
+                // 1. 24h Hourly bucket
+                if (artMs >= windowStart) {
+                    const bucket = Math.min(23, Math.floor((artMs - windowStart) / 3600000));
+                    if (bucket >= 0 && bucket < 24) {
+                        hourlyDistribution[bucket]++;
+                        hourlyBySource[bucket][srcLabel] = (hourlyBySource[bucket][srcLabel] || 0) + 1;
                     }
-                    hourlyBySource[bucket][srcLabel] = (hourlyBySource[bucket][srcLabel] || 0) + 1;
+                }
+
+                // 2. 30d Daily bucket
+                const dateStr = athensDateFormatter.format(artDate);
+                if (dateStr in dayMap) {
+                    const dayIdx = dayMap[dateStr];
+                    dailyDistribution[dayIdx]++;
+                    dailyBySource[dayIdx][srcLabel] = (dailyBySource[dayIdx][srcLabel] || 0) + 1;
                 }
             });
         }
 
-        // Build X-axis labels — the wall-clock hour label for each slot in Greece Time (Europe/Athens)
+        // Build X-axis labels for hourly chart — wall-clock hour in Greece Time
         const hourlyLabels = Array(24).fill(null).map((_, i) => {
             const slotStart = new Date(windowStart + i * 3600000);
             const formatter = new Intl.DateTimeFormat('el-GR', {
@@ -95,7 +132,7 @@ module.exports = async (req, res) => {
         const { data: runs } = await supabase
             .from('scraping_runs')
             .select('stats, started_at')
-            .gt('started_at', last24h)
+            .gt('started_at', last24hIso)
             .order('started_at', { ascending: false });
 
         // Parse Gemini Keys — support GEMINI_API_KEY (comma-separated) AND GEMINI_API_KEY_2 as fallback
@@ -133,7 +170,6 @@ module.exports = async (req, res) => {
                         const count = run.stats.gemini.calls_by_key[idxStr] || 0;
                         
                         if (idx >= 0) {
-                            // If the scraper used more keys than the dashboard knows about, dynamically add placeholders
                             while (idx >= apiKeys.length) {
                                 apiKeys.push(''); // placeholder
                                 keyCount = apiKeys.length;
@@ -151,11 +187,8 @@ module.exports = async (req, res) => {
             const keyStr = apiKeys[i] || '';
             const masked = keyStr ? (keyStr.slice(0, 8) + '...' + keyStr.slice(-4)) : `Key #${i + 1}`;
             
-            // If the latest scraper run hit a full exhaustion block OR this index is lower than the active index used in the last run, it's exhausted.
             let status = 'active';
-            if (isLastRunExhausted) {
-                status = 'exhausted';
-            } else if (i < lastRunKeyIndex) {
+            if (isLastRunExhausted || i < lastRunKeyIndex) {
                 status = 'exhausted';
             }
 
@@ -187,7 +220,10 @@ module.exports = async (req, res) => {
             },
             hourly_posts: hourlyDistribution,
             hourly_by_source: hourlyBySource,
-            hourly_labels: hourlyLabels
+            hourly_labels: hourlyLabels,
+            daily_posts: dailyDistribution,
+            daily_by_source: dailyBySource,
+            daily_labels: dailyLabels
         });
 
     } catch (err) {
