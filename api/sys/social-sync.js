@@ -122,7 +122,7 @@ module.exports = async (req, res) => {
             displayTitle = displayTitle.substring(0, 197) + '...';
         }
         
-        const tweetText = `${emoji} ${displayTitle}\n\n👉 ${url}\n\n#PAO #Panathinaikos #PaoNews #Gate13`;
+        const tweetText = `${emoji} ${displayTitle}\n\n👉 ${url}\n\n#PAO #Panathinaikos #paofc #paobc #Gate13`;
 
         // Send to Twitter API v2 directly using OAuth 1.0a
         const twitterEndpoint = 'https://api.twitter.com/2/tweets';
