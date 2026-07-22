@@ -1111,8 +1111,11 @@
             const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
             try {
-                const { error } = await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
+                const { data, error } = await db.from('articles').delete().eq('id', articleId).select();
                 if (error) throw error;
+                if (!data || data.length === 0) {
+                    await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
+                }
                 
                 // Remove the article element from the DOM
                 const card = document.querySelector(`[data-article-id="${articleId}"]`);
