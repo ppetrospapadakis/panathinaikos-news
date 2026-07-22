@@ -566,19 +566,6 @@
             } finally {
                 isFetchingMore = false;
             }
-        }).join('');
-                    grid.insertAdjacentHTML('beforeend', html);
-                    section.classList.remove('hidden');
-                    streamPage++;
-                }
-                if (articles.length < 20) {
-                    streamHasMore = false;
-                }
-            } catch (err) {
-                console.error('Error fetching more news:', err);
-            } finally {
-                isFetchingMore = false;
-            }
         }
 
         // Init Page
