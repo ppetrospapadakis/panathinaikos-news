@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
         if (error) throw error;
 
         let rss = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-        rss += `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">\n`;
+        rss += `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">\n`;
         rss += `  <channel>\n`;
         rss += `    <title>PanathinaikosNews</title>\n`;
         rss += `    <link>${domain}</link>\n`;
@@ -88,13 +88,13 @@ module.exports = async (req, res) => {
             rss += `      <category>${escapeXml(art.category || 'Γενικά')}</category>\n`;
             
             if (art.image_url && art.image_url.startsWith('http')) {
-                // Determine mime type roughly
                 let type = 'image/jpeg';
                 if (art.image_url.endsWith('.png')) type = 'image/png';
                 else if (art.image_url.endsWith('.webp')) type = 'image/webp';
                 else if (art.image_url.endsWith('.svg')) type = 'image/svg+xml';
                 
                 rss += `      <enclosure url="${escapeXml(art.image_url)}" length="0" type="${type}" />\n`;
+                rss += `      <media:content url="${escapeXml(art.image_url)}" medium="image" />\n`;
             }
             
             rss += `    </item>\n`;
