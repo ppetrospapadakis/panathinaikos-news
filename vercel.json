@@ -37,6 +37,8 @@
     { "source": "/dashboard", "destination": "/login.html" },
     { "source": "/admin", "destination": "/login.html" },
     { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/fixtures", "destination": "/fixtures.html" },
+    { "source": "/schedule", "destination": "/fixtures.html" },
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
     { "source": "/terms-of-service", "destination": "/terms-of-service.html" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },

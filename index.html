@@ -144,6 +144,10 @@
                 <span class="material-symbols-outlined">groups</span>
                 <span>Ρόστερ</span>
             </a>
+            <a id="nav-item-fixtures" class="hidden flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span>Πρόγραμμα</span>
+            </a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
@@ -435,8 +439,14 @@
 
         // Helper to check if user is admin
         function isAdmin() {
-            return sessionStorage.getItem('op_auth') === '1';
+            const authed = sessionStorage.getItem('op_auth') === '1';
+            if (authed) {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+            }
+            return authed;
         }
+        document.addEventListener('DOMContentLoaded', () => { isAdmin(); });
 
         // Render Pin Button for stream card
         function pinButtonHtml(articleId, pinnedAt) {
@@ -1148,6 +1158,19 @@
     </script>
 
 
+<script>
+        function checkAdminNav() {
+            if (sessionStorage.getItem('op_auth') === '1') {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAdminNav);
+        } else {
+            checkAdminNav();
+        }
+</script>
 </body>
 </html>
 <!-- Force Vercel rebuild - July 8, 2026 -->

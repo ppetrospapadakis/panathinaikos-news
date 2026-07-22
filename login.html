@@ -10,7 +10,7 @@
     <meta name="robots" content="noindex, nofollow"/>
     <link rel="canonical" href="https://panathinaikos-news.vercel.app/apopsi"/>
     
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" media="print" onload="this.media='all'"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Quill stylesheet and library -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet"/>
@@ -1370,6 +1370,19 @@ async function pinArticle(id, isCurrentlyPinned) {
     }
     loadOpinionArticles();
 }
+</script>
+<script>
+        function checkAdminNav() {
+            if (sessionStorage.getItem('op_auth') === '1') {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAdminNav);
+        } else {
+            checkAdminNav();
+        }
 </script>
 </body>
 </html>

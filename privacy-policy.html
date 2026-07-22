@@ -22,7 +22,7 @@
     <meta property="og:type" content="website" />
     <link rel="canonical" href="https://www.panathinaikosnews.gr/"/>
     
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" media="print" onload="this.media='all'"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
     
     
     <script>
@@ -110,6 +110,9 @@
                 <span class="material-symbols-outlined">groups</span>
                 <span>Ρόστερ</span>
             </a>
+            <a id="nav-item-fixtures" class="hidden flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
+                <span class="material-symbols-outlined">calendar_month</span><span>Πρόγραμμα</span>
+            </a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
@@ -158,6 +161,19 @@
             o.classList.toggle('pointer-events-none');
         }
     }
+</script>
+<script>
+        function checkAdminNav() {
+            if (sessionStorage.getItem('op_auth') === '1') {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAdminNav);
+        } else {
+            checkAdminNav();
+        }
 </script>
 </body>
 </html>
