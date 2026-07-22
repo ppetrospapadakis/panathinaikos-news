@@ -958,7 +958,7 @@ async function main() {
     for (const target of SCRAPE_TARGETS) {
         console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
 
-        const links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
+        let links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
         if (links === null) {
             runStats.sources[target.name].skipped_crawling_failed++;
             runStats.totals.skipped_crawling_failed++;

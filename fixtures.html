@@ -56,7 +56,7 @@
     <!-- Feature Gate Protection Check (Instant - Before Render) -->
     <script>
         (function() {
-            const FEATURE_FIXTURES_PUBLIC = false; // Set to true to unlock page for all visitors
+            const FEATURE_FIXTURES_PUBLIC = true; // Unlocked page for all public visitors
             function isFixturesAccessible() {
                 if (FEATURE_FIXTURES_PUBLIC) return true;
                 return sessionStorage.getItem('op_auth') === '1';
@@ -67,6 +67,26 @@
                 window.location.replace('/');
             }
         })();
+    </script>
+
+    <!-- Schema.org JSON-LD Structured Data for Google SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News",
+      "description": "Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη.",
+      "url": "https://www.panathinaikosnews.gr/fixtures",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Panathinaikos News",
+        "url": "https://www.panathinaikosnews.gr",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.panathinaikosnews.gr/favicon.png"
+        }
+      }
+    }
     </script>
 
     <!-- Google Analytics (Lazy Loaded) -->
@@ -251,7 +271,7 @@
                     </button>
 
                     <!-- Dropdown Menu Panel -->
-                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-52 rounded-2xl bg-surface-container-high/95 backdrop-blur-xl border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left">
+                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-52 rounded-2xl bg-surface-container-high border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left" style="background-color: #24272c !important;">
                         <div class="px-3 py-2 font-label text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest border-b border-outline-variant/20 mb-1">
                             Επιλογή Αθλήματος
                         </div>

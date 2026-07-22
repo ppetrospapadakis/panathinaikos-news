@@ -92,7 +92,7 @@
             <a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all" href="/roster.html">
                 <span class="material-symbols-outlined">groups</span><span>Ρόστερ</span>
             </a>
-            <a id="nav-item-fixtures" class="hidden flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
+            <a id="nav-item-fixtures" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
                 <span class="material-symbols-outlined">calendar_month</span><span>Πρόγραμμα</span>
             </a>
         </nav>
@@ -117,7 +117,7 @@
                 <a id="tab-amateur" href="/erasitechnis" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🤾 Ερασιτέχνης</a>
                 <a id="tab-opinion" href="/apopsi" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
                 <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center">📊 ΡΟΣΤΕΡ</a>
-                <a id="tab-item-fixtures" href="/fixtures" class="hidden px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📅 ΠΡΟΓΡΑΜΜΑ</a>
+                <a id="tab-item-fixtures" href="/fixtures" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📅 ΠΡΟΓΡΑΜΜΑ</a>
             </div>
         </div>
 
@@ -947,12 +947,10 @@
     </script>
 <script>
         function checkAdminNav() {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                const el = document.getElementById('nav-item-fixtures');
-                if (el) el.classList.remove('hidden');
-                const tab = document.getElementById('tab-item-fixtures');
-                if (tab) tab.classList.remove('hidden');
-            }
+            const el = document.getElementById('nav-item-fixtures');
+            if (el) el.classList.remove('hidden');
+            const tab = document.getElementById('tab-item-fixtures');
+            if (tab) tab.classList.remove('hidden');
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', checkAdminNav);
