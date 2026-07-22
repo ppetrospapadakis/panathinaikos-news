@@ -150,14 +150,6 @@
                 labelEl.textContent = category === 'all' ? 'Φίλτρα Αγώνων' : `Φίλτρο: ${label}`;
             }
 
-            ['all', 'football', 'basketball', 'amateur'].forEach(cat => {
-                const check = document.getElementById(`check-${cat}`);
-                if (check) {
-                    if (cat === category) check.classList.remove('hidden');
-                    else check.classList.add('hidden');
-                }
-            });
-
             window.closeFilterDropdown();
             if (typeof window.fetchFixtures === 'function') {
                 window.fetchFixtures(category);
@@ -259,28 +251,23 @@
                     </button>
 
                     <!-- Dropdown Menu Panel -->
-                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-56 rounded-2xl bg-surface-container-high/95 backdrop-blur-xl border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left">
+                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-52 rounded-2xl bg-surface-container-high/95 backdrop-blur-xl border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left">
                         <div class="px-3 py-2 font-label text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest border-b border-outline-variant/20 mb-1">
                             Επιλογή Αθλήματος
                         </div>
-                        <button onclick="selectFilter('all', 'Όλα τα Αθλήματα')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span class="flex items-center gap-2"><span>🏆</span><span>Όλα τα Αθλήματα</span></span>
-                            <span class="material-symbols-outlined text-primary text-[18px] check-icon" id="check-all">check</span>
+                        <button onclick="selectFilter('all', 'Όλα τα Αθλήματα')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>🏆</span><span>Όλα τα Αθλήματα</span>
                         </button>
-                        <button onclick="selectFilter('football', '⚽ Ποδόσφαιρο')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span class="flex items-center gap-2"><span>⚽</span><span>Ποδόσφαιρο</span></span>
-                            <span class="material-symbols-outlined text-primary text-[18px] check-icon hidden" id="check-football">check</span>
+                        <button onclick="selectFilter('football', '⚽ Ποδόσφαιρο')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>⚽</span><span>Ποδόσφαιρο</span>
                         </button>
-                        <button onclick="selectFilter('basketball', '🏀 Μπάσκετ')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span class="flex items-center gap-2"><span>🏀</span><span>Μπάσκετ</span></span>
-                            <span class="material-symbols-outlined text-primary text-[18px] check-icon hidden" id="check-basketball">check</span>
+                        <button onclick="selectFilter('basketball', '🏀 Μπάσκετ')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>🏀</span><span>Μπάσκετ</span>
                         </button>
-                        <button onclick="selectFilter('amateur', '🤾 Ερασιτέχνης')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span class="flex items-center gap-2"><span>🤾</span><span>Ερασιτέχνης</span></span>
-                            <span class="material-symbols-outlined text-primary text-[18px] check-icon hidden" id="check-amateur">check</span>
+                        <button onclick="selectFilter('amateur', '🤾 Ερασιτέχνης')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>🤾</span><span>Ερασιτέχνης</span>
                         </button>
                     </div>
-                </div>
             </div>
             <!-- Scrollable Match Box Container (500px mobile / 800px desktop) -->
             <div id="fixtures-box" class="h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
