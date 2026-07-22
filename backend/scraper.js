@@ -1229,17 +1229,22 @@ async function main() {
                                                 (dbArt.source_url || '').toLowerCase().includes('pao1908.com');
                         const isScrapedOfficial = !!target.isOfficial;
 
-                        // We will update source_url
-                        let newSourceUrl = dbArt.source_url || duplicateArticle.source_url || '';
-                        if (!newSourceUrl.includes(articleUrl)) {
+                        // We will update source_url ensuring each source appears at most once
+                        let existingUrls = (dbArt.source_url || duplicateArticle.source_url || '').split(',').map(u => u.trim()).filter(Boolean);
+                        
+                        if (!existingUrls.includes(articleUrl)) {
+                            // Remove any old link from the SAME source to keep only the latest
+                            existingUrls = existingUrls.filter(u => getSourceNameFromUrl(u) !== sourceName);
+                            
                             if (isScrapedOfficial) {
                                 // Put official source first
-                                newSourceUrl = articleUrl + ',' + newSourceUrl;
+                                existingUrls.unshift(articleUrl);
                             } else {
                                 // Put new source last
-                                newSourceUrl = newSourceUrl + ',' + articleUrl;
+                                existingUrls.push(articleUrl);
                             }
                         }
+                        let newSourceUrl = existingUrls.join(',');
 
                         let newContent = dbArt.content;
                         let newTitle = dbArt.title;
@@ -1395,7 +1400,7 @@ async function main() {
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
                 title:      finalTitle,
-                summary:    scraped.summary || (finalContent ? finalContent.substring(0, 300) : ''),
+                summary:    finalContent ? finalContent.substring(0, 300) : (scraped.summary || ''),
                 content:    finalContent,
                 source_url: articleUrl,
                 image_url:  scraped.imageUrl,
