@@ -305,13 +305,17 @@
 
         function slugify(text) {
             if (!text) return "arthro";
-            return text.toString().toLowerCase()
-                .trim()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
-                .replace(/--+/g, '-')
-                .replace(/^-+/, '')
-                .replace(/-+$/, '');
+            try {
+                return (text || "").toString().toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+                    .replace(/--+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '') || "arthro";
+            } catch(e) {
+                return "arthro";
+            }
         }
 
         function getCategoryCleanName(category) {
@@ -536,7 +540,7 @@
         // ── Phase 1: Render Hero ───────────────────────────────────────────────
         function renderHero(a) {
             const heroEl = document.getElementById('hero-container');
-            if (!heroEl || !a) return;
+            if (!heroEl || !a || !a.title) return;
 
             const slug    = slugify(a.title);
             const catPath = getCategoryCleanName(a.category);
