@@ -181,22 +181,43 @@
             </div>
         </div>
 
-        <!-- In-Page Sport Filter Bar (Sticky right under main horizontal nav) -->
-        <div class="sticky top-[137px] z-20 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 shadow-md">
-            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-center gap-2 overflow-x-auto scrollbar-hide py-2.5">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-label text-[11px] font-bold uppercase tracking-wider border border-primary/20 shrink-0 mr-1">
-                    <span class="material-symbols-outlined text-[15px]">tune</span>
-                    <span>ΦΙΛΤΡΑ</span>
-                </div>
-                <button id="fixture-cat-all" onclick="switchCategory('all')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer whitespace-nowrap">ΌΛΑ</button>
-                <button id="fixture-cat-football" onclick="switchCategory('football')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">⚽ Ποδόσφαιρο</button>
-                <button id="fixture-cat-basketball" onclick="switchCategory('basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">🏀 Μπάσκετ</button>
-                <button id="fixture-cat-amateur" onclick="switchCategory('amateur')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">🤾 Ερασιτέχνης</button>
-            </div>
-        </div>
+        
 
         <!-- Main Content Area -->
         <div class="max-w-[900px] mx-auto px-4 md:px-8 py-6 min-h-[60vh]">
+            <!-- Top Controls Bar (Filter Dropdown Aligned Top-Left) -->
+            <div class="flex items-center justify-between mb-4 relative z-20">
+                <div class="relative inline-block text-left" id="filter-dropdown-wrapper">
+                    <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
+                        <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
+                        <span id="filter-selected-label">Φίλτρα Αγώνων</span>
+                        <span class="material-symbols-outlined text-on-surface-variant text-[18px] transition-transform duration-200" id="filter-chevron">expand_more</span>
+                    </button>
+
+                    <!-- Dropdown Menu Panel -->
+                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-56 rounded-2xl bg-surface-container-high/95 backdrop-blur-xl border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left">
+                        <div class="px-3 py-2 font-label text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest border-b border-outline-variant/20 mb-1">
+                            Επιλογή Αθλήματος
+                        </div>
+                        <button onclick="selectFilter('all', 'Όλα τα Αθλήματα')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span class="flex items-center gap-2"><span>🏆</span><span>Όλα τα Αθλήματα</span></span>
+                            <span class="material-symbols-outlined text-primary text-[18px] check-icon" id="check-all">check</span>
+                        </button>
+                        <button onclick="selectFilter('football', '⚽ Ποδόσφαιρο')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span class="flex items-center gap-2"><span>⚽</span><span>Ποδόσφαιρο</span></span>
+                            <span class="material-symbols-outlined text-primary text-[18px] check-icon hidden" id="check-football">check</span>
+                        </button>
+                        <button onclick="selectFilter('basketball', '🏀 Μπάσκετ')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span class="flex items-center gap-2"><span>🏀</span><span>Μπάσκετ</span></span>
+                            <span class="material-symbols-outlined text-primary text-[18px] check-icon hidden" id="check-basketball">check</span>
+                        </button>
+                        <button onclick="selectFilter('amateur', '🤾 Ερασιτέχνης')" class="filter-option flex items-center justify-between w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span class="flex items-center gap-2"><span>🤾</span><span>Ερασιτέχνης</span></span>
+                            <span class="material-symbols-outlined text-primary text-[18px] check-icon hidden" id="check-amateur">check</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
             <!-- Scrollable Match Box Container (500px mobile / 800px desktop) -->
             <div id="fixtures-box" class="h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
                 <!-- Loading Spinner -->
@@ -239,19 +260,18 @@
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-outline-variant/30 bg-background py-8">
-        <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <img src="/logo.png" alt="PanathinaikosNews" class="h-8 w-auto object-contain" width="120" height="34"/>
-                <span class="text-on-surface-variant/40 text-sm">|</span>
-                <p class="font-caption text-caption text-on-surface-variant/60">© 2026 Panathinaikos Editorial. All rights reserved.</p>
+        <!-- Footer -->
+    <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant">
+        <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col items-center gap-8">
+            <a href="/" class="flex items-center">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+            </a>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/privacy-policy">Πολιτική Απορρήτου</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/terms-of-service">Όροι Χρήσης</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/contact">Επικοινωνία</a>
             </div>
-            <div class="flex items-center gap-6 text-sm text-on-surface-variant/70">
-                <a href="/privacy-policy" class="hover:text-primary transition-colors">Πολιτική Απορρήτου</a>
-                <a href="/terms-of-service" class="hover:text-primary transition-colors">Όροι Χρήσης</a>
-                <a href="/contact" class="hover:text-primary transition-colors">Επικοινωνία</a>
-            </div>
+            <p class="font-caption text-caption text-on-surface-variant/70">© 2026 PanathinaikosNews. All rights reserved.</p>
         </div>
     </footer>
 
