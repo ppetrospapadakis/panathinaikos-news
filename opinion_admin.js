@@ -230,7 +230,7 @@ function renderRunsList() {
         const timeStr = date.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
         
         const isSuccess = run.status === 'success';
-        const isSelected = run.id === selectedRunId;
+        const isSelected = String(run.id) === String(selectedRunId);
         const activeClass = isSelected 
             ? 'border-2 border-primary bg-primary/15 shadow-md shadow-primary/10 ring-1 ring-primary/40' 
             : 'border-outline-variant/30 hover:border-primary/40 bg-surface-container-low';
@@ -240,7 +240,7 @@ function renderRunsList() {
             : '<span class="w-2.5 h-2.5 rounded-full bg-error inline-block animate-pulse"></span>';
             
         const card = document.createElement('div');
-        card.dataset.runId = run.id;
+        card.dataset.runId = String(run.id);
         card.className = `p-4 border rounded-xl cursor-pointer transition-all duration-200 active:scale-98 ${activeClass}`;
         card.onclick = () => selectRun(run.id);
         
@@ -284,7 +284,7 @@ function selectRun(runId) {
     if (listContainer) {
         Array.from(listContainer.children).forEach(child => {
             if (child.dataset && child.dataset.runId) {
-                const isActive = child.dataset.runId === runId;
+                const isActive = String(child.dataset.runId) === String(runId);
                 if (isActive) {
                     child.className = 'p-4 border-2 border-primary bg-primary/15 shadow-md shadow-primary/10 ring-1 ring-primary/40 rounded-xl cursor-pointer transition-all duration-200 active:scale-98';
                 } else {
@@ -295,7 +295,7 @@ function selectRun(runId) {
     }
     
     // Find run, keeping selected highlight updated
-    const run = runsCached.find(r => r.id === runId);
+    const run = runsCached.find(r => String(r.id) === String(runId));
     const inspector = document.getElementById('run-inspector-card');
     if (!run || !inspector) return;
     
