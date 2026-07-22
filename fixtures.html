@@ -7,16 +7,51 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <link rel="icon" type="image/png" href="/favicon.png"/>
-    <title>Panathinaikos - ΠΡΟΓΡΑΜΜΑ & ΑΠΟΤΕΛΕΣΜΑΤΑ</title>
+    <title>Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News</title>
+    <meta name="description" content="Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη."/>
+    
+    <!-- Open Graph / SEO -->
+    <meta property="og:title" content="Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News"/>
+    <meta property="og:description" content="Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη."/>
+    <meta property="og:image" content="https://www.panathinaikosnews.gr/favicon.png"/>
+    <meta property="og:url" content="https://www.panathinaikosnews.gr/fixtures"/>
+    <meta property="og:type" content="website"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News"/>
+    <meta name="twitter:description" content="Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη."/>
+    <meta name="twitter:image" content="https://www.panathinaikosnews.gr/favicon.png"/>
+
+    <link rel="canonical" href="https://www.panathinaikosnews.gr/fixtures"/>
 
     <!-- Tailwind & Custom Styles -->
-    <link rel="stylesheet" href="/style.css"/>
+    <link rel="preload" href="/style.css?v=4" as="style">
+    <link rel="stylesheet" href="/style.css?v=4"/>
 
     <!-- Google Fonts & Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"/>
 
     <!-- Supabase Client JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Global Drawer Toggle Function -->
+    <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('nav-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (!drawer || !overlay) return;
+            const isOpen = !drawer.classList.contains('-translate-x-full');
+            if (isOpen) {
+                drawer.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                drawer.classList.remove('-translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        }
+        window.toggleDrawer = toggleDrawer;
+    </script>
 
     <!-- Feature Gate Protection Check (Instant - Before Render) -->
     <script>
@@ -101,7 +136,6 @@
             <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
                 <span class="material-symbols-outlined">groups</span><span>Ρόστερ</span>
             </a>
-                <a id="tab-fixtures" href="/fixtures" class="hidden px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📅 ΠΡΟΓΡΑΜΜΑ</a>
             <a id="nav-item-fixtures" class="flex items-center gap-4 px-4 py-3 bg-primary-container text-on-primary-container rounded-xl font-body text-body transition-all" href="/fixtures">
                 <span class="material-symbols-outlined">calendar_month</span><span>Πρόγραμμα</span>
             </a>
@@ -116,22 +150,34 @@
     <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
 
     <main class="mt-[80px]">
-        <!-- Category Tab Bar -->
+        <!-- Main Site Sticky Horizontal Navigation Bar -->
         <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
-            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-center gap-3 py-3">
-                <button id="tab-football" onclick="switchCategory('football')" class="px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer">⚽ Ποδόσφαιρο</button>
-                <button id="tab-basketball" onclick="switchCategory('basketball')" class="px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">🏀 Μπάσκετ</button>
-                <button id="tab-amateur" onclick="switchCategory('amateur')" class="px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">🤾 Ερασιτέχνης</button>
+            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+                <a id="tab-all" href="/" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
+                <a id="tab-football" href="/podosfairo" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball" href="/basket" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="/erasitexnis" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">☘️ Ερασιτέχνης</a>
+                <a id="tab-opinion" href="/apopsi" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
+                <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📊 ΡΟΣΤΕΡ</a>
+                <a id="tab-item-fixtures" href="/fixtures" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center font-bold">📅 ΠΡΟΓΡΑΜΜΑ</a>
             </div>
         </div>
 
         <!-- Main Content Area -->
         <div class="max-w-[900px] mx-auto px-4 md:px-8 py-8 min-h-[60vh]">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
                 <div>
                     <h1 class="font-h2 text-h2 text-on-surface tracking-tight">Πρόγραμμα & Αποτελέσματα</h1>
                     <p class="font-body text-body text-on-surface-variant/70 text-sm mt-1">Επίσημοι αγώνες και σκορ της ομάδας μας</p>
                 </div>
+            </div>
+
+            <!-- In-Page Sport Filter Tabs (Request 4: Default 'ΌΛΑ') -->
+            <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto scrollbar-hide py-3 mb-6 border-b border-outline-variant/20">
+                <button id="fixture-cat-all" onclick="switchCategory('all')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer whitespace-nowrap">ΌΛΑ</button>
+                <button id="fixture-cat-football" onclick="switchCategory('football')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">⚽ Ποδόσφαιρο</button>
+                <button id="fixture-cat-basketball" onclick="switchCategory('basketball')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">🏀 Μπάσκετ</button>
+                <button id="fixture-cat-amateur" onclick="switchCategory('amateur')" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap">🤾 Ερασιτέχνης</button>
             </div>
 
             <!-- Loading Spinner -->
@@ -186,23 +232,8 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Drawer Toggle Function
-        function toggleDrawer() {
-            const drawer = document.getElementById('nav-drawer');
-            const overlay = document.getElementById('drawer-overlay');
-            const isOpen = !drawer.classList.contains('-translate-x-full');
-            if (isOpen) {
-                drawer.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0', 'pointer-events-none');
-            } else {
-                drawer.classList.remove('-translate-x-full');
-                overlay.classList.remove('opacity-0', 'pointer-events-none');
-            }
-        }
-        window.toggleDrawer = toggleDrawer;
-
-        // Current Active Category
-        let currentCategory = 'football';
+        // Current Active Category (Default: 'all')
+        let currentCategory = 'all';
 
         // Helper: Check Shamrock
         function isPAO(teamName) {
@@ -245,7 +276,6 @@
             if (c.includes('volley')) {
                 return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-cyan-900/40 text-cyan-400 text-[10px] font-bold uppercase tracking-wider border border-cyan-500/30">Volley League</span>`;
             }
-            // Custom text badge fallback without breaking layout
             return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[10px] font-medium uppercase tracking-wider border border-outline-variant/30">${comp}</span>`;
         }
 
@@ -271,10 +301,12 @@
             list.innerHTML = '';
 
             try {
-                const { data: matches, error } = await supabaseClient.from('fixtures')
-                    .select('*')
-                    .eq('category', category)
-                    .order('match_date', { ascending: true });
+                let query = supabaseClient.from('fixtures').select('*');
+                if (category && category !== 'all') {
+                    query = query.eq('category', category);
+                }
+
+                const { data: matches, error } = await query.order('match_date', { ascending: true });
 
                 if (error) throw error;
 
@@ -327,7 +359,7 @@
                     requestAnimationFrame(() => {
                         const el = document.getElementById(currentMatchElId);
                         if (el) {
-                            const headerOffset = 160;
+                            const headerOffset = 180;
                             const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
                             window.scrollTo({
                                 top: elementPosition - headerOffset,
@@ -345,17 +377,17 @@
             }
         }
 
-        // Switch Category Tabs
+        // Switch Category Sub-Tabs
         function switchCategory(category) {
             currentCategory = category;
-            const tabs = ['football', 'basketball', 'amateur'];
+            const tabs = ['all', 'football', 'basketball', 'amateur'];
             tabs.forEach(t => {
-                const tabEl = document.getElementById(`tab-${t}`);
+                const tabEl = document.getElementById(`fixture-cat-${t}`);
                 if (tabEl) {
                     if (t === category) {
-                        tabEl.className = 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer';
+                        tabEl.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer whitespace-nowrap';
                     } else {
-                        tabEl.className = 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer';
+                        tabEl.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap';
                     }
                 }
             });
@@ -410,7 +442,7 @@
 
         // Init Page
         document.addEventListener('DOMContentLoaded', () => {
-            fetchFixtures('football');
+            fetchFixtures('all');
 
             // More news scroll observer
             const moreNewsSection = document.getElementById('more-news-section');
@@ -428,20 +460,5 @@
             observer.observe(sentinel);
         });
     </script>
-<script>
-        function checkAdminNav() {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                const el = document.getElementById('nav-item-fixtures');
-                if (el) el.classList.remove('hidden');
-                const tab = document.getElementById('tab-fixtures');
-                if (tab) tab.classList.remove('hidden');
-            }
-        }
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', checkAdminNav);
-        } else {
-            checkAdminNav();
-        }
-</script>
 </body>
 </html>

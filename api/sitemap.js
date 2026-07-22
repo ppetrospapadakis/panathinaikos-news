@@ -53,7 +53,10 @@ module.exports = async (req, res) => {
             '/erasitexnis',
             '/apopsi',
             '/metagrafes',
-            '/agones'
+            '/agones',
+            '/fixtures',
+            '/schedule',
+            '/roster.html'
         ];
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;

@@ -1376,7 +1376,7 @@ async function pinArticle(id, isCurrentlyPinned) {
             if (sessionStorage.getItem('op_auth') === '1') {
                 const el = document.getElementById('nav-item-fixtures');
                 if (el) el.classList.remove('hidden');
-                const tab = document.getElementById('tab-fixtures');
+                const tab = document.getElementById('tab-item-fixtures');
                 if (tab) tab.classList.remove('hidden');
             }
         }
