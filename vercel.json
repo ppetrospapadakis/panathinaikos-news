@@ -12,7 +12,7 @@
       ]
     },
     {
-      "source": "/(style.css|logo.png|favicon.png|opinion_admin.js)",
+      "source": "/(style.css|logo.png|favicon.png|favicon.ico|opinion_admin.js)",
       "headers": [
         {
           "key": "Cache-Control",
