@@ -1013,7 +1013,7 @@ async function main() {
             }
 
             // Skip specific promotional/irrelevant articles by keyword in URL
-            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone'];
+            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone', 'recommendations', '/recommendation/'];
             const lowerUrl = articleUrl.toLowerCase();
             if (skipKeywords.some(kw => lowerUrl.includes(kw))) {
                 console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);
