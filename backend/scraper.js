@@ -1020,6 +1020,24 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Excluded by URL)', 'promo', 'Φίλτρο διεύθυνσης URL (Promo/Live show)');
+                
+                // Save ignored URL to prevent re-crawling
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: crypto.randomUUID(),
+                            title: '[IGNORED_PROMO]',
+                            summary: '[IGNORED_PROMO]',
+                            content: '[IGNORED_PROMO]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored promo URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 
@@ -1033,6 +1051,24 @@ async function main() {
                 runStats.sources[target.name].skipped_crawling_failed++;
                 runStats.totals.skipped_crawling_failed++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
+                
+                // Save failed URL as IGNORED_FAILED to prevent infinite re-crawling on 403 / fetch errors
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: crypto.randomUUID(),
+                            title: '[IGNORED_FAILED]',
+                            summary: '[IGNORED_FAILED]',
+                            content: '[IGNORED_FAILED]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored failed URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
             if (scraped.status === 'skipped_size') {
