@@ -603,8 +603,8 @@
                 </div>
             </div>
 
-            <!-- Bar Chart card -->
-            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+            <!-- Bar Chart card: 24h Hourly -->
+            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 mb-8">
                 <div class="mb-6 flex justify-between items-center">
                     <div>
                         <h4 class="text-base font-bold text-on-surface">Συχνότητα Άρθρων ανά Ώρα (24h Post Activity)</h4>
@@ -644,6 +644,52 @@
                             <span id="x-axis-val-16">16:00</span>
                             <span id="x-axis-val-20">20:00</span>
                             <span id="x-axis-val-23">23:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart card: 30-Day Daily Breakdown -->
+            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6">
+                <div class="mb-6 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-base font-bold text-on-surface">Δραστηριότητα Άρθρων ανά Ημέρα (30-Day Daily Activity)</h4>
+                        <p id="daily-chart-subtitle" class="text-xs text-on-surface-variant">Συνολικά άρθρα που δημοσιεύθηκαν ανά ημέρα — τελευταίες 30 ημέρες.</p>
+                    </div>
+                    <span class="text-xs text-on-surface-variant/60 font-mono">30-Day Trends</span>
+                </div>
+
+                <!-- Custom premium 30-Day Bar Chart -->
+                <div class="flex h-[320px] bg-surface-container-low border border-outline-variant/20 rounded-2xl p-6 relative">
+                    <!-- Y-axis -->
+                    <div class="flex flex-col justify-between text-[10px] text-on-surface-variant/60 pr-4 h-[220px] font-mono text-right w-8 select-none">
+                        <span id="daily-y-axis-val-3">Max</span>
+                        <span id="daily-y-axis-val-2">Mid</span>
+                        <span id="daily-y-axis-val-1">Low</span>
+                        <span>0</span>
+                    </div>
+                    
+                    <!-- Chart area -->
+                    <div class="flex-1 flex flex-col h-full">
+                        <!-- Grid & bars container -->
+                        <div id="daily-chart-bars-container" class="flex-1 flex items-end justify-between gap-1 h-[220px] border-b border-outline-variant/30 pb-2 relative px-1">
+                            <!-- Grid lines -->
+                            <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+                            <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                            <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                            
+                            <!-- Dynamic bars populated via Javascript -->
+                        </div>
+                        
+                        <!-- X-axis -->
+                        <div class="flex justify-between text-[9px] text-on-surface-variant/60 pt-2 px-1 font-mono font-semibold" id="daily-chart-x-axis-labels">
+                            <span id="daily-x-axis-val-0">-30d</span>
+                            <span id="daily-x-axis-val-5">-25d</span>
+                            <span id="daily-x-axis-val-10">-20d</span>
+                            <span id="daily-x-axis-val-15">-15d</span>
+                            <span id="daily-x-axis-val-20">-10d</span>
+                            <span id="daily-x-axis-val-25">-5d</span>
+                            <span id="daily-x-axis-val-29">Σήμερα</span>
                         </div>
                     </div>
                 </div>
