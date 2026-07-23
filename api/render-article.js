@@ -64,9 +64,8 @@ function formatBodyContent(text) {
 }
 
 module.exports = async (req, res) => {
-    // Enable Vercel Edge caching
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=30');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
     const { id } = req.query;
 

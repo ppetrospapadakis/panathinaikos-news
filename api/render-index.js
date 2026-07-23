@@ -52,9 +52,8 @@ function escapeHtml(unsafe) {
 }
 
 module.exports = async (req, res) => {
-    // SSR Caching: 60s max age, 30s stale while revalidate
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=30');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
     let categoryFilter = null;
     if (req.query.category) {
