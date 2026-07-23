@@ -1,5 +1,9 @@
 name: 🤖 Autonomous News Ingestion
 
+concurrency:
+  group: news-ingestion
+  cancel-in-progress: true
+
 on:
   repository_dispatch:
     types: [trigger-scrape]
