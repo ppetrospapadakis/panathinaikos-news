@@ -15,9 +15,13 @@ function getNGrams(str, n = 3) {
 }
 
 function areSimilar(titleA, titleB) {
-    // 1. Character N-Gram Cosine Similarity (captures word variations and stems)
-    const nGramsA = getNGrams(titleA, 3);
-    const nGramsB = getNGrams(titleB, 3);
+    if (!titleA || !titleB) return false;
+    const cleanA = titleA.toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '');
+    const cleanB = titleB.toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '');
+
+    // 1. Character N-Gram Cosine Similarity
+    const nGramsA = getNGrams(cleanA, 3);
+    const nGramsB = getNGrams(cleanB, 3);
     
     if (nGramsA.length === 0 || nGramsB.length === 0) return false;
     
@@ -42,15 +46,20 @@ function areSimilar(titleA, titleB) {
     
     const cosineSimilarity = dotProduct / (Math.sqrt(magA) * Math.sqrt(magB));
     
-    // 2. Keyword Entity Overlap check
-    // Simple helper to match key sports entities (e.g. names, verbs, places)
-    const wordsA = new Set((titleA || '').toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '').split(/\s+/).filter(w => w.length > 3));
-    const wordsB = (titleB || '').toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, '').split(/\s+/).filter(w => w.length > 3);
-    const overlappingWords = wordsB.filter(w => wordsA.has(w)).length;
+    // 2. Keyword Entity Overlap check (ignoring common Greek stopwords)
+    const stopwords = new Set(['στην', 'στον', 'στους', 'στις', 'στη', 'στο', 'τους', 'τους', 'προς', 'μετά', 'από', 'για', 'και', 'που', 'πως', 'ότι']);
+    const wordsA = new Set(cleanA.split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w)));
+    const wordsB = new Set(cleanB.split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w)));
     
-    // If cosine similarity of trigrams is high (e.g. > 0.40) and there is at least some word overlap (e.g. >= 2 words),
-    // or if the trigram cosine similarity is extremely high (e.g. > 0.60), they are duplicates.
-    return cosineSimilarity > 0.60 || (cosineSimilarity > 0.38 && overlappingWords >= 2);
+    let overlapping = 0;
+    for (const w of wordsA) {
+        if (wordsB.has(w)) overlapping++;
+    }
+    
+    const minWords = Math.min(wordsA.size, wordsB.size);
+    const wordOverlapRatio = minWords > 0 ? (overlapping / minWords) : 0;
+    
+    return cosineSimilarity > 0.55 || (cosineSimilarity > 0.32 && overlapping >= 2) || (wordOverlapRatio >= 0.6 && overlapping >= 2);
 }
 
 module.exports = async (req, res) => {
