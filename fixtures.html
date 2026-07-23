@@ -486,15 +486,20 @@
                 list.innerHTML = html;
                 list.classList.remove('hidden');
 
-                // Instant Box Internal Positioning (Scrolls to current match inside box)
+                // Scroll to current match inside the fixtures box (cross-browser, works on mobile)
                 if (currentMatchElId) {
-                    requestAnimationFrame(() => {
+                    // Use two nested rAFs so the DOM layout is fully settled before measuring
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
                         const box = document.getElementById('fixtures-box');
                         const el = document.getElementById(currentMatchElId);
                         if (box && el) {
-                            box.scrollTop = Math.max(0, el.offsetTop - 16);
+                            // Compute offset relative to the scrollable box (not document)
+                            const boxRect = box.getBoundingClientRect();
+                            const elRect  = el.getBoundingClientRect();
+                            const offset  = elRect.top - boxRect.top + box.scrollTop;
+                            box.scrollTop = Math.max(0, offset - box.clientHeight / 2 + el.offsetHeight / 2);
                         }
-                    });
+                    }));
                 }
 
             } catch (err) {
@@ -612,6 +617,18 @@
 
         // Init Page
         document.addEventListener('DOMContentLoaded', () => {
+            // Scroll the horizontal nav bar so the active ΠΡΟΓΡΑΜΜΑ tab is centred (mobile fix)
+            requestAnimationFrame(() => {
+                const activeTab = document.getElementById('tab-item-fixtures');
+                if (activeTab) {
+                    const container = activeTab.parentElement;
+                    if (container) {
+                        const scrollLeft = activeTab.offsetLeft - (container.clientWidth / 2) + (activeTab.clientWidth / 2);
+                        container.scrollTo({ left: Math.max(0, scrollLeft) });
+                    }
+                }
+            });
+
             fetchFixtures('all');
 
             // More news scroll observer

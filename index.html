@@ -1104,7 +1104,7 @@
         async function deleteArticle(articleId, event) {
             event.preventDefault();
             event.stopPropagation();
-            if (!confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις οριστικά αυτό το άρθρο;')) return;
+            if (!confirm('Είσαι σίγουρος ότι θέλεις να αποκρύψεις αυτό το άρθρο;\n\nΤο άρθρο θα εξαφανιστεί από όλες τις λίστες, αλλά θα παραμένει προσβάσιμο από το άμεσο URL του (για Google).')) return;
             
             const SUPABASE_URL = "https://rctltbuiitdnqlxizlym.supabase.co";
             const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI";
@@ -1120,11 +1120,10 @@
             const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
             try {
-                const { data, error } = await db.from('articles').delete().eq('id', articleId).select();
+                // Soft-delete: mark as DELETED so it's hidden from all feeds/lists
+                // but the article page remains accessible via its direct URL (no 404 for Google)
+                const { error } = await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
                 if (error) throw error;
-                if (!data || data.length === 0) {
-                    await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
-                }
                 
                 // Remove the article element from the DOM
                 const card = document.querySelector(`[data-article-id="${articleId}"]`);
@@ -1135,10 +1134,11 @@
                 }
             } catch(e) {
                 console.error(e);
-                alert('Σφάλμα κατά τη διαγραφή: ' + e.message);
+                alert('Σφάλμα κατά την απόκρυψη: ' + e.message);
             }
         }
         window.deleteArticle = deleteArticle;
+
 
         let initialLoadDone = false;
         async function fetchCommentCounts() {

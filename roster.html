@@ -454,15 +454,16 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             container.innerHTML = players.map(p => `
-            <div class="card-hover flex items-center gap-4 p-4 bg-surface-container rounded-xl border border-outline-variant/20">
-                <div class="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary shrink-0 text-sm">${p.initials}</div>
+            <div class="card-hover flex items-center gap-3 p-2.5 bg-surface-container rounded-xl border border-outline-variant/20">
+                <div class="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary shrink-0 text-xs">${p.initials}</div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-h4 text-h4 leading-tight">${p.name}</p>
-                    <p class="font-caption text-caption text-on-surface-variant mt-0.5">${p.detail || p.pos}</p>
+                    <p class="font-semibold text-sm leading-tight">${p.name}</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5">${p.detail || p.pos}</p>
                 </div>
-                <span class="px-3 py-1 bg-surface-container-high rounded-full font-label text-label text-on-surface-variant text-xs uppercase">${p.pos || p.num || ''}</span>
+                <span class="px-2 py-0.5 bg-surface-container-high rounded-full text-[10px] font-medium text-on-surface-variant uppercase">${p.pos || p.num || ''}</span>
             </div>`).join('');
         }
+
 
         // ─────────────────────────────────────────────────────────────────
         // INIT & DYNAMIC SUPABASE LOADING
