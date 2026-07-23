@@ -15,5 +15,20 @@ for (const file of files) {
         console.log(`Copied ${file} to public/`);
     }
 }
+
+// Copy images/ folder to public/images/
+const imagesDir = path.join(__dirname, 'images');
+const publicImagesDir = path.join(publicDir, 'images');
+if (fs.existsSync(imagesDir)) {
+    if (!fs.existsSync(publicImagesDir)) {
+        fs.mkdirSync(publicImagesDir, { recursive: true });
+    }
+    const imgFiles = fs.readdirSync(imagesDir);
+    for (const file of imgFiles) {
+        fs.copyFileSync(path.join(imagesDir, file), path.join(publicImagesDir, file));
+        console.log(`Copied images/${file} to public/images/`);
+    }
+}
+
 console.log("Build completed successfully!");
 // Redeploy trigger to inject Vercel environment variables - July 8, 2026
