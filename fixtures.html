@@ -565,7 +565,6 @@
             return 'pao';
         }
 
-        // More News Grid Infinite Loader
         let streamPage = 1;
         let streamHasMore = true;
         let isFetchingMore = false;
@@ -601,9 +600,8 @@
                     grid.insertAdjacentHTML('beforeend', html);
                     section.classList.remove('hidden');
                     streamPage++;
-                    await new Promise(r => setTimeout(r, 400));
                 }
-                if (!articles || articles.length < 10) {
+                if (!articles || articles.length < 5) {
                     streamHasMore = false;
                     const sentinel = document.getElementById('fixtures-sentinel');
                     if (sentinel) sentinel.style.display = 'none';
