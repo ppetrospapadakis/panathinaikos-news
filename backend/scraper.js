@@ -736,7 +736,8 @@ async function generateArticleData(title, text, isOfficial = false) {
 Πληροφορίες: ${cleanText}`,
             config: {
                 temperature: 0.8,
-                maxOutputTokens: 2048
+                maxOutputTokens: 2048,
+                responseMimeType: 'application/json'
             }
         }));
 
@@ -748,7 +749,14 @@ async function generateArticleData(title, text, isOfficial = false) {
             jsonString = jsonString.substring(firstBrace, lastBrace + 1);
         }
 
-        const parsed = JSON.parse(jsonString);
+        let parsed;
+        try {
+            parsed = JSON.parse(jsonString);
+        } catch (_) {
+            // Fallback: repair raw control characters inside multi-line JSON values
+            const repaired = jsonString.replace(/[\u0000-\u001F]+/g, (m) => m.includes('\n') ? '\\n' : ' ');
+            parsed = JSON.parse(repaired);
+        }
 
         if (parsed.is_panathinaikos_relevant === false) {
             console.log(`  [AI EVALUATION] Article determined NOT relevant: "${title}"`);
