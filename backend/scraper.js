@@ -740,8 +740,14 @@ async function generateArticleData(title, text, isOfficial = false) {
             }
         }));
 
-        const rawResponse = response.text.trim();
-        const jsonString = rawResponse.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/, '').trim();
+        const rawResponse = (response.text || '').trim();
+        let jsonString = rawResponse.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/, '').trim();
+        const firstBrace = jsonString.indexOf('{');
+        const lastBrace = jsonString.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+        }
+
         const parsed = JSON.parse(jsonString);
 
         if (parsed.is_panathinaikos_relevant === false) {
@@ -755,19 +761,14 @@ async function generateArticleData(title, text, isOfficial = false) {
             .replace(/«μπες»/gi, '«μπάσιμο»')
             .replace(/\bμπες\b/gi, 'μπάσιμο');
         const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2) : [];
-        
-        if (articleText && articleText.length > 100) {
+        const articleText = (parsed.content || text || '').trim();
+
+        if (articleText && articleText.length > 20) {
             console.log(`  [AI] Article Data generated: ${articleText.length} chars, ${bullets.length} bullets. Title: ${newTitle}`);
             return { isRelevant: true, content: articleText, title: newTitle, bullets };
         }
     } catch (err) {
-        if (quotaExhausted || lastAiFailureWasRetryable) {
-            lastAiFailureWasRetryable = true;
-            console.warn('[AI] Retryable failure (quota/throttle) — will retry in next run.');
-        } else {
-            lastAiFailureWasRetryable = false;
-            console.warn(`[AI] Permanent article generation failure: ${err.message?.substring(0, 80)}`);
-        }
+        console.warn(`[AI] Article generation warning/error: ${err.message?.substring(0, 80)}`);
     }
     return null;
 }
@@ -1090,24 +1091,6 @@ async function main() {
                 runStats.sources[target.name].skipped_crawling_failed++;
                 runStats.totals.skipped_crawling_failed++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
-                
-                // Save failed URL as IGNORED_FAILED to prevent infinite re-crawling on 403 / fetch errors
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_FAILED]',
-                            summary: '[IGNORED_FAILED]',
-                            content: '[IGNORED_FAILED]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored failed URL: ${e.message}`);
-                    }
-                }
                 continue;
             }
             if (scraped.status === 'skipped_size') {
@@ -1461,38 +1444,12 @@ async function main() {
                 continue;
             }
 
-            // Skip insertion if AI failed (e.g., quota exhausted or throttle). We DO NOT want raw content.
+            // Skip insertion if AI failed. We DO NOT want raw content, and we DO NOT poison the URL in DB.
             if (!aiResult) {
-                if (lastAiFailureWasRetryable) {
-                    // Retryable failure (quota/throttle): DO NOT permanently flag this URL.
-                    // Leave it unprocessed so it will be retried once keys/rate reset.
-                    console.log(`    [SKIP] Retryable AI failure (quota/throttle) — leaving URL for retry in next run: ${articleUrl}`);
-                    logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or quota exhausted');
-                    runStats.sources[target.name].skipped_technical_error++;
-                    runStats.totals.skipped_technical_error++;
-                } else {
-                    // Permanent failure (bad content, parse error, HARM block, etc.) — flag as ignored
-                    console.log(`    [SKIP] Permanent AI failure — flagging URL as ignored: ${articleUrl}`);
-                    logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI permanent failure (non-retryable)');
-                    runStats.sources[target.name].skipped_technical_error++;
-                    runStats.totals.skipped_technical_error++;
-                    if (!isDryRun) {
-                        try {
-                            await db.from('articles').insert({
-                                id: crypto.randomUUID(),
-                                title: '[IGNORED_FAILED]',
-                                summary: '[IGNORED_FAILED]',
-                                content: '[IGNORED_FAILED]',
-                                source_url: articleUrl,
-                                category: 'SystemRoster',
-                                created_at: new Date().toISOString()
-                            });
-                            existingUrls.add(articleUrl);
-                        } catch (e) {
-                            console.error(`    [DB ERROR] Failed to save ignored failed URL: ${e.message}`);
-                        }
-                    }
-                }
+                console.log(`    [SKIP] AI generation failed or returned null — leaving URL for retry: ${articleUrl}`);
+                logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or returned null');
+                runStats.sources[target.name].skipped_technical_error++;
+                runStats.totals.skipped_technical_error++;
                 continue;
             }
 
