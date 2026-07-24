@@ -76,8 +76,8 @@ module.exports = async (req, res) => {
                 query = query.ilike('category', `%${categoryFilter}%`);
             }
         } else {
-            // Exclude 'Ερασιτέχνης' from the general homepage hero article
-            query = query.not('category', 'eq', 'Ερασιτέχνης');
+            // Exclude all 'Ερασιτέχνης' articles from the general homepage hero article
+            query = query.not('category', 'ilike', '%Ερασιτέχνης%');
         }
 
         query = query.order('created_at', { ascending: false })
