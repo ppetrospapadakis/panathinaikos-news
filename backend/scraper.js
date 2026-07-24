@@ -588,6 +588,9 @@ let aiClientInstance = null;
 let quotaExhausted = false;
 const geminiCallsPerKey = {};
 
+// Track whether the last AI failure was due to quota (so we don't permanently blacklist those URLs)
+let lastAiFailureWasQuota = false;
+
 function getAiClient() {
     if (apiKeys.length === 0) {
         const rawKey1 = process.env.GEMINI_API_KEY || '';
@@ -661,7 +664,10 @@ async function retryWithBackoff(fn, maxRetries = 2) {
 // ─── Gemini API: combined article data (bullets + long-form) ────────────────
 async function generateArticleData(title, text, isOfficial = false) {
     const ai = getAiClient();
-    if (!ai || quotaExhausted) return null;
+    if (!ai || quotaExhausted) {
+        lastAiFailureWasQuota = true;
+        return null;
+    }
 
     const cleanText = (text || '')
         .replace(/<[^>]*>/g, ' ')
@@ -728,8 +734,13 @@ async function generateArticleData(title, text, isOfficial = false) {
             return { isRelevant: true, content: articleText, title: newTitle, bullets };
         }
     } catch (err) {
-        if (quotaExhausted) console.warn('[AI] Daily quota exhausted — skipping article generation.');
-        else console.warn(`[AI] Article generation failed: ${err.message?.substring(0, 80)}`);
+        if (quotaExhausted) {
+            lastAiFailureWasQuota = true;
+            console.warn('[AI] Daily quota exhausted — skipping article generation.');
+        } else {
+            lastAiFailureWasQuota = false;
+            console.warn(`[AI] Article generation failed: ${err.message?.substring(0, 80)}`);
+        }
     }
     return null;
 }
@@ -1425,26 +1436,34 @@ async function main() {
 
             // Skip insertion if AI failed (e.g., quota exhausted). We DO NOT want raw content.
             if (!aiResult) {
-                console.log(`    [SKIP] AI generation failed or quota exhausted. Flagging URL so it doesn't cause infinite retries.`);
-                logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or quota exhausted');
-                runStats.sources[target.name].skipped_technical_error++;
-                runStats.totals.skipped_technical_error++;
-                
-                // Save ignored URL to DB so it won't be re-crawled every 15 minutes endlessly
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_FAILED]',
-                            summary: '[IGNORED_FAILED]',
-                            content: '[IGNORED_FAILED]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored failed URL: ${e.message}`);
+                if (lastAiFailureWasQuota) {
+                    // Quota exhaustion: DO NOT permanently flag this URL.
+                    // Leave it unprocessed so it will be retried once keys reset.
+                    console.log(`    [SKIP] Quota exhausted — leaving URL for retry in next run: ${articleUrl}`);
+                    logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or quota exhausted');
+                    runStats.sources[target.name].skipped_technical_error++;
+                    runStats.totals.skipped_technical_error++;
+                } else {
+                    // Permanent failure (bad content, parse error, etc.) — flag as ignored
+                    console.log(`    [SKIP] Permanent AI failure — flagging URL as ignored: ${articleUrl}`);
+                    logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI permanent failure (non-quota)');
+                    runStats.sources[target.name].skipped_technical_error++;
+                    runStats.totals.skipped_technical_error++;
+                    if (!isDryRun) {
+                        try {
+                            await db.from('articles').insert({
+                                id: crypto.randomUUID(),
+                                title: '[IGNORED_FAILED]',
+                                summary: '[IGNORED_FAILED]',
+                                content: '[IGNORED_FAILED]',
+                                source_url: articleUrl,
+                                category: 'SystemRoster',
+                                created_at: new Date().toISOString()
+                            });
+                            existingUrls.add(articleUrl);
+                        } catch (e) {
+                            console.error(`    [DB ERROR] Failed to save ignored failed URL: ${e.message}`);
+                        }
                     }
                 }
                 continue;
