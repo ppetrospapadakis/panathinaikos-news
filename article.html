@@ -76,6 +76,10 @@
       #article-body ul { list-style-type: disc !important; padding-left: 1.75rem !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
       #article-body ol { list-style-type: decimal !important; padding-left: 1.75rem !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
       #article-body li { margin-bottom: 0.5rem !important; }
+      /* Quill data-list formatting support */
+      #article-body li[data-list="bullet"] { list-style-type: disc !important; }
+      #article-body li[data-list="ordered"] { list-style-type: decimal !important; }
+      #article-body li[data-list="bullet"]::before, #article-body li[data-list="ordered"]::before { display: none !important; }
       #article-body .ql-indent-1 { padding-left: 2rem !important; }
       #article-body .ql-indent-2 { padding-left: 4rem !important; }
       #article-body .ql-indent-3 { padding-left: 6rem !important; }
