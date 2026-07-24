@@ -1523,8 +1523,8 @@ async function main() {
             keys_status: apiKeys.map((key, idx) => {
                 return {
                     index: idx,
-                    masked: key.slice(0, 8) + '...' + key.slice(-4),
-                    status: idx < currentKeyIndex ? 'exhausted' : (idx === currentKeyIndex && !quotaExhausted ? 'active' : 'exhausted')
+                    masked: key ? (key.slice(0, 8) + '...' + key.slice(-4)) : `Key #${idx + 1}`,
+                    status: idx < currentKeyIndex ? 'exhausted' : (idx === currentKeyIndex ? (quotaExhausted ? 'exhausted' : 'active') : 'active')
                 };
             })
         };
