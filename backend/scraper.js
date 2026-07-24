@@ -684,7 +684,7 @@ async function generateArticleData(title, text, isOfficial = false) {
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
   "is_panathinaikos_relevant": true ή false (βάλε false αν το άρθρο αφορά γενική διεθνή ειδησεογραφία, άλλα αθλήματα/ομάδες χωρίς καμία σύνδεση με τον Παναθηναϊκό, ή άσχετα παγκόσμια γεγονότα),
-  "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, πιο clicky/attractive αλλά ακριβής, χωρίς υπερβολές)",
+  "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, πιο clicky/attractive αλλά ακριβής. ΠΟΤΕ μην χρησιμοποιείς τη λέξη «μπες» - χρησιμοποίησε «μπάσιμο» ή «κίνηση»)",
   "content": "το αναδιατυπωμένο άρθρο (σύμφωνα με τους κανόνες παρακάτω)",
   "bullets": ["Bullet 1", "Bullet 2"]
 }
@@ -718,8 +718,11 @@ async function generateArticleData(title, text, isOfficial = false) {
             return { isRelevant: false, content: null, title: null, bullets: [] };
         }
 
-        const articleText = (parsed.content || '').trim();
-        const newTitle = (parsed.title || title).trim();
+        let newTitle = (parsed.title || title).trim();
+        // Replace unwanted slang terms in title
+        newTitle = newTitle
+            .replace(/«μπες»/gi, '«μπάσιμο»')
+            .replace(/\bμπες\b/gi, 'μπάσιμο');
         const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2) : [];
         
         if (articleText && articleText.length > 100) {
