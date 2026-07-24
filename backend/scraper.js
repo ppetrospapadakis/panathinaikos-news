@@ -592,6 +592,30 @@ const geminiCallsPerKey = {};
 // Retryable = should not be permanently blacklisted; will be retried on next run
 let lastAiFailureWasRetryable = false;
 
+// ─── Simple per-minute rate limiter (max 25 calls/60s) ───────────────────────
+// Gemini free tier allows 30 RPM; we cap at 25 to stay safe.
+const AI_RPM_LIMIT = 25;
+const aiCallTimestamps = [];
+async function throttleIfNeeded() {
+    const now = Date.now();
+    // Remove timestamps older than 60 seconds
+    while (aiCallTimestamps.length > 0 && now - aiCallTimestamps[0] > 60000) {
+        aiCallTimestamps.shift();
+    }
+    if (aiCallTimestamps.length >= AI_RPM_LIMIT) {
+        // Wait until the oldest call is 60s old
+        const waitMs = 60000 - (now - aiCallTimestamps[0]) + 500;
+        console.log(`    [RATE LIMITER] At ${aiCallTimestamps.length} calls/min. Waiting ${(waitMs/1000).toFixed(1)}s to stay under RPM limit...`);
+        await sleep(waitMs);
+        // Re-clean after waiting
+        const nowAfter = Date.now();
+        while (aiCallTimestamps.length > 0 && nowAfter - aiCallTimestamps[0] > 60000) {
+            aiCallTimestamps.shift();
+        }
+    }
+    aiCallTimestamps.push(Date.now());
+}
+
 function getAiClient() {
     if (apiKeys.length === 0) {
         const rawKey1 = process.env.GEMINI_API_KEY || '';
@@ -624,6 +648,8 @@ function rotateAiClient() {
 async function retryWithBackoff(fn, maxRetries = 2) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
+            // Throttle before every API call to stay under RPM limit
+            await throttleIfNeeded();
             const res = await fn();
             // Track successful calls per key index
             if (!geminiCallsPerKey[currentKeyIndex]) geminiCallsPerKey[currentKeyIndex] = 0;
@@ -1514,11 +1540,10 @@ async function main() {
             existingArticles.unshift({ id: inserted[0].id, title: scraped.title, source_url: articleUrl, group_id, created_at: scraped.created_at });
             totalNew++;
             console.log(`    ✅ Inserted (id=${inserted[0].id})`);
-
-            // Rate limit between AI calls (skip in Vercel serverless environment to prevent timeouts)
-            if (!process.env.VERCEL) {
-                await sleep(1500);
-            }
+        }
+        // Rate limit between article processing — always pause, not just on success
+        if (!process.env.VERCEL) {
+            await sleep(2000);
         }
         // After finishing all articles for this source, stagger before next target (skip in dry‑run or Vercel serverless environment)
         if (!isDryRun && !process.env.VERCEL) {
