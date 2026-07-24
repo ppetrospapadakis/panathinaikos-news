@@ -588,8 +588,9 @@ let aiClientInstance = null;
 let quotaExhausted = false;
 const geminiCallsPerKey = {};
 
-// Track whether the last AI failure was due to quota (so we don't permanently blacklist those URLs)
-let lastAiFailureWasQuota = false;
+// Track whether the last AI failure was retryable (quota/throttle) vs permanent (parse/content error)
+// Retryable = should not be permanently blacklisted; will be retried on next run
+let lastAiFailureWasRetryable = false;
 
 function getAiClient() {
     if (apiKeys.length === 0) {
@@ -665,7 +666,7 @@ async function retryWithBackoff(fn, maxRetries = 2) {
 async function generateArticleData(title, text, isOfficial = false) {
     const ai = getAiClient();
     if (!ai || quotaExhausted) {
-        lastAiFailureWasQuota = true;
+        lastAiFailureWasRetryable = true; // quota exhaustion is always retryable
         return null;
     }
 
@@ -734,12 +735,12 @@ async function generateArticleData(title, text, isOfficial = false) {
             return { isRelevant: true, content: articleText, title: newTitle, bullets };
         }
     } catch (err) {
-        if (quotaExhausted) {
-            lastAiFailureWasQuota = true;
-            console.warn('[AI] Daily quota exhausted — skipping article generation.');
+        if (quotaExhausted || lastAiFailureWasRetryable) {
+            lastAiFailureWasRetryable = true;
+            console.warn('[AI] Retryable failure (quota/throttle) — will retry in next run.');
         } else {
-            lastAiFailureWasQuota = false;
-            console.warn(`[AI] Article generation failed: ${err.message?.substring(0, 80)}`);
+            lastAiFailureWasRetryable = false;
+            console.warn(`[AI] Permanent article generation failure: ${err.message?.substring(0, 80)}`);
         }
     }
     return null;
@@ -1434,19 +1435,19 @@ async function main() {
                 continue;
             }
 
-            // Skip insertion if AI failed (e.g., quota exhausted). We DO NOT want raw content.
+            // Skip insertion if AI failed (e.g., quota exhausted or throttle). We DO NOT want raw content.
             if (!aiResult) {
-                if (lastAiFailureWasQuota) {
-                    // Quota exhaustion: DO NOT permanently flag this URL.
-                    // Leave it unprocessed so it will be retried once keys reset.
-                    console.log(`    [SKIP] Quota exhausted — leaving URL for retry in next run: ${articleUrl}`);
+                if (lastAiFailureWasRetryable) {
+                    // Retryable failure (quota/throttle): DO NOT permanently flag this URL.
+                    // Leave it unprocessed so it will be retried once keys/rate reset.
+                    console.log(`    [SKIP] Retryable AI failure (quota/throttle) — leaving URL for retry in next run: ${articleUrl}`);
                     logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or quota exhausted');
                     runStats.sources[target.name].skipped_technical_error++;
                     runStats.totals.skipped_technical_error++;
                 } else {
-                    // Permanent failure (bad content, parse error, etc.) — flag as ignored
+                    // Permanent failure (bad content, parse error, HARM block, etc.) — flag as ignored
                     console.log(`    [SKIP] Permanent AI failure — flagging URL as ignored: ${articleUrl}`);
-                    logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI permanent failure (non-quota)');
+                    logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI permanent failure (non-retryable)');
                     runStats.sources[target.name].skipped_technical_error++;
                     runStats.totals.skipped_technical_error++;
                     if (!isDryRun) {
