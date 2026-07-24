@@ -189,6 +189,7 @@
 
                     <!-- Toolbar -->
                     <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b border-outline-variant/30">
+                        <button class="toolbar-btn" onclick="insertText('☘️ ')" title="Shamrock emoji">☘️</button>
                         <button class="toolbar-btn" onclick="insertText('⚽ ')" title="Football emoji">⚽</button>
                         <button class="toolbar-btn" onclick="insertText('🏀 ')" title="Basketball emoji">🏀</button>
                         <button class="toolbar-btn" onclick="insertText('🔥 ')" title="Fire emoji">🔥</button>
@@ -1007,8 +1008,11 @@ function initEditor() {
         modules: {
             toolbar: {
                 container: [
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
                     ['bold', 'italic', 'underline'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'align': [] }],
                     ['link', 'image', 'video'],
                     ['clean']
                 ],
