@@ -135,16 +135,20 @@ module.exports = async (req, res) => {
             .gt('started_at', last24hIso)
             .order('started_at', { ascending: false });
 
-        // Parse Gemini Keys — support GEMINI_API_KEY (comma-separated) AND GEMINI_API_KEY_2 as fallback
+        // Parse Gemini Keys from env (Vercel) — used only as fallback for masking
         const rawKey1 = process.env.GEMINI_API_KEY || '';
         const rawKey2 = process.env.GEMINI_API_KEY_2 || '';
+        let envApiKeys = rawKey1.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        if (rawKey2) envApiKeys.push(rawKey2.trim());
+
+        // Discover true key count from the scraping runs (GitHub Actions env may differ from Vercel env)
+        // The scraper stores key_count and keys_status in each run's stats
+        const latestRunGemini = (runs && runs.length > 0 && runs[0].stats && runs[0].stats.gemini) ? runs[0].stats.gemini : null;
         
-        // Combine: split key1 by comma, then append key2 if set
-        let apiKeys = rawKey1.split(',').map(k => k.trim()).filter(k => k.length > 0);
-        if (rawKey2) apiKeys.push(rawKey2.trim());
+        // Use the key_count stored in the last run, or fall back to env-based count
+        let keyCount = (latestRunGemini && latestRunGemini.key_count) ? latestRunGemini.key_count : (envApiKeys.length || 1);
 
-        let keyCount = apiKeys.length || 1; // default to 1 for presentation if env is empty
-
+        // Also check calls_by_key to ensure we capture all indexes
         // Initialize key totals dictionary
         const keyUsageToday = {};
         for (let i = 0; i < keyCount; i++) {
@@ -182,6 +186,15 @@ module.exports = async (req, res) => {
             }
         }
 
+        // Build masked key labels: prefer stored keys_status from latest run (GitHub Actions),
+        // fall back to Vercel env vars
+        const storedKeysStatus = (latestRunGemini && Array.isArray(latestRunGemini.keys_status)) ? latestRunGemini.keys_status : [];
+        const getMasked = (idx) => {
+            if (storedKeysStatus[idx] && storedKeysStatus[idx].masked) return storedKeysStatus[idx].masked;
+            if (envApiKeys[idx]) return envApiKeys[idx].slice(0, 8) + '...' + envApiKeys[idx].slice(-4);
+            return `Key #${idx + 1}`;
+        };
+
         // Build Gemini keys status array
         // SOURCE OF TRUTH: use calls_today vs 1500 limit.
         // NEVER rely on stored status from previous run (it may be stale/buggy).
@@ -189,8 +202,6 @@ module.exports = async (req, res) => {
         const keysStatus = [];
 
         for (let i = 0; i < keyCount; i++) {
-            const keyStr = apiKeys[i] || '';
-            const masked = keyStr ? (keyStr.slice(0, 8) + '...' + keyStr.slice(-4)) : `Key #${i + 1}`;
             const callsToday = keyUsageToday[i] || 0;
             const DAILY_LIMIT = 1500;
 
@@ -199,7 +210,7 @@ module.exports = async (req, res) => {
 
             keysStatus.push({
                 index: i,
-                masked: masked,
+                masked: getMasked(i),
                 status: status,
                 calls_today: callsToday,
                 limit: DAILY_LIMIT
