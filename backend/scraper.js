@@ -634,13 +634,11 @@ async function retryWithBackoff(fn, maxRetries = 2) {
                                 msg.includes('econnreset') || msg.includes('timeout') || msg.includes('socket');
             if (!isRetryable) throw err; // non-retryable error — bubble up immediately
 
-            // A 429 can mean per-minute throttle OR daily quota exhaustion
-            // The new SDK usually says "Quota exceeded for metric..." or "Resource has been exhausted"
+            // Distinguish between per-minute rate limit (RPM/throttle) vs true daily quota limit (RPD / per_day)
             const msgLower = (err.message || '').toLowerCase();
-            const isResourceExhausted = msgLower.includes('quota exceeded') || msgLower.includes('exhausted') || msgLower.includes('quota');
-            const isDailyLimit = msgLower.includes('per_day');
+            const isDailyLimit = msgLower.includes('per_day') || msgLower.includes('day') || msgLower.includes('daily') || (msgLower.includes('quota') && msgLower.includes('day'));
 
-            if (isResourceExhausted || isDailyLimit) {
+            if (isDailyLimit) {
                 if (rotateAiClient()) {
                     attempt--; // Don't count against retries, it's a new key
                     continue; // Try immediately with the new key
