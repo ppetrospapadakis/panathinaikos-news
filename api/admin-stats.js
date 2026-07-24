@@ -162,7 +162,8 @@ module.exports = async (req, res) => {
                 lastRunKeyIndex = latestRun.stats.gemini.current_index || 0;
             }
 
-            // Sum up calls by key from all runs in the last 24h
+            // Sum up calls by key from all runs in the last 24h & detect max key index seen
+            let maxKeyIdxSeen = 0;
             runs.forEach(run => {
                 if (run.stats && run.stats.gemini && run.stats.gemini.calls_by_key) {
                     Object.keys(run.stats.gemini.calls_by_key).forEach(idxStr => {
@@ -170,15 +171,15 @@ module.exports = async (req, res) => {
                         const count = run.stats.gemini.calls_by_key[idxStr] || 0;
                         
                         if (idx >= 0) {
-                            while (idx >= apiKeys.length) {
-                                apiKeys.push(''); // placeholder
-                                keyCount = apiKeys.length;
-                            }
+                            if (idx > maxKeyIdxSeen) maxKeyIdxSeen = idx;
                             keyUsageToday[idx] = (keyUsageToday[idx] || 0) + count;
                         }
                     });
                 }
             });
+            if (maxKeyIdxSeen + 1 > keyCount) {
+                keyCount = maxKeyIdxSeen + 1;
+            }
         }
 
         // Build Gemini keys status array
