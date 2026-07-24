@@ -1427,10 +1427,28 @@ async function main() {
 
             // Skip insertion if AI failed (e.g., quota exhausted). We DO NOT want raw content.
             if (!aiResult) {
-                console.log(`    [SKIP] AI generation failed or quota exhausted. Skipping article so it can be retried later.`);
+                console.log(`    [SKIP] AI generation failed or quota exhausted. Flagging URL so it doesn't cause infinite retries.`);
                 logRunError(target.name, articleUrl, 'ai_error', 'Gemini AI response failed or quota exhausted');
                 runStats.sources[target.name].skipped_technical_error++;
                 runStats.totals.skipped_technical_error++;
+                
+                // Save ignored URL to DB so it won't be re-crawled every 15 minutes endlessly
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: crypto.randomUUID(),
+                            title: '[IGNORED_FAILED]',
+                            summary: '[IGNORED_FAILED]',
+                            content: '[IGNORED_FAILED]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save ignored failed URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
 
