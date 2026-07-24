@@ -183,35 +183,27 @@ module.exports = async (req, res) => {
         }
 
         // Build Gemini keys status array
+        // SOURCE OF TRUTH: use calls_today vs 1500 limit.
+        // NEVER rely on stored status from previous run (it may be stale/buggy).
+        // A key is EXHAUSTED only if it has actually used >= 1500 calls today.
         const keysStatus = [];
-        const latestRunStats = (runs && runs.length > 0 && runs[0].stats && runs[0].stats.gemini) ? runs[0].stats.gemini : null;
-        
-        if (latestRunStats && Array.isArray(latestRunStats.keys_status) && latestRunStats.keys_status.length > 0) {
-            latestRunStats.keys_status.forEach((k, idx) => {
-                keysStatus.push({
-                    index: idx,
-                    masked: k.masked || (apiKeys[idx] ? (apiKeys[idx].slice(0, 8) + '...' + apiKeys[idx].slice(-4)) : `Key #${idx + 1}`),
-                    status: k.status || 'active',
-                    calls_today: keyUsageToday[idx] || 0,
-                    limit: 1500
-                });
+
+        for (let i = 0; i < keyCount; i++) {
+            const keyStr = apiKeys[i] || '';
+            const masked = keyStr ? (keyStr.slice(0, 8) + '...' + keyStr.slice(-4)) : `Key #${i + 1}`;
+            const callsToday = keyUsageToday[i] || 0;
+            const DAILY_LIMIT = 1500;
+
+            // A key is exhausted ONLY if it has actually hit the daily limit
+            const status = callsToday >= DAILY_LIMIT ? 'exhausted' : 'active';
+
+            keysStatus.push({
+                index: i,
+                masked: masked,
+                status: status,
+                calls_today: callsToday,
+                limit: DAILY_LIMIT
             });
-        } else {
-            for (let i = 0; i < keyCount; i++) {
-                const keyStr = apiKeys[i] || '';
-                const masked = keyStr ? (keyStr.slice(0, 8) + '...' + keyStr.slice(-4)) : `Key #${i + 1}`;
-                let status = 'active';
-                if (i < lastRunKeyIndex || (isLastRunExhausted && i === lastRunKeyIndex)) {
-                    status = 'exhausted';
-                }
-                keysStatus.push({
-                    index: i,
-                    masked: masked,
-                    status: status,
-                    calls_today: keyUsageToday[i] || 0,
-                    limit: 1500
-                });
-            }
         }
 
         return res.status(200).json({
