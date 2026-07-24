@@ -188,7 +188,7 @@ module.exports = async (req, res) => {
             const masked = keyStr ? (keyStr.slice(0, 8) + '...' + keyStr.slice(-4)) : `Key #${i + 1}`;
             
             let status = 'active';
-            if (isLastRunExhausted || i < lastRunKeyIndex) {
+            if (i < lastRunKeyIndex || (isLastRunExhausted && i === lastRunKeyIndex)) {
                 status = 'exhausted';
             }
 
