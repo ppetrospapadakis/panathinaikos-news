@@ -442,11 +442,23 @@
 
 
         
+        
+
+        
         window.opinionHeroIndex = 0;
-        window.navigateOpinionHero = function(dir) {
-            if (!ownArticles || ownArticles.length === 0) return;
-            window.opinionHeroIndex = (window.opinionHeroIndex + dir + ownArticles.length) % ownArticles.length;
-            const targetArt = ownArticles[window.opinionHeroIndex];
+        window.opinionArticles = [];
+        window.navigateOpinionHero = function(dir, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            const articlesToUse = (window.opinionArticles && window.opinionArticles.length > 0)
+                ? window.opinionArticles
+                : (ownArticles || []);
+
+            if (!articlesToUse || articlesToUse.length === 0) return;
+            window.opinionHeroIndex = (window.opinionHeroIndex + dir + articlesToUse.length) % articlesToUse.length;
+            const targetArt = articlesToUse[window.opinionHeroIndex];
             window.currentHeroId = targetArt.id;
             window.currentHeroDate = targetArt.created_at;
             renderHero(targetArt);
@@ -580,11 +592,33 @@
             }
 
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
-
             const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+
+            const articlesToUse = (window.opinionArticles && window.opinionArticles.length > 0)
+                ? window.opinionArticles
+                : (ownArticles || []);
+
+            let heroArrowsHtml = '';
+            if (activeCategory === 'Άποψη' && articlesToUse && articlesToUse.length > 1) {
+                const curIdx = window.opinionHeroIndex + 1;
+                const total = articlesToUse.length;
+                heroArrowsHtml = `
+                <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-between px-3 pointer-events-none">
+                    <button onclick="navigateOpinionHero(-1, event)" aria-label="Προηγούμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
+                        <span class="material-symbols-outlined text-2xl">chevron_left</span>
+                    </button>
+                    <button onclick="navigateOpinionHero(1, event)" aria-label="Επόμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
+                        <span class="material-symbols-outlined text-2xl">chevron_right</span>
+                    </button>
+                </div>
+                <div class="absolute top-3 right-3 z-30 px-2.5 py-1 bg-surface-container/90 text-primary border border-outline-variant/30 rounded-full text-xs font-bold tracking-wider shadow">
+                    ${curIdx} / ${total}
+                </div>`;
+            }
 
             heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
                 ${pinButtonHtml(a.id, a.pinned_at)}
+                ${heroArrowsHtml}
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                     <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
