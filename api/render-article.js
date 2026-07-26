@@ -352,6 +352,11 @@ module.exports = async (req, res) => {
             html = html.substring(0, blockStart) + sourcesHtml + html.substring(blockEnd);
         }
 
+        
+        const articleDataJson = JSON.stringify(article);
+        const articleDataScript = `<script>window.currentArticleData = ${articleDataJson};</script>`;
+        html = html.replace('</head>', `${articleDataScript}\n</head>`);
+
         return res.status(200).send(html);
     } catch (err) {
         console.error('Server-side rendering exception:', err);
