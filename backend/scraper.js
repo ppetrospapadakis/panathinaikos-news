@@ -361,7 +361,7 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
                         if (u.pathname === '/' || u.pathname === '') return;
                         
-                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', '/galacticos', '/gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/'];
+                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', '/galacticos', '/gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos'];
                         if (blacklist.some(b => u.pathname.includes(b))) return;
                         
                         // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
@@ -499,7 +499,7 @@ async function scrapeArticlePage(url, categoryHint) {
         // Try progressively more specific selectors (strictly targeted at single-article containers)
         const bodySelectors = [
             'article .article-body', 'article .content', '.article-content',
-            '.article-body', '.story-body', '.entry-content', '.post-content',
+            '.article-body', '.story-body', '.entry-content', '.post-content', '.html-content',
             '[class*="article-text"]', '[class*="article-content"]',
             '.single-article-content', '.article__body',
             '.single_article__body', '.single_article', '[class*="single_article"]'
