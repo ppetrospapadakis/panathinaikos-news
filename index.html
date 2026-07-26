@@ -441,6 +441,17 @@
 
 
 
+        
+        window.opinionHeroIndex = 0;
+        window.navigateOpinionHero = function(dir) {
+            if (!ownArticles || ownArticles.length === 0) return;
+            window.opinionHeroIndex = (window.opinionHeroIndex + dir + ownArticles.length) % ownArticles.length;
+            const targetArt = ownArticles[window.opinionHeroIndex];
+            window.currentHeroId = targetArt.id;
+            window.currentHeroDate = targetArt.created_at;
+            renderHero(targetArt);
+        };
+
         window.scrollCarousel = function(direction) {
             const c = document.getElementById('own-carousel-container');
             if (c) c.scrollBy({ left: direction === 'left' ? -380 : 380, behavior: 'smooth' });
@@ -484,7 +495,7 @@
         function sideCardHtml(a) {
             const slug      = slugify(a.title);
             const catPath   = getCategoryCleanName(a.category);
-            const url       = `/${catPath}/${slug}-id=${a.id}`;
+            const url       = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
             const isOwn     = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
@@ -509,7 +520,7 @@
         function gridCardHtml(a) {
             const slug     = slugify(a.title);
             const catPath  = getCategoryCleanName(a.category);
-            const url      = `/${catPath}/${slug}-id=${a.id}`;
+            const url      = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
             const isOwn    = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
@@ -547,7 +558,7 @@
 
             const slug    = slugify(a.title);
             const catPath = getCategoryCleanName(a.category);
-            const url     = `/${catPath}/${slug}-id=${a.id}`;
+            const url     = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
             const isOwn   = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const ageMs   = Date.now() - new Date(a.created_at).getTime();
@@ -647,7 +658,7 @@
 
             sorted.forEach(g => {
                 const isOwn = (g.main.source_url||'').toLowerCase().includes('manual') || (g.main.source_url||'').toLowerCase().includes('opinion://');
-                if (activeCategory === null) {
+                if (activeCategory === null || activeCategory === 'Άποψη') {
                     if (isOwn) ownGroups.push(g);
                     else scraperGroups.push(g);
                 } else {
@@ -817,7 +828,7 @@
             const carouselCards = articles.map(a => {
                 const slug   = slugify(a.title);
                 const cat    = getCategoryCleanName(a.category);
-                const url    = `/${cat}/${slug}-id=${a.id}`;
+                const url    = `/${cat}/${slug}-id=${(a.id||"").substring(0,8)}`;
                 return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
                     <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
                         <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">

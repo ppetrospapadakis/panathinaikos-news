@@ -8,13 +8,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 function slugify(text) {
     if (!text) return "arthro";
     try {
-        return (text || "").toString().toLowerCase()
+        let slug = (text || "").toString().toLowerCase()
             .trim()
             .replace(/\s+/g, '-')
             .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
             .replace(/--+/g, '-')
             .replace(/^-+/, '')
             .replace(/-+$/, '') || "arthro";
+        if (slug.length > 45) {
+            const truncated = slug.substring(0, 45).replace(/-[^-]*$/, '');
+            slug = truncated.length > 10 ? truncated : slug.substring(0, 45);
+        }
+        return slug || "arthro";
     } catch(e) {
         return "arthro";
     }
@@ -75,7 +80,8 @@ module.exports = async (req, res) => {
         for (const art of (articles || [])) {
             const cleanCat = getCategoryCleanName(art.category);
             const cleanSlug = slugify(art.title);
-            const url = `${domain}/${cleanCat}/${cleanSlug}-id=${art.id}`;
+            const shortId = (art.id || '').substring(0, 8);
+            const url = `${domain}/${cleanCat}/${cleanSlug}-id=${shortId}`;
             const pubDate = new Date(art.created_at).toUTCString();
             const description = art.summary || (art.content ? art.content.substring(0, 300) + '...' : '');
 

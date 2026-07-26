@@ -8,13 +8,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 function slugify(text) {
     if (!text) return "arthro";
     try {
-        return (text || "").toString().toLowerCase()
+        let slug = (text || "").toString().toLowerCase()
             .trim()
             .replace(/\s+/g, '-')
             .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
             .replace(/--+/g, '-')
             .replace(/^-+/, '')
             .replace(/-+$/, '') || "arthro";
+        if (slug.length > 45) {
+            const truncated = slug.substring(0, 45).replace(/-[^-]*$/, '');
+            slug = truncated.length > 10 ? truncated : slug.substring(0, 45);
+        }
+        return slug || "arthro";
     } catch(e) {
         return "arthro";
     }
@@ -112,7 +117,8 @@ module.exports = async (req, res) => {
         const cleanCat = getCategoryCleanName(article.category);
         const cleanSlug = slugify(article.title);
         const domain = 'https://www.panathinaikosnews.gr';
-        const path = `/${cleanCat}/${cleanSlug}-id=${article.id}`;
+        const shortId = (article.id || '').substring(0, 8);
+        const path = `/${cleanCat}/${cleanSlug}-id=${shortId}`;
         const url = `${domain}${encodeURI(path)}`;
         
         const emoji = getCategoryEmoji(article.category);

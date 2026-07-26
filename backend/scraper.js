@@ -501,15 +501,16 @@ async function scrapeArticlePage(url, categoryHint) {
             'article .article-body', 'article .content', '.article-content',
             '.article-body', '.story-body', '.entry-content', '.post-content',
             '[class*="article-text"]', '[class*="article-content"]',
-            '.single-article-content', '.article__body'
+            '.single-article-content', '.article__body',
+            '.single_article__body', '.single_article', '[class*="single_article"]'
         ];
         let bodyText = '';
         for (const sel of bodySelectors) {
             try {
                 const els = $(sel);
                 if (els.length > 0) {
-                    // Strip scripts, ads, share buttons
-                    els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"]').remove();
+                    // Strip scripts, ads, share buttons, seo promos
+                    els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"], .seo_promo').remove();
                     // Map block elements to lines to preserve paragraph structure
                     const paragraphs = [];
                     els.find('p, div, br, li').each((i, el) => {

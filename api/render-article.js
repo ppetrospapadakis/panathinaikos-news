@@ -10,13 +10,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 function slugify(text) {
     if (!text) return "arthro";
     try {
-        return (text || "").toString().toLowerCase()
+        let slug = (text || "").toString().toLowerCase()
             .trim()
             .replace(/\s+/g, '-')
             .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
             .replace(/--+/g, '-')
             .replace(/^-+/, '')
             .replace(/-+$/, '') || "arthro";
+        if (slug.length > 45) {
+            const truncated = slug.substring(0, 45).replace(/-[^-]*$/, '');
+            slug = truncated.length > 10 ? truncated : slug.substring(0, 45);
+        }
+        return slug || "arthro";
     } catch(e) {
         return "arthro";
     }
@@ -74,12 +79,15 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // 1. Fetch article from Supabase
-        const { data: article, error } = await supabase
-            .from('articles')
-            .select('*')
-            .eq('id', id)
-            .single();
+        // 1. Fetch article from Supabase (supports both 8-char short ID and 36-char full UUID)
+        let query = supabase.from('articles').select('*');
+        if (id.length === 36) {
+            query = query.eq('id', id);
+        } else {
+            query = query.ilike('id', `${id}%`);
+        }
+        let { data: articles, error } = await query.limit(1);
+        let article = (articles && articles.length > 0) ? articles[0] : null;
 
         if (error || !article) {
             console.error('Database fetch error:', error);
@@ -192,13 +200,14 @@ module.exports = async (req, res) => {
             `<title id="page-title">${escapeHtml(article.title)} | Panathinaikos News</title>`
         );
 
+        const shortId = (article.id || '').substring(0, 8);
         // SEO and metadata replacement
         const metaTags = `
     <!-- Dynamic SEO and OpenGraph Metadata -->
     <meta property="og:title" content="${escapeHtml(article.title)}"/>
     <meta property="og:description" content="${escapeHtml(article.summary || '')}"/>
     <meta property="og:image" content="${article.image_url || DEFAULT_IMG}"/>
-    <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
+    <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
     <meta property="og:type" content="article"/>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:site" content="@PanaNewsGr"/>
@@ -206,12 +215,12 @@ module.exports = async (req, res) => {
     <meta name="twitter:title" content="${escapeHtml(article.title)}"/>
     <meta name="twitter:description" content="${escapeHtml(article.summary || '')}"/>
     <meta name="twitter:image" content="${article.image_url || DEFAULT_IMG}"/>
-    <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}"/>
+    <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
-      "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${article.id}",
+      "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}",
       "headline": ${JSON.stringify(article.title)},
       "image": [
         ${JSON.stringify(article.image_url || DEFAULT_IMG)}

@@ -587,7 +587,7 @@
                         const date = formatExactDate(a.created_at);
                         const catClean = getCategoryCleanName(a.category);
                         const slug = slugify(a.title);
-                        const url = `/${catClean}/${slug}-id=${a.id}`;
+                        const url = `/${catClean}/${slug}-id=${(a.id||"").substring(0,8)}`;
                         const img = a.image_url || '/logo.png';
                         return `
                         <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
