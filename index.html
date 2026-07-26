@@ -321,6 +321,12 @@
             }
         }
 
+        function isOwnArticle(a) {
+        if (!a) return false;
+        const src = (a.source_url || '').toLowerCase();
+        return src.includes('manual') || src.includes('opinion://');
+    }
+
         function getCategoryCleanName(category) {
             const cat = (category || '').toLowerCase();
             if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
@@ -800,7 +806,7 @@
 
             // More News section (Περισσότερες Ειδήσεις)
             const bottomArticles = activeCategory === 'Άποψη'
-                ? (ownArticles.length > 0 ? ownArticles.filter(a => a.id !== window.currentHeroId) : ownGroups.map(g => g.main).filter(g => g.id !== window.currentHeroId))
+                ? ownArticles.filter(a => isOwnArticle(a) && a.id !== window.currentHeroId)
                 : (activeCategory === null ? scraperGroups.map(g => g.main) : sideCandidates.map(g => g.main));
 
             if (bottomArticles.length > 0 && moreNewsEl) {
