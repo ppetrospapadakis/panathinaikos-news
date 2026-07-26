@@ -81,7 +81,6 @@ module.exports = async (req, res) => {
                 query = query.ilike('category', `%${categoryFilter}%`);
             }
         } else {
-            // Exclude all 'Ερασιτέχνης' articles from the general homepage hero article
             query = query.not('category', 'ilike', '%Ερασιτέχνης%');
         }
 
@@ -97,14 +96,12 @@ module.exports = async (req, res) => {
         let html = fs.readFileSync(templatePath, 'utf8');
 
         if (!article) {
-            // No article found, just return unmodified HTML (it will fallback to skeletons)
             return res.status(200).send(html);
         }
 
         const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
         let imageUrl = article.image_url || DEFAULT_IMG;
 
-        // Try to filter out generic branding logos and replace with google proxy if valid
         try {
             if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
             let u;
@@ -127,7 +124,6 @@ module.exports = async (req, res) => {
             if (isBranding) {
                 imageUrl = DEFAULT_IMG;
             } else if (!u.hostname.includes('localhost') && !u.hostname.includes('panathinaikosnews.gr') && !u.hostname.includes('wsrv.nl')) {
-                // Compress external image on-the-fly to tiny WebP/AVIF format
                 imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=800&output=webp&q=82`;
             }
         } catch (e) {}
@@ -174,35 +170,35 @@ module.exports = async (req, res) => {
         let heroArrowsHtml = '';
         if (categoryFilter === 'Άποψη' && articles.length > 1) {
             heroArrowsHtml = `
-            <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-between px-3 pointer-events-none">
-                <button onclick="navigateOpinionHero(-1, event)" aria-label="Προηγούμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
-                    <span class="material-symbols-outlined text-2xl">chevron_left</span>
-                </button>
-                <button onclick="navigateOpinionHero(1, event)" aria-label="Επόμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
-                    <span class="material-symbols-outlined text-2xl">chevron_right</span>
-                </button>
-            </div>
-            <div class="absolute top-3 right-3 z-30 px-2.5 py-1 bg-surface-container/90 text-primary border border-outline-variant/30 rounded-full text-xs font-bold tracking-wider shadow">
+            <button type="button" onclick="window.navigateOpinionHero(-1, event); return false;" aria-label="Προηγούμενο άρθρο" class="absolute left-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-2xl select-none">chevron_left</span>
+            </button>
+            <button type="button" onclick="window.navigateOpinionHero(1, event); return false;" aria-label="Επόμενο άρθρο" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-2xl select-none">chevron_right</span>
+            </button>
+            <div class="absolute top-3 right-3 z-50 px-2.5 py-1 bg-surface-container/95 text-primary border border-outline-variant/40 rounded-full text-xs font-bold tracking-wider shadow">
                 1 / ${articles.length}
             </div>`;
         }
 
         const heroHtml = `
-            <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
-                ${heroArrowsHtml}
-                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
-                    ${latestBadge}
-                </div>
-                <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge} <span id="comments-badge-${article.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
-                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
-                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
-                    <div class="mt-auto overflow-hidden">
-                        ${bulletsHtml}
+            <div class="relative w-full h-full flex flex-col group/hero">
+                <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
+                    <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                        <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
+                        ${latestBadge}
                     </div>
-                </div>
-            </a>
+                    <div class="p-6 flex flex-col flex-1">
+                        <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge} <span id="comments-badge-${article.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                        <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
+                        <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
+                        <div class="mt-auto overflow-hidden">
+                            ${bulletsHtml}
+                        </div>
+                    </div>
+                </a>
+                ${heroArrowsHtml}
+            </div>
         `;
 
         if (categoryFilter === 'Άποψη' && articles.length > 0) {
@@ -224,26 +220,23 @@ module.exports = async (req, res) => {
 
         const preloadTag = `<link rel="preload" as="image" href="${imageUrl}">`;
 
-        // Inject Preload Tag
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
         
-        // Inject Hero HTML
         const heroRegex = /(<!-- HERO_START -->)([\s\S]*?)(<!-- HERO_END -->)/i;
         if (heroRegex.test(html)) {
             html = html.replace(heroRegex, `$1\n${heroHtml}\n$3`);
         } else {
-            // Fallback just in case
             const fallbackRegex = /(<div[^>]*id="hero-container"[^>]*>)([\s\S]*?)(<\/div>)/i;
             html = html.replace(fallbackRegex, `$1\n${heroHtml}\n$3`);
         }
         
-        res.status(200).send(html);
+        return res.status(200).send(html);
 
     } catch (err) {
         console.error('SSR Index Error:', err);
         const templatePath = path.join(__dirname, '../index.html');
         let html = fs.readFileSync(templatePath, 'utf8');
         html += `<!-- SSR ERROR: ${err.message}\n${err.stack} -->`;
-        res.status(200).send(html); // Fallback to raw HTML
+        return res.status(200).send(html);
     }
 };

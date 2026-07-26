@@ -459,9 +459,11 @@
             if (!articlesToUse || articlesToUse.length === 0) return;
             window.opinionHeroIndex = (window.opinionHeroIndex + dir + articlesToUse.length) % articlesToUse.length;
             const targetArt = articlesToUse[window.opinionHeroIndex];
-            window.currentHeroId = targetArt.id;
-            window.currentHeroDate = targetArt.created_at;
-            renderHero(targetArt);
+            if (targetArt) {
+                window.currentHeroId = targetArt.id;
+                window.currentHeroDate = targetArt.created_at;
+                renderHero(targetArt);
+            }
         };
 
         window.scrollCarousel = function(direction) {
@@ -603,17 +605,16 @@
                 const curIdx = window.opinionHeroIndex + 1;
                 const total = articlesToUse.length;
                 heroArrowsHtml = `
-                <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-between px-3 pointer-events-none">
-                    <button onclick="navigateOpinionHero(-1, event)" aria-label="Προηγούμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
-                        <span class="material-symbols-outlined text-2xl">chevron_left</span>
-                    </button>
-                    <button onclick="navigateOpinionHero(1, event)" aria-label="Επόμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
-                        <span class="material-symbols-outlined text-2xl">chevron_right</span>
-                    </button>
-                </div>
-                <div class="absolute top-3 right-3 z-30 px-2.5 py-1 bg-surface-container/90 text-primary border border-outline-variant/30 rounded-full text-xs font-bold tracking-wider shadow">
+                <button type="button" onclick="window.navigateOpinionHero(-1, event); return false;" aria-label="Προηγούμενο άρθρο" class="absolute left-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-2xl select-none">chevron_left</span>
+                </button>
+                <button type="button" onclick="window.navigateOpinionHero(1, event); return false;" aria-label="Επόμενο άρθρο" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-2xl select-none">chevron_right</span>
+                </button>
+                <div class="absolute top-3 right-3 z-50 px-2.5 py-1 bg-surface-container/95 text-primary border border-outline-variant/40 rounded-full text-xs font-bold tracking-wider shadow">
                     ${curIdx} / ${total}
                 </div>`;
+            }
             }
 
             heroEl.innerHTML = `<div class="relative w-full h-full flex flex-col group/hero">
@@ -997,13 +998,23 @@
 
             // PHASE 1 — hero (limit=1) fires immediately if no SSR hero
             if (!hasSsrHero) {
-                const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
+                const isApopsi = (activeCategory === 'Άποψη');
+                const heroUrl = isApopsi ? '/api/articles?opinionOnly=true' : `/api/articles?limit=1&category=${apiCat}`;
+                fetch(heroUrl)
                     .then(r => r.json())
                     .then(data => {
-                        if (data && data[0]) {
-                            window.currentHeroId = data[0].id;
-                            window.currentHeroDate = data[0].created_at;
-                            renderHero(processImage(data[0]));
+                        if (data && data.length > 0) {
+                            const processed = data.map(processImage);
+                            if (isApopsi) {
+                                window.opinionArticles = processed;
+                                ownArticles = processed;
+                                window.opinionHeroIndex = 0;
+                                renderHero(processed[0]);
+                            } else {
+                                window.currentHeroId = processed[0].id;
+                                window.currentHeroDate = processed[0].created_at;
+                                renderHero(processed[0]);
+                            }
                         }
                     })
                     .catch(err => console.error('[Phase1]', err));
@@ -1017,7 +1028,7 @@
                 .then(data => data.map(processImage))
                 .catch(() => []);
 
-            const ownPromise = activeCategory === null
+            const ownPromise = (activeCategory === null || activeCategory === 'Άποψη')
                 ? fetch('/api/articles?opinionOnly=true').then(r => r.json()).then(data => data.map(processImage)).catch(() => [])
                 : Promise.resolve([]);
 
