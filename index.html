@@ -449,8 +449,8 @@
         window.opinionArticles = [];
         window.navigateOpinionHero = function(dir, event) {
             if (event) {
-                event.preventDefault();
-                event.stopPropagation();
+                if (typeof event.preventDefault === 'function') event.preventDefault();
+                if (typeof event.stopPropagation === 'function') event.stopPropagation();
             }
             const articlesToUse = (window.opinionArticles && window.opinionArticles.length > 0)
                 ? window.opinionArticles
@@ -616,22 +616,24 @@
                 </div>`;
             }
 
-            heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
-                ${pinButtonHtml(a.id, a.pinned_at)}
-                ${heroArrowsHtml}
-                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
-                    ${latestBadge}
-                </div>
-                <div class="p-6 flex flex-col flex-1">
-                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
-                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
-                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
-                    <div class="mt-auto overflow-hidden">
-                        ${bulletsHtml}
+            heroEl.innerHTML = `<div class="relative w-full h-full flex flex-col group/hero">
+                <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
+                    ${pinButtonHtml(a.id, a.pinned_at)}
+                    <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                        <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                        ${latestBadge}
                     </div>
-                </div>
-            </a>`;
+                    <div class="p-6 flex flex-col flex-1">
+                        <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                        <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
+                        <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
+                        <div class="mt-auto overflow-hidden">
+                            ${bulletsHtml}
+                        </div>
+                    </div>
+                </a>
+                ${heroArrowsHtml}
+            </div>`;
 
             // Sync stream height to hero height on desktop
             syncStreamHeight();
