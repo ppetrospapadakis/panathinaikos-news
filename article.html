@@ -412,9 +412,10 @@
                     }
                 });
                 fetchSidebarStream();
-            if (isOwnArticle(article)) {
-                setupBottomGridForOwn(article);
-            }
+                const currentArt = window.currentArticleData;
+                if (currentArt && isOwnArticle(currentArt)) {
+                    setupBottomGridForOwn(currentArt);
+                }
             renderQuickLinks();
                 return;
             }
