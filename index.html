@@ -322,10 +322,11 @@
         }
 
         function isOwnArticle(a) {
-        if (!a) return false;
-        const src = (a.source_url || '').toLowerCase();
-        return src.includes('manual') || src.includes('opinion://');
-    }
+            if (!a) return false;
+            const src = (a.source_url || '').toLowerCase();
+            const cat = (a.category || '').toLowerCase();
+            return src.includes('manual') || src.includes('opinion://') || cat.includes('άποψη');
+        }
 
         function getCategoryCleanName(category) {
             const cat = (category || '').toLowerCase();

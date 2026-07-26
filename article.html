@@ -663,7 +663,8 @@
             else streamEl.classList.remove('hidden');
             
             try {
-                let url = '/api/articles?page=' + sidebarPage;
+                const isCurrentOwn = isOwnArticle(window.currentArticleData);
+                let url = isCurrentOwn ? '/api/articles?opinionOnly=true' : ('/api/articles?page=' + sidebarPage);
                 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch stream');
@@ -708,7 +709,14 @@
             }
         }
                 
-                function getCategoryCleanName(cat) {
+                function isOwnArticle(a) {
+            if (!a) return false;
+            const src = (a.source_url || '').toLowerCase();
+            const cat = (a.category || '').toLowerCase();
+            return src.includes('manual') || src.includes('opinion://') || cat.includes('άποψη');
+        }
+
+        function getCategoryCleanName(cat) {
                     if (!cat) return 'podosfairo';
                     if (cat.includes('Ποδόσφαιρο')) return 'podosfairo';
                     if (cat.includes('Μπάσκετ')) return 'basket';
@@ -772,7 +780,7 @@
                     // Setup More News grid
                     if (moreNewsSection) {
                         moreNewsSection.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30">
-                            <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
+                            <h2 class="font-h2 text-h2 mb-6">${isOwnArticle(window.currentArticleData) ? 'Περισσότερη αρθρογραφία' : 'Περισσότερες Ειδήσεις'}</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bottom-grid-cards"></div>`;
                         gridContainer = document.getElementById('bottom-grid-cards');
