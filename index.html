@@ -383,8 +383,8 @@
             { name: '🏀 Μπάσκετ',   category: 'Μπάσκετ',    icon: 'sports_basketball',url: '/basket' },
             { name: '🤾 Ερασιτέχνης',category: 'Ερασιτέχνης',icon: 'sports',          url: '/erasitexnis' },
             { name: '✍️ Άποψη',     category: 'Άποψη',       icon: 'rate_review',     url: '/apopsi' },
-            { name: '📅 Πρόγραμμα', category: 'Schedule',    icon: 'calendar_month',  url: 'fixtures.html' },
-            { name: '📊 ΡΟΣΤΕΡ',    category: 'Roster',      icon: 'groups',          url: 'roster.html' }
+            { name: '📊 ΡΟΣΤΕΡ',    category: 'Roster',      icon: 'groups',          url: 'roster.html' },
+            { name: '📅 Πρόγραμμα', category: 'Schedule',    icon: 'calendar_month',  url: 'fixtures.html' }
         ];
 
         function renderQuickLinks() {
@@ -583,6 +583,17 @@
 
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+
+            const heroContainer = document.getElementById('hero-container');
+            const streamContainer = document.getElementById('stream-container');
+            const streamWrapper = streamContainer ? streamContainer.parentElement : null;
+            if (activeCategory === 'Άποψη') {
+                if (heroContainer) heroContainer.className = 'lg:col-span-12 flex flex-col';
+                if (streamWrapper) streamWrapper.classList.add('hidden');
+            } else {
+                if (heroContainer) heroContainer.className = 'lg:col-span-8 flex flex-col';
+                if (streamWrapper) streamWrapper.classList.remove('hidden');
+            }
 
             heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
                 ${pinButtonHtml(a.id, a.pinned_at)}
