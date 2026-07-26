@@ -85,9 +85,10 @@ module.exports = async (req, res) => {
             query = query.not('category', 'ilike', '%Ερασιτέχνης%');
         }
 
+        const fetchLimit = (categoryFilter === 'Άποψη') ? 20 : 1;
         query = query.order('created_at', { ascending: false })
             .order('id', { ascending: false })
-            .limit(1);
+            .limit(fetchLimit);
 
         const { data: articles, error } = await query;
         let article = (articles && articles.length > 0) ? articles[0] : null;
@@ -148,13 +149,9 @@ module.exports = async (req, res) => {
             : '';
 
         let bulletsHtml = '';
-        let parsedBullets = [];
-        if (article.bullets) {
-            if (Array.isArray(article.bullets)) {
-                parsedBullets = article.bullets;
-            } else if (typeof article.bullets === 'string') {
-                try { parsedBullets = JSON.parse(article.bullets); } catch(e) {}
-            }
+        let parsedBullets = Array.isArray(article.bullets) ? article.bullets : [];
+        if (typeof article.bullets === 'string') {
+            try { parsedBullets = JSON.parse(article.bullets); } catch (_) {}
         }
         if (parsedBullets && parsedBullets.length > 0) {
             bulletsHtml = `<div class="mt-4 p-4 bg-background/60 rounded-xl border border-primary/25 overflow-hidden">
@@ -174,8 +171,25 @@ module.exports = async (req, res) => {
         const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
         const ownBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
+        let heroArrowsHtml = '';
+        if (categoryFilter === 'Άποψη' && articles.length > 1) {
+            heroArrowsHtml = `
+            <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-between px-3 pointer-events-none">
+                <button onclick="navigateOpinionHero(-1, event)" aria-label="Προηγούμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-2xl">chevron_left</span>
+                </button>
+                <button onclick="navigateOpinionHero(1, event)" aria-label="Επόμενο άρθρο" class="pointer-events-auto w-11 h-11 rounded-full bg-surface-container/90 border border-outline-variant/40 flex items-center justify-center text-primary shadow-xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-2xl">chevron_right</span>
+                </button>
+            </div>
+            <div class="absolute top-3 right-3 z-30 px-2.5 py-1 bg-surface-container/90 text-primary border border-outline-variant/30 rounded-full text-xs font-bold tracking-wider shadow">
+                1 / ${articles.length}
+            </div>`;
+        }
+
         const heroHtml = `
-            <a class="group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
+            <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
+                ${heroArrowsHtml}
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
                     <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
@@ -190,6 +204,23 @@ module.exports = async (req, res) => {
                 </div>
             </a>
         `;
+
+        if (categoryFilter === 'Άποψη' && articles.length > 0) {
+            const opinionArticlesJson = JSON.stringify(articles.map(a => ({
+                id: a.id,
+                title: a.title,
+                summary: a.summary,
+                content: a.content,
+                image_url: a.image_url,
+                category: a.category,
+                source_url: a.source_url,
+                created_at: a.created_at,
+                bullets: a.bullets,
+                pinned_at: a.pinned_at
+            })));
+            const injectScript = `<script>window.opinionArticles = ${opinionArticlesJson};</script>`;
+            html = html.replace('</head>', `${injectScript}\n</head>`);
+        }
 
         const preloadTag = `<link rel="preload" as="image" href="${imageUrl}">`;
 
