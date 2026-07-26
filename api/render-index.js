@@ -84,10 +84,9 @@ module.exports = async (req, res) => {
             query = query.not('category', 'ilike', '%Ερασιτέχνης%');
         }
 
-        const fetchLimit = (categoryFilter === 'Άποψη') ? 20 : 1;
         query = query.order('created_at', { ascending: false })
             .order('id', { ascending: false })
-            .limit(fetchLimit);
+            .limit(1);
 
         const { data: articles, error } = await query;
         let article = (articles && articles.length > 0) ? articles[0] : null;
@@ -167,66 +166,32 @@ module.exports = async (req, res) => {
         const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
         const ownBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
-        let heroArrowsHtml = '';
-        if (categoryFilter === 'Άποψη' && articles.length > 1) {
-            heroArrowsHtml = `
-            <button type="button" onclick="window.navigateOpinionHero(-1, event); return false;" aria-label="Προηγούμενο άρθρο" class="absolute left-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
-                <span class="material-symbols-outlined text-2xl select-none">chevron_left</span>
-            </button>
-            <button type="button" onclick="window.navigateOpinionHero(1, event); return false;" aria-label="Επόμενο άρθρο" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
-                <span class="material-symbols-outlined text-2xl select-none">chevron_right</span>
-            </button>
-            <div class="absolute top-3 right-3 z-50 px-2.5 py-1 bg-surface-container/95 text-primary border border-outline-variant/40 rounded-full text-xs font-bold tracking-wider shadow">
-                1 / ${articles.length}
-            </div>`;
-        }
-
         const heroHtml = `
-            <div class="relative w-full h-full flex flex-col group/hero">
-                <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
-                    <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                        <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
-                        ${latestBadge}
+            <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-ssr="true" data-article="${escapeHtml(articleJson)}">
+                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${imageUrl}" alt="${article.title||''}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    ${latestBadge}
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge} <span id="comments-badge-${article.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
+                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
+                    <div class="mt-auto overflow-hidden">
+                        ${bulletsHtml}
                     </div>
-                    <div class="p-6 flex flex-col flex-1">
-                        <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${pubDate} ${ownBadge} ${officialBadge} <span id="comments-badge-${article.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
-                        <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${article.title||''}</h2>
-                        <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${article.summary||''}</p>
-                        <div class="mt-auto overflow-hidden">
-                            ${bulletsHtml}
-                        </div>
-                    </div>
-                </a>
-                ${heroArrowsHtml}
-            </div>
+                </div>
+            </a>
         `;
-
-        if (categoryFilter === 'Άποψη' && articles.length > 0) {
-            const opinionArticlesJson = JSON.stringify(articles.map(a => ({
-                id: a.id,
-                title: a.title,
-                summary: a.summary,
-                content: a.content,
-                image_url: a.image_url,
-                category: a.category,
-                source_url: a.source_url,
-                created_at: a.created_at,
-                bullets: a.bullets,
-                pinned_at: a.pinned_at
-            })));
-            const injectScript = `<script>window.opinionArticles = ${opinionArticlesJson};</script>`;
-            html = html.replace('</head>', `${injectScript}\n</head>`);
-        }
 
         const preloadTag = `<link rel="preload" as="image" href="${imageUrl}">`;
 
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
         
-        const heroRegex = /(<!-- HERO_START -->)([\s\S]*?)(<!-- HERO_END -->)/i;
+        const heroRegex = /(<!-- HERO_START -->)([sS]*?)(<!-- HERO_END -->)/i;
         if (heroRegex.test(html)) {
             html = html.replace(heroRegex, `$1\n${heroHtml}\n$3`);
         } else {
-            const fallbackRegex = /(<div[^>]*id="hero-container"[^>]*>)([\s\S]*?)(<\/div>)/i;
+            const fallbackRegex = /(<div[^>]*id="hero-container"[^>]*>)([sS]*?)(</div>)/i;
             html = html.replace(fallbackRegex, `$1\n${heroHtml}\n$3`);
         }
         

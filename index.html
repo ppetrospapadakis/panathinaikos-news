@@ -445,27 +445,7 @@
         
 
         
-        window.opinionHeroIndex = 0;
-        window.opinionArticles = [];
-        window.navigateOpinionHero = function(dir, event) {
-            if (event) {
-                if (typeof event.preventDefault === 'function') event.preventDefault();
-                if (typeof event.stopPropagation === 'function') event.stopPropagation();
-            }
-            const articlesToUse = (window.opinionArticles && window.opinionArticles.length > 0)
-                ? window.opinionArticles
-                : (ownArticles || []);
-
-            if (!articlesToUse || articlesToUse.length === 0) return;
-            window.opinionHeroIndex = (window.opinionHeroIndex + dir + articlesToUse.length) % articlesToUse.length;
-            const targetArt = articlesToUse[window.opinionHeroIndex];
-            if (targetArt) {
-                window.currentHeroId = targetArt.id;
-                window.currentHeroDate = targetArt.created_at;
-                renderHero(targetArt);
-            }
-        };
-
+        
         window.scrollCarousel = function(direction) {
             const c = document.getElementById('own-carousel-container');
             if (c) c.scrollBy({ left: direction === 'left' ? -380 : 380, behavior: 'smooth' });
@@ -596,45 +576,21 @@
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
-            const articlesToUse = (window.opinionArticles && window.opinionArticles.length > 0)
-                ? window.opinionArticles
-                : (ownArticles || []);
-
-            let heroArrowsHtml = '';
-            if (activeCategory === 'Άποψη' && articlesToUse && articlesToUse.length > 1) {
-                const curIdx = window.opinionHeroIndex + 1;
-                const total = articlesToUse.length;
-                heroArrowsHtml = `
-                <button type="button" onclick="window.navigateOpinionHero(-1, event); return false;" aria-label="Προηγούμενο άρθρο" class="absolute left-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-2xl select-none">chevron_left</span>
-                </button>
-                <button type="button" onclick="window.navigateOpinionHero(1, event); return false;" aria-label="Επόμενο άρθρο" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 w-11 h-11 rounded-full bg-surface-container/95 border border-outline-variant/50 flex items-center justify-center text-primary shadow-2xl hover:bg-surface-container-high hover:scale-110 active:scale-95 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-2xl select-none">chevron_right</span>
-                </button>
-                <div class="absolute top-3 right-3 z-50 px-2.5 py-1 bg-surface-container/95 text-primary border border-outline-variant/40 rounded-full text-xs font-bold tracking-wider shadow">
-                    ${curIdx} / ${total}
-                </div>`;
-            }
-            }
-
-            heroEl.innerHTML = `<div class="relative w-full h-full flex flex-col group/hero">
-                <a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
-                    ${pinButtonHtml(a.id, a.pinned_at)}
-                    <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                        <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
-                        ${latestBadge}
+            heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
+                ${pinButtonHtml(a.id, a.pinned_at)}
+                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    ${latestBadge}
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
+                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
+                    <div class="mt-auto overflow-hidden">
+                        ${bulletsHtml}
                     </div>
-                    <div class="p-6 flex flex-col flex-1">
-                        <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
-                        <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
-                        <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
-                        <div class="mt-auto overflow-hidden">
-                            ${bulletsHtml}
-                        </div>
-                    </div>
-                </a>
-                ${heroArrowsHtml}
-            </div>`;
+                </div>
+            </a>`;
 
             // Sync stream height to hero height on desktop
             syncStreamHeight();
@@ -843,9 +799,9 @@
             }
 
             // More News section (Περισσότερες Ειδήσεις)
-            const bottomArticles = activeCategory === null
-                ? scraperGroups.map(g => g.main)
-                : sideCandidates.map(g => g.main);
+            const bottomArticles = activeCategory === 'Άποψη'
+                ? (ownArticles.length > 0 ? ownArticles.filter(a => a.id !== window.currentHeroId) : ownGroups.map(g => g.main).filter(g => g.id !== window.currentHeroId))
+                : (activeCategory === null ? scraperGroups.map(g => g.main) : sideCandidates.map(g => g.main));
 
             if (bottomArticles.length > 0 && moreNewsEl) {
                 moreNewsObserver = new IntersectionObserver(entries => {
@@ -998,23 +954,13 @@
 
             // PHASE 1 — hero (limit=1) fires immediately if no SSR hero
             if (!hasSsrHero) {
-                const isApopsi = (activeCategory === 'Άποψη');
-                const heroUrl = isApopsi ? '/api/articles?opinionOnly=true' : `/api/articles?limit=1&category=${apiCat}`;
-                fetch(heroUrl)
+                const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
                     .then(r => r.json())
                     .then(data => {
-                        if (data && data.length > 0) {
-                            const processed = data.map(processImage);
-                            if (isApopsi) {
-                                window.opinionArticles = processed;
-                                ownArticles = processed;
-                                window.opinionHeroIndex = 0;
-                                renderHero(processed[0]);
-                            } else {
-                                window.currentHeroId = processed[0].id;
-                                window.currentHeroDate = processed[0].created_at;
-                                renderHero(processed[0]);
-                            }
+                        if (data && data[0]) {
+                            window.currentHeroId = data[0].id;
+                            window.currentHeroDate = data[0].created_at;
+                            renderHero(processImage(data[0]));
                         }
                     })
                     .catch(err => console.error('[Phase1]', err));
