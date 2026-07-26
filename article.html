@@ -442,6 +442,7 @@
         }
 
         function renderArticle(article) {
+            window.currentArticleData = article;
             // Page title
             document.title = `${article.title} | Panathinaikos News`;
 
@@ -663,7 +664,8 @@
             else streamEl.classList.remove('hidden');
             
             try {
-                const isCurrentOwn = isOwnArticle(window.currentArticleData);
+                const currentData = window.currentArticleData || {};
+                const isCurrentOwn = isOwnArticle(currentData);
                 let url = isCurrentOwn ? '/api/articles?opinionOnly=true' : ('/api/articles?page=' + sidebarPage);
                 
                 const response = await fetch(url);

@@ -891,6 +891,12 @@
 
         async function fetchMorePages() {
             if (isFetchingMore || !streamHasMore) return;
+            if (activeCategory === 'Άποψη') {
+                streamHasMore = false;
+                const sentinel = document.getElementById('feed-sentinel');
+                if (sentinel) sentinel.classList.add('hidden');
+                return;
+            }
             isFetchingMore = true;
             const sentinel = document.getElementById('feed-sentinel');
             try {
