@@ -187,11 +187,11 @@ module.exports = async (req, res) => {
 
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
         
-        const heroRegex = /(<!-- HERO_START -->)([sS]*?)(<!-- HERO_END -->)/i;
+        const heroRegex = /(<!-- HERO_START -->)([\s\S]*?)(<!-- HERO_END -->)/i;
         if (heroRegex.test(html)) {
             html = html.replace(heroRegex, `$1\n${heroHtml}\n$3`);
         } else {
-            const fallbackRegex = /(<div[^>]*id="hero-container"[^>]*>)([sS]*?)(</div>)/i;
+            const fallbackRegex = /(<div[^>]*id="hero-container"[^>]*>)([\s\S]*?)(<\/div>)/i;
             html = html.replace(fallbackRegex, `$1\n${heroHtml}\n$3`);
         }
         
