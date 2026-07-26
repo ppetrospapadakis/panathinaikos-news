@@ -72,20 +72,26 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
-    const { id } = req.query;
+    const rawId = (req.query.id || '').trim();
 
-    if (!id) {
+    if (!rawId) {
         return res.status(400).send('<h1>Σφάλμα: Λείπει το ID άρθρου.</h1>');
     }
 
     try {
         // 1. Fetch article from Supabase (supports both 8-char short ID and 36-char full UUID)
         let query = supabase.from('articles').select('*');
-        if (id.length === 36) {
-            query = query.eq('id', id);
+        if (rawId.length === 36) {
+            query = query.eq('id', rawId);
+        } else if (rawId.length >= 8) {
+            const shortHex = rawId.substring(0, 8);
+            query = query
+                .gte('id', `${shortHex}-0000-0000-0000-000000000000`)
+                .lte('id', `${shortHex}-ffff-ffff-ffff-ffffffffffff`);
         } else {
-            query = query.ilike('id', `${id}%`);
+            query = query.eq('id', rawId);
         }
+
         let { data: articles, error } = await query.limit(1);
         let article = (articles && articles.length > 0) ? articles[0] : null;
 
