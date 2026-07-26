@@ -1,18 +1,20 @@
 {
   "version": 2,
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=30"
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
         }
       ]
     },
     {
-      "source": "/(style.css|logo.png|favicon.png|favicon.ico|opinion_admin.js)",
+      "source": "/(style.css|logo.png|favicon.png|favicon.ico)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -22,29 +24,94 @@
     }
   ],
   "redirects": [
-    { "source": "/matches.html", "destination": "/", "permanent": true },
-    { "source": "/agones", "destination": "/", "permanent": true },
-    { "source": "/sport-latest.html", "destination": "/", "permanent": true }
+    {
+      "source": "/matches.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/agones",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/sport-latest.html",
+      "destination": "/",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/basket", "destination": "/api/render-index?category=basket" },
-    { "source": "/podosfairo", "destination": "/api/render-index?category=football" },
-    { "source": "/erasitexnis", "destination": "/api/render-index?category=erasitexnis" },
-    { "source": "/erasitechnis", "destination": "/api/render-index?category=erasitexnis" },
-    { "source": "/apopsi", "destination": "/api/render-index?category=apopsi" },
-    { "source": "/metagrafes", "destination": "/api/render-index?category=metagrafes" },
-    { "source": "/analytics", "destination": "/login.html" },
-    { "source": "/dashboard", "destination": "/login.html" },
-    { "source": "/admin", "destination": "/login.html" },
-    { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/fixtures", "destination": "/fixtures.html" },
-    { "source": "/schedule", "destination": "/fixtures.html" },
-    { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
-    { "source": "/terms-of-service", "destination": "/terms-of-service.html" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/feed.xml", "destination": "/api/feed" },
-    { "source": "/:category/:slug-id=:id", "destination": "/api/render-article?id=:id" },
-    { "source": "/", "destination": "/api/render-index" }
+    {
+      "source": "/basket",
+      "destination": "/api/render-index?category=basket"
+    },
+    {
+      "source": "/podosfairo",
+      "destination": "/api/render-index?category=football"
+    },
+    {
+      "source": "/erasitexnis",
+      "destination": "/api/render-index?category=erasitexnis"
+    },
+    {
+      "source": "/erasitechnis",
+      "destination": "/api/render-index?category=erasitexnis"
+    },
+    {
+      "source": "/apopsi",
+      "destination": "/api/render-index?category=apopsi"
+    },
+    {
+      "source": "/metagrafes",
+      "destination": "/api/render-index?category=metagrafes"
+    },
+    {
+      "source": "/analytics",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/fixtures",
+      "destination": "/fixtures.html"
+    },
+    {
+      "source": "/schedule",
+      "destination": "/fixtures.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/terms-of-service",
+      "destination": "/terms-of-service.html"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/feed.xml",
+      "destination": "/api/feed"
+    },
+    {
+      "source": "/:category/:slug-id=:id",
+      "destination": "/api/render-article?id=:id"
+    },
+    {
+      "source": "/",
+      "destination": "/api/render-index"
+    }
   ]
 }
-
