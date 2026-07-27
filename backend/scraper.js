@@ -303,18 +303,68 @@ function isPanathinaikosArticle(title, text) {
     return checkMatch(combinedTitle) || checkMatch(combinedText);
 }
 
-// ─── Jaccard similarity ────────────────────────────────────────────────────────
+// ─── Jaccard similarity & Text Normalization ──────────────────────────────────
+function stripGreekAccents(str) {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function stemGreekWord(word) {
+    if (word.length <= 4) return word;
+    return word.replace(/(εισ|εων|ουσ|ους|ιασ|ιας|ικος|ικη|ικης|ικου|ικων|ικα|ικο|ιο|ια|ιου|ιων|ησ|ης|ου|ων|οσ|ος|ασ|ας|εσ|ες|α|η|ο|υ|ε)$/, '');
+}
+
+function getCanonicalArticleId(urlStr) {
+    if (!urlStr) return '';
+    try {
+        const u = new URL(urlStr.trim());
+        const hostname = u.hostname.toLowerCase();
+        const path = u.pathname;
+
+        if (hostname.includes('sport-fm.gr')) {
+            const m = path.match(/\/(\d+)\/?$/);
+            if (m) return `sport-fm:${m[1]}`;
+        }
+        if (hostname.includes('sdna.gr')) {
+            const m = path.match(/\/(\d+)_[^\/]+/);
+            if (m) return `sdna:${m[1]}`;
+        }
+        if (hostname.includes('gazzetta.gr')) {
+            const m = path.match(/\/(\d+)\/[^\/]+/);
+            if (m) return `gazzetta:${m[1]}`;
+        }
+        if (hostname.includes('sportal.gr')) {
+            const m = path.match(/\/article\/([^\/]+)/);
+            if (m) return `sportal:${m[1]}`;
+        }
+        if (hostname.includes('sport24.gr')) {
+            const m = path.match(/\/([^\/]+)\/?$/);
+            if (m) return `sport24:${m[1]}`;
+        }
+        if (hostname.includes('pao.gr')) {
+            const m = path.match(/\/([^\/]+)\/?$/);
+            if (m) return `pao:${m[1]}`;
+        }
+        return `${hostname}:${path.replace(/\/+$/, '')}`;
+    } catch (_) {
+        return urlStr;
+    }
+}
+
 function cleanTextToWords(text) {
+    const unaccented = stripGreekAccents(text || '');
     const greekStopwords = new Set([
-        'και','το','του','της','στον','στην','από','με','για','στα','στις','στους',
-        'ο','η','οι','τα','ένα','μια','στο','σε','πως','ότι','που','αλλά','ωσ',
+        'και','το','του','της','στον','στην','απο','με','για','στα','στις','στους',
+        'ο','η','οι','τα','ενα','μια','στο','σε','πως','οτι','που','αλλα','ως',
+        'τον','την','των','τους','τις','αμα','αν','στη','στο','στον','κι',
+        'ειναι','ηταν','θα','να','δεν','μην','προς','μετα','υπο','κατα','παρα'
     ]);
-    return new Set(
-        (text || '').toLowerCase()
-            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'«»]/g, ' ')
-            .split(/\s+/)
-            .filter(w => w.length > 2 && !greekStopwords.has(w))
-    );
+    const words = unaccented
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'«»]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !greekStopwords.has(w))
+        .map(w => stemGreekWord(w));
+    return new Set(words);
 }
 
 function jaccardSimilarity(a, b) {
@@ -987,7 +1037,14 @@ async function main() {
 
         rawDbArticles.forEach(a => {
             if (a.source_url) {
-                a.source_url.split(',').forEach(u => existingUrls.add(u.trim()));
+                a.source_url.split(',').forEach(u => {
+                    const cleanU = u.trim();
+                    if (cleanU) {
+                        existingUrls.add(cleanU);
+                        const canonId = getCanonicalArticleId(cleanU);
+                        if (canonId) existingUrls.add(canonId);
+                    }
+                });
             }
             // Only add valid, non-ignored, recent articles (< 48h) to existingArticles for merge matching
             const isIgnored = a.group_id === 'IGNORED_URLS' || (a.title && a.title.includes('[IGNORED')) || a.category === 'SystemRoster';
@@ -1054,7 +1111,8 @@ async function main() {
         runStats.totals.scraped += links.length;
 
         for (const articleUrl of links) {
-            if (!isDryRun && existingUrls.has(articleUrl)) {
+            const canonicalArticleId = getCanonicalArticleId(articleUrl);
+            if (!isDryRun && (existingUrls.has(articleUrl) || (canonicalArticleId && existingUrls.has(canonicalArticleId)))) {
                 totalSkipped++;
                 runStats.sources[target.name].skipped_duplicate++;
                 runStats.totals.skipped_duplicate++;
@@ -1241,8 +1299,9 @@ async function main() {
 
             // ── Cross-Source Cross-Publishing Deduplication ──────────────────
             const currentScrapedTime = new Date(scraped.created_at);
+            const canonicalScraped = getCanonicalArticleId(articleUrl);
             
-            // Collect candidates from the last 120/240 minutes in the same category
+            // Collect candidates from the last 24 hours (1440 mins)
             const candidateArticles = existingArticles.filter(art => {
                 const dbTime = new Date(art.created_at);
                 const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
@@ -1250,13 +1309,22 @@ async function main() {
                 const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
                 const isAmateur = (art.category && art.category.includes('Ερασιτέχνης')) || 
                                  (scrapedCategory && scrapedCategory.includes('Ερασιτέχνης'));
-                const maxWindow = isAmateur ? 600 : 180; // 10 hours for Amateur (600 mins), 3 hours for General (180 mins)
+                const maxWindow = isAmateur ? 1440 : 1440; // 24 hours (1440 mins) for candidate window
                 
                 if (timeDiffMinutes > maxWindow) return false;
+
+                // If candidate already contains this URL or canonical ID, include as top candidate
+                const dbUrls = (art.source_url || '').split(',').map(u => u.trim());
+                const hasCanonicalMatch = dbUrls.some(u => u === articleUrl || (canonicalScraped && getCanonicalArticleId(u) === canonicalScraped));
+                if (hasCanonicalMatch) return true;
                 
                 const scrapedDomain = getSourceNameFromUrl(articleUrl);
-                const dbDomain = getSourceNameFromUrl(art.source_url);
-                if (scrapedDomain === dbDomain) return false; // same source, usually not a duplicate event but a different article
+                const dbDomains = dbUrls.map(u => getSourceNameFromUrl(u));
+                const sameDomainOnly = dbDomains.length > 0 && dbDomains.every(d => d === scrapedDomain);
+                if (sameDomainOnly) {
+                    const sim = jaccardSimilarity(scraped.title, art.title);
+                    if (sim < 0.2) return false;
+                }
                 
                 return true;
             });
@@ -1264,20 +1332,30 @@ async function main() {
             let duplicateArticleId = null;
 
             if (candidateArticles.length > 0) {
-                // First try Jaccard as a fast-pass (if extremely similar title)
-                const exactMatch = candidateArticles.find(art => jaccardSimilarity(scraped.title, art.title) > 0.45);
-                if (exactMatch) {
-                    duplicateArticleId = exactMatch.id;
+                // Direct match by URL / canonical ID
+                const directCanonicalMatch = candidateArticles.find(art => {
+                    const dbUrls = (art.source_url || '').split(',').map(u => u.trim());
+                    return dbUrls.some(u => u === articleUrl || (canonicalScraped && getCanonicalArticleId(u) === canonicalScraped));
+                });
+
+                if (directCanonicalMatch) {
+                    duplicateArticleId = directCanonicalMatch.id;
                 } else {
-                    // Check if any candidate has a similarity > 0.05 (at least 1 common word). If not, bypass AI completely
-                    const hasPossibleMatch = candidateArticles.some(art => jaccardSimilarity(scraped.title, art.title) > 0.05);
-                    
-                    if (!hasPossibleMatch) {
-                        console.log(`  [AI DEDUPLICATION BYPASS] Jaccard similarity too low. Assuming unique event.`);
+                    // Fast pass Jaccard (if title similarity > 0.40)
+                    const exactMatch = candidateArticles.find(art => jaccardSimilarity(scraped.title, art.title) > 0.40);
+                    if (exactMatch) {
+                        duplicateArticleId = exactMatch.id;
                     } else {
-                        // Fallback to Semantic AI Match for borderline cases
-                        console.log(`  [AI DEDUPLICATION] Checking semantic match for "${scraped.title.substring(0, 40)}..." against ${candidateArticles.length} candidates.`);
-                        duplicateArticleId = await checkSemanticDuplicate(scraped.title, scraped.summary, candidateArticles);
+                        // Check if any candidate has a similarity > 0.05
+                        const hasPossibleMatch = candidateArticles.some(art => jaccardSimilarity(scraped.title, art.title) > 0.05);
+                        
+                        if (!hasPossibleMatch) {
+                            console.log(`  [AI DEDUPLICATION BYPASS] Jaccard similarity too low. Assuming unique event.`);
+                        } else {
+                            // Fallback to Semantic AI Match for borderline cases
+                            console.log(`  [AI DEDUPLICATION] Checking semantic match for "${scraped.title.substring(0, 40)}..." against ${candidateArticles.length} candidates.`);
+                            duplicateArticleId = await checkSemanticDuplicate(scraped.title, scraped.summary, candidateArticles);
+                        }
                     }
                 }
             }
@@ -1375,6 +1453,8 @@ async function main() {
                             runStats.totals.merged++;
                             // update local cache to prevent redundant merges
                             duplicateArticle.created_at = new Date().toISOString(); 
+                            existingUrls.add(articleUrl);
+                            if (canonicalScraped) existingUrls.add(canonicalScraped);
                         }
                     }
                 } else {

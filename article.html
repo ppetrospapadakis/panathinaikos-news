@@ -666,6 +666,43 @@
         let currentArticleId = null;
         let sentinelObserver = null;
 
+        function isSameArticle(a) {
+            if (!a) return false;
+            const curData = window.currentArticleData;
+            const curId = currentArticleId || (curData ? curData.id : null);
+            
+            const norm = str => (str || '').toLowerCase().replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF]/g, '').trim();
+
+            if (curId) {
+                const idStr = String(curId).trim();
+                const aIdStr = String(a.id || '').trim();
+                if (aIdStr === idStr) return true;
+                if (idStr.length >= 8 && aIdStr.startsWith(idStr)) return true;
+                if (aIdStr.length >= 8 && idStr.startsWith(aIdStr)) return true;
+            }
+            
+            if (curData) {
+                if (a.id && curData.id && String(a.id) === String(curData.id)) return true;
+                if (a.group_id && curData.group_id && String(a.group_id) === String(curData.group_id)) return true;
+                if (a.title && curData.title) {
+                    const normA = norm(a.title);
+                    const normCur = norm(curData.title);
+                    if (normA && normCur && (normA === normCur || normA.includes(normCur) || normCur.includes(normA))) {
+                        return true;
+                    }
+                }
+            }
+
+            const match = window.location.pathname.match(/-id=([a-zA-Z0-9-]+)/);
+            if (match && match[1]) {
+                const urlId = match[1].trim();
+                const aIdStr = String(a.id || '').trim();
+                if (aIdStr.startsWith(urlId) || urlId.startsWith(aIdStr)) return true;
+            }
+
+            return false;
+        }
+
         function isOwnArticle(a) {
             if (!a) return false;
             const src = (a.source_url || '').toLowerCase();
@@ -690,9 +727,7 @@
                 if (!response.ok) throw new Error('Failed to fetch stream');
                 let articles = await response.json();
                 
-                if (currentArticleId) {
-                    articles = articles.filter(a => String(a.id) !== String(currentArticleId));
-                }
+                articles = (articles || []).filter(a => !isSameArticle(a));
                 
                 if (!articles || articles.length === 0) {
                     sidebarHasMore = false;
@@ -845,7 +880,7 @@
                 if (!res.ok) return;
                 let articles = await res.json();
                 
-                articles = (articles || []).filter(a => isOwnArticle(a) && String(a.id) !== String(currentArticle.id));
+                articles = (articles || []).filter(a => isOwnArticle(a) && !isSameArticle(a));
 
                 if (articles.length === 0) {
                     moreNewsSection.innerHTML = '';

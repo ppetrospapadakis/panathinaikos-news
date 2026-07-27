@@ -587,13 +587,8 @@
             const heroContainer = document.getElementById('hero-container');
             const streamContainer = document.getElementById('stream-container');
             const streamWrapper = streamContainer ? streamContainer.parentElement : null;
-            if (activeCategory === 'Άποψη') {
-                if (heroContainer) heroContainer.className = 'lg:col-span-12 flex flex-col';
-                if (streamWrapper) streamWrapper.classList.add('hidden');
-            } else {
-                if (heroContainer) heroContainer.className = 'lg:col-span-8 flex flex-col';
-                if (streamWrapper) streamWrapper.classList.remove('hidden');
-            }
+            if (heroContainer) heroContainer.className = 'lg:col-span-8 flex flex-col';
+            if (streamWrapper) streamWrapper.classList.remove('hidden');
 
             heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
                 ${pinButtonHtml(a.id, a.pinned_at)}
