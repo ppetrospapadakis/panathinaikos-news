@@ -1420,14 +1420,16 @@ async function main() {
                         }
                         const newSummary = newContent.substring(0, 300); // basic summary
 
-                        // Prefer non-SDNA image
+                        // Prefer real article image over fallback logo, and prefer non-SDNA image
+                        const isFallbackImage = (img) => !img || img === '/logo.png' || img.includes('logo.png') || img === DEFAULT_STADIUM_IMG;
+
                         let newImageUrl = dbArt.image_url;
                         const isDbSdna = (dbArt.source_url || '').toLowerCase().includes('sdna.gr');
                         const isScrapedSdna = articleUrl.toLowerCase().includes('sdna.gr');
                         
-                        if (!newImageUrl && scraped.imageUrl) {
+                        if ((isFallbackImage(newImageUrl) || !newImageUrl) && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
                             newImageUrl = scraped.imageUrl;
-                        } else if (isDbSdna && !isScrapedSdna && scraped.imageUrl) {
+                        } else if (isDbSdna && !isScrapedSdna && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
                             newImageUrl = scraped.imageUrl; // Swap SDNA watermark image with the clean one
                         }
 
