@@ -696,8 +696,8 @@
                 }
             }
 
-            // Safely filter out the Hero from groups to prevent duplicates (except for 'Άποψη')
-            if (window.currentHeroId && activeCategory !== 'Άποψη') {
+            // Safely filter out the Hero from groups to prevent duplicates
+            if (window.currentHeroId) {
                 scraperGroups = scraperGroups.filter(g => g.main.id !== window.currentHeroId);
                 ownGroups = ownGroups.filter(g => g.main.id !== window.currentHeroId);
             }
@@ -738,7 +738,7 @@
                     const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
                     Object.values(newGroupsObj).forEach(g => {
                         g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
-                        if (activeCategory !== 'Άποψη' && window.currentHeroId && g[0].id === window.currentHeroId) return;
+                        if (window.currentHeroId && g[0].id === window.currentHeroId) return;
                         sideCandidates.push({ main: g[0], related: g.slice(1) });
                     });
                 }

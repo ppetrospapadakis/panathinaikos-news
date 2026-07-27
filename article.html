@@ -673,6 +673,18 @@
             
             const norm = str => (str || '').toLowerCase().replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF]/g, '').trim();
 
+            function areTitlesSimilar(t1, t2) {
+                if (!t1 || !t2) return false;
+                const clean = s => s.toLowerCase().replace(/[^\w\s\u0370-\u03FF\u1F00-\u1FFF]/g, ' ').trim();
+                const words1 = new Set(clean(t1).split(/\s+/).filter(w => w.length > 3));
+                const words2 = new Set(clean(t2).split(/\s+/).filter(w => w.length > 3));
+                if (words1.size === 0 || words2.size === 0) return false;
+                let common = 0;
+                words1.forEach(w => { if (words2.has(w)) common++; });
+                const minSize = Math.min(words1.size, words2.size);
+                return minSize > 0 && (common / minSize) >= 0.7;
+            }
+
             if (curId) {
                 const idStr = String(curId).trim();
                 const aIdStr = String(a.id || '').trim();
@@ -684,10 +696,14 @@
             if (curData) {
                 if (a.id && curData.id && String(a.id) === String(curData.id)) return true;
                 if (a.group_id && curData.group_id && String(a.group_id) === String(curData.group_id)) return true;
+                if (a.source_url && curData.source_url && String(a.source_url).trim() === String(curData.source_url).trim()) return true;
                 if (a.title && curData.title) {
                     const normA = norm(a.title);
                     const normCur = norm(curData.title);
                     if (normA && normCur && (normA === normCur || normA.includes(normCur) || normCur.includes(normA))) {
+                        return true;
+                    }
+                    if (areTitlesSimilar(a.title, curData.title)) {
                         return true;
                     }
                 }

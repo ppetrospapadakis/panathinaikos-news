@@ -353,7 +353,7 @@ module.exports = async (req, res) => {
         }
 
         
-        const articleDataJson = JSON.stringify(article);
+        const articleDataJson = JSON.stringify(article).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
         const articleDataScript = `<script>window.currentArticleData = ${articleDataJson};</script>`;
         html = html.replace('</head>', `${articleDataScript}\n</head>`);
 
