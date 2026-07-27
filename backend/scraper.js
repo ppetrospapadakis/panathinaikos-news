@@ -552,7 +552,8 @@ async function scrapeArticlePage(url, categoryHint) {
             '.article-body', '.story-body', '.entry-content', '.post-content', '.html-content',
             '[class*="article-text"]', '[class*="article-content"]',
             '.single-article-content', '.article__body',
-            '.single_article__body', '.single_article', '[class*="single_article"]'
+            '.single_article__body', '.single_article', '[class*="single_article"]',
+            '.prose', 'div.prose'
         ];
         let bodyText = '';
         for (const sel of bodySelectors) {
