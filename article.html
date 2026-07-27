@@ -768,16 +768,19 @@
                 function slugify(text) {
                     if (!text) return "arthro";
                     try {
-                        let slug = (text || "").toString().toLowerCase()
+                        let latin = greekToLatin(text);
+                        let slug = latin
+                            .toLowerCase()
                             .trim()
                             .replace(/\s+/g, '-')
-                            .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+                            .replace(/[^a-z0-9-]+/g, '')
                             .replace(/--+/g, '-')
                             .replace(/^-+/, '')
-                            .replace(/-+$/, '') || "arthro";
-                        if (slug.length > 45) {
-                            const truncated = slug.substring(0, 45).replace(/-[^-]*$/, '');
-                            slug = truncated.length > 10 ? truncated : slug.substring(0, 45);
+                            .replace(/-+$/, '');
+                            
+                        if (slug.length > 35) {
+                            const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+                            slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
                         }
                         return slug || "arthro";
                     } catch(e) {
@@ -917,16 +920,19 @@
                 function slugify(text) {
                     if (!text) return "arthro";
                     try {
-                        let slug = (text || "").toString().toLowerCase()
+                        let latin = greekToLatin(text);
+                        let slug = latin
+                            .toLowerCase()
                             .trim()
                             .replace(/\s+/g, '-')
-                            .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+                            .replace(/[^a-z0-9-]+/g, '')
                             .replace(/--+/g, '-')
                             .replace(/^-+/, '')
-                            .replace(/-+$/, '') || "arthro";
-                        if (slug.length > 45) {
-                            const truncated = slug.substring(0, 45).replace(/-[^-]*$/, '');
-                            slug = truncated.length > 10 ? truncated : slug.substring(0, 45);
+                            .replace(/-+$/, '');
+                            
+                        if (slug.length > 35) {
+                            const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+                            slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
                         }
                         return slug || "arthro";
                     } catch(e) {

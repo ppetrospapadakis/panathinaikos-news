@@ -473,16 +473,61 @@
         // ─────────────────────────────────────────────────────────────────
         
         
+        function greekToLatin(text) {
+            if (!text) return "";
+            let str = text.toLowerCase();
+            str = str
+                .replace(/αι|αί/g, 'ai')
+                .replace(/ει|εί/g, 'ei')
+                .replace(/οι|οί/g, 'oi')
+                .replace(/ου|ού/g, 'ou')
+                .replace(/αυ|αύ/g, 'av')
+                .replace(/ευ|εύ/g, 'ev')
+                .replace(/μπ/g, 'b')
+                .replace(/ντ/g, 'nt')
+                .replace(/γκ/g, 'gk')
+                .replace(/γγ/g, 'ng')
+                .replace(/τζ/g, 'tz')
+                .replace(/τσ/g, 'ts')
+                .replace(/θ/g, 'th')
+                .replace(/χ/g, 'ch')
+                .replace(/ψ/g, 'ps')
+                .replace(/ξ/g, 'x');
+
+            const singleMap = {
+                'α': 'a', 'ά': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'έ': 'e',
+                'ζ': 'z', 'η': 'i', 'ή': 'i', 'ι': 'i', 'ί': 'i', 'ϊ': 'i', 'ΐ': 'i',
+                'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ο': 'o', 'ό': 'o', 'π': 'p',
+                'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'ύ': 'y', 'ϋ': 'y',
+                'ΰ': 'y', 'φ': 'f', 'ω': 'o', 'ώ': 'o'
+            };
+
+            let res = '';
+            for (let i = 0; i < str.length; i++) {
+                const c = str[i];
+                res += singleMap[c] !== undefined ? singleMap[c] : c;
+            }
+            return res;
+        }
+
         function slugify(text) {
             if (!text) return "arthro";
             try {
-                return (text || "").toString().toLowerCase()
+                let latin = greekToLatin(text);
+                let slug = latin
+                    .toLowerCase()
                     .trim()
                     .replace(/\s+/g, '-')
-                    .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+                    .replace(/[^a-z0-9-]+/g, '')
                     .replace(/--+/g, '-')
                     .replace(/^-+/, '')
-                    .replace(/-+$/, '') || "arthro";
+                    .replace(/-+$/, '');
+                    
+                if (slug.length > 35) {
+                    const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+                    slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
+                }
+                return slug || "arthro";
             } catch(e) {
                 return "arthro";
             }
