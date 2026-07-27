@@ -1342,13 +1342,19 @@ async function main() {
                 if (directCanonicalMatch) {
                     duplicateArticleId = directCanonicalMatch.id;
                 } else {
-                    // Fast pass Jaccard (if title similarity > 0.40)
-                    const exactMatch = candidateArticles.find(art => jaccardSimilarity(scraped.title, art.title) > 0.40);
+                    // Fast pass Jaccard (if title similarity > 0.35 OR summary similarity > 0.25)
+                    const exactMatch = candidateArticles.find(art => 
+                        jaccardSimilarity(scraped.title, art.title) > 0.35 ||
+                        jaccardSimilarity(scraped.summary, art.summary) > 0.25
+                    );
                     if (exactMatch) {
                         duplicateArticleId = exactMatch.id;
                     } else {
-                        // Check if any candidate has a similarity > 0.05
-                        const hasPossibleMatch = candidateArticles.some(art => jaccardSimilarity(scraped.title, art.title) > 0.05);
+                        // Check if any candidate has a title similarity > 0.05 OR summary similarity > 0.12
+                        const hasPossibleMatch = candidateArticles.some(art => 
+                            jaccardSimilarity(scraped.title, art.title) > 0.05 ||
+                            jaccardSimilarity(scraped.summary, art.summary) > 0.12
+                        );
                         
                         if (!hasPossibleMatch) {
                             console.log(`  [AI DEDUPLICATION BYPASS] Jaccard similarity too low. Assuming unique event.`);
