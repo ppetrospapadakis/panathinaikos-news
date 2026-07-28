@@ -435,6 +435,8 @@ async function scrapeArticleLinks(target, logErrorCallback) {
     }
 }
 
+const DEFAULT_STADIUM_IMG = '/logo.png';
+
 // ─── Programmatic Image Watermark Sanitizer ──────────────────────────────────
 function sanitizeImageUrl(scrapedImg) {
     if (!scrapedImg || typeof scrapedImg !== 'string') return '';
