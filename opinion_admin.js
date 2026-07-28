@@ -1279,6 +1279,22 @@ function filterTrafficChartsBySource(sourceFilter) {
 window.filterTrafficChartsBySource = filterTrafficChartsBySource;
 
 function renderTrafficCharts(data, filterSource = 'ALL') {
+    // 0. Dynamic Overview Card Filtering
+    const totalArticlesEl = document.getElementById('total-articles-count');
+    const totalArticlesSubEl = document.getElementById('total-articles-sub');
+    if (totalArticlesEl) {
+        if (filterSource === 'ALL') {
+            const dbTotal = (data.database && data.database.total_articles) || 0;
+            totalArticlesEl.textContent = dbTotal.toLocaleString('el-GR');
+            if (totalArticlesSubEl) totalArticlesSubEl.textContent = 'Αθροιστικά — ever';
+        } else {
+            const totalBySrc = data.total_by_source || {};
+            const srcCount = totalBySrc[filterSource] || 0;
+            totalArticlesEl.textContent = srcCount.toLocaleString('el-GR');
+            if (totalArticlesSubEl) totalArticlesSubEl.textContent = `Πηγή: ${filterSource}`;
+        }
+    }
+
     // 4. Render 24h Post Activity Chart
     const hourlyBySource = data.hourly_by_source || Array(24).fill(null).map(() => ({}));
     const hourlyLabels = data.hourly_labels || Array(24).fill(null).map((_, i) => `${String(i).padStart(2,'0')}:00`);

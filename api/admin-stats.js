@@ -61,6 +61,7 @@ module.exports = async (req, res) => {
             page++;
         }
 
+        const totalBySource = {};
         const windowStart = now - 24 * 60 * 60 * 1000; // 24h ago in ms
         const hourlyDistribution = Array(24).fill(0);
         const hourlyBySource = Array(24).fill(null).map(() => ({}));
@@ -104,10 +105,14 @@ module.exports = async (req, res) => {
                         else if (raw.includes('gazzetta')) srcLabel = 'Gazzetta';
                         else if (raw.includes('athletiko')) srcLabel = 'Athletiko';
                         else if (raw.includes('monobala')) srcLabel = 'Monobala';
+                        else if (art.source_url.includes('pao1908.com') || art.source_url.includes('pao1908')) srcLabel = 'PAO1908 Official';
+                        else if (art.source_url.includes('pao.gr') || art.source_url.includes('paobc.gr')) srcLabel = 'PAO Official';
                         else if (art.source_url.includes('opinion://manual') || art.source_url.includes('manual')) srcLabel = 'Manual';
                         else srcLabel = raw.charAt(0).toUpperCase() + raw.slice(1);
                     } catch {}
                 }
+
+                totalBySource[srcLabel] = (totalBySource[srcLabel] || 0) + 1;
 
                 // 1. 24h Hourly bucket
                 if (artMs >= windowStart) {
@@ -251,7 +256,8 @@ module.exports = async (req, res) => {
             hourly_labels: hourlyLabels,
             daily_posts: dailyDistribution,
             daily_by_source: dailyBySource,
-            daily_labels: dailyLabels
+            daily_labels: dailyLabels,
+            total_by_source: totalBySource
         });
 
     } catch (err) {
