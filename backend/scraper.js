@@ -1638,7 +1638,7 @@ async function main() {
             stats: runStats
         });
         if (logErr) {
-            console.error('[ANALYTICS] Failed to log scraping run stats:', logErr.message);
+            console.warn('[ANALYTICS] Scraping run stats write skipped:', logErr.message);
         } else {
             console.log('[ANALYTICS] Scraping run logged successfully.');
         }
