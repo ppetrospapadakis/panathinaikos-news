@@ -44,10 +44,22 @@ module.exports = async (req, res) => {
         const last24hIso = new Date(now - 24 * 60 * 60 * 1000).toISOString();
         const last30dIso = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-        const { data: recentArticles } = await supabase
-            .from('articles')
-            .select('created_at, source_url')
-            .gt('created_at', last30dIso);
+        let recentArticles = [];
+        let page = 0;
+        const pageSize = 1000;
+        while (true) {
+            const { data, error } = await supabase
+                .from('articles')
+                .select('created_at, source_url')
+                .gt('created_at', last30dIso)
+                .order('created_at', { ascending: false })
+                .range(page * pageSize, (page + 1) * pageSize - 1);
+
+            if (error || !data || data.length === 0) break;
+            recentArticles.push(...data);
+            if (data.length < pageSize) break;
+            page++;
+        }
 
         const windowStart = now - 24 * 60 * 60 * 1000; // 24h ago in ms
         const hourlyDistribution = Array(24).fill(0);
