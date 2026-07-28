@@ -1600,10 +1600,11 @@ async function main() {
         if (!process.env.VERCEL) {
             await sleep(2000);
         }
-        // After finishing all articles for this source, stagger before next target (skip in dry‑run or Vercel serverless environment)
-        if (!isDryRun && !process.env.VERCEL) {
-            console.log(`[STAGGER] Pausing ${TARGET_STAGGER_MS/1000}s before next source to regulate Gemini API traffic`);
-            await new Promise(resolve => setTimeout(resolve, TARGET_STAGGER_MS));
+        // After finishing all articles for this source, stagger before next target (1s in CI/Vercel, 3s locally)
+        if (!isDryRun) {
+            const staggerMs = (process.env.GITHUB_ACTIONS || process.env.VERCEL) ? 1000 : 3000;
+            console.log(`[STAGGER] Pausing ${staggerMs/1000}s before next source`);
+            await new Promise(resolve => setTimeout(resolve, staggerMs));
         }
     }
 
