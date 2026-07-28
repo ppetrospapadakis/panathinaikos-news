@@ -28,7 +28,7 @@ jobs:
   scrape:
     name: Scrape & Ingest News
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: 📥 Checkout repository

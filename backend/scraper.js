@@ -1602,10 +1602,10 @@ async function main() {
         if (!process.env.VERCEL) {
             await sleep(2000);
         }
-        // After finishing all articles for this source, stagger before next target (1s in CI/Vercel, 3s locally)
+        // After finishing all articles for this source, stagger before next target (15s pause to protect Gemini API Rate Limits)
         if (!isDryRun) {
-            const staggerMs = (process.env.GITHUB_ACTIONS || process.env.VERCEL) ? 1000 : 3000;
-            console.log(`[STAGGER] Pausing ${staggerMs/1000}s before next source`);
+            const staggerMs = 15000; // 15 seconds
+            console.log(`[STAGGER] Pausing ${staggerMs/1000}s before next source to regulate Gemini API traffic`);
             await new Promise(resolve => setTimeout(resolve, staggerMs));
         }
     }
