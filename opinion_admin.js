@@ -1341,8 +1341,13 @@ function renderSourceDistributionChart(rangeKey) {
             barDiv.className = 'w-full bg-emerald-500/30 hover:bg-emerald-400/80 transition-all duration-300 rounded-t cursor-pointer relative group';
             barDiv.style.height = `${Math.max(3, pct)}%`;
 
+            const isTallBar = Number(pct) > 55;
+            const tooltipPosClass = isTallBar
+                ? 'top-2 left-1/2 transform -translate-x-1/2'
+                : 'bottom-full left-1/2 transform -translate-x-1/2 mb-2';
+
             barDiv.innerHTML = `
-                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[130px]" style="white-space:normal">
+                <div class="absolute ${tooltipPosClass} bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[130px]" style="white-space:normal">
                     <div class="flex justify-between items-center gap-3 font-bold">
                         <span class="text-emerald-400">${srcName}</span>
                         <span class="text-on-surface">${count} άρθρα</span>
@@ -1439,8 +1444,13 @@ function renderTrafficCharts(data, filterSource = 'ALL') {
             barDiv.className = 'w-full bg-primary/25 hover:bg-primary/60 transition-all duration-300 rounded-t cursor-pointer relative group';
             barDiv.style.height = `${Math.max(3, pct)}%`;
             
+            const isTallBar = Number(pct) > 55;
+            const tooltipPosClass = isTallBar
+                ? 'top-2 left-1/2 transform -translate-x-1/2'
+                : 'bottom-full left-1/2 transform -translate-x-1/2 mb-2';
+
             barDiv.innerHTML = `
-                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[140px]" style="white-space:normal">
+                <div class="absolute ${tooltipPosClass} bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[140px]" style="white-space:normal">
                     <div class="flex justify-between items-center gap-3 font-bold">
                         <span class="text-primary">${label}</span>
                         <span class="text-on-surface">${count} άρθρα</span>
@@ -1516,8 +1526,13 @@ function renderTrafficCharts(data, filterSource = 'ALL') {
             barDiv.className = 'w-full bg-primary/30 hover:bg-primary/70 transition-all duration-300 rounded-t cursor-pointer relative group';
             barDiv.style.height = `${Math.max(3, pct)}%`;
             
+            const isTallBarDaily = Number(pct) > 55;
+            const tooltipPosClassDaily = isTallBarDaily
+                ? 'top-2 left-1/2 transform -translate-x-1/2'
+                : 'bottom-full left-1/2 transform -translate-x-1/2 mb-2';
+
             barDiv.innerHTML = `
-                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[150px]" style="white-space:normal">
+                <div class="absolute ${tooltipPosClassDaily} bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[150px]" style="white-space:normal">
                     <div class="flex justify-between items-center gap-3 font-bold">
                         <span class="text-primary">${label}</span>
                         <span class="text-on-surface">${count} άρθρα</span>
