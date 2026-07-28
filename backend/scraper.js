@@ -1387,21 +1387,21 @@ async function main() {
                         const isScrapedOfficial = !!target.isOfficial;
 
                         // We will update source_url ensuring each source appears at most once
-                        let existingUrls = (dbArt.source_url || duplicateArticle.source_url || '').split(',').map(u => u.trim()).filter(Boolean);
+                        let mergedSourceUrls = (dbArt.source_url || duplicateArticle.source_url || '').split(',').map(u => u.trim()).filter(Boolean);
                         
-                        if (!existingUrls.includes(articleUrl)) {
+                        if (!mergedSourceUrls.includes(articleUrl)) {
                             // Remove any old link from the SAME source to keep only the latest
-                            existingUrls = existingUrls.filter(u => getSourceNameFromUrl(u) !== sourceName);
+                            mergedSourceUrls = mergedSourceUrls.filter(u => getSourceNameFromUrl(u) !== sourceName);
                             
                             if (isScrapedOfficial) {
                                 // Put official source first
-                                existingUrls.unshift(articleUrl);
+                                mergedSourceUrls.unshift(articleUrl);
                             } else {
                                 // Put new source last
-                                existingUrls.push(articleUrl);
+                                mergedSourceUrls.push(articleUrl);
                             }
                         }
-                        let newSourceUrl = existingUrls.join(',');
+                        let newSourceUrl = mergedSourceUrls.join(',');
 
                         let newContent = dbArt.content;
                         let newTitle = dbArt.title;
