@@ -1164,6 +1164,24 @@ async function main() {
                 runStats.sources[target.name].skipped_crawling_failed++;
                 runStats.totals.skipped_crawling_failed++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
+                
+                // Save failed/broken URL to database so it is never re-crawled on subsequent runs
+                if (!isDryRun) {
+                    try {
+                        await db.from('articles').insert({
+                            id: crypto.randomUUID(),
+                            title: '[IGNORED_CRAWL_FAIL]',
+                            summary: '[IGNORED_CRAWL_FAIL]',
+                            content: '[IGNORED_CRAWL_FAIL]',
+                            source_url: articleUrl,
+                            category: 'SystemRoster',
+                            created_at: new Date().toISOString()
+                        });
+                        existingUrls.add(articleUrl);
+                    } catch (e) {
+                        console.error(`    [DB ERROR] Failed to save failed crawl URL: ${e.message}`);
+                    }
+                }
                 continue;
             }
             if (scraped.status === 'skipped_size') {
