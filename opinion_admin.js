@@ -1431,9 +1431,3 @@ function renderTrafficCharts(data, filterSource = 'ALL') {
     }
 }
 
-    } catch (err) {
-        console.error('Failed to load engagement/system stats:', err);
-    }
-}
-window.loadEngagementStats = loadEngagementStats;
-
