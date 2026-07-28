@@ -841,7 +841,10 @@ async function checkSemanticDuplicate(newTitle, newSummary, candidateArticles) {
     const ai = getAiClient();
     if (!ai || quotaExhausted) return null;
 
-    const candidatesList = candidateArticles.map(a => `ID: ${a.id}\nΤίτλος: ${a.title}`).join('\n\n');
+    const candidatesList = candidateArticles.map(a => {
+        const snippet = a.summary ? `\n   Σύνοψη: ${a.summary.substring(0, 150)}` : '';
+        return `ID: ${a.id}\n   Τίτλος: ${a.title}${snippet}`;
+    }).join('\n\n');
 
     try {
         const response = await retryWithBackoff(() => ai.models.generateContent({
