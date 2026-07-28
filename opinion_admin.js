@@ -1257,134 +1257,179 @@ async function loadEngagementStats() {
             }
         }
 
-        // 4. Render 24h Post Activity Chart
-        const hourlyPosts = data.hourly_posts || Array(24).fill(0);
-        const hourlyBySource = data.hourly_by_source || Array(24).fill(null).map(() => ({}));
-        const hourlyLabels = data.hourly_labels || Array(24).fill(null).map((_, i) => `${String(i).padStart(2,'0')}:00`);
-        const chartContainer = document.getElementById('chart-bars-container');
-        if (chartContainer) {
-            // Retain absolute grid lines
-            chartContainer.innerHTML = `
-                <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
-                <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
-                <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
-            `;
-            
-            const maxVal = Math.max(...hourlyPosts, 1);
-            
-            // Set Y-axis labels dynamically based on max
-            document.getElementById('y-axis-val-3').textContent = Math.round(maxVal).toString();
-            document.getElementById('y-axis-val-2').textContent = Math.round(maxVal * 2 / 3).toString();
-            document.getElementById('y-axis-val-1').textContent = Math.round(maxVal * 1 / 3).toString();
+        // Cache fetched data and render charts
+        trafficStatsCache = data;
+        renderTrafficCharts(data, currentTrafficSourceFilter);
 
-            // Set X-axis labels dynamically
-            [0, 4, 8, 12, 16, 20, 23].forEach(idx => {
-                const el = document.getElementById(`x-axis-val-${idx}`);
-                if (el) el.textContent = hourlyLabels[idx] || '';
-            });
+    } catch (err) {
+        console.error('Failed to load engagement/system stats:', err);
+    }
+}
+window.loadEngagementStats = loadEngagementStats;
 
-            // Populate all 24 bars
-            hourlyPosts.forEach((count, idx) => {
-                const label = hourlyLabels[idx] || `${String(idx).padStart(2,'0')}:00`;
-                const pct = ((count / maxVal) * 98).toFixed(1);
-                
-                // Build per-source breakdown for tooltip
-                const srcBreakdown = hourlyBySource[idx] || {};
-                const srcEntries = Object.entries(srcBreakdown)
+let trafficStatsCache = null;
+let currentTrafficSourceFilter = 'ALL';
+
+function filterTrafficChartsBySource(sourceFilter) {
+    currentTrafficSourceFilter = sourceFilter;
+    if (trafficStatsCache) {
+        renderTrafficCharts(trafficStatsCache, currentTrafficSourceFilter);
+    }
+}
+window.filterTrafficChartsBySource = filterTrafficChartsBySource;
+
+function renderTrafficCharts(data, filterSource = 'ALL') {
+    // 4. Render 24h Post Activity Chart
+    const hourlyBySource = data.hourly_by_source || Array(24).fill(null).map(() => ({}));
+    const hourlyLabels = data.hourly_labels || Array(24).fill(null).map((_, i) => `${String(i).padStart(2,'0')}:00`);
+
+    const hourlyPosts = Array(24).fill(0);
+    for (let i = 0; i < 24; i++) {
+        const srcObj = hourlyBySource[i] || {};
+        if (filterSource === 'ALL') {
+            hourlyPosts[i] = Object.values(srcObj).reduce((a, b) => a + b, 0);
+        } else {
+            hourlyPosts[i] = srcObj[filterSource] || 0;
+        }
+    }
+
+    const chartContainer = document.getElementById('chart-bars-container');
+    if (chartContainer) {
+        chartContainer.innerHTML = `
+            <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+        `;
+        
+        const maxVal = Math.max(...hourlyPosts, 1);
+        
+        document.getElementById('y-axis-val-3').textContent = Math.round(maxVal).toString();
+        document.getElementById('y-axis-val-2').textContent = Math.round(maxVal * 2 / 3).toString();
+        document.getElementById('y-axis-val-1').textContent = Math.round(maxVal * 1 / 3).toString();
+
+        [0, 4, 8, 12, 16, 20, 23].forEach(idx => {
+            const el = document.getElementById(`x-axis-val-${idx}`);
+            if (el) el.textContent = hourlyLabels[idx] || '';
+        });
+
+        hourlyPosts.forEach((count, idx) => {
+            const label = hourlyLabels[idx] || `${String(idx).padStart(2,'0')}:00`;
+            const pct = ((count / maxVal) * 98).toFixed(1);
+            
+            const srcBreakdown = hourlyBySource[idx] || {};
+            const srcEntries = filterSource === 'ALL'
+                ? Object.entries(srcBreakdown)
                     .sort((a, b) => b[1] - a[1])
                     .map(([src, n]) => `<span class="flex justify-between gap-3"><span class="text-on-surface-variant/70">${src}</span><strong class="text-on-surface">${n}</strong></span>`)
-                    .join('');
-                const srcHtml = srcEntries
-                    ? `<div class="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-outline-variant/30">${srcEntries}</div>`
-                    : '';
-                
-                const barDiv = document.createElement('div');
-                barDiv.className = 'w-full bg-primary/25 hover:bg-primary/60 transition-all duration-300 rounded-t cursor-pointer relative group';
-                barDiv.style.height = `${Math.max(3, pct)}%`;
-                
-                barDiv.innerHTML = `
-                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[140px]" style="white-space:normal">
-                        <div class="flex justify-between items-center gap-3 font-bold">
-                            <span class="text-primary">${label}</span>
-                            <span class="text-on-surface">${count} άρθρα</span>
-                        </div>
-                        ${srcHtml}
+                    .join('')
+                : (srcBreakdown[filterSource] ? `<span class="flex justify-between gap-3"><span class="text-on-surface-variant/70">${filterSource}</span><strong class="text-on-surface">${srcBreakdown[filterSource]}</strong></span>` : '');
+
+            const srcHtml = srcEntries
+                ? `<div class="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-outline-variant/30">${srcEntries}</div>`
+                : '';
+            
+            const barDiv = document.createElement('div');
+            barDiv.className = 'w-full bg-primary/25 hover:bg-primary/60 transition-all duration-300 rounded-t cursor-pointer relative group';
+            barDiv.style.height = `${Math.max(3, pct)}%`;
+            
+            barDiv.innerHTML = `
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[140px]" style="white-space:normal">
+                    <div class="flex justify-between items-center gap-3 font-bold">
+                        <span class="text-primary">${label}</span>
+                        <span class="text-on-surface">${count} άρθρα</span>
                     </div>
-                `;
-                chartContainer.appendChild(barDiv);
-            });
-
-            // Update chart subtitle and x-axis to reflect real 24h window
-            const startLabel = hourlyLabels[0] || '00:00';
-            const endLabel = hourlyLabels[23] || '23:00';
-            const chartSubtitle = document.getElementById('chart-subtitle');
-            if (chartSubtitle) {
-                chartSubtitle.textContent = `Άρθρα που δημοσιεύθηκαν ανά ώρα — τελευταίες 24h (${startLabel} → ${endLabel})`;
-            }
-        }
-
-        // 5. Render 30-day Post Activity Chart
-        const dailyPosts = data.daily_posts || Array(30).fill(0);
-        const dailyBySource = data.daily_by_source || Array(30).fill(null).map(() => ({}));
-        const dailyLabels = data.daily_labels || Array(30).fill(null).map((_, i) => `H-${30-i}`);
-        const dailyChartContainer = document.getElementById('daily-chart-bars-container');
-        if (dailyChartContainer) {
-            dailyChartContainer.innerHTML = `
-                <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
-                <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
-                <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+                    ${srcHtml}
+                </div>
             `;
-            
-            const maxValDaily = Math.max(...dailyPosts, 1);
-            
-            const y3 = document.getElementById('daily-y-axis-val-3');
-            const y2 = document.getElementById('daily-y-axis-val-2');
-            const y1 = document.getElementById('daily-y-axis-val-1');
-            if (y3) y3.textContent = Math.round(maxValDaily).toString();
-            if (y2) y2.textContent = Math.round(maxValDaily * 2 / 3).toString();
-            if (y1) y1.textContent = Math.round(maxValDaily * 1 / 3).toString();
+            chartContainer.appendChild(barDiv);
+        });
 
-            [0, 5, 10, 15, 20, 25, 29].forEach(idx => {
-                const el = document.getElementById(`daily-x-axis-val-${idx}`);
-                if (el) el.textContent = dailyLabels[idx] || '';
-            });
+        const startLabel = hourlyLabels[0] || '00:00';
+        const endLabel = hourlyLabels[23] || '23:00';
+        const chartSubtitle = document.getElementById('chart-subtitle');
+        if (chartSubtitle) {
+            const filterSuffix = filterSource === 'ALL' ? '' : ` [Πηγή: ${filterSource}]`;
+            chartSubtitle.textContent = `Άρθρα που δημοσιεύθηκαν ανά ώρα — τελευταίες 24h (${startLabel} → ${endLabel})${filterSuffix}`;
+        }
+    }
 
-            dailyPosts.forEach((count, idx) => {
-                const label = dailyLabels[idx] || `Hμέρα ${idx+1}`;
-                const pct = ((count / maxValDaily) * 98).toFixed(1);
-                
-                const srcBreakdown = dailyBySource[idx] || {};
-                const srcEntries = Object.entries(srcBreakdown)
+    // 5. Render 30-day Post Activity Chart
+    const dailyBySource = data.daily_by_source || Array(30).fill(null).map(() => ({}));
+    const dailyLabels = data.daily_labels || Array(30).fill(null).map((_, i) => `H-${30-i}`);
+
+    const dailyPosts = Array(30).fill(0);
+    for (let i = 0; i < 30; i++) {
+        const srcObj = dailyBySource[i] || {};
+        if (filterSource === 'ALL') {
+            dailyPosts[i] = Object.values(srcObj).reduce((a, b) => a + b, 0);
+        } else {
+            dailyPosts[i] = srcObj[filterSource] || 0;
+        }
+    }
+
+    const dailyChartContainer = document.getElementById('daily-chart-bars-container');
+    if (dailyChartContainer) {
+        dailyChartContainer.innerHTML = `
+            <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+        `;
+        
+        const maxValDaily = Math.max(...dailyPosts, 1);
+        
+        const y3 = document.getElementById('daily-y-axis-val-3');
+        const y2 = document.getElementById('daily-y-axis-val-2');
+        const y1 = document.getElementById('daily-y-axis-val-1');
+        if (y3) y3.textContent = Math.round(maxValDaily).toString();
+        if (y2) y2.textContent = Math.round(maxValDaily * 2 / 3).toString();
+        if (y1) y1.textContent = Math.round(maxValDaily * 1 / 3).toString();
+
+        [0, 5, 10, 15, 20, 25, 29].forEach(idx => {
+            const el = document.getElementById(`daily-x-axis-val-${idx}`);
+            if (el) el.textContent = dailyLabels[idx] || '';
+        });
+
+        dailyPosts.forEach((count, idx) => {
+            const label = dailyLabels[idx] || `Hμέρα ${idx+1}`;
+            const pct = ((count / maxValDaily) * 98).toFixed(1);
+            
+            const srcBreakdown = dailyBySource[idx] || {};
+            const srcEntries = filterSource === 'ALL'
+                ? Object.entries(srcBreakdown)
                     .sort((a, b) => b[1] - a[1])
                     .map(([src, n]) => `<span class="flex justify-between gap-3"><span class="text-on-surface-variant/70">${src}</span><strong class="text-on-surface">${n}</strong></span>`)
-                    .join('');
-                const srcHtml = srcEntries
-                    ? `<div class="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-outline-variant/30">${srcEntries}</div>`
-                    : '';
-                
-                const barDiv = document.createElement('div');
-                barDiv.className = 'w-full bg-primary/30 hover:bg-primary/70 transition-all duration-300 rounded-t cursor-pointer relative group';
-                barDiv.style.height = `${Math.max(3, pct)}%`;
-                
-                barDiv.innerHTML = `
-                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[150px]" style="white-space:normal">
-                        <div class="flex justify-between items-center gap-3 font-bold">
-                            <span class="text-primary">${label}</span>
-                            <span class="text-on-surface">${count} άρθρα</span>
-                        </div>
-                        ${srcHtml}
-                    </div>
-                `;
-                dailyChartContainer.appendChild(barDiv);
-            });
+                    .join('')
+                : (srcBreakdown[filterSource] ? `<span class="flex justify-between gap-3"><span class="text-on-surface-variant/70">${filterSource}</span><strong class="text-on-surface">${srcBreakdown[filterSource]}</strong></span>` : '');
 
-            const firstDate = dailyLabels[0] || '';
-            const lastDate = dailyLabels[dailyLabels.length - 1] || '';
-            const dailyChartSubtitle = document.getElementById('daily-chart-subtitle');
-            if (dailyChartSubtitle) {
-                dailyChartSubtitle.textContent = `Συνολικά άρθρα που δημοσιεύθηκαν ανά ημέρα — τελευταίες 30 ημέρες (${firstDate} → ${lastDate})`;
-            }
+            const srcHtml = srcEntries
+                ? `<div class="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-outline-variant/30">${srcEntries}</div>`
+                : '';
+            
+            const barDiv = document.createElement('div');
+            barDiv.className = 'w-full bg-primary/30 hover:bg-primary/70 transition-all duration-300 rounded-t cursor-pointer relative group';
+            barDiv.style.height = `${Math.max(3, pct)}%`;
+            
+            barDiv.innerHTML = `
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[150px]" style="white-space:normal">
+                    <div class="flex justify-between items-center gap-3 font-bold">
+                        <span class="text-primary">${label}</span>
+                        <span class="text-on-surface">${count} άρθρα</span>
+                    </div>
+                    ${srcHtml}
+                </div>
+            `;
+            dailyChartContainer.appendChild(barDiv);
+        });
+
+        const firstDate = dailyLabels[0] || '';
+        const lastDate = dailyLabels[dailyLabels.length - 1] || '';
+        const dailyChartSubtitle = document.getElementById('daily-chart-subtitle');
+        if (dailyChartSubtitle) {
+            const filterSuffix = filterSource === 'ALL' ? '' : ` [Πηγή: ${filterSource}]`;
+            dailyChartSubtitle.textContent = `Συνολικά άρθρα που δημοσιεύθηκαν ανά ημέρα — τελευταίες 30 ημέρες (${firstDate} → ${lastDate})${filterSuffix}`;
         }
+    }
+}
 
     } catch (err) {
         console.error('Failed to load engagement/system stats:', err);

@@ -565,9 +565,31 @@
 
         <!-- ── TAB 5: READER TRAFFIC ── -->
         <div id="panel-section-analytics-engagement" class="admin-panel-content hidden">
-            <div class="mb-8">
-                <h2 class="text-xl font-bold text-primary mb-2">System Analytics & Resource Monitoring</h2>
-                <p class="text-sm text-on-surface-variant">Στατιστικά στοιχεία βάσης δεδομένων, συχνότητας δημοσιεύσεων και ορίων χρήσης API.</p>
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-primary mb-2">System Analytics & Resource Monitoring</h2>
+                    <p class="text-sm text-on-surface-variant">Στατιστικά στοιχεία βάσης δεδομένων, συχνότητας δημοσιεύσεων και ορίων χρήσης API.</p>
+                </div>
+
+                <!-- Source Filter Dropdown -->
+                <div class="flex items-center gap-2 bg-surface-container-low border border-outline-variant/30 px-3.5 py-2 rounded-xl">
+                    <span class="material-symbols-outlined text-sm text-primary">filter_alt</span>
+                    <label for="traffic-source-filter" class="text-xs text-on-surface-variant font-bold">Φίλτρο Πηγής:</label>
+                    <select id="traffic-source-filter" onchange="filterTrafficChartsBySource(this.value)" class="bg-transparent text-xs text-on-surface font-bold focus:outline-none cursor-pointer border-none py-0.5 pl-1 pr-2">
+                        <option value="ALL" class="bg-[#1e2024]">🌐 Όλες οι πηγές (All)</option>
+                        <option value="Sport-FM" class="bg-[#1e2024]">📻 Sport-FM</option>
+                        <option value="SDNA" class="bg-[#1e2024]">🟢 SDNA</option>
+                        <option value="Sportal" class="bg-[#1e2024]">⚽ Sportal</option>
+                        <option value="Sport24" class="bg-[#1e2024]">🏀 Sport24</option>
+                        <option value="Gazzetta" class="bg-[#1e2024]">📰 Gazzetta</option>
+                        <option value="Sportime" class="bg-[#1e2024]">⚡ Sportime</option>
+                        <option value="Monobala" class="bg-[#1e2024]">⚽ Monobala</option>
+                        <option value="Athletiko" class="bg-[#1e2024]">☘️ Athletiko</option>
+                        <option value="PAO Official" class="bg-[#1e2024]">🛡️ PAO Official</option>
+                        <option value="PAO1908 Official" class="bg-[#1e2024]">☘️ PAO1908 Official</option>
+                        <option value="Manual" class="bg-[#1e2024]">✍️ Manual Opinions</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Overview Cards -->
