@@ -86,49 +86,99 @@ module.exports = async (req, res) => {
             dayMap[dateStr] = index;
         }
 
+        const rangeStats = {
+            today: {},
+            yesterday: {},
+            last_7d: {},
+            ever: {}
+        };
+
+        const nowYmdDate = new Date();
+        const athensYmdFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Athens', year: 'numeric', month: '2-digit', day: '2-digit' });
+        const todayYmd = athensYmdFormatter.format(nowYmdDate);
+        const yesterdayYmd = athensYmdFormatter.format(new Date(now - 24 * 60 * 60 * 1000));
+        const last7dMs = now - 7 * 24 * 60 * 60 * 1000;
+
+        function getSourcesFromArticleUrl(sourceUrl) {
+            if (!sourceUrl) return ['Άλλο'];
+            const urls = sourceUrl.split(',').map(u => u.trim()).filter(Boolean);
+            const labels = new Set();
+
+            urls.forEach(url => {
+                const uLower = url.toLowerCase();
+                if (uLower.includes('pao1908.com') || uLower.includes('pao1908')) labels.add('PAO1908 Official');
+                else if (uLower.includes('pao.gr') || uLower.includes('paobc.gr')) labels.add('PAO Official');
+                else if (uLower.includes('sport-fm') || uLower.includes('sportfm')) labels.add('Sport-FM');
+                else if (uLower.includes('sport24')) labels.add('Sport24');
+                else if (uLower.includes('sportime')) labels.add('Sportime');
+                else if (uLower.includes('sportal')) labels.add('Sportal');
+                else if (uLower.includes('sdna')) labels.add('SDNA');
+                else if (uLower.includes('gazzetta')) labels.add('Gazzetta');
+                else if (uLower.includes('athletiko')) labels.add('Athletiko');
+                else if (uLower.includes('monobala')) labels.add('Monobala');
+                else if (uLower.includes('opinion://manual') || uLower.includes('manual')) labels.add('Manual');
+                else {
+                    try {
+                        const domain = new URL(url).hostname.replace('www.', '');
+                        const raw = domain.split('.')[0].toLowerCase();
+                        if (raw) labels.add(raw.charAt(0).toUpperCase() + raw.slice(1));
+                    } catch {}
+                }
+            });
+
+            return labels.size > 0 ? Array.from(labels) : ['Άλλο'];
+        }
+
         if (recentArticles) {
             recentArticles.forEach(art => {
                 if (!art.created_at) return;
                 const artDate = new Date(art.created_at);
                 const artMs = artDate.getTime();
+                const artYmd = athensYmdFormatter.format(artDate);
 
-                let srcLabel = 'Άλλο';
-                if (art.source_url) {
-                    try {
-                        const domain = new URL(art.source_url).hostname.replace('www.', '');
-                        const raw = domain.split('.')[0].toLowerCase();
-                        if (raw.includes('sport-fm') || raw.includes('sportfm')) srcLabel = 'Sport-FM';
-                        else if (raw.includes('sport24')) srcLabel = 'Sport24';
-                        else if (raw.includes('sportime')) srcLabel = 'Sportime';
-                        else if (raw.includes('sportal')) srcLabel = 'Sportal';
-                        else if (raw.includes('sdna')) srcLabel = 'SDNA';
-                        else if (raw.includes('gazzetta')) srcLabel = 'Gazzetta';
-                        else if (raw.includes('athletiko')) srcLabel = 'Athletiko';
-                        else if (raw.includes('monobala')) srcLabel = 'Monobala';
-                        else if (art.source_url.includes('pao1908.com') || art.source_url.includes('pao1908')) srcLabel = 'PAO1908 Official';
-                        else if (art.source_url.includes('pao.gr') || art.source_url.includes('paobc.gr')) srcLabel = 'PAO Official';
-                        else if (art.source_url.includes('opinion://manual') || art.source_url.includes('manual')) srcLabel = 'Manual';
-                        else srcLabel = raw.charAt(0).toUpperCase() + raw.slice(1);
-                    } catch {}
-                }
+                const srcLabels = getSourcesFromArticleUrl(art.source_url);
 
-                totalBySource[srcLabel] = (totalBySource[srcLabel] || 0) + 1;
+                srcLabels.forEach(srcLabel => {
+                    totalBySource[srcLabel] = (totalBySource[srcLabel] || 0) + 1;
+                    rangeStats.ever[srcLabel] = (rangeStats.ever[srcLabel] || 0) + 1;
 
-                // 1. 24h Hourly bucket
+                    if (artYmd === todayYmd) {
+                        rangeStats.today[srcLabel] = (rangeStats.today[srcLabel] || 0) + 1;
+                    }
+                    if (artYmd === yesterdayYmd) {
+                        rangeStats.yesterday[srcLabel] = (rangeStats.yesterday[srcLabel] || 0) + 1;
+                    }
+                    if (artMs >= last7dMs) {
+                        rangeStats.last_7d[srcLabel] = (rangeStats.last_7d[srcLabel] || 0) + 1;
+                    }
+
+                    // 1. 24h Hourly bucket
+                    if (artMs >= windowStart) {
+                        const bucket = Math.min(23, Math.floor((artMs - windowStart) / 3600000));
+                        if (bucket >= 0 && bucket < 24) {
+                            hourlyBySource[bucket][srcLabel] = (hourlyBySource[bucket][srcLabel] || 0) + 1;
+                        }
+                    }
+
+                    // 2. 30d Daily bucket
+                    const dateStr = athensDateFormatter.format(artDate);
+                    if (dateStr in dayMap) {
+                        const dayIdx = dayMap[dateStr];
+                        dailyBySource[dayIdx][srcLabel] = (dailyBySource[dayIdx][srcLabel] || 0) + 1;
+                    }
+                });
+
+                // Overall total post activity counts (1 per unique article)
                 if (artMs >= windowStart) {
                     const bucket = Math.min(23, Math.floor((artMs - windowStart) / 3600000));
                     if (bucket >= 0 && bucket < 24) {
                         hourlyDistribution[bucket]++;
-                        hourlyBySource[bucket][srcLabel] = (hourlyBySource[bucket][srcLabel] || 0) + 1;
                     }
                 }
-
-                // 2. 30d Daily bucket
                 const dateStr = athensDateFormatter.format(artDate);
                 if (dateStr in dayMap) {
                     const dayIdx = dayMap[dateStr];
                     dailyDistribution[dayIdx]++;
-                    dailyBySource[dayIdx][srcLabel] = (dailyBySource[dayIdx][srcLabel] || 0) + 1;
                 }
             });
         }
@@ -257,7 +307,8 @@ module.exports = async (req, res) => {
             daily_posts: dailyDistribution,
             daily_by_source: dailyBySource,
             daily_labels: dailyLabels,
-            total_by_source: totalBySource
+            total_by_source: totalBySource,
+            sources_by_range: rangeStats
         });
 
     } catch (err) {

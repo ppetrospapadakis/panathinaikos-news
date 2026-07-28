@@ -1260,6 +1260,7 @@ async function loadEngagementStats() {
         // Cache fetched data and render charts
         trafficStatsCache = data;
         renderTrafficCharts(data, currentTrafficSourceFilter);
+        renderSourceDistributionChart(currentSourceRangeFilter);
 
     } catch (err) {
         console.error('Failed to load engagement/system stats:', err);
@@ -1269,6 +1270,7 @@ window.loadEngagementStats = loadEngagementStats;
 
 let trafficStatsCache = null;
 let currentTrafficSourceFilter = 'ALL';
+let currentSourceRangeFilter = 'last_7d';
 
 function filterTrafficChartsBySource(sourceFilter) {
     currentTrafficSourceFilter = sourceFilter;
@@ -1277,6 +1279,95 @@ function filterTrafficChartsBySource(sourceFilter) {
     }
 }
 window.filterTrafficChartsBySource = filterTrafficChartsBySource;
+
+function renderSourceDistributionChart(rangeKey) {
+    if (rangeKey) currentSourceRangeFilter = rangeKey;
+    if (!trafficStatsCache) return;
+
+    const data = trafficStatsCache;
+    const sourcesByRange = data.sources_by_range || {};
+    const rangeData = sourcesByRange[currentSourceRangeFilter] || {};
+
+    const targetSources = [
+        'Sport-FM', 'SDNA', 'Sportal', 'Sport24', 
+        'Gazzetta', 'Sportime', 'Monobala', 'Athletiko', 
+        'PAO Official', 'PAO1908 Official', 'Manual'
+    ];
+
+    const sourceCounts = targetSources.map(src => rangeData[src] || 0);
+    const maxVal = Math.max(...sourceCounts, 1);
+    const totalSum = sourceCounts.reduce((a, b) => a + b, 0);
+
+    // Update Y-Axis
+    const y3 = document.getElementById('source-y-axis-val-3');
+    const y2 = document.getElementById('source-y-axis-val-2');
+    const y1 = document.getElementById('source-y-axis-val-1');
+    if (y3) y3.textContent = Math.round(maxVal).toString();
+    if (y2) y2.textContent = Math.round(maxVal * 2 / 3).toString();
+    if (y1) y1.textContent = Math.round(maxVal * 1 / 3).toString();
+
+    // Update Subtitle with current date range text
+    const subtitleEl = document.getElementById('source-chart-subtitle');
+    if (subtitleEl) {
+        const rangeNames = {
+            today: 'Σήμερα',
+            yesterday: 'Χθες',
+            last_7d: 'Τελευταίες 7 Ημέρες',
+            ever: 'Όλα (All Time)'
+        };
+        const rangeText = rangeNames[currentSourceRangeFilter] || currentSourceRangeFilter;
+        subtitleEl.textContent = `Συνολικός αριθμός άρθρων που δημοσιεύθηκαν ανά πηγή — ${rangeText} (Σύνολο: ${totalSum})`;
+    }
+
+    // Populate Bars & X-Axis Labels
+    const chartContainer = document.getElementById('source-chart-bars-container');
+    const xAxisContainer = document.getElementById('source-chart-x-axis-labels');
+
+    if (chartContainer) {
+        chartContainer.innerHTML = `
+            <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 top-2/3 border-t border-outline-variant/10 pointer-events-none"></div>
+        `;
+
+        if (xAxisContainer) xAxisContainer.innerHTML = '';
+
+        targetSources.forEach((srcName, idx) => {
+            const count = sourceCounts[idx];
+            const pct = ((count / maxVal) * 98).toFixed(1);
+            const sharePct = totalSum > 0 ? ((count / totalSum) * 100).toFixed(1) : '0.0';
+
+            const barDiv = document.createElement('div');
+            barDiv.className = 'flex-1 bg-emerald-500/30 hover:bg-emerald-400/80 transition-all duration-300 rounded-t cursor-pointer relative group min-w-[12px]';
+            barDiv.style.height = `${Math.max(3, pct)}%`;
+
+            barDiv.innerHTML = `
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1e2024] border border-outline-variant px-3 py-2 rounded-lg text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none shadow-2xl text-left min-w-[130px]" style="white-space:normal">
+                    <div class="flex justify-between items-center gap-3 font-bold">
+                        <span class="text-emerald-400">${srcName}</span>
+                        <span class="text-on-surface">${count} άρθρα</span>
+                    </div>
+                    <div class="text-[9px] text-on-surface-variant/70 mt-1">
+                        Μερίδιο: <strong class="text-on-surface font-mono">${sharePct}%</strong>
+                    </div>
+                </div>
+            `;
+            chartContainer.appendChild(barDiv);
+
+            if (xAxisContainer) {
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'flex-1 text-center truncate text-[9px] text-on-surface-variant/80 font-mono font-semibold';
+                labelSpan.title = srcName;
+                let shortName = srcName;
+                if (srcName === 'PAO Official') shortName = 'PAO Off';
+                if (srcName === 'PAO1908 Official') shortName = 'PAO1908';
+                labelSpan.textContent = shortName;
+                xAxisContainer.appendChild(labelSpan);
+            }
+        });
+    }
+}
+window.renderSourceDistributionChart = renderSourceDistributionChart;
 
 function renderTrafficCharts(data, filterSource = 'ALL') {
     // 0. Dynamic Overview Card Filtering
