@@ -1338,7 +1338,7 @@ function renderSourceDistributionChart(rangeKey) {
             const sharePct = totalSum > 0 ? ((count / totalSum) * 100).toFixed(1) : '0.0';
 
             const barDiv = document.createElement('div');
-            barDiv.className = 'flex-1 bg-emerald-500/30 hover:bg-emerald-400/80 transition-all duration-300 rounded-t cursor-pointer relative group min-w-[12px]';
+            barDiv.className = 'w-full bg-emerald-500/30 hover:bg-emerald-400/80 transition-all duration-300 rounded-t cursor-pointer relative group';
             barDiv.style.height = `${Math.max(3, pct)}%`;
 
             barDiv.innerHTML = `
@@ -1356,7 +1356,7 @@ function renderSourceDistributionChart(rangeKey) {
 
             if (xAxisContainer) {
                 const labelSpan = document.createElement('span');
-                labelSpan.className = 'flex-1 text-center truncate text-[9px] text-on-surface-variant/80 font-mono font-semibold';
+                labelSpan.className = 'w-full text-center truncate text-[9px] text-on-surface-variant/80 font-mono font-semibold';
                 labelSpan.title = srcName;
                 let shortName = srcName;
                 if (srcName === 'PAO Official') shortName = 'PAO Off';

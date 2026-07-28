@@ -751,7 +751,7 @@
                     <!-- Chart area -->
                     <div class="flex-1 flex flex-col h-full overflow-hidden">
                         <!-- Grid & bars container -->
-                        <div id="source-chart-bars-container" class="flex-1 flex items-end justify-between gap-2 h-[220px] border-b border-outline-variant/30 pb-2 relative px-2">
+                        <div id="source-chart-bars-container" class="flex-1 grid grid-cols-11 items-end gap-1.5 h-[220px] border-b border-outline-variant/30 pb-2 relative px-1">
                             <!-- Grid lines -->
                             <div class="absolute inset-x-0 top-0 border-t border-outline-variant/10 pointer-events-none"></div>
                             <div class="absolute inset-x-0 top-1/3 border-t border-outline-variant/10 pointer-events-none"></div>
@@ -761,7 +761,7 @@
                         </div>
                         
                         <!-- X-axis labels (Sources) -->
-                        <div class="flex justify-between text-[10px] text-on-surface-variant/70 pt-2 px-1 font-mono font-semibold" id="source-chart-x-axis-labels">
+                        <div class="grid grid-cols-11 gap-1.5 text-[9px] text-on-surface-variant/80 pt-2 px-1 font-mono font-semibold text-center" id="source-chart-x-axis-labels">
                             <!-- Dynamic source labels populated via Javascript -->
                         </div>
                     </div>
