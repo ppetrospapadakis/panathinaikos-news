@@ -83,7 +83,7 @@
     (function() {
         var TAB_ACTIVE   = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
         var TAB_INACTIVE = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center';
-        var catMap = { 'football': 'tab-football', 'podosfairo': 'tab-football', 'basket': 'tab-basketball', 'basketball': 'tab-basketball', 'erasitexnis': 'tab-amateur', 'apopsi': 'tab-opinion', 'metagrafes': null, 'agones': null };
+        var catMap = { 'football': 'tab-football', 'podosfairo': 'tab-football', 'basket': 'tab-basketball', 'basketball': 'tab-basketball', 'erasitexnis': 'tab-amateur', 'apopsi': 'tab-opinion', 'agones': null };
         var cat = new URLSearchParams(window.location.search).get('category') || '';
         var activeTabId = catMap[cat.toLowerCase()] || (cat === '' ? 'tab-all' : null);
         // Apply before DOM is fully painted by hooking into DOMContentLoaded at capture phase

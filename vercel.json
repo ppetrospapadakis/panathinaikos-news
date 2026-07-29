@@ -89,10 +89,6 @@
       "destination": "/api/render-index?category=apopsi"
     },
     {
-      "source": "/metagrafes",
-      "destination": "/api/render-index?category=metagrafes"
-    },
-    {
       "source": "/analytics",
       "destination": "/login.html"
     },

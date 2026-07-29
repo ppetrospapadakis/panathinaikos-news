@@ -70,7 +70,6 @@ function getCategoryCleanName(category) {
     if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
     if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitexnis';
     if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
-    if (cat.includes('μεταγραφές') || cat.includes('transfers')) return 'metagrafes';
     return 'pao';
 }
 
@@ -110,7 +109,6 @@ module.exports = async (req, res) => {
             '/basket',
             '/erasitexnis',
             '/apopsi',
-            '/metagrafes',
             '/agones',
             '/fixtures',
             '/schedule',

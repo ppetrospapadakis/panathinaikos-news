@@ -143,8 +143,6 @@ module.exports = async (req, res) => {
             'erasitexnis': 'Ερασιτέχνης',
             'erasitechnis': 'Ερασιτέχνης',
             'apopsi': 'Άποψη',
-            'metagrafes': 'Μεταγραφές',
-            'transfers': 'Μεταγραφές',
             'agones': 'Αγώνες'
           };
           const dbCategory = categoryMap[req.query.category.toLowerCase()] || req.query.category;

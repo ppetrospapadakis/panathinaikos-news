@@ -82,7 +82,6 @@ function getCategoryCleanName(category) {
     if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
     if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitexnis';
     if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
-    if (cat.includes('μεταγραφές') || cat.includes('transfers')) return 'metagrafes';
     return 'podosfairo';
 }
 
@@ -117,7 +116,6 @@ module.exports = async (req, res) => {
         else if (cat === 'basket' || cat === 'basketball') categoryFilter = 'Μπάσκετ';
         else if (cat === 'erasitexnis' || cat === 'erasitechnis' || cat === 'amateur') categoryFilter = 'Ερασιτέχνης';
         else if (cat === 'apopsi' || cat === 'opinion') categoryFilter = 'Άποψη';
-        else if (cat === 'metagrafes') categoryFilter = 'Μεταγραφές';
     }
 
     try {
