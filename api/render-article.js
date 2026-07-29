@@ -264,6 +264,7 @@ module.exports = async (req, res) => {
         // SEO and metadata replacement
         const metaTags = `
     <!-- Dynamic SEO and OpenGraph Metadata -->
+    <link rel="preload" as="image" fetchpriority="high" href="${imageUrl}"/>
     <meta name="description" content="${escapeHtml(article.summary || article.title)}"/>
     <meta name="robots" content="index, follow, max-image-preview:large"/>
     <meta property="og:title" content="${escapeHtml(article.title)}"/>

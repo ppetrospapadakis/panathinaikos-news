@@ -229,7 +229,7 @@ module.exports = async (req, res) => {
             </a>
         `;
 
-        const preloadTag = `<link rel="preload" as="image" href="${imageUrl}">`;
+        const preloadTag = `<link rel="preload" as="image" fetchpriority="high" href="${imageUrl}">`;
 
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
         
