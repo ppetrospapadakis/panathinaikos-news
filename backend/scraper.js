@@ -460,6 +460,14 @@ function sanitizeImageUrl(scrapedImg) {
     return cleaned;
 }
 
+function capitalizeTitle(str) {
+    if (!str || typeof str !== 'string') return str;
+    let trimmed = str.trim();
+    if (!trimmed) return trimmed;
+    return trimmed.replace(/^([«"'\s]*)([\p{L}])/u, (m, prefix, char) => prefix + char.toUpperCase());
+}
+
+
 function greekToLatin(text) {
     if (!text) return "";
     let str = text.toLowerCase();
@@ -923,11 +931,12 @@ async function generateArticleData(title, text, isOfficial = false) {
             return { isRelevant: false, content: null, title: null, bullets: [] };
         }
 
-        let newTitle = sanitizeGreekText((parsed.title || title).trim());
+        let newTitle = capitalizeTitle(sanitizeGreekText((parsed.title || title).trim()));
         // Replace unwanted slang terms in title
         newTitle = newTitle
             .replace(/«μπες»/gi, '«μπάσιμο»')
             .replace(/\bμπες\b/gi, 'μπάσιμο');
+        newTitle = capitalizeTitle(newTitle);
         const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2).map(b => sanitizeGreekText(b)) : [];
         const articleText = sanitizeGreekText((parsed.content || text || '').trim());
 
@@ -1035,7 +1044,7 @@ async function generateCombinedArticleData(articleA, articleB, isOfficial = fals
 
         if (parsed.content && parsed.content.length > 100) {
             const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2).map(b => sanitizeGreekText(b)) : [];
-            const newTitle = sanitizeGreekText((parsed.title || articleA.title).trim());
+            const newTitle = capitalizeTitle(sanitizeGreekText((parsed.title || articleA.title).trim()));
             const newContent = sanitizeGreekText(parsed.content.trim());
             console.log(`  [AI] Combined Article Data generated: ${newContent.length} chars, ${bullets.length} bullets. Title: ${newTitle}`);
             return { content: newContent, title: newTitle, bullets };
@@ -1702,7 +1711,7 @@ async function main() {
 
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
-                title:      finalTitle,
+                title:      capitalizeTitle(finalTitle),
                 summary:    finalContent ? finalContent.substring(0, 300) : (scraped.summary || ''),
                 content:    finalContent,
                 source_url: articleUrl,
