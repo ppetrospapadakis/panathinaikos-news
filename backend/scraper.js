@@ -742,6 +742,14 @@ async function retryWithBackoff(fn, maxRetries = 2) {
     }
 }
 
+function sanitizeGreekText(str) {
+    if (!str || typeof str !== 'string') return str;
+    return str
+        .replace(/\u0DAF\u0DCF/g, 'δια')
+        .replace(/[\u0D80-\u0DFF]/g, '')
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]+/g, (m) => m.includes('\n') ? '\n' : ' ');
+}
+
 // ─── Gemini API: combined article data (bullets + long-form) ────────────────
 async function generateArticleData(title, text, isOfficial = false) {
     const ai = getAiClient();
@@ -789,7 +797,7 @@ async function generateArticleData(title, text, isOfficial = false) {
 Τίτλος: ${title}
 Πληροφορίες: ${cleanText}`,
             config: {
-                temperature: 0.8,
+                temperature: 0.4,
                 maxOutputTokens: 2048,
                 responseMimeType: 'application/json'
             }
@@ -817,13 +825,13 @@ async function generateArticleData(title, text, isOfficial = false) {
             return { isRelevant: false, content: null, title: null, bullets: [] };
         }
 
-        let newTitle = (parsed.title || title).trim();
+        let newTitle = sanitizeGreekText((parsed.title || title).trim());
         // Replace unwanted slang terms in title
         newTitle = newTitle
             .replace(/«μπες»/gi, '«μπάσιμο»')
             .replace(/\bμπες\b/gi, 'μπάσιμο');
-        const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2) : [];
-        const articleText = (parsed.content || text || '').trim();
+        const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2).map(b => sanitizeGreekText(b)) : [];
+        const articleText = sanitizeGreekText((parsed.content || text || '').trim());
 
         if (articleText && articleText.length > 20) {
             console.log(`  [AI] Article Data generated: ${articleText.length} chars, ${bullets.length} bullets. Title: ${newTitle}`);
@@ -917,7 +925,7 @@ async function generateCombinedArticleData(articleA, articleB, isOfficial = fals
 Τίτλος: ${articleB.title}
 Κείμενο: ${(articleB.content || '').substring(0, 3000)}`,
             config: {
-                temperature: 0.5,
+                temperature: 0.4,
                 maxOutputTokens: 2048
             }
         }));
@@ -927,9 +935,11 @@ async function generateCombinedArticleData(articleA, articleB, isOfficial = fals
         const parsed = JSON.parse(jsonString);
 
         if (parsed.content && parsed.content.length > 100) {
-            const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2) : [];
-            console.log(`  [AI] Combined Article Data generated: ${parsed.content.length} chars, ${bullets.length} bullets. Title: ${parsed.title}`);
-            return { content: parsed.content.trim(), title: (parsed.title || '').trim(), bullets };
+            const bullets = Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 2).map(b => sanitizeGreekText(b)) : [];
+            const newTitle = sanitizeGreekText((parsed.title || articleA.title).trim());
+            const newContent = sanitizeGreekText(parsed.content.trim());
+            console.log(`  [AI] Combined Article Data generated: ${newContent.length} chars, ${bullets.length} bullets. Title: ${newTitle}`);
+            return { content: newContent, title: newTitle, bullets };
         }
     } catch (err) {
         console.warn(`[AI] Combined Long-form failed: ${err.message?.substring(0, 80)}`);
@@ -1462,6 +1472,17 @@ async function main() {
                             newImageUrl = scraped.imageUrl; // Swap SDNA watermark image with the clean one
                         }
 
+                        // Category resolution: if any merged article belongs to a specific sport category, assign it to the merged article
+                        const specificCategories = ['Ποδόσφαιρο', 'Μπάσκετ', 'Ερασιτέχνης'];
+                        const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
+                        let newCategory = dbArt.category || 'Ποδόσφαιρο';
+
+                        if (specificCategories.includes(scrapedCategory)) {
+                            newCategory = scrapedCategory;
+                        } else if (!specificCategories.includes(newCategory)) {
+                            newCategory = scrapedCategory || target.category || 'Ποδόσφαιρο';
+                        }
+
                         const { error: updateErr } = await db.from('articles')
                             .update({ 
                                 title: newTitle,
@@ -1470,6 +1491,7 @@ async function main() {
                                 bullets: newBullets,
                                 source_url: newSourceUrl,
                                 image_url: newImageUrl,
+                                category: newCategory,
                                 updated_at: new Date().toISOString()
                             })
                             .eq('id', duplicateArticle.id);
