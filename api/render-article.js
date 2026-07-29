@@ -149,9 +149,15 @@ module.exports = async (req, res) => {
         const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
         
         let imageUrl = article.image_url || DEFAULT_IMG;
-        if (imageUrl) {
+        if (imageUrl && !imageUrl.includes('logo.png') && !imageUrl.includes('favicon')) {
             try {
-                const u = new URL(imageUrl);
+                if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+                let u;
+                if (imageUrl.startsWith('/')) {
+                    u = new URL(imageUrl, 'https://www.panathinaikosnews.gr');
+                } else {
+                    u = new URL(imageUrl);
+                }
                 const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
                 const pathLower = u.pathname.toLowerCase();
                 const filenameBrandingIndicators = [
@@ -160,14 +166,13 @@ module.exports = async (req, res) => {
                     'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
                 ];
                 const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
-                const isInternal = u.hostname.includes('localhost') || u.hostname.includes('panathinaikosnews.gr') || imageUrl.startsWith('/');
-                let isBranding = !isInternal && filenameBrandingIndicators.some(ind => filename.includes(ind));
-                if (!isInternal && !isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
-                if (isBranding) {
+                const isInternalLogo = filenameBrandingIndicators.some(ind => filename.includes(ind)) || pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
+                
+                if (isInternalLogo) {
                     imageUrl = DEFAULT_IMG;
-                } else if (!imageUrl.startsWith('/') && !imageUrl.includes('localhost') && !imageUrl.includes('panathinaikosnews.gr')) {
-                    // Proxy external image to compress payloads and load fast on mobile (WebP)
-                    imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=800&output=webp&q=80`;
+                } else if (!u.hostname.includes('wsrv.nl')) {
+                    // Proxy & optimize all images (external and custom uploads) to WebP format for fast mobile loads
+                    imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(u.href)}&w=1200&output=webp&q=82`;
                 }
             } catch (_) {}
         } else {
@@ -263,31 +268,70 @@ module.exports = async (req, res) => {
     <meta name="twitter:image" content="${article.image_url || DEFAULT_IMG}"/>
     <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "NewsArticle",
-      "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}",
-      "headline": ${JSON.stringify(article.title)},
-      "image": [
-        ${JSON.stringify(article.image_url || DEFAULT_IMG)}
-      ],
-      "datePublished": ${JSON.stringify(article.created_at)},
-      "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},
-      "author": {
-        "@type": "Organization",
-        "name": "PanathinaikosNews",
-        "url": "https://www.panathinaikosnews.gr"
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}",
+        "headline": ${JSON.stringify(article.title)},
+        "image": [
+          ${JSON.stringify(article.image_url || DEFAULT_IMG)}
+        ],
+        "datePublished": ${JSON.stringify(article.created_at)},
+        "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},
+        "author": {
+          "@type": "Organization",
+          "name": "PanathinaikosNews",
+          "url": "https://www.panathinaikosnews.gr"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "PanathinaikosNews",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.panathinaikosnews.gr/logo.png"
+          }
+        },
+        "description": ${JSON.stringify(article.summary || article.title)},
+        "articleSection": ${JSON.stringify(article.category || 'Ποδόσφαιρο')}
       },
-      "publisher": {
-        "@type": "Organization",
-        "name": "PanathinaikosNews",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://www.panathinaikosnews.gr/logo.png"
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Αρχική",
+            "item": "https://www.panathinaikosnews.gr"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": ${JSON.stringify(article.category || 'Ποδόσφαιρο')},
+            "item": "https://www.panathinaikosnews.gr/${cleanCat}"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": ${JSON.stringify(article.title)},
+            "item": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "SportsTeam",
+        "name": "Παναθηναϊκός",
+        "alternateName": "Panathinaikos FC / BC",
+        "url": "https://www.panathinaikosnews.gr",
+        "sport": "Football / Basketball",
+        "memberOf": {
+          "@type": "SportsOrganization",
+          "name": "Super League Greece / EuroLeague"
         }
-      },
-      "description": ${JSON.stringify(article.summary || article.title)}
-    }
+      }
+    ]
     </script>
     <script>window.__PRE_RENDERED__ = true;</script>
         `;

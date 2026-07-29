@@ -157,13 +157,11 @@ module.exports = async (req, res) => {
                 'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
             ];
             const pathBrandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/', '/assets/images/', '/site-assets/'];
-            const isInternal = u.hostname.includes('localhost') || u.hostname.includes('panathinaikosnews.gr') || imageUrl.startsWith('/');
-            let isBranding = !isInternal && filenameBrandingIndicators.some(ind => filename.includes(ind));
-            if (!isInternal && !isBranding) isBranding = pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
-            if (isBranding) {
+            const isInternalLogo = filenameBrandingIndicators.some(ind => filename.includes(ind)) || pathBrandingPaths.some(p => ('/' + pathLower + '/').includes(p));
+            if (isInternalLogo) {
                 imageUrl = DEFAULT_IMG;
-            } else if (!u.hostname.includes('localhost') && !u.hostname.includes('panathinaikosnews.gr') && !u.hostname.includes('wsrv.nl')) {
-                imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=800&output=webp&q=82`;
+            } else if (!u.hostname.includes('wsrv.nl') && !imageUrl.includes('logo.png') && !imageUrl.includes('favicon')) {
+                imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(u.href)}&w=1200&output=webp&q=82`;
             }
         } catch (e) {}
 
