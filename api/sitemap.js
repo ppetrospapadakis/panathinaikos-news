@@ -48,15 +48,14 @@ function slugify(text) {
         let latin = greekToLatin(text);
         let slug = latin
             .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
             .trim()
             .replace(/\s+/g, '-')
-            .replace(/[^a-z0-9-]+/g, '')
-            .replace(/--+/g, '-')
-            .replace(/^-+/, '')
-            .replace(/-+$/, '');
-            
-        if (slug.length > 35) {
-            const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+            .replace(/-+/g, '-');
+        if (slug.length > 60) {
+            let truncated = slug.substring(0, 60);
+            const lastDash = truncated.lastIndexOf('-');
+            truncated = lastDash > 8 ? truncated.substring(0, lastDash) : truncated;
             slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
         }
         return slug || "arthro";
@@ -75,22 +74,36 @@ function getCategoryCleanName(category) {
     return 'pao';
 }
 
+function xmlEscape(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
     res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1200');
 
     try {
+        // B3: Reduced from 10000 to 2000 to avoid Vercel function timeout on large DBs
         const { data: articles, error } = await supabase
             .from('articles')
-            .select('id, title, category, created_at')
+            .select('id, title, category, created_at, image_url')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
             .order('created_at', { ascending: false })
-            .limit(10000);
+            .limit(2000);
 
         if (error) throw error;
 
         const domain = 'https://www.panathinaikosnews.gr';
+        const PUBLICATION_NAME = 'PanathinaikosNews';
+        const PUBLICATION_LANGUAGE = 'el';
+
         const staticRoutes = [
             '',
             '/podosfairo',
@@ -104,10 +117,16 @@ module.exports = async (req, res) => {
             '/roster.html'
         ];
 
+        // B1: Added xmlns:news for Google News, B2: Added xmlns:image for Image Sitemap
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+        xml += `        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"\n`;
+        xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
         const nowStr = new Date().toISOString().split('T')[0];
+        const nowMs = Date.now();
+        const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+
         for (const route of staticRoutes) {
             xml += `  <url>\n`;
             xml += `    <loc>${domain}${route}</loc>\n`;
@@ -123,12 +142,36 @@ module.exports = async (req, res) => {
             const shortId = (art.id || '').substring(0, 8);
             const url = `${domain}/${cleanCat}/${cleanSlug}-id=${shortId}`;
             const artDate = new Date(art.created_at).toISOString().split('T')[0];
+            const artMs = new Date(art.created_at).getTime();
+            const isRecent = (nowMs - artMs) < FORTY_EIGHT_HOURS_MS;
 
             xml += `  <url>\n`;
             xml += `    <loc>${url}</loc>\n`;
             xml += `    <lastmod>${artDate}</lastmod>\n`;
             xml += `    <changefreq>monthly</changefreq>\n`;
             xml += `    <priority>0.8</priority>\n`;
+
+            // B1: Google News entries — only for articles published in the last 48 hours
+            if (isRecent && art.title) {
+                const pubDateISO = new Date(art.created_at).toISOString();
+                xml += `    <news:news>\n`;
+                xml += `      <news:publication>\n`;
+                xml += `        <news:name>${xmlEscape(PUBLICATION_NAME)}</news:name>\n`;
+                xml += `        <news:language>${PUBLICATION_LANGUAGE}</news:language>\n`;
+                xml += `      </news:publication>\n`;
+                xml += `      <news:publication_date>${pubDateISO}</news:publication_date>\n`;
+                xml += `      <news:title>${xmlEscape(art.title)}</news:title>\n`;
+                xml += `    </news:news>\n`;
+            }
+
+            // B2: Image sitemap entries — include article image if available
+            if (art.image_url) {
+                xml += `    <image:image>\n`;
+                xml += `      <image:loc>${xmlEscape(art.image_url)}</image:loc>\n`;
+                xml += `      <image:title>${xmlEscape(art.title)}</image:title>\n`;
+                xml += `    </image:image>\n`;
+            }
+
             xml += `  </url>\n`;
         }
 
