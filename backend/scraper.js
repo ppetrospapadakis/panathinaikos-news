@@ -411,8 +411,8 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
                         if (u.pathname === '/' || u.pathname === '') return;
                         
-                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', '/galacticos', '/gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos'];
-                        if (blacklist.some(b => u.pathname.includes(b))) return;
+                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', 'galacticos', 'interwetten', 'gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos'];
+                        if (blacklist.some(b => u.pathname.toLowerCase().includes(b))) return;
                         
                         // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
                         if (target.sdnaNumericOnly && !/\/\d{5,}/.test(u.pathname)) return;
@@ -480,6 +480,10 @@ function detectCategoryFromUrl(url, categoryHint) {
 
 // ─── Scrape individual article page ───────────────────────────────────────────
 async function scrapeArticlePage(url, categoryHint) {
+    if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten')) {
+        console.log(`[SCRAPE SKIPPED] URL contains blacklisted galacticos/interwetten term: ${url}`);
+        return null;
+    }
     try {
         const response = await httpGetWithRetry(url);
         console.log(`[HTTP GET] ${url} | Status: ${response.status}`);
