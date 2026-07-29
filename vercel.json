@@ -70,27 +70,27 @@
   "rewrites": [
     {
       "source": "/basket",
-      "destination": "/api/app?route=render-index&category=basket"
+      "destination": "/api/render-index?category=basket"
     },
     {
       "source": "/podosfairo",
-      "destination": "/api/app?route=render-index&category=football"
+      "destination": "/api/render-index?category=football"
     },
     {
       "source": "/erasitexnis",
-      "destination": "/api/app?route=render-index&category=erasitexnis"
+      "destination": "/api/render-index?category=erasitexnis"
     },
     {
       "source": "/erasitechnis",
-      "destination": "/api/app?route=render-index&category=erasitexnis"
+      "destination": "/api/render-index?category=erasitexnis"
     },
     {
       "source": "/apopsi",
-      "destination": "/api/app?route=render-index&category=apopsi"
+      "destination": "/api/render-index?category=apopsi"
     },
     {
       "source": "/metagrafes",
-      "destination": "/api/app?route=render-index&category=metagrafes"
+      "destination": "/api/render-index?category=metagrafes"
     },
     {
       "source": "/analytics",
@@ -126,19 +126,19 @@
     },
     {
       "source": "/sitemap.xml",
-      "destination": "/api/app"
+      "destination": "/api/sitemap"
     },
     {
       "source": "/feed.xml",
-      "destination": "/api/app"
+      "destination": "/api/feed"
     },
     {
       "source": "/:category/:slug-id=:id",
-      "destination": "/api/app?route=render-article&id=:id"
+      "destination": "/api/render-article?id=:id"
     },
     {
       "source": "/",
-      "destination": "/api/app?route=render-index"
+      "destination": "/api/render-index"
     }
   ]
 }
