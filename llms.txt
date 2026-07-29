@@ -1,0 +1,17 @@
+# PanathinaikosNews
+
+> Η πληρέστερη πλατφόρμα ενημέρωσης και αθλητικής ειδησεογραφίας για τον Παναθηναϊκό (Ποδόσφαιρο, Μπάσκετ, Ερασιτέχνης).
+
+## Κύριες Ενότητες
+
+- [Αρχική Σελίδα](https://www.panathinaikosnews.gr/): Όλα τα νέα του Παναθηναϊκού σε ζωντανή ροή.
+- [Ποδόσφαιρο](https://www.panathinaikosnews.gr/podosfairo): Ειδήσεις, ρεπορτάζ και αναλύσεις για την ομάδα ποδοσφαίρου του Παναθηναϊκού.
+- [Μπάσκετ](https://www.panathinaikosnews.gr/basket): Όλα τα νέα για το τμήμα μπάσκετ του Παναθηναϊκού και την EuroLeague.
+- [Ερασιτέχνης](https://www.panathinaikosnews.gr/erasitexnis): Ενημέρωση για όλα τα αγωνιστικά τμήματα του Παναθηναϊκού Αθλητικού Ομίλου.
+- [Άποψη & Αρθρογραφία](https://www.panathinaikosnews.gr/apopsi): Σχόλια, γνώμες και αποκλειστικά άρθρα.
+- [Μεταγραφές](https://www.panathinaikosnews.gr/metagrafes): Όλη η μεταγραφολογία και οι επίσημες ανακοινώσεις.
+
+## Πηγές & Ροές
+
+- [RSS Feed](https://www.panathinaikosnews.gr/feed.xml): Επίσημη ροή RSS ειδήσεων.
+- [Sitemap](https://www.panathinaikosnews.gr/sitemap.xml): Χάρτης πλοήγησης ιστοτόπου.
