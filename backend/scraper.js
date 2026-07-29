@@ -460,6 +460,88 @@ function sanitizeImageUrl(scrapedImg) {
     return cleaned;
 }
 
+function greekToLatin(text) {
+    if (!text) return "";
+    let str = text.toLowerCase();
+    str = str
+        .replace(/αι|αί/g, 'ai').replace(/ει|εί/g, 'ei').replace(/οι|οί/g, 'oi')
+        .replace(/ου|ού/g, 'ou').replace(/αυ|αύ/g, 'av').replace(/ευ|εύ/g, 'ev')
+        .replace(/μπ/g, 'b').replace(/ντ/g, 'nt').replace(/γκ/g, 'gk')
+        .replace(/γγ/g, 'ng').replace(/τζ/g, 'tz').replace(/τσ/g, 'ts')
+        .replace(/θ/g, 'th').replace(/χ/g, 'ch').replace(/ψ/g, 'ps').replace(/ξ/g, 'x');
+
+    const singleMap = {
+        'α': 'a', 'ά': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'έ': 'e',
+        'ζ': 'z', 'η': 'i', 'ή': 'i', 'ι': 'i', 'ί': 'i', 'ϊ': 'i', 'ΐ': 'i',
+        'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ο': 'o', 'ό': 'o', 'π': 'p',
+        'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'ύ': 'y', 'ϋ': 'y',
+        'ΰ': 'y', 'φ': 'f', 'ω': 'o', 'ώ': 'o'
+    };
+
+    let res = '';
+    for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        res += singleMap[c] !== undefined ? singleMap[c] : c;
+    }
+    return res;
+}
+
+function slugify(text) {
+    if (!text) return "arthro";
+    try {
+        let latin = greekToLatin(text);
+        let slug = latin
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+        if (slug.length > 60) {
+            let truncated = slug.substring(0, 60);
+            const lastDash = truncated.lastIndexOf('-');
+            truncated = lastDash > 8 ? truncated.substring(0, lastDash) : truncated;
+            slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
+        }
+        return slug || "arthro";
+    } catch(e) {
+        return "arthro";
+    }
+}
+
+function getCategoryCleanName(category) {
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
+    if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
+    if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitexnis';
+    if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
+    return 'pao';
+}
+
+// ─── Cache Warmup (Pre-warming CDN & Image Proxy) ──────────────────────────
+function warmUpArticleCache(imageUrl, articleTitle, articleId, category) {
+    try {
+        // 1. Warm up wsrv.nl WebP Image Proxy CDN
+        if (imageUrl && imageUrl.startsWith('http') && !imageUrl.includes('wsrv.nl') && !imageUrl.includes('logo.png') && !imageUrl.includes('favicon')) {
+            const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=1200&output=webp&q=82`;
+            console.log(`  [CACHE WARMUP] Pre-warming WebP image proxy for: ${imageUrl.substring(0, 60)}...`);
+            httpGetWithRetry(wsrvUrl, {}, 1, false, 8000).catch(() => {});
+        }
+
+        // 2. Warm up Article SSR Page & Homepage Edge Cache
+        if (articleTitle && articleId) {
+            const cleanCat = getCategoryCleanName(category);
+            const cleanSlug = slugify(articleTitle);
+            const shortId = (articleId || '').substring(0, 8);
+            const articleUrl = `https://www.panathinaikosnews.gr/${cleanCat}/${cleanSlug}-id=${shortId}`;
+            
+            console.log(`  [CACHE WARMUP] Pre-warming SSR page: ${articleUrl}`);
+            httpGetWithRetry(articleUrl, {}, 1, false, 8000).catch(() => {});
+            httpGetWithRetry('https://www.panathinaikosnews.gr/', {}, 1, false, 8000).catch(() => {});
+        }
+    } catch (_) {}
+}
+
+
 // ─── Dynamic Category Router ─────────────────────────────────────────────────
 function detectCategoryFromUrl(url, categoryHint) {
     const urlLower = url.toLowerCase();
@@ -1526,6 +1608,7 @@ async function main() {
                             duplicateArticle.created_at = new Date().toISOString(); 
                             existingUrls.add(articleUrl);
                             if (canonicalScraped) existingUrls.add(canonicalScraped);
+                            warmUpArticleCache(newImageUrl, newTitle, duplicateArticle.id, newCategory);
                         }
                     }
                 } else {
@@ -1657,6 +1740,7 @@ async function main() {
             existingArticles.unshift({ id: inserted[0].id, title: scraped.title, source_url: articleUrl, group_id, created_at: scraped.created_at });
             totalNew++;
             console.log(`    ✅ Inserted (id=${inserted[0].id})`);
+            warmUpArticleCache(scraped.imageUrl, finalTitle, inserted[0].id, dbPayload.category);
         }
         // Rate limit between article processing — always pause, not just on success
         if (!process.env.VERCEL) {
