@@ -441,6 +441,14 @@ const DEFAULT_STADIUM_IMG = '/logo.png';
 function sanitizeImageUrl(scrapedImg) {
     if (!scrapedImg || typeof scrapedImg !== 'string') return '';
     let cleaned = scrapedImg.trim();
+
+    // Clean Sportime watermark / og-branded overlay images
+    if (cleaned.toLowerCase().includes('sportime.gr')) {
+        cleaned = cleaned
+            .replace(/-og-branded/gi, '-1320')
+            .replace(/-branded/gi, '-1320');
+    }
+
     // Clean SDNA watermark styles (only for sdna.gr domains, since others don't have watermarks and styles/main might not exist)
     if (cleaned.toLowerCase().includes('sdna.gr')) {
         cleaned = cleaned.replace('/styles/og_image/', '/styles/main/');
@@ -1465,13 +1473,13 @@ async function main() {
                         const isFallbackImage = (img) => !img || img === '/logo.png' || img.includes('logo.png') || img === DEFAULT_STADIUM_IMG;
 
                         let newImageUrl = dbArt.image_url;
-                        const isDbSdna = (dbArt.source_url || '').toLowerCase().includes('sdna.gr');
-                        const isScrapedSdna = articleUrl.toLowerCase().includes('sdna.gr');
+                        const isDbWatermarked = (dbArt.source_url || '').toLowerCase().includes('sdna.gr') || (dbArt.source_url || '').toLowerCase().includes('sportime.gr');
+                        const isScrapedWatermarked = articleUrl.toLowerCase().includes('sdna.gr') || articleUrl.toLowerCase().includes('sportime.gr');
                         
                         if ((isFallbackImage(newImageUrl) || !newImageUrl) && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
                             newImageUrl = scraped.imageUrl;
-                        } else if (isDbSdna && !isScrapedSdna && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
-                            newImageUrl = scraped.imageUrl; // Swap SDNA watermark image with the clean one
+                        } else if (isDbWatermarked && !isScrapedWatermarked && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
+                            newImageUrl = scraped.imageUrl; // Swap SDNA/Sportime image with clean external portal image
                         }
 
                         // Category resolution: if any merged article belongs to a specific sport category, assign it to the merged article
