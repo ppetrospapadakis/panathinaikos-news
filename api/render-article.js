@@ -184,9 +184,10 @@ module.exports = async (req, res) => {
                     imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(u.href)}&w=1200&output=webp&q=82`;
                 }
             } catch (_) {}
-        } else {
-            imageUrl = DEFAULT_IMG;
         }
+        // NOTE: if image_url contains 'logo.png' or 'favicon', we keep it as-is (our own CDN assets — no proxy needed).
+        // We do NOT fall back to DEFAULT_IMG in that case — the user explicitly set that image.
+
 
         const sourceUrlStr = (article.source_url || '');
         const categoryStr = (article.category || '').toLowerCase();
