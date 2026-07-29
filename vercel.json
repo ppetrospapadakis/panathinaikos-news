@@ -5,7 +5,7 @@
   ],
   "headers": [
     {
-      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape)",
+      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "source": "/(style.css|logo.png|favicon.png|favicon.ico|images/.*)",
+      "source": "/(style.css|logo.png|favicon.png|favicon.ico|opinion_admin.js|images/.*)",
       "headers": [
         {
           "key": "Cache-Control",
