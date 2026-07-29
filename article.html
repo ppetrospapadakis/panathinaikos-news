@@ -2,15 +2,8 @@
 <html class="dark icons-loaded" lang="el">
 <head>
 
-    <!-- Google Discover Optimization Tag -->
-
-    <!-- Google Discover Optimization Tag -->
-  <meta name="robots" content="max-image-preview:large">
-
-  
-
-  <!-- Vercel Analytics -->
-  <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Vercel Analytics -->
+    <script defer src="/_vercel/insights/script.js"></script>
     <!-- Preconnect for fonts & CDNs -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,23 +16,21 @@
     
     <meta name="theme-color" content="#111317"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Διαβάστε το άρθρο - PanathinaikosNews</title>
-    <meta name="robots" content="max-image-preview:large"/>
+    <meta property="og:locale" content="el_GR" />
+    <title id="page-title">Panathinaikos News - Άρθρο</title>
+    <meta name="robots" content="index, follow, max-image-preview:large"/>
     <!-- {{SEO_META_PLACEHOLDER}} -->
     
     <!-- Compiled Tailwind CSS -->
     <link rel="preload" href="/style.css?v=5" as="style">
     <link rel="stylesheet" href="/style.css?v=5">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
-    
-    
-    
-    <script>
-        document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
-            document.documentElement.classList.add('icons-loaded');
-        }).catch(() => { document.documentElement.classList.add('icons-loaded'); });
-    </script>
+
+    <!-- Geist Font: loaded directly (not via CSS @import) to avoid render-blocking chain -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap"></noscript>
+
+    <!-- Material Symbols: display=swap to eliminate FOIT -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
     <!-- Google Analytics (Lazy Loaded) -->
 <script>

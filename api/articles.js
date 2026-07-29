@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
         if (id) {
             const { data, error } = await supabase
                 .from('articles')
-                .select('*')
+                .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
                 .eq('id', id)
                 .single();
             if (error) throw error;
@@ -100,7 +100,7 @@ module.exports = async (req, res) => {
         if (req.query.opinionOnly === 'true') {
             const { data, error } = await supabase
                 .from('articles')
-                .select('*')
+                .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
                 .or('source_url.ilike.%manual%,source_url.ilike.%opinion://manual%')
                 .order('created_at', { ascending: false })
                 .order('id', { ascending: false });

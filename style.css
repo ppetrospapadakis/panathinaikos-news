@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+/* Geist font is loaded via <link> in HTML <head> to avoid a blocking CSS request chain */
 
 *, ::before, ::after{
   --tw-border-spacing-x: 0;

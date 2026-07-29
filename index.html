@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="dark icons-loaded" lang="el">
 <head>
-
+<meta charset="utf-8"/>
     <!-- Resource Hints & Preconnects -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,20 +26,26 @@
     <meta name="description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ."/>
     <meta property="og:title" content="PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος" />
     <meta property="og:description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ." />
-    <meta property="og:image" content="https://www.panathinaikosnews.gr/favicon.png?v=5" />
+    <meta property="og:image" content="https://www.panathinaikosnews.gr/logo.png" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.panathinaikosnews.gr/" />
+    <meta property="og:locale" content="el_GR" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος" />
     <meta name="twitter:description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ." />
-    <meta name="twitter:image" content="https://www.panathinaikosnews.gr/favicon.png?v=5" />
+    <meta name="twitter:image" content="https://www.panathinaikosnews.gr/logo.png" />
     <link rel="canonical" href="https://www.panathinaikosnews.gr/"/>
     
     <!-- Compiled Tailwind CSS -->
     <link rel="preload" href="/style.css?v=5" as="style">
     <link rel="stylesheet" href="/style.css?v=5">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
+
+    <!-- Geist Font: loaded directly (not via CSS @import) to avoid render-blocking chain -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap"></noscript>
+
+    <!-- Material Symbols: display=swap to eliminate FOIT (Flash of Invisible Text) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     
     
     <script>

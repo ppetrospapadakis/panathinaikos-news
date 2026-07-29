@@ -7,6 +7,16 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Cache HTML template at module level — avoids synchronous disk I/O on every request
+const templatePath = path.join(__dirname, '../article.html');
+let _articleTemplate = null;
+function getTemplate() {
+    if (!_articleTemplate) {
+        _articleTemplate = fs.readFileSync(templatePath, 'utf8');
+    }
+    return _articleTemplate;
+}
+
 function greekToLatin(text) {
     if (!text) return "";
     let str = text.toLowerCase();
@@ -120,7 +130,7 @@ module.exports = async (req, res) => {
 
     try {
         // 1. Fetch article from Supabase (supports both 8-char short ID and 36-char full UUID)
-        let query = supabase.from('articles').select('*');
+        let query = supabase.from('articles').select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id');
         if (rawId.length === 36) {
             query = query.eq('id', rawId);
         } else if (rawId.length >= 8) {
@@ -140,9 +150,8 @@ module.exports = async (req, res) => {
             return res.status(404).send('<h1>Το άρθρο δεν βρέθηκε στη βάση δεδομένων.</h1>');
         }
 
-        // 2. Read template file article.html
-        const templatePath = path.join(__dirname, '../article.html');
-        let html = fs.readFileSync(templatePath, 'utf8');
+        // 2. Get cached template (no disk I/O after first request)
+        let html = getTemplate();
 
         // 3. Prepare parameters
         const cleanCat = getCategoryCleanName(article.category);
@@ -255,17 +264,20 @@ module.exports = async (req, res) => {
         // SEO and metadata replacement
         const metaTags = `
     <!-- Dynamic SEO and OpenGraph Metadata -->
+    <meta name="description" content="${escapeHtml(article.summary || article.title)}"/>
+    <meta name="robots" content="index, follow, max-image-preview:large"/>
     <meta property="og:title" content="${escapeHtml(article.title)}"/>
     <meta property="og:description" content="${escapeHtml(article.summary || '')}"/>
-    <meta property="og:image" content="${article.image_url || DEFAULT_IMG}"/>
+    <meta property="og:image" content="${imageUrl}"/>
     <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
     <meta property="og:type" content="article"/>
+    <meta property="og:locale" content="el_GR"/>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:site" content="@PanaNewsGr"/>
     <meta name="twitter:creator" content="@PanaNewsGr"/>
     <meta name="twitter:title" content="${escapeHtml(article.title)}"/>
     <meta name="twitter:description" content="${escapeHtml(article.summary || '')}"/>
-    <meta name="twitter:image" content="${article.image_url || DEFAULT_IMG}"/>
+    <meta name="twitter:image" content="${imageUrl}"/>
     <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
     <script type="application/ld+json">
     [
@@ -275,7 +287,7 @@ module.exports = async (req, res) => {
         "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}",
         "headline": ${JSON.stringify(article.title)},
         "image": [
-          ${JSON.stringify(article.image_url || DEFAULT_IMG)}
+          ${JSON.stringify(imageUrl)}
         ],
         "datePublished": ${JSON.stringify(article.created_at)},
         "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},

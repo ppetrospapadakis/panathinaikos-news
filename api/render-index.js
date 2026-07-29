@@ -6,6 +6,16 @@ const supabaseUrl = "https://rctltbuiitdnqlxizlym.supabase.co".trim();
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI".trim();
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Cache HTML template at module level — avoids synchronous disk I/O on every request
+const _indexTemplatePath = path.join(__dirname, '../index.html');
+let _indexTemplate = null;
+function getIndexTemplate() {
+    if (!_indexTemplate) {
+        _indexTemplate = fs.readFileSync(_indexTemplatePath, 'utf8');
+    }
+    return _indexTemplate;
+}
+
 function greekToLatin(text) {
     if (!text) return "";
     let str = text.toLowerCase();
@@ -111,7 +121,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        let query = supabase.from('articles').select('*')
+        let query = supabase.from('articles').select('id, title, summary, image_url, category, created_at, source_url, bullets, group_id, pinned_at')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER');
         if (categoryFilter) {
@@ -131,8 +141,8 @@ module.exports = async (req, res) => {
         const { data: articles, error } = await query;
         let article = (articles && articles.length > 0) ? articles[0] : null;
 
-        const templatePath = path.join(__dirname, '../index.html');
-        let html = fs.readFileSync(templatePath, 'utf8');
+        // 2. Get cached template (no disk I/O after first request)
+        let html = getIndexTemplate();
 
         if (!article) {
             return res.status(200).send(html);
@@ -237,8 +247,7 @@ module.exports = async (req, res) => {
 
     } catch (err) {
         console.error('SSR Index Error:', err);
-        const templatePath = path.join(__dirname, '../index.html');
-        let html = fs.readFileSync(templatePath, 'utf8');
+        let html = getIndexTemplate();
         html += `<!-- SSR ERROR: ${err.message}\n${err.stack} -->`;
         return res.status(200).send(html);
     }
