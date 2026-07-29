@@ -204,7 +204,20 @@ module.exports = async (req, res) => {
                 <p class="text-xs uppercase tracking-[0.25em] text-primary/80 font-bold">PanathinaikosNews Editorial</p>
             </div>`;
         } else if (article.source_url) {
-            const urls = article.source_url.split(',').map(u => u.trim()).filter(Boolean);
+            const rawUrls = article.source_url.split(',').map(u => u.trim()).filter(Boolean);
+            const seenDomains = new Set();
+            const urls = [];
+            for (const u of rawUrls) {
+                try {
+                    const host = new URL(u).hostname.replace('www.', '').toLowerCase();
+                    if (!seenDomains.has(host)) {
+                        seenDomains.add(host);
+                        urls.push(u);
+                    }
+                } catch (_) {
+                    urls.push(u);
+                }
+            }
             const linksHtml = urls.map(url => {
                 let name = 'Portal';
                 let color = '#84d999';
