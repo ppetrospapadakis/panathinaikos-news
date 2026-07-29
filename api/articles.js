@@ -115,7 +115,7 @@ module.exports = async (req, res) => {
         
         let query = supabase
             .from('articles')
-            .select('*')
+            .select('id, title, summary, image_url, category, created_at, source_url, group_id, bullets, pinned_at')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
             .not('category', 'eq', 'DELETED');

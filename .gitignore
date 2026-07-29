@@ -31,3 +31,4 @@ public/
 
 .vercel
 .env*
+scratch/

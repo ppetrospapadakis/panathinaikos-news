@@ -5,7 +5,7 @@
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -14,11 +14,38 @@
       ]
     },
     {
-      "source": "/(style.css|logo.png|favicon.png|favicon.ico)",
+      "source": "/(style.css|logo.png|favicon.png|favicon.ico|images/.*)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(sitemap.xml|feed.xml|api/sitemap|api/feed)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=600, stale-while-revalidate=1800"
+        }
+      ]
+    },
+    {
+      "source": "/api/articles",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=30, stale-while-revalidate=120"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=60, stale-while-revalidate=300"
         }
       ]
     }
