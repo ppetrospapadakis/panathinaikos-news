@@ -563,34 +563,37 @@ async function scrapeArticlePage(url, categoryHint) {
             '[class*="article-text"]', '[class*="article-content"]',
             '.single-article-content', '.article__body',
             '.single_article__body', '.single_article', '[class*="single_article"]',
-            '.prose', 'div.prose'
+            '.prose', 'div.prose', 'article', 'main'
         ];
         let bodyText = '';
         for (const sel of bodySelectors) {
             try {
                 const els = $(sel);
                 if (els.length > 0) {
+                    const clone = els.clone();
                     // Strip scripts, ads, share buttons, seo promos
-                    els.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"], .seo_promo').remove();
-                    // Map block elements to lines to preserve paragraph structure
+                    clone.find('script, style, .share, .social, .ad, .advertisement, [class*="share"], [class*="social"], .seo_promo').remove();
+                    
+                    // Extract text from paragraphs and list items
                     const paragraphs = [];
-                    els.find('p, div, br, li').each((i, el) => {
+                    clone.find('p, li').each((i, el) => {
                         let t = $(el).text().replace(/[ \t]+/g, ' ').trim();
                         if ((el.name === 'li' || el.tagName === 'li') && t) t = '• ' + t;
-                        if (t) paragraphs.push(t);
+                        if (t && t.length > 15) paragraphs.push(t);
                     });
-                    if (paragraphs.length > 0) {
-                        bodyText = paragraphs.join('\n\n');
-                    } else {
-                        bodyText = els.text().replace(/[ \t]+/g, ' ').trim();
-                    }
+                    
+                    let candidateText = paragraphs.length > 0 ? paragraphs.join('\n\n') : clone.text().replace(/[ \t]+/g, ' ').trim();
                     
                     // Clean promotional junk
-                    bodyText = bodyText.replace(/Μην χάνεις είδηση[\s\S]{0,100}στην Google/gi, '').trim();
-                    bodyText = bodyText.replace(/Ακολουθήστε το .*? στο Google News/gi, '').trim();
-                    bodyText = bodyText.replace(/Βάλε το .*? στην Google/gi, '').trim();
+                    candidateText = candidateText.replace(/Μην χάνεις είδηση[\s\S]{0,100}στην Google/gi, '').trim();
+                    candidateText = candidateText.replace(/Ακολουθήστε το .*? στο Google News/gi, '').trim();
+                    candidateText = candidateText.replace(/Βάλε το .*? στην Google/gi, '').trim();
                     
-                    if (bodyText.length > 100) break;
+                    // Keep the largest bodyText found across candidate selectors
+                    if (candidateText.length > bodyText.length) {
+                        bodyText = candidateText;
+                    }
+                    if (bodyText.length > 500) break; // Only break early if we have a full long-form body
                 }
             } catch (e) {
                 console.error(`  [PARSING ERROR] Body parsing failed for selector '${sel}': ${e.message}`);
@@ -598,7 +601,7 @@ async function scrapeArticlePage(url, categoryHint) {
         }
 
         const isOfficial = url.includes('pao.gr') || url.includes('paobc.gr') || url.includes('pao1908.com');
-        const minLength = isOfficial ? 0 : 500;
+        const minLength = isOfficial ? 0 : 200;
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
