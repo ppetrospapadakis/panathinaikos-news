@@ -1054,7 +1054,7 @@ async function main() {
         // but limit duplicate group merging candidates to the last 48 hours.
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
         const { data, error } = await db.from('articles')
-            .select('id, title, source_url, group_id, created_at, category')
+            .select('id, title, summary, source_url, group_id, created_at, category')
             .gte('created_at', thirtyDaysAgo)
             .order('created_at', { ascending: false })
             .limit(10000);
