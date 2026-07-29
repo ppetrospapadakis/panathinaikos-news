@@ -1171,7 +1171,7 @@ async function main() {
                 });
             }
             // Only add valid, non-ignored, recent articles (< 48h) to existingArticles for merge matching
-            const isIgnored = a.group_id === 'IGNORED_URLS' || (a.title && a.title.includes('[IGNORED')) || a.category === 'SystemRoster';
+            const isIgnored = a.group_id === 'IGNORED_URLS' || (a.title && a.title.includes('[IGNORED')) || a.category === 'SystemRoster' || a.category === 'DELETED';
             if (!isIgnored) {
                 const createdMs = new Date(a.created_at).getTime();
                 if (createdMs >= twoDaysAgoMs) {
