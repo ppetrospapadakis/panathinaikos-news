@@ -1,3 +1,27 @@
+
+// ─── Helper for generating slug URL ──────────────────────────────────────────
+function getArticleSlugUrl(category, title, id) {
+    let catPath = 'podosfairo';
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('μπάσκετ') || cat.includes('basket')) catPath = 'basket';
+    else if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) catPath = 'erasitexnis';
+    else if (cat.includes('άποψη') || cat.includes('opinion')) catPath = 'apopsi';
+
+    let cleanTitle = (title || '').toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\u0370-\u03FF\u1F00-\u1FFF-]+/g, '')
+        .replace(/--+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '') || 'arthro';
+    if (cleanTitle.length > 45) {
+        const truncated = cleanTitle.substring(0, 45).replace(/-[^-]*$/, '');
+        cleanTitle = truncated.length > 10 ? truncated : cleanTitle.substring(0, 45);
+    }
+    const shortId = (id || '').substring(0, 8);
+    return `https://www.panathinaikosnews.gr/${catPath}/${cleanTitle}-id=${shortId}`;
+}
+
 /**
  * Panathinaikos News — Direct HTML Scraper
  *
