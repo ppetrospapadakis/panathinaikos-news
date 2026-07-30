@@ -1307,13 +1307,6 @@
                     const errData = await res.json();
                     showToast(errData.error || 'Αποτυχία υποβολής σχολίου.');
                 }
-
-                    await loadComments();
-                    await fetchCommentCounts();
-                } else {
-                    const errData = await res.json();
-                    showToast(errData.error || 'Αποτυχία υποβολής σχολίου.');
-                }
             } catch(e) {
                 showToast('Σφάλμα σύνδεσης. Δοκιμάστε ξανά.');
             } finally {
