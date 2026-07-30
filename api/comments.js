@@ -43,51 +43,86 @@ module.exports = async (req, res) => {
 
             const { data, error } = await supabase
                 .from('article_comments')
-                .select('id, user_name, comment_text, created_at')
+                .select('*')
                 .eq('article_id', article_id)
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
-            return res.status(200).json(data || []);
+            
+            // Format comments, marking is_admin flag if user_name is PanathinaikosNews or column is set
+            const formatted = (data || []).map(c => ({
+                id: c.id,
+                user_name: c.user_name,
+                comment_text: c.comment_text,
+                created_at: c.created_at,
+                is_admin: c.is_admin === true || c.user_name === 'PanathinaikosNews' || (c.user_name || '').toLowerCase() === 'panathinaikos news'
+            }));
+
+            return res.status(200).json(formatted);
         }
 
         if (req.method === 'POST') {
-            const { article_id, user_name, comment_text } = req.body || {};
+            const { article_id, user_name, comment_text, admin_token, is_admin } = req.body || {};
 
-            if (!article_id || !user_name || !comment_text) {
+            if (!article_id || !comment_text) {
                 return res.status(400).json({ error: 'Missing required fields' });
             }
 
-            const cleanName = user_name.trim();
+            const isAdminPost = (admin_token === 'admin_secure_session' && is_admin === true) || 
+                                (admin_token === 'admin_secure_session' && (user_name || '').toLowerCase().includes('panathinaikos'));
+
+            let cleanName = (user_name || '').trim();
             const cleanText = comment_text.trim();
 
-            if (cleanName.length < 2 || cleanName.length > 50) {
-                return res.status(400).json({ error: 'Το όνομα πρέπει να είναι μεταξύ 2 και 50 χαρακτήρων.' });
-            }
-            if (cleanText.length < 3 || cleanText.length > 1000) {
-                return res.status(400).json({ error: 'Το σχόλιο πρέπει να είναι μεταξύ 3 και 1000 χαρακτήρων.' });
+            if (isAdminPost) {
+                cleanName = 'PanathinaikosNews';
+            } else {
+                // Prevent regular users from impersonating PanathinaikosNews
+                if (cleanName.toLowerCase().includes('panathinaikos') || cleanName.toLowerCase().includes('admin') || cleanName.toLowerCase().includes('διαχειριστ')) {
+                    return res.status(400).json({ error: 'Το όνομα PanathinaikosNews είναι δεσμευμένο για τον διαχειριστή.' });
+                }
+                if (cleanName.length < 2 || cleanName.length > 50) {
+                    return res.status(400).json({ error: 'Το όνομα πρέπει να είναι μεταξύ 2 και 50 χαρακτήρων.' });
+                }
             }
 
-            const hasLink = /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(cleanText) ||
-                            /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(cleanName);
-            if (hasLink) {
-                return res.status(400).json({ error: 'Δεν επιτρέπονται σύνδεσμοι (links) στα σχόλια.' });
+            if (cleanText.length < 2 || cleanText.length > 1000) {
+                return res.status(400).json({ error: 'Το σχόλιο πρέπει να είναι μεταξύ 2 και 1000 χαρακτήρων.' });
             }
 
-            const curseWords = [
-                'μαλακ', 'πουστ', 'γαμησ', 'γαμω', 'γαμι', 'μουνι', 'μουνια', 'πουτανα', 'κωλο',
-                'σκατα', 'fucking', 'fuck', 'bitch', 'asshole', 'shit', 'pussy', 'cunt', 'γαμημενη',
-                'γαμημενο', 'γαμιολη', 'ξεκωλο', 'παπαρα', 'παπαρια', 'αρχιδια', 'αρχιδι'
-            ];
-            const lowerText = cleanText.toLowerCase();
-            const lowerName = cleanName.toLowerCase();
-            if (curseWords.some(word => lowerText.includes(word)) || curseWords.some(word => lowerName.includes(word))) {
-                return res.status(400).json({ error: 'Το σχόλιό σας περιέχει ανάρμοστο λεξιλόγιο.' });
+            if (!isAdminPost) {
+                const hasLink = /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(cleanText) ||
+                                /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(cleanName);
+                if (hasLink) {
+                    return res.status(400).json({ error: 'Δεν επιτρέπονται σύνδεσμοι (links) στα σχόλια.' });
+                }
+
+                const curseWords = [
+                    'μαλακ', 'πουστ', 'γαμησ', 'γαμω', 'γαμι', 'μουνι', 'μουνια', 'πουτανα', 'κωλο',
+                    'σκατα', 'fucking', 'fuck', 'bitch', 'asshole', 'shit', 'pussy', 'cunt', 'γαμημενη',
+                    'γαμημενο', 'γαμιολη', 'ξεκωλο', 'παπαρα', 'παπαρια', 'αρχιδια', 'αρχιδι'
+                ];
+                const lowerText = cleanText.toLowerCase();
+                const lowerName = cleanName.toLowerCase();
+                if (curseWords.some(word => lowerText.includes(word)) || curseWords.some(word => lowerName.includes(word))) {
+                    return res.status(400).json({ error: 'Το σχόλιό σας περιέχει ανάρμοστο λεξιλόγιο.' });
+                }
             }
+
+            const dbPayload = { 
+                article_id, 
+                user_name: cleanName, 
+                comment_text: cleanText 
+            };
+
+            // Include is_admin if column exists
+            try {
+                dbPayload.is_admin = isAdminPost;
+            } catch(e) {}
 
             const { data, error } = await supabase
                 .from('article_comments')
-                .insert([{ article_id, user_name: cleanName, comment_text: cleanText }])
+                .insert([dbPayload])
                 .select('*')
                 .single();
 
