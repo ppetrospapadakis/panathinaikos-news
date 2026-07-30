@@ -77,7 +77,7 @@ function switchAdminTab(tab) {
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 
     // Style active sidebar menu items
-    ['opinion', 'football', 'basketball', 'analytics-ingestion', 'analytics-engagement'].forEach(t => {
+    ['opinion', 'football', 'basketball', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
         const btn = document.getElementById(`admin-tab-${t}`);
         if (btn) {
             if (t === tab) {
@@ -120,6 +120,11 @@ function switchAdminTab(tab) {
             headerTag.textContent = 'Dashboard';
             headerTitle.textContent = 'Reader Traffic';
             headerDesc.textContent = 'Συνολικά στατιστικά βάσης δεδομένων, όρια πόρων, χρήση κλειδιών Gemini API και δραστηριότητα δημοσιεύσεων ανά ώρα.';
+        } else if (tab === 'deleted') {
+            headerIcon.textContent = 'delete_history';
+            headerTag.textContent = 'Recycle Bin';
+            headerTitle.textContent = 'Διαγραμμένα Άρθρα';
+            headerDesc.textContent = 'Δες όλα τα άρθρα που έχουν διαγραφεί. Μπορείς να κάνεις προεπισκόπηση ή να τα επαναφέρεις στην ενεργή ροή ειδήσεων.';
         }
     }
 
@@ -129,7 +134,229 @@ function switchAdminTab(tab) {
     if (tab === 'analytics-engagement') {
         loadEngagementStats();
     }
+    if (tab === 'deleted') {
+        loadDeletedArticles();
+    }
 }
+window.switchAdminTab = switchAdminTab;
+
+// ── Deleted Articles Manager (Trash / Recycle Bin) ───────────────────────────
+let deletedArticlesCache = [];
+
+async function loadDeletedArticles() {
+    const listContainer = document.getElementById('deleted-articles-list');
+    if (!listContainer) return;
+    if (!db) {
+        listContainer.innerHTML = '<div class="col-span-full text-center py-10 text-on-surface-variant/60">Δεν έχει συνδεθεί η βάση δεδομένων.</div>';
+        return;
+    }
+
+    listContainer.innerHTML = `
+        <div class="col-span-full flex items-center justify-center py-12">
+            <div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+        </div>
+    `;
+
+    try {
+        const { data, error } = await db.from('articles')
+            .select('id, title, summary, content, image_url, category, created_at, source_url, bullets')
+            .eq('category', 'DELETED')
+            .order('created_at', { ascending: false })
+            .limit(60);
+
+        if (error) throw error;
+
+        deletedArticlesCache = data || [];
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="col-span-full text-center py-12 bg-surface-container rounded-2xl border border-outline-variant/30 p-8 space-y-3">
+                    <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">delete_outline</span>
+                    <h4 class="text-base font-bold text-on-surface">Το καλάθι είναι άδειο</h4>
+                    <p class="text-xs text-on-surface-variant max-w-sm mx-auto">Δεν υπάρχουν διαγραμμένα άρθρα αυτή τη στιγμή.</p>
+                </div>
+            `;
+            return;
+        }
+
+        listContainer.innerHTML = data.map(a => {
+            const date = new Date(a.created_at);
+            const dateStr = date.toLocaleDateString('el-GR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+            const img = a.image_url || DEFAULT_IMG;
+            
+            // Try to guess original sport / source category from title or URL
+            let inferredCategory = 'Ποδόσφαιρο';
+            const titleLower = (a.title || '').toLowerCase();
+            const urlLower = (a.source_url || '').toLowerCase();
+            if (titleLower.includes('μπάσκετ') || titleLower.includes('basket') || urlLower.includes('basket') || titleLower.includes('αταμάν') || titleLower.includes('ναν') || titleLower.includes('σλούκας')) {
+                inferredCategory = 'Μπάσκετ';
+            } else if (titleLower.includes('ερασιτέχνης') || titleLower.includes('βόλεϊ') || titleLower.includes('πόλο') || urlLower.includes('erasitechnis')) {
+                inferredCategory = 'Ερασιτέχνης';
+            } else if (titleLower.includes('άποψη') || urlLower.includes('opinion')) {
+                inferredCategory = 'Άποψη';
+            }
+
+            return `
+                <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-5 flex flex-col justify-between hover:border-outline-variant/60 transition-all shadow-sm group">
+                    <div class="flex gap-4 items-start mb-4">
+                        <div class="w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-surface-container-low border border-outline-variant/20">
+                            <img src="${img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='${DEFAULT_IMG}'"/>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <span class="px-2 py-0.5 rounded-md bg-error/10 border border-error/20 text-error font-bold text-[10px] uppercase tracking-wider">DELETED</span>
+                                <span class="text-[11px] text-on-surface-variant/60">🕒 ${dateStr}</span>
+                            </div>
+                            <h4 class="text-sm font-bold leading-snug line-clamp-2 text-on-surface mb-2">${a.title}</h4>
+                            <p class="text-xs text-on-surface-variant/80 line-clamp-2 leading-relaxed">${a.summary || a.content || 'Χωρίς σύνοψη'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                        <span class="text-[11px] text-on-surface-variant/50">Κατηγορία: <strong class="text-primary font-medium">${inferredCategory}</strong></span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="previewDeletedArticle('${a.id}')" class="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-xs font-semibold text-on-surface flex items-center gap-1.5 transition-all cursor-pointer">
+                                <span class="material-symbols-outlined" style="font-size:16px">visibility</span> Προεπισκόπηση
+                            </button>
+                            <button onclick="restoreDeletedArticle('${a.id}', '${inferredCategory}')" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm">
+                                <span class="material-symbols-outlined" style="font-size:16px">restore_from_trash</span> Επαναφορά
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('[Deleted Articles Error]', err);
+        listContainer.innerHTML = `<div class="col-span-full text-center py-10 text-error">Σφάλμα φόρτωσης: ${err.message}</div>`;
+    }
+}
+
+async function previewDeletedArticle(id) {
+    const article = deletedArticlesCache.find(a => a.id === id);
+    if (!article) return;
+
+    const modal = document.getElementById('deleted-preview-modal');
+    const content = document.getElementById('deleted-preview-content');
+    if (!modal || !content) return;
+
+    const date = new Date(article.created_at);
+    const dateStr = date.toLocaleDateString('el-GR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+    const img = article.image_url || DEFAULT_IMG;
+
+    let inferredCategory = 'Ποδόσφαιρο';
+    const titleLower = (article.title || '').toLowerCase();
+    const urlLower = (article.source_url || '').toLowerCase();
+    if (titleLower.includes('μπάσκετ') || titleLower.includes('basket') || urlLower.includes('basket') || titleLower.includes('αταμάν') || titleLower.includes('ναν')) {
+        inferredCategory = 'Μπάσκετ';
+    } else if (titleLower.includes('ερασιτέχνης') || titleLower.includes('βόλεϊ') || urlLower.includes('erasitechnis')) {
+        inferredCategory = 'Ερασιτέχνης';
+    } else if (titleLower.includes('άποψη') || urlLower.includes('opinion')) {
+        inferredCategory = 'Άποψη';
+    }
+
+    const bulletsList = Array.isArray(article.bullets) && article.bullets.length > 0
+        ? `<div class="mb-6 bg-surface-container/60 rounded-xl p-4 border border-outline-variant/30">
+            <h5 class="text-xs uppercase font-bold text-primary tracking-wider mb-2">Κύρια Σημεία</h5>
+            <ul class="space-y-1.5 text-xs text-on-surface-variant">
+                ${article.bullets.map(b => `<li class="flex gap-2"><span>•</span><span>${b}</span></li>`).join('')}
+            </ul>
+           </div>`
+        : '';
+
+    const contentParagraphs = (article.content || article.summary || 'Χωρίς περιεχόμενο')
+        .split('\n\n')
+        .map(p => `<p class="mb-4 text-on-surface-variant leading-relaxed text-sm">${p.trim()}</p>`)
+        .join('');
+
+    content.innerHTML = `
+        <div class="space-y-4">
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full bg-error/10 border border-error/20 text-error font-bold text-xs uppercase">ΔΙΑΓΡΑΜΜΕΝΟ</span>
+                <span class="text-xs text-on-surface-variant">Δημιουργία: ${dateStr}</span>
+                <a href="/podosfairo/arthro-id=${article.id}?admin_preview=true" target="_blank" class="ml-auto text-xs text-primary hover:underline flex items-center gap-1 font-semibold">
+                    <span class="material-symbols-outlined text-sm">open_in_new</span> Άνοιγμα σε νέα καρτέλα
+                </a>
+            </div>
+
+            <h2 class="text-2xl font-bold text-on-surface leading-tight">${article.title}</h2>
+
+            <div class="rounded-xl overflow-hidden border border-outline-variant/30 max-h-[345px] bg-black/40">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.src='${DEFAULT_IMG}'"/>
+            </div>
+
+            ${bulletsList}
+
+            <div class="py-2 border-t border-outline-variant/20">
+                ${contentParagraphs}
+            </div>
+
+            <div class="pt-6 border-t border-outline-variant/30 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <label class="text-xs text-on-surface-variant font-semibold">Επαναφορά στην κατηγορία:</label>
+                    <select id="restore-category-select" class="bg-surface-container border border-outline-variant/40 text-on-surface text-xs rounded-lg px-3 py-1.5 focus:border-primary">
+                        <option value="Ποδόσφαιρο" ${inferredCategory === 'Ποδόσφαιρο' ? 'selected' : ''}>⚽ Ποδόσφαιρο</option>
+                        <option value="Μπάσκετ" ${inferredCategory === 'Μπάσκετ' ? 'selected' : ''}>🏀 Μπάσκετ</option>
+                        <option value="Ερασιτέχνης" ${inferredCategory === 'Ερασιτέχνης' ? 'selected' : ''}>🤾 Ερασιτέχνης</option>
+                        <option value="Άποψη" ${inferredCategory === 'Άποψη' ? 'selected' : ''}>✍️ Άποψη</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="closeDeletedPreviewModal()" class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-xs font-semibold text-on-surface transition-all cursor-pointer">
+                        Ακύρωση
+                    </button>
+                    <button onclick="restoreDeletedArticleFromModal('${article.id}')" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-md">
+                        <span class="material-symbols-outlined" style="font-size:18px">restore_from_trash</span> Επαναφορά Άρθρου
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    if (modal.firstElementChild) {
+        modal.firstElementChild.classList.remove('scale-95');
+        modal.firstElementChild.classList.add('scale-100');
+    }
+}
+
+function closeDeletedPreviewModal() {
+    const modal = document.getElementById('google-news-modal') || document.getElementById('deleted-preview-modal');
+    const delModal = document.getElementById('deleted-preview-modal');
+    if (delModal) {
+        delModal.classList.add('opacity-0', 'pointer-events-none');
+        if (delModal.firstElementChild) {
+            delModal.firstElementChild.classList.remove('scale-100');
+            delModal.firstElementChild.classList.add('scale-95');
+        }
+    }
+}
+
+async function restoreDeletedArticle(id, category = 'Ποδόσφαιρο') {
+    if (!db) return;
+    const { error } = await db.from('articles').update({ category: category }).eq('id', id);
+    if (error) {
+        alert('Σφάλμα κατά την επαναφορά: ' + error.message);
+        return;
+    }
+    closeDeletedPreviewModal();
+    loadDeletedArticles();
+}
+
+async function restoreDeletedArticleFromModal(id) {
+    const select = document.getElementById('restore-category-select');
+    const selectedCategory = select ? select.value : 'Ποδόσφαιρο';
+    await restoreDeletedArticle(id, selectedCategory);
+}
+
+window.loadDeletedArticles = loadDeletedArticles;
+window.previewDeletedArticle = previewDeletedArticle;
+window.closeDeletedPreviewModal = closeDeletedPreviewModal;
+window.restoreDeletedArticle = restoreDeletedArticle;
+window.restoreDeletedArticleFromModal = restoreDeletedArticleFromModal;
 window.switchAdminTab = switchAdminTab;
 
 // ── Ingestion Runs Fetching & Inspectors ───────────────────────────────────

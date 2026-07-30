@@ -122,6 +122,10 @@
                 <span class="material-symbols-outlined">bar_chart</span>
                 <span>Reader Traffic</span>
             </button>
+            <button id="admin-tab-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+                <span class="material-symbols-outlined">delete_history</span>
+                <span>Διαγραμμένα Άρθρα</span>
+            </button>
         </div>
     </nav>
     
@@ -164,6 +168,9 @@
             </button>
             <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="px-5 py-2.5 rounded-xl font-label text-label uppercase bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-2">
                 <span class="material-symbols-outlined" style="font-size:18px">sports_basketball</span> Roster Μπάσκετ
+            </button>
+            <button id="admin-tab-deleted" onclick="switchAdminTab('deleted')" class="px-5 py-2.5 rounded-xl font-label text-label uppercase bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined" style="font-size:18px">delete_history</span> Διαγραμμένα
             </button>
         </div>
 
@@ -847,6 +854,28 @@
             <button onclick="deleteSelectedPlayer()" class="bg-red-950 text-red-400 border border-red-500/30 font-bold py-2 px-3 rounded-lg text-xs hover:bg-red-900 transition-colors" title="Διαγραφή">
                 <span class="material-symbols-outlined" style="font-size:16px">delete</span>
             </button>
+        <!-- ── TAB 6: DELETED ARTICLES MANAGER ── -->
+        <div id="panel-section-deleted" class="admin-panel-content hidden">
+            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">delete_history</span>
+                            Αρχείο Διαγραμμένων Άρθρων
+                        </h3>
+                        <p class="text-sm text-on-surface-variant mt-1">
+                            Δες όλα τα άρθρα που έχουν διαγραφεί. Μπορείς να κάνεις προεπισκόπηση ή να τα επαναφέρεις στην ενεργή ροή ειδήσεων.
+                        </p>
+                    </div>
+                    <button onclick="loadDeletedArticles()" class="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 rounded-xl text-xs font-semibold text-on-surface flex items-center gap-2 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">refresh</span> Ανανέωση
+                    </button>
+                </div>
+            </div>
+
+            <div id="deleted-articles-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Loaded dynamically by JS -->
+            </div>
         </div>
     </div>
 </main>
@@ -865,6 +894,19 @@
                 <img id="modal-image" src="" class="w-full rounded-xl object-cover max-h-[300px]" alt=""/>
             </div>
             <div id="modal-body" class="text-on-surface-variant leading-relaxed text-base" style="font-size:16px;line-height:1.8"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ DELETED ARTICLE PREVIEW MODAL ═══ -->
+<div id="deleted-preview-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="relative w-full max-w-3xl max-h-[90vh] bg-surface-container-high border border-outline-variant/30 rounded-2xl p-6 shadow-2xl overflow-y-auto transform scale-95 transition-all duration-300">
+        <button onclick="closeDeletedPreviewModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all cursor-pointer z-10">
+            <span class="material-symbols-outlined" style="font-size:20px">close</span>
+        </button>
+        
+        <div id="deleted-preview-content">
+            <!-- Rendered by JS -->
         </div>
     </div>
 </div>

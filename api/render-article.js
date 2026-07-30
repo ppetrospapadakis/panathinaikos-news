@@ -144,7 +144,8 @@ module.exports = async (req, res) => {
         let { data: articles, error } = await query.limit(1);
         let article = (articles && articles.length > 0) ? articles[0] : null;
 
-        if (error || !article || article.category === 'DELETED') {
+        const isAdminPreview = req.query.admin_preview === 'true';
+        if (error || !article || (article.category === 'DELETED' && !isAdminPreview)) {
             console.error('Database fetch error:', error);
             return res.status(404).send('<h1>Το άρθρο δεν βρέθηκε στη βάση δεδομένων.</h1>');
         }
