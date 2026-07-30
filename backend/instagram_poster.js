@@ -1,0 +1,265 @@
+/**
+ * Instagram Auto-Poster & News Card Generator for PanathinaikosNews.gr
+ * Generates branded 1080x1350 News Cards (0 AI cost) and publishes to Instagram Feed.
+ */
+
+const sharp = require('sharp');
+const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
+
+// ── Text Wrapping Helper for SVG Headlines ──────────────────────────────────
+function wrapText(text, maxCharsPerLine = 24) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+
+    for (const word of words) {
+        if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+            currentLine = (currentLine + ' ' + word).trim();
+        } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines.slice(0, 5); // Max 5 lines
+}
+
+// ── XML/SVG Text Escaper ───────────────────────────────────────────────────
+function escapeXml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+// ── Create 1080x1350 News Card JPEG Buffer ──────────────────────────────────
+async function createNewsCardBuffer(title, sourceImageUrl) {
+    const width = 1080;
+    const height = 1350;
+
+    // 1. Fetch source image or generate fallback dark background
+    let bgBuffer;
+    try {
+        if (sourceImageUrl && sourceImageUrl.startsWith('http')) {
+            const response = await axios.get(sourceImageUrl, { responseType: 'arraybuffer', timeout: 5000 });
+            bgBuffer = Buffer.from(response.data);
+        }
+    } catch (e) {
+        console.warn('[Instagram] Could not fetch source image for background, using fallback background:', e.message);
+    }
+
+    if (!bgBuffer) {
+        // Create solid dark green canvas as fallback
+        bgBuffer = await sharp({
+            create: {
+                width: width,
+                height: height,
+                channels: 3,
+                background: { r: 16, g: 30, b: 22 }
+            }
+        }).png().toBuffer();
+    }
+
+    // 2. Process background: Resize to 1080x1350, crop, and apply heavy blur
+    const processedBg = await sharp(bgBuffer)
+        .resize(width, height, { fit: 'cover', position: 'center' })
+        .blur(18)
+        .toBuffer();
+
+    // 3. Prepare Logo Overlay
+    let logoBase64 = '';
+    try {
+        const logoPath = path.join(__dirname, '..', 'logo.png');
+        if (fs.existsSync(logoPath)) {
+            const logoData = fs.readFileSync(logoPath);
+            logoBase64 = `data:image/png;base64,${logoData.toString('base64')}`;
+        }
+    } catch (err) {
+        console.warn('[Instagram] Logo file not found:', err.message);
+    }
+
+    // 4. Wrap Title Text
+    const lines = wrapText(title, 22);
+    const escapedLines = lines.map(l => escapeXml(l));
+
+    // Calculate vertical position for text (centered nicely)
+    const startY = Math.max(480, 750 - (escapedLines.length * 42));
+
+    const titleSvgSpans = escapedLines.map((line, idx) => {
+        const yPos = startY + (idx * 84);
+        return `<tspan x="90" y="${yPos}">${line}</tspan>`;
+    }).join('\n');
+
+    // 5. Generate SVG Overlay (Gradient, Branding, Title & Footer)
+    const svgOverlay = `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <!-- Heavy Dark Moody Green Gradient -->
+            <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#0a120c" stop-opacity="0.85"/>
+                <stop offset="35%" stop-color="#0d1810" stop-opacity="0.75"/>
+                <stop offset="70%" stop-color="#070c08" stop-opacity="0.92"/>
+                <stop offset="100%" stop-color="#040805" stop-opacity="0.98"/>
+            </linearGradient>
+
+            <!-- Card Border Glow -->
+            <linearGradient id="primaryGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#10b981"/>
+                <stop offset="50%" stop-color="#059669"/>
+                <stop offset="100%" stop-color="#047857"/>
+            </linearGradient>
+
+            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.8"/>
+            </filter>
+        </defs>
+
+        <!-- Gradient Dark Overlay -->
+        <rect width="${width}" height="${height}" fill="url(#bgGradient)"/>
+
+        <!-- Top Decorative Bar -->
+        <rect x="0" y="0" width="${width}" height="10" fill="url(#primaryGlow)"/>
+
+        <!-- Top Left Prominent Logo & Shamrock Emblem -->
+        <g transform="translate(80, 80)">
+            <!-- Shamrock SVG Icon -->
+            <path d="M40 8C35 2 25 2 18 8C11 14 11 25 18 31L36 50C34 60 25 68 12 68C-2 68 -6 52 2 40C10 28 25 28 32 36L40 45L48 36C55 28 70 28 78 40C86 52 82 68 68 68C55 68 46 60 44 50L62 31C69 25 69 14 62 8C55 2 45 2 40 8Z" fill="#10b981" filter="url(#shadow)"/>
+            <!-- Stem -->
+            <path d="M40 45 Q 40 85 46 100" stroke="#10b981" stroke-width="8" stroke-linecap="round" fill="none"/>
+            
+            ${logoBase64 ? `<image href="${logoBase64}" x="75" y="10" width="340" height="70"/>` : `
+            <text x="75" y="55" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="34" fill="#ffffff" letter-spacing="2">
+                PANATHINAIKOS<tspan fill="#10b981">NEWS</tspan>
+            </text>
+            `}
+        </g>
+
+        <!-- Center Article Headline -->
+        <g filter="url(#shadow)">
+            <!-- Category Tag line -->
+            <text x="90" y="${startY - 60}" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="24" fill="#10b981" letter-spacing="3">
+                ΠΑΝΑΘΗΝΑΪΚΟΣ NEWS
+            </text>
+
+            <text font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="64" fill="#ffffff" letter-spacing="-1.5">
+                ${titleSvgSpans}
+            </text>
+        </g>
+
+        <!-- Footer Accent Line & Domain -->
+        <g transform="translate(90, 1220)">
+            <rect x="0" y="0" width="80" height="4" fill="#10b981" rx="2"/>
+            <text x="100" y="6" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="22" fill="#a1a1aa" letter-spacing="2">
+                PANATHINAIKOSNEWS.GR
+            </text>
+        </g>
+    </svg>
+    `;
+
+    // 6. Composite SVG overlay onto background image
+    const finalBuffer = await sharp(processedBg)
+        .composite([{ input: Buffer.from(svgOverlay), top: 0, left: 0 }])
+        .jpeg({ quality: 92 })
+        .toBuffer();
+
+    return finalBuffer;
+}
+
+// ── Publish to Instagram Feed & Post 1st Comment ─────────────────────────────
+async function publishToInstagram(article) {
+    const igUserId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
+    const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+
+    if (!igUserId || !accessToken) {
+        console.log('[Instagram] INSTAGRAM_BUSINESS_ACCOUNT_ID or FACEBOOK_ACCESS_TOKEN not set in environment. Skipping auto-post.');
+        return null;
+    }
+
+    try {
+        console.log(`[Instagram] Generating News Card for: "${article.title}"...`);
+        const cardBuffer = await createNewsCardBuffer(article.title, article.image_url || article.image);
+
+        // 1. Upload card buffer to Supabase Storage bucket 'instagram-cards'
+        let imageUrl = null;
+        if (supabaseUrl && supabaseKey) {
+            const supabase = createClient(supabaseUrl, supabaseKey);
+            const fileName = `card_${article.id || Date.now()}.jpg`;
+            const { data, error } = await supabase.storage
+                .from('instagram-cards')
+                .upload(fileName, cardBuffer, { contentType: 'image/jpeg', upsert: true });
+
+            if (!error && data) {
+                const { data: publicUrlData } = supabase.storage.from('instagram-cards').getPublicUrl(fileName);
+                imageUrl = publicUrlData?.publicUrl;
+            } else {
+                console.warn('[Instagram] Storage upload warning:', error?.message);
+            }
+        }
+
+        if (!imageUrl) {
+            console.error('[Instagram] Could not obtain public image URL for Meta API. Ensure "instagram-cards" storage bucket is public.');
+            return null;
+        }
+
+        // 2. Prepare Caption & Post Container
+        const caption = `☘️ ${article.title}\n\n${(article.summary || '').substring(0, 300)}...\n\n#Panathinaikos #PAO #PanathinaikosNews #Ποδόσφαιρο #Μπάσκετ`;
+
+        console.log(`[Instagram] Creating container on Meta Graph API...`);
+        const containerRes = await axios.post(`https://graph.facebook.com/v19.0/${igUserId}/media`, null, {
+            params: {
+                image_url: imageUrl,
+                caption: caption,
+                access_token: accessToken
+            }
+        });
+
+        const containerId = containerRes.data?.id;
+        if (!containerId) throw new Error('Failed to get container ID from Meta API');
+
+        // Wait 3 seconds for Meta to process image
+        await new Promise(res => setTimeout(res, 3000));
+
+        // 3. Publish Container
+        console.log(`[Instagram] Publishing post ID: ${containerId}...`);
+        const publishRes = await axios.post(`https://graph.facebook.com/v19.0/${igUserId}/media_publish`, null, {
+            params: {
+                creation_id: containerId,
+                access_token: accessToken
+            }
+        });
+
+        const mediaId = publishRes.data?.id;
+        console.log(`[Instagram] Successfully published post! Media ID: ${mediaId}`);
+
+        // 4. Post 1st Comment with Article Link
+        if (mediaId && article.url) {
+            console.log(`[Instagram] Posting 1st comment with link...`);
+            const articleLink = article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`;
+            await axios.post(`https://graph.facebook.com/v19.0/${mediaId}/comments`, null, {
+                params: {
+                    message: `🔗 Διαβάστε το πλήρες άρθρο εδώ: ${articleLink}`,
+                    access_token: accessToken
+                }
+            });
+            console.log(`[Instagram] 1st comment posted successfully!`);
+        }
+
+        return mediaId;
+    } catch (error) {
+        console.error('[Instagram] Auto-posting failed:', error.response?.data || error.message);
+        return null;
+    }
+}
+
+module.exports = {
+    createNewsCardBuffer,
+    publishToInstagram
+};

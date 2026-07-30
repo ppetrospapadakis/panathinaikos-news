@@ -17,6 +17,7 @@ const cheerio = require('cheerio');
 const { createClient } = require('@supabase/supabase-js');
 const crypto  = require('crypto');
 require('dotenv').config();
+const { publishToInstagram } = require('./instagram_poster');
 
 // ─── HTTP client ───────────────────────────────────────────────────────────────
 // Uses full Chrome 136 browser fingerprint to avoid anti-bot detection.
@@ -1750,6 +1751,18 @@ async function main() {
             totalNew++;
             console.log(`    ✅ Inserted (id=${inserted[0].id})`);
             warmUpArticleCache(scraped.imageUrl, finalTitle, inserted[0].id, dbPayload.category);
+
+            // Auto-Publish to Instagram Feed (if credentials exist)
+            if (!isDryRun) {
+                const articleForIg = {
+                    id: inserted[0].id,
+                    title: dbPayload.title,
+                    summary: dbPayload.summary,
+                    image_url: scraped.imageUrl,
+                    url: getArticleSlugUrl(dbPayload.category, dbPayload.title, inserted[0].id)
+                };
+                publishToInstagram(articleForIg).catch(err => console.error('[Instagram] Background error:', err.message));
+            }
         }
         // Rate limit between article processing — always pause, not just on success
         if (!process.env.VERCEL) {
