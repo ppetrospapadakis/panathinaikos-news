@@ -204,6 +204,14 @@ module.exports = async (req, res) => {
         const resData = await twitterRes.json().catch(() => ({}));
 
         if (!twitterRes.ok) {
+            if (twitterRes.status === 402 || (resData?.detail && resData.detail.includes('credits depleted'))) {
+                console.warn(`[Twitter Sync Warning] Credits depleted: ${JSON.stringify(resData)}`);
+                return res.status(200).json({
+                    success: false,
+                    warning: 'Twitter API credits depleted (402 Payment Required). Post skipped.',
+                    twitter_response: resData
+                });
+            }
             throw new Error(`Twitter API error (${twitterRes.status}): ${JSON.stringify(resData)}`);
         }
 
