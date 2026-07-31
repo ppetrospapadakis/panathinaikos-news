@@ -494,6 +494,9 @@ function sanitizeImageUrl(scrapedImg) {
 function stripJournalistFromTitle(title) {
     if (!title || typeof title !== 'string') return title;
     let t = title.trim();
+    // Strip category/section code prefixes like "Α19:", "A:19", "K19:", "U19:", "Α15:", etc.
+    t = t.replace(/^\s*([AΑ]:?\d{1,2}|U\d{1,2}|K\d{1,2})\s*:\s*/i, '');
+
     const journalistRegex = /^\s*(Αθανασίου|Νικολογιάννης|Πετρωτός|Σταύρου|Κετσετζόγλου|Χελάκης|Τσακίρης|Καρπετόπουλος|Παπαθεοδώρου|Αρναούτογλου|Athanasiou|Nikologiannis)(\s+στο[υςα-ώA-Za-z]+(\s+\w+)*)?\s*:\s*/i;
     t = t.replace(journalistRegex, '');
     t = t.replace(/^\s*(Αθανασίου|Νικολογιάννης|Πετρωτός|Σταύρου|Κετσετζόγλου|Χελάκης|Τσακίρης|Καρπετόπουλος|Παπαθεοδώρου|Αρναούτογλου|Athanasiou|Nikologiannis)\s+/i, '');
