@@ -46,8 +46,8 @@ function areSimilar(titleA, titleB) {
     
     const cosineSimilarity = dotProduct / (Math.sqrt(magA) * Math.sqrt(magB));
     
-    // 2. Keyword Entity Overlap check (ignoring common Greek stopwords)
-    const stopwords = new Set(['στην', 'στον', 'στους', 'στις', 'στη', 'στο', 'τους', 'τους', 'προς', 'μετά', 'από', 'για', 'και', 'που', 'πως', 'ότι']);
+    // 2. Keyword Entity Overlap check (ignoring common Greek & site stopwords)
+    const stopwords = new Set(['στην', 'στον', 'στους', 'στις', 'στη', 'στο', 'τους', 'προς', 'μετά', 'από', 'για', 'και', 'που', 'πως', 'ότι', 'παναθηναϊκός', 'παναθηναϊκό', 'παναθηναϊκού', 'παναθηναϊκά', 'τριφύλλι', 'πράσινοι', 'πράσινα']);
     const wordsA = new Set(cleanA.split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w)));
     const wordsB = new Set(cleanB.split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w)));
     
@@ -59,7 +59,7 @@ function areSimilar(titleA, titleB) {
     const minWords = Math.min(wordsA.size, wordsB.size);
     const wordOverlapRatio = minWords > 0 ? (overlapping / minWords) : 0;
     
-    return cosineSimilarity > 0.55 || (cosineSimilarity > 0.32 && overlapping >= 2) || (wordOverlapRatio >= 0.6 && overlapping >= 2);
+    return cosineSimilarity > 0.65 || (cosineSimilarity > 0.50 && overlapping >= 3) || (wordOverlapRatio >= 0.75 && overlapping >= 3);
 }
 
 module.exports = async (req, res) => {
@@ -172,6 +172,13 @@ module.exports = async (req, res) => {
             
             if (!currentIsOwn) {
                 for (const existing of uniqueArticles) {
+                    // Category Guard: Articles from different categories (e.g. Football vs Basketball) can NEVER be deduplicated!
+                    const catCurrent = (current.category || '').toLowerCase();
+                    const catExisting = (existing.category || '').toLowerCase();
+                    if (catCurrent !== catExisting) {
+                        continue;
+                    }
+
                     const timeDiffMins = Math.abs(new Date(current.created_at) - new Date(existing.created_at)) / (1000 * 60);
                     const isAmateur = (current.category && current.category.includes('Ερασιτέχνης')) ||
                                      (existing.category && existing.category.includes('Ερασιτέχνης'));
