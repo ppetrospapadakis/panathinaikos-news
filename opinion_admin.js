@@ -2069,3 +2069,28 @@ async function setFixtureCurrent(id) {
     }
 }
 window.setFixtureCurrent = setFixtureCurrent;
+
+
+async function emptyRecycleBin() {
+    if (!confirm('ΠΡΟΣΟΧΗ: Θέλεις σίγουρα να διαγράψεις ΟΡΙΣΤΙΚΑ ΟΛΑ τα άρθρα που βρίσκονται στο Αρχείο Διαγραμμένων;\n\nΑυτή η ενέργεια δεν αναιρείται!')) {
+        return;
+    }
+
+    db = getDb();
+    if (!db) {
+        alert('Σφάλμα: Δεν υπάρχει σύνδεση με τη βάση δεδομένων.');
+        return;
+    }
+
+    try {
+        const { error } = await db.from('articles').delete().eq('category', 'DELETED');
+        if (error) throw error;
+        
+        alert('Όλα τα διαγραμμένα άρθρα διαγράφηκαν οριστικά από τη βάση δεδομένων!');
+        loadDeletedArticles();
+    } catch (err) {
+        console.error('Empty Recycle Bin Error:', err);
+        alert('Σφάλμα οριστικής διαγραφής όλων: ' + err.message);
+    }
+}
+window.emptyRecycleBin = emptyRecycleBin;
