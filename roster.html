@@ -199,17 +199,6 @@
                 </div>
             </div>
 
-            <!-- TACTICAL ANALYSIS -->
-            <div id="analysis-container-football" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
-                <div class="flex items-center gap-3 mb-6">
-                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
-                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
-                </div>
-                <div id="analysis-text-football" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
-                    <!-- Dynamically loaded -->
-                </div>
-            </div>
-
             <!-- Football Comments Widget -->
             <div id="football-comments-container" class="mt-12 pt-8 border-t border-outline-variant/30"></div>
         </div>
@@ -264,17 +253,6 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="squad-rest-basketball">
                     <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- TACTICAL ANALYSIS -->
-            <div id="analysis-container-basketball" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
-                <div class="flex items-center gap-3 mb-6">
-                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
-                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
-                </div>
-                <div id="analysis-text-basketball" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
-                    <!-- Dynamically loaded -->
                 </div>
             </div>
 
@@ -646,12 +624,12 @@
                 renderPitchPlayers('pitch-starting', footballStarting);
                 renderPitchPlayers('pitch-bench', footballBench);
                 renderSquadList('squad-rest-football', footballRest);
-                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
+                
 
                 renderCourtPlayers('court-starting', basketballStarting);
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
-                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                
                 // Still try to load news even without Supabase CDN
                 initMoreNewsScroll();
             };
@@ -670,23 +648,9 @@
                     const starting = JSON.parse(fData.bullets[0]);
                     const bench = JSON.parse(fData.bullets[1]);
                     const rest = JSON.parse(fData.bullets[2]);
-                    const analysis = fData.content || '';
-
                     renderPitchPlayers('pitch-starting', starting);
                     renderPitchPlayers('pitch-bench', bench);
                     renderSquadList('squad-rest-football', rest);
-                    const elFootballContainer = document.getElementById('analysis-container-football');
-                    if (analysis.trim() !== '') {
-                        document.getElementById('analysis-text-football').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
-                        if (elFootballContainer) elFootballContainer.style.display = 'block';
-                    } else {
-                        if (elFootballContainer) elFootballContainer.style.display = 'none';
-                    }
-                } else {
-                    renderPitchPlayers('pitch-starting', footballStarting);
-                    renderPitchPlayers('pitch-bench', footballBench);
-                    renderSquadList('squad-rest-football', footballRest);
-                    document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
                 }
 
                 // Fetch Basketball Roster
@@ -699,23 +663,9 @@
                     const starting = JSON.parse(bData.bullets[0]);
                     const backup = JSON.parse(bData.bullets[1]);
                     const rest = JSON.parse(bData.bullets[2]);
-                    const analysis = bData.content || '';
-
                     renderCourtPlayers('court-starting', starting);
                     renderCourtPlayers('court-backup', backup);
                     renderSquadList('squad-rest-basketball', rest);
-                    const elBasketballContainer = document.getElementById('analysis-container-basketball');
-                    if (analysis.trim() !== '') {
-                        document.getElementById('analysis-text-basketball').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
-                        if (elBasketballContainer) elBasketballContainer.style.display = 'block';
-                    } else {
-                        if (elBasketballContainer) elBasketballContainer.style.display = 'none';
-                    }
-                } else {
-                    renderCourtPlayers('court-starting', basketballStarting);
-                    renderCourtPlayers('court-backup', basketballBackup);
-                    renderSquadList('squad-rest-basketball', basketballRest);
-                    document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
                 }
 
                 if (fData && fData.id) {
@@ -731,13 +681,13 @@
                 renderPitchPlayers('pitch-starting', footballStarting);
                 renderPitchPlayers('pitch-bench', footballBench);
                 renderSquadList('squad-rest-football', footballRest);
-                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή.</p>';
+                
                 
                 // Basketball fallback
                 renderCourtPlayers('court-starting', basketballStarting);
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
-                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη.</p>';
+                
             }
         }
 
