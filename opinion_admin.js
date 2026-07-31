@@ -146,6 +146,11 @@ let deletedArticlesCache = [];
 async function loadDeletedArticles() {
     const listContainer = document.getElementById('deleted-articles-list');
     if (!listContainer) return;
+
+    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+
     if (!db) {
         listContainer.innerHTML = '<div class="col-span-full text-center py-10 text-on-surface-variant/60">Δεν έχει συνδεθεί η βάση δεδομένων.</div>';
         return;
@@ -221,6 +226,9 @@ async function loadDeletedArticles() {
                             </button>
                             <button onclick="restoreDeletedArticle('${a.id}', '${inferredCategory}')" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm">
                                 <span class="material-symbols-outlined" style="font-size:16px">restore_from_trash</span> Επαναφορά
+                            </button>
+                            <button onclick="hardDeleteArticle('${a.id}')" class="px-3 py-1.5 rounded-xl bg-error/20 hover:bg-error/30 text-error border border-error/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm" title="Οριστική Διαγραφή">
+                                <span class="material-symbols-outlined" style="font-size:16px">delete_forever</span> Οριστική
                             </button>
                         </div>
                     </div>
@@ -1780,3 +1788,20 @@ function renderTrafficCharts(data, filterSource = 'ALL') {
     }
 }
 
+
+
+async function hardDeleteArticle(id) {
+    if (!confirm('Θέλεις σίγουρα να διαγράψεις ΟΡΙΣΤΙΚΑ αυτό το άρθρο από τη βάση δεδομένων; Αυτή η ενέργεια δεν αναιρείται.')) return;
+    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+    if (!db) return;
+    const { error } = await db.from('articles').delete().eq('id', id);
+    if (error) {
+        alert('Σφάλμα οριστικής διαγραφής: ' + error.message);
+    } else {
+        closeDeletedPreviewModal();
+        loadDeletedArticles();
+    }
+}
+window.hardDeleteArticle = hardDeleteArticle;
