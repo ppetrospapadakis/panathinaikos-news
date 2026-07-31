@@ -696,9 +696,49 @@ async function scrapeArticlePage(url, categoryHint) {
             } catch (_) {}
         }
         
-        // ── Published date ─────────────────────────────────────────────────────
-        // User requested: Ignore source's specified time and always use the exact time we scrape it
-        let created_at = new Date().toISOString();
+        // ── Published date & Age Validation ────────────────────────────────────
+        let extractedDateStr = 
+            $('meta[property="article:published_time"]').attr('content') ||
+            $('meta[name="article:published_time"]').attr('content') ||
+            $('meta[property="og:updated_time"]').attr('content') ||
+            $('meta[itemprop="datePublished"]').attr('content') ||
+            $('time[datetime]').first().attr('datetime') ||
+            $('time[pubdate]').first().attr('datetime');
+
+        if (!extractedDateStr) {
+            try {
+                $('script[type="application/ld+json"]').each((_, el) => {
+                    const raw = $(el).html();
+                    if (raw && raw.includes('datePublished')) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed.datePublished) extractedDateStr = parsed.datePublished;
+                        else if (Array.isArray(parsed['@graph'])) {
+                            const item = parsed['@graph'].find(g => g.datePublished);
+                            if (item) extractedDateStr = item.datePublished;
+                        }
+                    }
+                });
+            } catch (_) {}
+        }
+
+        const now = new Date();
+        let created_at = now.toISOString();
+
+        if (extractedDateStr) {
+            const pubDate = new Date(extractedDateStr);
+            if (!isNaN(pubDate.getTime())) {
+                const ageHours = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
+                
+                // MAX AGE CHECK: Skip articles published more than 36 hours ago!
+                if (ageHours > 36) {
+                    console.log(`  [PARSING WARNING] Article is too old (Published: ${pubDate.toISOString()}, Age: ${ageHours.toFixed(1)}h). Maximum allowed age is 36h. Skipping ${url}`);
+                    return { status: 'skipped_older', length: 0 };
+                }
+                
+                // Preserve true publication timestamp for valid recent articles
+                created_at = pubDate.toISOString();
+            }
+        }
 
         // ── Body text ──────────────────────────────────────────────────────────
         // Try progressively more specific selectors (strictly targeted at single-article containers)
