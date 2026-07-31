@@ -746,7 +746,7 @@ async function scrapeArticlePage(url, categoryHint) {
         }
 
         const isOfficial = url.includes('pao.gr') || url.includes('paobc.gr') || url.includes('pao1908.com');
-        const minLength = isOfficial ? 0 : 200;
+        const minLength = isOfficial ? 100 : 380;
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
