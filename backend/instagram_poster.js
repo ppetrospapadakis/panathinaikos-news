@@ -207,7 +207,13 @@ async function publishToInstagram(article) {
         // 2. Prepare Caption & Post Container (Includes Full AI Summary + Direct Article Link)
         const articleLink = article.url ? (article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`) : 'https://www.panathinaikosnews.gr';
         const fullSummary = article.summary ? article.summary.trim() : '';
-        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο: ${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews #Ποδόσφαιρο #Μπάσκετ`;
+        // Determine category hashtags
+        const catLower = (article.category || '').toLowerCase();
+        let sportTags = '#PAOFC #PAOBC';
+        if (catLower.includes('ποδόσφαιρο') || catLower.includes('football')) sportTags = '#PAOFC';
+        else if (catLower.includes('μπάσκετ') || catLower.includes('basket')) sportTags = '#PAOBC';
+
+        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο: ${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
 
         console.log(`[Instagram] Creating container on Meta Graph API...`);
         const containerRes = await axios.post(`https://graph.facebook.com/v19.0/${igUserId}/media`, null, {
