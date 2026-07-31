@@ -436,7 +436,7 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
                         if (u.pathname === '/' || u.pathname === '') return;
                         
-                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', 'galacticos', 'interwetten', 'gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos'];
+                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', 'galacticos', 'interwetten', 'gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos', 'papatheodwroy', 'papatheodorou'];
                         if (blacklist.some(b => u.pathname.toLowerCase().includes(b))) return;
                         
                         // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
@@ -444,6 +444,9 @@ async function scrapeArticleLinks(target, logErrorCallback) {
 
                         // Sport-FM specific filter: skip radio comments / audio recaps containing 'sxolia' or 'sxolio'
                         if (u.hostname.includes('sport-fm.gr') && (u.pathname.toLowerCase().includes('sxolia') || u.pathname.toLowerCase().includes('sxolio'))) return;
+
+                        // Sportime specific filter: skip articles containing 'papatheodwroy' or 'papatheodorou'
+                        if (u.hostname.includes('sportime.gr') && (u.pathname.toLowerCase().includes('papatheodwroy') || u.pathname.toLowerCase().includes('papatheodorou'))) return;
                         
                         links.add(href.split('?')[0].split('#')[0]); // strip query/hash
                     } catch (_) {}
@@ -600,6 +603,10 @@ function detectCategoryFromUrl(url, categoryHint) {
 async function scrapeArticlePage(url, categoryHint) {
     if (url.toLowerCase().includes('sport-fm.gr') && (url.toLowerCase().includes('sxolia') || url.toLowerCase().includes('sxolio'))) {
         console.log(`[SCRAPE SKIPPED] Sport-FM audio/comments recap URL skipped: ${url}`);
+        return null;
+    }
+    if (url.toLowerCase().includes('sportime.gr') && (url.toLowerCase().includes('papatheodwroy') || url.toLowerCase().includes('papatheodorou'))) {
+        console.log(`[SCRAPE SKIPPED] Sportime papatheodwroy article URL skipped: ${url}`);
         return null;
     }
     if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten')) {
