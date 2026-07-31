@@ -126,15 +126,10 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
         <!-- Top Decorative Bar -->
         <rect x="0" y="0" width="${width}" height="10" fill="url(#primaryGlow)"/>
 
-        <!-- Top Left Prominent Logo & Shamrock Emblem -->
-        <g transform="translate(80, 80)">
-            <!-- Shamrock SVG Icon -->
-            <path d="M40 8C35 2 25 2 18 8C11 14 11 25 18 31L36 50C34 60 25 68 12 68C-2 68 -6 52 2 40C10 28 25 28 32 36L40 45L48 36C55 28 70 28 78 40C86 52 82 68 68 68C55 68 46 60 44 50L62 31C69 25 69 14 62 8C55 2 45 2 40 8Z" fill="#10b981" filter="url(#shadow)"/>
-            <!-- Stem -->
-            <path d="M40 45 Q 40 85 46 100" stroke="#10b981" stroke-width="8" stroke-linecap="round" fill="none"/>
-            
-            ${logoBase64 ? `<image href="${logoBase64}" x="75" y="10" width="340" height="70"/>` : `
-            <text x="75" y="55" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="34" fill="#ffffff" letter-spacing="2">
+        <!-- Top Left Official Logo (Enlarged, extra shamrock removed) -->
+        <g transform="translate(80, 85)">
+            ${logoBase64 ? `<image href="${logoBase64}" x="0" y="0" width="460" height="95"/>` : `
+            <text x="0" y="55" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="42" fill="#ffffff" letter-spacing="2">
                 PANATHINAIKOS<tspan fill="#10b981">NEWS</tspan>
             </text>
             `}
@@ -209,8 +204,10 @@ async function publishToInstagram(article) {
             return null;
         }
 
-        // 2. Prepare Caption & Post Container
-        const caption = `☘️ ${article.title}\n\n${(article.summary || '').substring(0, 300)}...\n\n#Panathinaikos #PAO #PanathinaikosNews #Ποδόσφαιρο #Μπάσκετ`;
+        // 2. Prepare Caption & Post Container (Includes Full AI Summary + Direct Article Link)
+        const articleLink = article.url ? (article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`) : 'https://www.panathinaikosnews.gr';
+        const fullSummary = article.summary ? article.summary.trim() : '';
+        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο: ${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews #Ποδόσφαιρο #Μπάσκετ`;
 
         console.log(`[Instagram] Creating container on Meta Graph API...`);
         const containerRes = await axios.post(`https://graph.facebook.com/v19.0/${igUserId}/media`, null, {
