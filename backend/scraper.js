@@ -1727,6 +1727,9 @@ async function main() {
                     id: inserted[0].id,
                     title: dbPayload.title,
                     summary: dbPayload.summary,
+                    category: dbPayload.category,
+                    source: target.name,
+                    is_official: target.name.toLowerCase().includes('official') || target.name.toLowerCase().includes('επίσημ'),
                     image_url: scraped.imageUrl,
                     url: getArticleSlugUrl(dbPayload.category, dbPayload.title, inserted[0].id)
                 };

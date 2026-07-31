@@ -178,6 +178,17 @@ async function publishToInstagram(article) {
         return null;
     }
 
+    // Filter: Do NOT post Amateur (Ερασιτέχνης) or Official sources/categories to Instagram!
+    const cat = (article.category || '').toLowerCase();
+    const src = (article.source || '').toLowerCase();
+    const isAmateur = cat.includes('ερασιτέχνης') || cat.includes('erasitexnis') || cat.includes('amateur') || src.includes('1908');
+    const isOfficial = article.is_official === true || cat.includes('official') || src.includes('official') || src.includes('επίσημ');
+
+    if (isAmateur || isOfficial) {
+        console.log(`[Instagram] Skipping auto-post: Article is Amateur/Official (${cat || src}) — "${article.title}"`);
+        return null;
+    }
+
     try {
         console.log(`[Instagram] Generating News Card for: "${article.title}"...`);
         const cardBuffer = await createNewsCardBuffer(article.title, article.image_url || article.image);
