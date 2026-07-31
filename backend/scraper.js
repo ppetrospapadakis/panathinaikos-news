@@ -729,9 +729,9 @@ async function scrapeArticlePage(url, categoryHint) {
             if (!isNaN(pubDate.getTime())) {
                 const ageHours = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
                 
-                // MAX AGE CHECK: Skip articles published more than 36 hours ago!
-                if (ageHours > 36) {
-                    console.log(`  [PARSING WARNING] Article is too old (Published: ${pubDate.toISOString()}, Age: ${ageHours.toFixed(1)}h). Maximum allowed age is 36h. Skipping ${url}`);
+                // MAX AGE CHECK: Skip articles published more than 4 hours ago!
+                if (ageHours > 4) {
+                    console.log(`  [PARSING WARNING] Article is too old (Published: ${pubDate.toISOString()}, Age: ${ageHours.toFixed(1)}h). Maximum allowed age is 4h. Skipping ${url}`);
                     return { status: 'skipped_older', length: 0 };
                 }
                 
