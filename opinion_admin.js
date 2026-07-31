@@ -1436,7 +1436,7 @@ async function saveRoster(sport) {
                 summary: `${sport.toUpperCase()} starting squad and tactical analysis.`,
                 content: analysis,
                 bullets: [JSON.stringify(starting), JSON.stringify(benchOrBackup), JSON.stringify(rest)],
-                category: 'SystemRoster',
+                category: 'SystemRosterData',
                 created_at: '1970-01-01T00:00:00.000Z',
             }, {
                 onConflict: 'source_url'
