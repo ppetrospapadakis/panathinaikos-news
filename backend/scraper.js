@@ -1342,6 +1342,20 @@ async function main() {
                 
                 continue;
             }
+            if (scraped.status === 'skipped_older') {
+                runStats.sources[target.name].skipped_other++;
+                runStats.totals.skipped_other++;
+                logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Old)', 'promo', 'Παλαιότερο των 4 ωρών');
+                existingUrls.add(articleUrl);
+                continue;
+            }
+            if (scraped.status === 'skipped_video') {
+                runStats.sources[target.name].skipped_size++;
+                runStats.totals.skipped_size++;
+                logSkippedArticle(target.name, articleUrl, 'Unknown Title (Video)', 'size', 'Βίντεο/Media άρθρο');
+                existingUrls.add(articleUrl);
+                continue;
+            }
             if (scraped.status === 'skipped_size') {
                 runStats.sources[target.name].skipped_size++;
                 runStats.totals.skipped_size++;
@@ -1357,6 +1371,9 @@ async function main() {
                     console.log(`    [SMART RETRY] Fresh short stub (${articleAgeMins.toFixed(0)}m old). Will re-check on next run if expanded.`);
                 }
                 
+                continue;
+            }
+            if (scraped.status !== 'success' || !scraped.title) {
                 continue;
             }
 
