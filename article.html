@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark icons-loaded" lang="el">
+<html class="dark" lang="el">
 <head>
 
     <!-- Vercel Analytics -->
@@ -83,7 +83,27 @@
       #article-body .ql-size-small { font-size: 0.85rem !important; }
       #article-body .ql-size-large { font-size: 1.35rem !important; line-height: 1.6 !important; }
       #article-body .ql-size-huge { font-size: 1.85rem !important; line-height: 1.4 !important; font-weight: bold !important; }
+    
+        /* Hide raw text ligatures until icon font is loaded to eliminate FOUT text flash */
+        html:not(.icons-loaded) .material-symbols-outlined {
+            color: transparent !important;
+            text-shadow: none !important;
+        }
+
     </style>
+
+    <script>
+        if (document.fonts) {
+            document.fonts.load('1em "Material Symbols Outlined"').then(function() {
+                document.documentElement.classList.add('icons-loaded');
+            }).catch(function() {
+                document.documentElement.classList.add('icons-loaded');
+            });
+        } else {
+            document.documentElement.classList.add('icons-loaded');
+        }
+    </script>
+
 </head>
 <body class="bg-background text-on-surface overflow-x-hidden overflow-y-scroll">
 

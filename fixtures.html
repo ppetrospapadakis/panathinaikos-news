@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark icons-loaded" lang="el">
+<html class="dark" lang="el">
 <head>
     <!-- Preconnect for fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -129,6 +129,13 @@
         #fixtures-box::-webkit-scrollbar-thumb:hover {
             background: rgba(16, 185, 129, 0.5);
         }
+    
+        /* Hide raw text ligatures until icon font is loaded to eliminate FOUT text flash */
+        html:not(.icons-loaded) .material-symbols-outlined {
+            color: transparent !important;
+            text-shadow: none !important;
+        }
+
     </style>
 
 
@@ -185,6 +192,19 @@
                 window.closeFilterDropdown();
             }
         });
+    </script>
+
+
+    <script>
+        if (document.fonts) {
+            document.fonts.load('1em "Material Symbols Outlined"').then(function() {
+                document.documentElement.classList.add('icons-loaded');
+            }).catch(function() {
+                document.documentElement.classList.add('icons-loaded');
+            });
+        } else {
+            document.documentElement.classList.add('icons-loaded');
+        }
     </script>
 
 </head>
