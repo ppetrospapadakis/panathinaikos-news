@@ -4,7 +4,7 @@ function getDb() {
     if (window.db) return window.db;
     if (typeof db !== 'undefined' && db) return db;
     const url = window.SUPABASE_URL || 'https://rctltbuiitdnqlxizlym.supabase.co';
-    const key = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyNjA1OTYsImV4cCI6MjA2ODgzNjU5Nn0.8mvhPZ0rZ6zQvT5XmDmsn94aY3Z2eR008gXk_u1Q-2k';
+    const key = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
     if (window.supabase) {
         window.db = window.supabase.createClient(url, key);
         return window.db;
