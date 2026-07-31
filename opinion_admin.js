@@ -1438,7 +1438,6 @@ async function saveRoster(sport) {
                 bullets: [JSON.stringify(starting), JSON.stringify(benchOrBackup), JSON.stringify(rest)],
                 category: 'SystemRoster',
                 created_at: '1970-01-01T00:00:00.000Z',
-                updated_at: new Date().toISOString()
             }, {
                 onConflict: 'source_url'
             });
@@ -2015,7 +2014,6 @@ async function saveFixture() {
             away_team_name: awayName,
             away_score: awayScore,
             is_current: isCurrent,
-            updated_at: new Date().toISOString()
         };
 
         if (editingFixtureId) {
