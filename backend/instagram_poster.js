@@ -189,6 +189,18 @@ async function publishToInstagram(article) {
         return null;
     }
 
+    // Deduplication Guard: Check if article was already posted to Instagram
+    if (supabaseUrl && supabaseKey && article.id) {
+        try {
+            const supabase = createClient(supabaseUrl, supabaseKey);
+            const { data: dbArt } = await supabase.from('articles').select('instagram_posted').eq('id', article.id).single();
+            if (dbArt && dbArt.instagram_posted) {
+                console.log(`[Instagram] Article id=${article.id} already posted to Instagram. Skipping.`);
+                return null;
+            }
+        } catch (_) {}
+    }
+
     try {
         console.log(`[Instagram] Generating News Card for: "${article.title}"...`);
         const cardBuffer = await createNewsCardBuffer(article.title, article.image_url || article.image);
@@ -278,6 +290,14 @@ async function publishToInstagram(article) {
             } catch (commentErr) {
                 console.warn(`[Instagram] 1st comment warning (post published successfully):`, commentErr.response?.data?.error?.message || commentErr.message);
             }
+        }
+
+        // Mark article as published to Instagram in DB
+        if (mediaId && supabaseUrl && supabaseKey && article.id) {
+            try {
+                const supabase = createClient(supabaseUrl, supabaseKey);
+                await supabase.from('articles').update({ instagram_posted: true }).eq('id', article.id);
+            } catch (_) {}
         }
 
         return mediaId;
