@@ -17,10 +17,13 @@
   <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
     <!-- Favicon & Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=5"/>
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=5"/>
-    <link rel="shortcut icon" href="/favicon.png?v=5"/>
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=5"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png?v=6"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=6"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=6"/>
+    <link rel="shortcut icon" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=6"/>
+    <link rel="manifest" href="/site.webmanifest"/>
     <meta name="theme-color" content="#111317"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος</title>
@@ -1279,7 +1282,8 @@
         if (!modal) {
             modal = document.createElement('div');
             modal.id = 'google-news-modal';
-            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 opacity-0 pointer-events-none transition-all duration-300';
+            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300';
+            modal.style.cssText = 'background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);';
             modal.innerHTML = `
                 <div class="relative w-full max-w-[310px] sm:max-w-md bg-[#1e2022] border border-outline-variant/30 rounded-2xl p-5 sm:p-6 shadow-2xl transform scale-95 transition-all duration-300 text-center space-y-4">
                     <div class="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#282a2d] border border-outline-variant/30 flex items-center justify-center shadow-inner">
