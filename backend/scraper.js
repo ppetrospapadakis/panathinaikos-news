@@ -1691,6 +1691,7 @@ async function main() {
                                 source_url: newSourceUrl,
                                 image_url: newImageUrl,
                                 category: newCategory,
+                                created_at: new Date().toISOString(),
                                 updated_at: new Date().toISOString()
                             })
                             .eq('id', duplicateArticle.id);
