@@ -441,6 +441,9 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         
                         // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
                         if (target.sdnaNumericOnly && !/\/\d{5,}/.test(u.pathname)) return;
+
+                        // Sport-FM specific filter: skip radio comments / audio recaps containing 'sxolia' or 'sxolio'
+                        if (u.hostname.includes('sport-fm.gr') && (u.pathname.toLowerCase().includes('sxolia') || u.pathname.toLowerCase().includes('sxolio'))) return;
                         
                         links.add(href.split('?')[0].split('#')[0]); // strip query/hash
                     } catch (_) {}
@@ -595,6 +598,10 @@ function detectCategoryFromUrl(url, categoryHint) {
 
 // ─── Scrape individual article page ───────────────────────────────────────────
 async function scrapeArticlePage(url, categoryHint) {
+    if (url.toLowerCase().includes('sport-fm.gr') && (url.toLowerCase().includes('sxolia') || url.toLowerCase().includes('sxolio'))) {
+        console.log(`[SCRAPE SKIPPED] Sport-FM audio/comments recap URL skipped: ${url}`);
+        return null;
+    }
     if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten')) {
         console.log(`[SCRAPE SKIPPED] URL contains blacklisted galacticos/interwetten term: ${url}`);
         return null;
