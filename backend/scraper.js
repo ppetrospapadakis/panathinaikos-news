@@ -1298,26 +1298,7 @@ async function main() {
             if (newLinks.length > 2) {
                 console.log(`[SPORTIME] First run detected! Processing latest article "${newLinks[0]}" and ignoring ${newLinks.length - 1} older articles.`);
                 for (let i = 1; i < newLinks.length; i++) {
-                    if (!isDryRun) {
-                        try {
-                            const { error: insErr } = await db.from('articles').insert({
-                                id: crypto.randomUUID(),
-                                title: '[IGNORED_OLDER]',
-                                summary: '[IGNORED_OLDER]',
-                                content: '[IGNORED_OLDER]',
-                                source_url: newLinks[i],
-                                category: 'SystemRoster',
-                                created_at: new Date().toISOString()
-                            });
-                            if (!insErr) {
-                                existingUrls.add(newLinks[i]);
-                            } else {
-                                console.error(`[SPORTIME DB WARN] ${insErr.message}`);
-                            }
-                        } catch(e) {
-                            console.error(`[SPORTIME DB CATCH] ${e.message}`);
-                        }
-                    }
+                    
                 }
             }
         }
@@ -1343,23 +1324,7 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Excluded by URL)', 'promo', 'Φίλτρο διεύθυνσης URL (Promo/Live show)');
                 
-                // Save ignored URL to prevent re-crawling
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_PROMO]',
-                            summary: '[IGNORED_PROMO]',
-                            content: '[IGNORED_PROMO]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored promo URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
 
@@ -1374,23 +1339,7 @@ async function main() {
                 runStats.totals.skipped_crawling_failed++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
                 
-                // Save failed/broken URL to database so it is never re-crawled on subsequent runs
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_CRAWL_FAIL]',
-                            summary: '[IGNORED_CRAWL_FAIL]',
-                            content: '[IGNORED_CRAWL_FAIL]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save failed crawl URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
             if (scraped.status === 'skipped_size') {
@@ -1398,23 +1347,7 @@ async function main() {
                 runStats.totals.skipped_size++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Short)', 'size', `Πολύ μικρό κείμενο: ${scraped.length || 0} χαρακτήρες (Video/Gallery)`);
                 
-                // Save ignored URL to prevent re-crawling
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_SIZE]',
-                            summary: '[IGNORED_SIZE]',
-                            content: '[IGNORED_SIZE]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored size URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
 
@@ -1425,23 +1358,7 @@ async function main() {
                 runStats.totals.skipped_relevance++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Τοπικό φίλτρο λέξεων (Not PAO-relevant)');
                 
-                // Save ignored URL to prevent re-crawling
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_IRRELEVANT]',
-                            summary: '[IGNORED_IRRELEVANT]',
-                            content: '[IGNORED_IRRELEVANT]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored irrelevant URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
 
@@ -1453,23 +1370,7 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο τίτλου (Promo/Live show)');
                 
-                // Save ignored URL to prevent re-crawling
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_PROMO]',
-                            summary: '[IGNORED_PROMO]',
-                            content: '[IGNORED_PROMO]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored promo URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
 
@@ -1483,23 +1384,7 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Μπάσκετ σε Ποδόσφαιρο)');
                 
-                // Save ignored URL to prevent re-crawling
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_CROSS_BASKET]',
-                            summary: '[IGNORED_CROSS_BASKET]',
-                            content: '[IGNORED_CROSS_BASKET]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored cross URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
             if (target.category === 'Μπάσκετ' && isFootballUrl) {
@@ -1508,23 +1393,7 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Ποδόσφαιρο σε Μπάσκετ)');
                 
-                // Save ignored URL to prevent re-crawling
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED_CROSS_FOOTBALL]',
-                            summary: '[IGNORED_CROSS_FOOTBALL]',
-                            content: '[IGNORED_CROSS_FOOTBALL]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster',
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored cross URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
 
@@ -1767,23 +1636,7 @@ async function main() {
                 runStats.totals.skipped_relevance++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Μη σχετικό περιεχόμενο (Relevance)');
 
-                // FIX: Save irrelevant URLs to prevent infinite retries
-                if (!isDryRun) {
-                    try {
-                        await db.from('articles').insert({
-                            id: crypto.randomUUID(),
-                            title: '[IGNORED]',
-                            summary: '[IGNORED]',
-                            content: '[IGNORED]',
-                            source_url: articleUrl,
-                            category: 'SystemRoster', // Frontend ignores this category
-                            created_at: new Date().toISOString()
-                        });
-                        existingUrls.add(articleUrl);
-                    } catch (e) {
-                        console.error(`    [DB ERROR] Failed to save ignored URL: ${e.message}`);
-                    }
-                }
+                
                 continue;
             }
 
