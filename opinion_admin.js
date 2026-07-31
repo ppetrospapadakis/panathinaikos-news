@@ -90,14 +90,14 @@ function switchAdminTab(tab) {
     document.querySelectorAll('.admin-panel-content').forEach(el => el.classList.add('hidden'));
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 
-    // Style active sidebar & top tab menu items
+    // Style active sidebar menu items uniformly
     ['opinion', 'football', 'basketball', 'fixtures', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
         const btn = document.getElementById(`admin-tab-${t}`);
         if (btn) {
             if (t === tab) {
-                btn.className = 'w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left';
+                btn.className = 'w-full flex items-center gap-3.5 px-4 py-3 bg-primary/15 text-primary border-l-4 border-primary font-bold text-sm rounded-r-xl transition-all text-left shadow-sm';
             } else {
-                btn.className = 'w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left';
+                btn.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left';
             }
         }
         const topBtn = document.getElementById(`tab-item-${t}`);

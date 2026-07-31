@@ -98,37 +98,37 @@
         <button class="md:hidden material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleSidebar()">close</button>
     </div>
     
-    <nav class="flex-grow flex flex-col gap-2">
-        <button id="tab-item-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">edit_note</span>
-            <span>Article Editor</span>
+    <nav class="flex-grow flex flex-col gap-1.5">
+        <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-3.5 px-4 py-3 bg-primary/15 text-primary border-l-4 border-primary font-bold text-sm rounded-r-xl transition-all text-left">
+            <span class="material-symbols-outlined text-xl shrink-0">edit_note</span>
+            <span class="truncate">Δημιουργία Άρθρου</span>
         </button>
-        <button id="tab-item-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">sports_soccer</span>
-            <span>Roster Ποδοσφαίρου</span>
+        <button id="admin-tab-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
+            <span class="material-symbols-outlined text-xl shrink-0">sports_soccer</span>
+            <span class="truncate">Ρόστερ Ποδοσφαίρου</span>
         </button>
-        <button id="tab-item-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">sports_basketball</span>
-            <span>Roster Μπάσκετ</span>
+        <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
+            <span class="material-symbols-outlined text-xl shrink-0">sports_basketball</span>
+            <span class="truncate">Ρόστερ Μπάσκετ</span>
         </button>
-        <button id="tab-item-fixtures" onclick="switchAdminTab('fixtures')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-            <span class="material-symbols-outlined">calendar_month</span>
-            <span>Πρόγραμμα Αγώνων</span>
+        <button id="admin-tab-fixtures" onclick="switchAdminTab('fixtures')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
+            <span class="material-symbols-outlined text-xl shrink-0">calendar_month</span>
+            <span class="truncate">Πρόγραμμα Αγώνων</span>
         </button>
         
-        <div class="pt-4 border-t border-outline-variant/30 mt-2 flex flex-col gap-2">
-            <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 px-4 mb-1">Analytics</p>
-            <button id="admin-tab-analytics-ingestion" onclick="switchAdminTab('analytics-ingestion')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-                <span class="material-symbols-outlined">insights</span>
-                <span>Ingestion Stats</span>
+        <div class="pt-4 border-t border-outline-variant/30 mt-3 flex flex-col gap-1.5">
+            <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 px-4 mb-1">Αναλυτικά & Αρχείο</p>
+            <button id="admin-tab-analytics-ingestion" onclick="switchAdminTab('analytics-ingestion')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
+                <span class="material-symbols-outlined text-xl shrink-0">insights</span>
+                <span class="truncate">Στατιστικά Scraper</span>
             </button>
-            <button id="admin-tab-analytics-engagement" onclick="switchAdminTab('analytics-engagement')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-                <span class="material-symbols-outlined">bar_chart</span>
-                <span>Reader Traffic</span>
+            <button id="admin-tab-analytics-engagement" onclick="switchAdminTab('analytics-engagement')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
+                <span class="material-symbols-outlined text-xl shrink-0">bar_chart</span>
+                <span class="truncate">Επισκεψιμότητα</span>
             </button>
-            <button id="tab-item-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
-                <span class="material-symbols-outlined">delete_history</span>
-                <span>Διαγραμμένα Άρθρα</span>
+            <button id="admin-tab-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
+                <span class="material-symbols-outlined text-xl shrink-0">delete_history</span>
+                <span class="truncate">Διαγραμμένα Άρθρα</span>
             </button>
         </div>
     </nav>
