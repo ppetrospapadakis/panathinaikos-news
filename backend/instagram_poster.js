@@ -239,17 +239,21 @@ async function publishToInstagram(article) {
         const mediaId = publishRes.data?.id;
         console.log(`[Instagram] Successfully published post! Media ID: ${mediaId}`);
 
-        // 4. Post 1st Comment with Article Link
+        // 4. Post 1st Comment with Article Link (optional)
         if (mediaId && article.url) {
-            console.log(`[Instagram] Posting 1st comment with link...`);
-            const articleLink = article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`;
-            await axios.post(`https://graph.facebook.com/v19.0/${mediaId}/comments`, null, {
-                params: {
-                    message: `🔗 Διαβάστε το πλήρες άρθρο εδώ: ${articleLink}`,
-                    access_token: accessToken
-                }
-            });
-            console.log(`[Instagram] 1st comment posted successfully!`);
+            try {
+                console.log(`[Instagram] Posting 1st comment with link...`);
+                const articleLink = article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`;
+                await axios.post(`https://graph.facebook.com/v19.0/${mediaId}/comments`, null, {
+                    params: {
+                        message: `🔗 Διαβάστε το πλήρες άρθρο εδώ: ${articleLink}`,
+                        access_token: accessToken
+                    }
+                });
+                console.log(`[Instagram] 1st comment posted successfully!`);
+            } catch (commentErr) {
+                console.warn(`[Instagram] 1st comment warning (post published successfully):`, commentErr.response?.data?.error?.message || commentErr.message);
+            }
         }
 
         return mediaId;
