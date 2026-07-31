@@ -126,10 +126,10 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
         <!-- Top Decorative Bar -->
         <rect x="0" y="0" width="${width}" height="10" fill="url(#primaryGlow)"/>
 
-        <!-- Top Left Official Logo (Enlarged, extra shamrock removed) -->
-        <g transform="translate(80, 85)">
-            ${logoBase64 ? `<image href="${logoBase64}" x="0" y="0" width="460" height="95"/>` : `
-            <text x="0" y="55" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="42" fill="#ffffff" letter-spacing="2">
+        <!-- Top Left Official Logo (Enlarged further) -->
+        <g transform="translate(80, 80)">
+            ${logoBase64 ? `<image href="${logoBase64}" x="0" y="0" width="560" height="118"/>` : `
+            <text x="0" y="60" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="48" fill="#ffffff" letter-spacing="2">
                 PANATHINAIKOS<tspan fill="#10b981">NEWS</tspan>
             </text>
             `}
