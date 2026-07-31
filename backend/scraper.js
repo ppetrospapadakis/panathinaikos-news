@@ -1347,11 +1347,11 @@ async function main() {
                 runStats.totals.skipped_size++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Short)', 'size', `Πολύ μικρό κείμενο: ${scraped.length || 0} χαρακτήρες (Video/Gallery)`);
                 
-                // Smart re-check: If breaking news stub was published < 90 minutes ago, do NOT cache URL,
+                // Smart re-check: If breaking news stub was published < 25 minutes ago, do NOT cache URL,
                 // so subsequent scraper runs can re-evaluate if content gets expanded!
-                // If > 90 minutes old, cache in-memory (no DB garbage) to avoid redundant HTTP requests.
+                // If > 25 minutes old, cache in-memory (no DB garbage) to avoid redundant HTTP requests.
                 const articleAgeMins = scraped.created_at ? (Date.now() - new Date(scraped.created_at).getTime()) / (1000 * 60) : 999;
-                if (articleAgeMins > 90) {
+                if (articleAgeMins > 25) {
                     existingUrls.add(articleUrl);
                 } else {
                     console.log(`    [SMART RETRY] Fresh short stub (${articleAgeMins.toFixed(0)}m old). Will re-check on next run if expanded.`);
