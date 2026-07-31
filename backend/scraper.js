@@ -491,9 +491,18 @@ function sanitizeImageUrl(scrapedImg) {
     return cleaned;
 }
 
+function stripJournalistFromTitle(title) {
+    if (!title || typeof title !== 'string') return title;
+    let t = title.trim();
+    const journalistRegex = /^\s*(Αθανασίου|Νικολογιάννης|Πετρωτός|Σταύρου|Κετσετζόγλου|Χελάκης|Τσακίρης|Καρπετόπουλος|Παπαθεοδώρου|Αρναούτογλου|Athanasiou|Nikologiannis)(\s+στο[υςα-ώA-Za-z]+(\s+\w+)*)?\s*:\s*/i;
+    t = t.replace(journalistRegex, '');
+    t = t.replace(/^\s*(Αθανασίου|Νικολογιάννης|Πετρωτός|Σταύρου|Κετσετζόγλου|Χελάκης|Τσακίρης|Καρπετόπουλος|Παπαθεοδώρου|Αρναούτογλου|Athanasiou|Nikologiannis)\s+/i, '');
+    return t.trim();
+}
+
 function capitalizeTitle(str) {
     if (!str || typeof str !== 'string') return str;
-    let trimmed = str.trim();
+    let trimmed = stripJournalistFromTitle(str);
     if (!trimmed) return trimmed;
     return trimmed.replace(/^([«"'\s]*)([\p{L}])/u, (m, prefix, char) => prefix + char.toUpperCase());
 }
@@ -921,7 +930,7 @@ async function generateArticleData(title, text, isOfficial = false) {
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
   "is_panathinaikos_relevant": true ή false (βάλε false αν το άρθρο αφορά γενική διεθνή ειδησεογραφία, άλλα αθλήματα/ομάδες χωρίς καμία σύνδεση με τον Παναθηναϊκό, ή άσχετα παγκόσμια γεγονότα),
-  "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, πιο clicky/attractive αλλά ακριβής. ΠΟΤΕ μην χρησιμοποιείς τη λέξη «μπες» - χρησιμοποίησε «μπάσιμο» ή «κίνηση»)",
+  "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, πιο clicky/attractive αλλά ακριβής. ΠΟΤΕ μην χρησιμοποιείς τη λέξη «μπες» - χρησιμοποίησε «μπάσιμο» ή «κίνηση». ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ η συμπερίληψη ονομάτων δημοσιογράφων/συντακτών όπως Αθανασίου, Νικολογιάννης, Παπαθεοδώρου, κλπ στον τίτλο)",
   "content": "το αναδιατυπωμένο άρθρο (σύμφωνα με τους κανόνες παρακάτω)",
   "bullets": ["Bullet 1", "Bullet 2"]
 }
@@ -1045,7 +1054,7 @@ async function generateCombinedArticleData(articleA, articleB, isOfficial = fals
 
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
-  "title": "ο νέος, ενιαίος τίτλος",
+  "title": "ο νέος, ενιαίος τίτλος (ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ η συμπερίληψη ονομάτων δημοσιογράφων/συντακτών όπως Αθανασίου, Νικολογιάννης, Παπαθεοδώρου, κλπ στον τίτλο)",
   "content": "το αναδιατυπωμένο και συνδυασμένο άρθρο (σύμφωνα με τους κανόνες)",
   "bullets": ["Bullet 1", "Bullet 2"]
 }
