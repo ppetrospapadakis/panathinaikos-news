@@ -77,7 +77,7 @@ function switchAdminTab(tab) {
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 
     // Style active sidebar menu items
-    ['opinion', 'football', 'basketball', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
+    ['opinion', 'football', 'basketball', 'fixtures', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
         const btn = document.getElementById(`admin-tab-${t}`);
         if (btn) {
             if (t === tab) {
@@ -120,6 +120,11 @@ function switchAdminTab(tab) {
             headerTag.textContent = 'Dashboard';
             headerTitle.textContent = 'Reader Traffic';
             headerDesc.textContent = 'Συνολικά στατιστικά βάσης δεδομένων, όρια πόρων, χρήση κλειδιών Gemini API και δραστηριότητα δημοσιεύσεων ανά ώρα.';
+        } else if (tab === 'fixtures') {
+            headerIcon.textContent = 'calendar_month';
+            headerTag.textContent = 'Fixtures Manager';
+            headerTitle.textContent = 'Διαχείριση Προγράμματος';
+            headerDesc.textContent = 'Πρόσθεσε νέους αγώνες, άλλαξε ημερομηνίες/σκορ ή όρισε τον ενεργό (προσεχή) αγώνα για τις ομάδες του Παναθηναϊκού.';
         } else if (tab === 'deleted') {
             headerIcon.textContent = 'delete_history';
             headerTag.textContent = 'Recycle Bin';
@@ -133,6 +138,9 @@ function switchAdminTab(tab) {
     }
     if (tab === 'analytics-engagement') {
         loadEngagementStats();
+    }
+    if (tab === 'fixtures') {
+        loadAdminFixtures();
     }
     if (tab === 'deleted') {
         loadDeletedArticles();
@@ -1805,3 +1813,257 @@ async function hardDeleteArticle(id) {
     }
 }
 window.hardDeleteArticle = hardDeleteArticle;
+
+// ── Fixtures / Schedule Manager Logic ──────────────────────────────────────────
+let adminFixturesCache = [];
+let editingFixtureId = null;
+
+async function loadAdminFixtures(categoryFilter) {
+    if (!categoryFilter) categoryFilter = 'all';
+    const container = document.getElementById('admin-fixtures-list');
+    if (!container) return;
+
+    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+
+    if (!db) {
+        container.innerHTML = '<div class="text-center py-10 text-on-surface-variant/60">Δεν έχει συνδεθεί η βάση δεδομένων.</div>';
+        return;
+    }
+
+    container.innerHTML = '<div class="flex items-center justify-center py-12"><div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div></div>';
+
+    try {
+        let query = db.from('fixtures').select('*');
+        if (categoryFilter && categoryFilter !== 'all') {
+            query = query.eq('category', categoryFilter);
+        }
+        const res = await query.order('match_date', { ascending: true });
+
+        if (res.error) throw res.error;
+        adminFixturesCache = res.data || [];
+        renderAdminFixturesTable();
+    } catch (err) {
+        console.error('[Admin Fixtures Error]', err);
+        container.innerHTML = '<div class="text-center py-10 text-error">Σφάλμα φόρτωσης αγώνων: ' + err.message + '</div>';
+    }
+}
+window.loadAdminFixtures = loadAdminFixtures;
+
+function renderAdminFixturesTable() {
+    const container = document.getElementById('admin-fixtures-list');
+    if (!container) return;
+
+    if (!adminFixturesCache || adminFixturesCache.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 bg-surface-container rounded-2xl border border-outline-variant/30 p-8 space-y-3"><span class="material-symbols-outlined text-4xl text-on-surface-variant/40">calendar_today</span><h4 class="text-base font-bold text-on-surface">Δεν βρέθηκαν αγώνες</h4><p class="text-xs text-on-surface-variant max-w-sm mx-auto">Πρόσθεσε νέο αγώνα πατώντας το κουμπί "+ Νέος Αγώνας".</p></div>';
+        return;
+    }
+
+    let html = '';
+    for (let i = 0; i < adminFixturesCache.length; i++) {
+        const m = adminFixturesCache[i];
+        const d = new Date(m.match_date);
+        const dateStr = !isNaN(d.getTime()) 
+            ? d.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : 'Άγνωστη ώρα';
+        
+        const homeScore = (m.home_score !== null && m.home_score !== undefined) ? m.home_score : '-';
+        const awayScore = (m.away_score !== null && m.away_score !== undefined) ? m.away_score : '-';
+        const isCurrent = Boolean(m.is_current);
+        const currentBadge = isCurrent 
+            ? '<span class="px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> Επόμενος</span>'
+            : '';
+        const iconName = m.category === 'basketball' ? 'sports_basketball' : (m.category === 'amateur' ? 'sports_handball' : 'sports_soccer');
+        const compStr = m.competition || 'Αγώνας';
+
+        html += `<div class="bg-surface-container rounded-2xl border ${isCurrent ? 'border-primary bg-primary/5' : 'border-outline-variant/30'} p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-outline-variant/60 transition-all group">`;
+        html += `<div class="flex items-center gap-3 min-w-[140px]">`;
+        html += `<div class="w-10 h-10 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-xl">${iconName}</span></div>`;
+        html += `<div><div class="flex items-center gap-2"><span class="text-xs font-mono font-bold text-on-surface">${dateStr}</span>${currentBadge}</div><span class="text-[11px] text-on-surface-variant/70 font-semibold uppercase tracking-wider">${compStr}</span></div>`;
+        html += `</div>`;
+        html += `<div class="flex-1 flex items-center justify-center gap-3 bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant/20 w-full md:w-auto">`;
+        html += `<span class="text-sm font-bold text-on-surface text-right flex-1 truncate">${m.home_team_name}</span>`;
+        html += `<span class="px-3 py-1 bg-surface-container-highest rounded-lg font-mono font-bold text-base text-primary min-w-[50px] text-center border border-outline-variant/30">${homeScore} - ${awayScore}</span>`;
+        html += `<span class="text-sm font-bold text-on-surface text-left flex-1 truncate">${m.away_team_name}</span>`;
+        html += `</div>`;
+        html += `<div class="flex items-center gap-2 self-end md:self-center">`;
+        html += `<button onclick="setFixtureCurrent('${m.id}')" class="px-3 py-1.5 rounded-xl ${isCurrent ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface-container-high text-on-surface-variant hover:text-primary'} border border-outline-variant/30 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"><span class="material-symbols-outlined text-[16px]">${isCurrent ? 'push_pin' : 'pin_drop'}</span> ${isCurrent ? 'Ενεργός' : 'Pin'}</button>`;
+        html += `<button onclick="editFixtureModal('${m.id}')" class="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/30 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"><span class="material-symbols-outlined text-[16px]">edit</span> Επεξεργασία</button>`;
+        html += `<button onclick="deleteFixture('${m.id}')" class="px-3 py-1.5 rounded-xl bg-error/10 hover:bg-error/20 text-error border border-error/20 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer" title="Διαγραφή αγώνα"><span class="material-symbols-outlined text-[16px]">delete</span></button>`;
+        html += `</div>`;
+        html += `</div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function openAddFixtureModal() {
+    editingFixtureId = null;
+    document.getElementById('fixture-modal-title').textContent = 'Προσθήκη Νέου Αγώνα';
+    document.getElementById('fix-category').value = 'football';
+    document.getElementById('fix-competition').value = 'Super League';
+    document.getElementById('fix-date').value = '';
+    document.getElementById('fix-home-name').value = 'Παναθηναϊκός';
+    document.getElementById('fix-home-score').value = '';
+    document.getElementById('fix-away-name').value = '';
+    document.getElementById('fix-away-score').value = '';
+    document.getElementById('fix-is-current').checked = false;
+    
+    document.getElementById('fixture-edit-modal').classList.remove('hidden');
+}
+window.openAddFixtureModal = openAddFixtureModal;
+
+function editFixtureModal(id) {
+    let found = null;
+    for (let i = 0; i < adminFixturesCache.length; i++) {
+        if (String(adminFixturesCache[i].id) === String(id)) {
+            found = adminFixturesCache[i];
+            break;
+        }
+    }
+    if (!found) return;
+
+    editingFixtureId = found.id;
+    document.getElementById('fixture-modal-title').textContent = 'Επεξεργασία Αγώνα';
+    document.getElementById('fix-category').value = found.category || 'football';
+    document.getElementById('fix-competition').value = found.competition || '';
+    
+    if (found.match_date) {
+        const d = new Date(found.match_date);
+        const pad = function(num) { return String(num).padStart(2, '0'); };
+        const localIso = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        document.getElementById('fix-date').value = localIso;
+    } else {
+        document.getElementById('fix-date').value = '';
+    }
+
+    document.getElementById('fix-home-name').value = found.home_team_name || '';
+    document.getElementById('fix-home-score').value = (found.home_score !== null && found.home_score !== undefined) ? found.home_score : '';
+    document.getElementById('fix-away-name').value = found.away_team_name || '';
+    document.getElementById('fix-away-score').value = (found.away_score !== null && found.away_score !== undefined) ? found.away_score : '';
+    document.getElementById('fix-is-current').checked = Boolean(found.is_current);
+
+    document.getElementById('fixture-edit-modal').classList.remove('hidden');
+}
+window.editFixtureModal = editFixtureModal;
+
+function closeFixtureModal() {
+    document.getElementById('fixture-edit-modal').classList.add('hidden');
+}
+window.closeFixtureModal = closeFixtureModal;
+
+async function saveFixture() {
+    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+    if (!db) {
+        alert('Σφάλμα: Δεν υπάρχει σύνδεση με τη βάση.');
+        return;
+    }
+
+    const category = document.getElementById('fix-category').value;
+    const competition = document.getElementById('fix-competition').value.trim();
+    const dateInput = document.getElementById('fix-date').value;
+    const homeName = document.getElementById('fix-home-name').value.trim();
+    const homeScoreVal = document.getElementById('fix-home-score').value;
+    const awayName = document.getElementById('fix-away-name').value.trim();
+    const awayScoreVal = document.getElementById('fix-away-score').value;
+    const isCurrent = document.getElementById('fix-is-current').checked;
+
+    if (!homeName || !awayName) {
+        alert('Παρακαλώ συμπληρώστε τα ονόματα και των δύο ομάδων.');
+        return;
+    }
+    if (!dateInput) {
+        alert('Παρακαλώ επιλέξτε ημερομηνία και ώρα αγώνα.');
+        return;
+    }
+
+    const matchDateIso = new Date(dateInput).toISOString();
+    const homeScore = homeScoreVal !== '' ? parseInt(homeScoreVal, 10) : null;
+    const awayScore = awayScoreVal !== '' ? parseInt(awayScoreVal, 10) : null;
+    
+    let sportName = 'Ποδόσφαιρο';
+    if (category === 'basketball') sportName = 'Μπάσκετ';
+    else if (category === 'amateur') sportName = 'Ερασιτέχνης';
+
+    const saveBtn = document.getElementById('fixture-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Αποθήκευση...';
+
+    try {
+        if (isCurrent) {
+            await db.from('fixtures').update({ is_current: false }).eq('is_current', true);
+        }
+
+        const payload = {
+            category: category,
+            sport_name: sportName,
+            competition: competition,
+            match_date: matchDateIso,
+            home_team_name: homeName,
+            home_score: homeScore,
+            away_team_name: awayName,
+            away_score: awayScore,
+            is_current: isCurrent,
+            updated_at: new Date().toISOString()
+        };
+
+        if (editingFixtureId) {
+            const res = await db.from('fixtures').update(payload).eq('id', editingFixtureId);
+            if (res.error) throw res.error;
+        } else {
+            payload.created_at = new Date().toISOString();
+            const res = await db.from('fixtures').insert([payload]);
+            if (res.error) throw res.error;
+        }
+
+        closeFixtureModal();
+        const activeFilter = document.getElementById('admin-fixtures-category-filter') ? document.getElementById('admin-fixtures-category-filter').value : 'all';
+        loadAdminFixtures(activeFilter);
+    } catch (err) {
+        console.error('Save Fixture Error:', err);
+        alert('Σφάλμα αποθήκευσης: ' + err.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Αποθήκευση Αγώνα';
+    }
+}
+window.saveFixture = saveFixture;
+
+async function deleteFixture(id) {
+    if (!confirm('Θέλεις σίγουρα να διαγράψεις αυτόν τον αγώνα από το πρόγραμμα;')) return;
+    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+    if (!db) return;
+
+    try {
+        const res = await db.from('fixtures').delete().eq('id', id);
+        if (res.error) throw res.error;
+        const activeFilter = document.getElementById('admin-fixtures-category-filter') ? document.getElementById('admin-fixtures-category-filter').value : 'all';
+        loadAdminFixtures(activeFilter);
+    } catch (err) {
+        alert('Σφάλμα διαγραφής: ' + err.message);
+    }
+}
+window.deleteFixture = deleteFixture;
+
+async function setFixtureCurrent(id) {
+    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+    if (!db) return;
+
+    try {
+        await db.from('fixtures').update({ is_current: false }).eq('is_current', true);
+        const res = await db.from('fixtures').update({ is_current: true }).eq('id', id);
+        if (res.error) throw res.error;
+        const activeFilter = document.getElementById('admin-fixtures-category-filter') ? document.getElementById('admin-fixtures-category-filter').value : 'all';
+        loadAdminFixtures(activeFilter);
+    } catch (err) {
+        alert('Σφάλμα ορισμού ενεργού αγώνα: ' + err.message);
+    }
+}
+window.setFixtureCurrent = setFixtureCurrent;
