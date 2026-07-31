@@ -206,7 +206,17 @@ async function publishToInstagram(article) {
 
         // 2. Prepare Caption & Post Container (Includes Full AI Summary + Direct Article Link)
         const articleLink = article.url ? (article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`) : 'https://www.panathinaikosnews.gr';
-        const fullSummary = article.summary ? article.summary.trim() : '';
+
+        // Format summary nicely with word boundary truncation & 3 dots
+        let fullSummary = article.summary ? article.summary.trim() : '';
+        if (fullSummary.length > 350) {
+            const truncated = fullSummary.substring(0, 350);
+            const lastSpace = truncated.lastIndexOf(' ');
+            fullSummary = (lastSpace > 100 ? truncated.substring(0, lastSpace) : truncated) + '...';
+        } else if (fullSummary && !/[.!?…]$/.test(fullSummary)) {
+            fullSummary += '...';
+        }
+
         // Determine category hashtags
         const catLower = (article.category || '').toLowerCase();
         let sportTags = '#PAOFC #PAOBC';
