@@ -99,19 +99,19 @@
     </div>
     
     <nav class="flex-grow flex flex-col gap-2">
-        <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left">
+        <button id="tab-item-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left">
             <span class="material-symbols-outlined">edit_note</span>
             <span>Article Editor</span>
         </button>
-        <button id="admin-tab-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+        <button id="tab-item-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
             <span class="material-symbols-outlined">sports_soccer</span>
             <span>Roster Ποδοσφαίρου</span>
         </button>
-        <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+        <button id="tab-item-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
             <span class="material-symbols-outlined">sports_basketball</span>
             <span>Roster Μπάσκετ</span>
         </button>
-        <button id="admin-tab-fixtures" onclick="switchAdminTab('fixtures')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+        <button id="tab-item-fixtures" onclick="switchAdminTab('fixtures')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
             <span class="material-symbols-outlined">calendar_month</span>
             <span>Πρόγραμμα Αγώνων</span>
         </button>
@@ -126,7 +126,7 @@
                 <span class="material-symbols-outlined">bar_chart</span>
                 <span>Reader Traffic</span>
             </button>
-            <button id="admin-tab-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+            <button id="tab-item-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
                 <span class="material-symbols-outlined">delete_history</span>
                 <span>Διαγραμμένα Άρθρα</span>
             </button>
@@ -1041,6 +1041,7 @@ function checkPassword() {
         
         // Show sidebar and apply margins
         document.getElementById('admin-sidebar').classList.remove('hidden');
+        const adminTabs = document.getElementById('admin-tabs'); if (adminTabs) adminTabs.classList.remove('hidden');
         document.getElementById('admin-main').classList.add('md:pl-[260px]');
         document.getElementById('admin-header').classList.add('md:pl-[260px]');
         

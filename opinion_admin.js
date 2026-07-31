@@ -1,3 +1,17 @@
+
+// ── Global Supabase DB Instance Helper ──────────────────────────────────────────
+function getDb() {
+    if (window.db) return window.db;
+    if (typeof db !== 'undefined' && db) return db;
+    const url = window.SUPABASE_URL || 'https://rctltbuiitdnqlxizlym.supabase.co';
+    const key = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyNjA1OTYsImV4cCI6MjA2ODgzNjU5Nn0.8mvhPZ0rZ6zQvT5XmDmsn94aY3Z2eR008gXk_u1Q-2k';
+    if (window.supabase) {
+        window.db = window.supabase.createClient(url, key);
+        return window.db;
+    }
+    return null;
+}
+window.getDb = getDb;
 // ── Roster & Analysis Editing Logic ──────────────────────────────────────────
 const footballStartingDefault = [
     [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1, 'GK'],
@@ -76,7 +90,7 @@ function switchAdminTab(tab) {
     document.querySelectorAll('.admin-panel-content').forEach(el => el.classList.add('hidden'));
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 
-    // Style active sidebar menu items
+    // Style active sidebar & top tab menu items
     ['opinion', 'football', 'basketball', 'fixtures', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
         const btn = document.getElementById(`admin-tab-${t}`);
         if (btn) {
@@ -84,6 +98,14 @@ function switchAdminTab(tab) {
                 btn.className = 'w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left';
             } else {
                 btn.className = 'w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left';
+            }
+        }
+        const topBtn = document.getElementById(`tab-item-${t}`);
+        if (topBtn) {
+            if (t === tab) {
+                topBtn.className = 'px-5 py-2.5 rounded-xl font-label text-label uppercase bg-primary text-on-primary transition-all flex items-center gap-2';
+            } else {
+                topBtn.className = 'px-5 py-2.5 rounded-xl font-label text-label uppercase bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-2';
             }
         }
     });
@@ -155,11 +177,7 @@ async function loadDeletedArticles() {
     const listContainer = document.getElementById('deleted-articles-list');
     if (!listContainer) return;
 
-    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-
-    if (!db) {
+    db = getDb(); if (!db) {
         listContainer.innerHTML = '<div class="col-span-full text-center py-10 text-on-surface-variant/60">Δεν έχει συνδεθεί η βάση δεδομένων.</div>';
         return;
     }
@@ -352,7 +370,7 @@ function closeDeletedPreviewModal() {
 }
 
 async function restoreDeletedArticle(id, category = 'Ποδόσφαιρο') {
-    if (!db) return;
+    db = getDb(); if (!db) return;
     const { error } = await db.from('articles').update({ category: category }).eq('id', id);
     if (error) {
         alert('Σφάλμα κατά την επαναφορά: ' + error.message);
@@ -1800,10 +1818,7 @@ function renderTrafficCharts(data, filterSource = 'ALL') {
 
 async function hardDeleteArticle(id) {
     if (!confirm('Θέλεις σίγουρα να διαγράψεις ΟΡΙΣΤΙΚΑ αυτό το άρθρο από τη βάση δεδομένων; Αυτή η ενέργεια δεν αναιρείται.')) return;
-    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-    if (!db) return;
+    db = getDb(); if (!db) return;
     const { error } = await db.from('articles').delete().eq('id', id);
     if (error) {
         alert('Σφάλμα οριστικής διαγραφής: ' + error.message);
@@ -1823,11 +1838,7 @@ async function loadAdminFixtures(categoryFilter) {
     const container = document.getElementById('admin-fixtures-list');
     if (!container) return;
 
-    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-
-    if (!db) {
+    db = getDb(); if (!db) {
         container.innerHTML = '<div class="text-center py-10 text-on-surface-variant/60">Δεν έχει συνδεθεί η βάση δεδομένων.</div>';
         return;
     }
@@ -1954,10 +1965,7 @@ function closeFixtureModal() {
 window.closeFixtureModal = closeFixtureModal;
 
 async function saveFixture() {
-    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-    if (!db) {
+    db = getDb(); if (!db) {
         alert('Σφάλμα: Δεν υπάρχει σύνδεση με τη βάση.');
         return;
     }
@@ -2034,10 +2042,7 @@ window.saveFixture = saveFixture;
 
 async function deleteFixture(id) {
     if (!confirm('Θέλεις σίγουρα να διαγράψεις αυτόν τον αγώνα από το πρόγραμμα;')) return;
-    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-    if (!db) return;
+    db = getDb(); if (!db) return;
 
     try {
         const res = await db.from('fixtures').delete().eq('id', id);
@@ -2051,10 +2056,7 @@ async function deleteFixture(id) {
 window.deleteFixture = deleteFixture;
 
 async function setFixtureCurrent(id) {
-    if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-    if (!db) return;
+    db = getDb(); if (!db) return;
 
     try {
         await db.from('fixtures').update({ is_current: false }).eq('is_current', true);
