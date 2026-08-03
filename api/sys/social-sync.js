@@ -1,6 +1,9 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
+// ⚠️ TWITTER POSTING DISABLED — Set to true to re-enable
+const TWITTER_ENABLED = false;
+
 const supabaseUrl = "https://rctltbuiitdnqlxizlym.supabase.co".trim();
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI".trim();
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -132,6 +135,12 @@ module.exports = async (req, res) => {
     
     if (secret !== expectedSecret) {
         return res.status(401).json({ error: 'Unauthorized. Invalid secret key.' });
+    }
+
+    // ⚠️ Master toggle — return early if Twitter posting is disabled
+    if (!TWITTER_ENABLED) {
+        console.log('[Twitter Sync] Posting is disabled (TWITTER_ENABLED = false). Skipping.');
+        return res.status(200).json({ success: false, disabled: true, message: 'Twitter posting is currently disabled.' });
     }
 
     try {

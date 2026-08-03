@@ -1,17 +1,26 @@
-name: 🐦 Twitter/X Social Sync
+name: 🐦 Twitter/X Social Sync [DISABLED]
+
+# ⚠️ DISABLED — Twitter/X posting is paused. Re-enable by restoring the `on:` block below.
+# on:
+#   schedule:
+#     # Run at 07:00 and 16:00 UTC (10:00 AM and 19:00 PM Athens EEST)
+#     - cron: '0 7,16 * * *'
+#   workflow_dispatch:
+#     # Allow manual trigger from GitHub Actions UI
 
 on:
-  schedule:
-    # Run at 07:00 and 16:00 UTC (10:00 AM and 19:00 PM Athens EEST)
-    - cron: '0 7,16 * * *'
   workflow_dispatch:
-    # Allow manual trigger from GitHub Actions UI
+    inputs:
+      enable:
+        description: 'This workflow is disabled. Do not run.'
+        required: false
 
 jobs:
   sync:
-    name: Sync Articles to Twitter
+    name: Sync Articles to Twitter [DISABLED]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 1
+    if: false  # Never runs — workflow is disabled
 
     steps:
       - name: 🔗 Trigger Twitter/X Social Sync Endpoint
