@@ -184,6 +184,13 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
 
 // ── Publish to Instagram Feed & Post 1st Comment ─────────────────────────────
 async function publishToInstagram(article) {
+    // Master Pause Flag — PAUSED by user request until explicitly re-enabled
+    const INSTAGRAM_AUTOPOST_ENABLED = false;
+    if (!INSTAGRAM_AUTOPOST_ENABLED) {
+        console.log('[Instagram] Auto-posting is currently PAUSED by user directive. Skipping.');
+        return null;
+    }
+
     const igUserId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
     const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
     const supabaseUrl = process.env.SUPABASE_URL;
