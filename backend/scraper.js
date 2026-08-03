@@ -1741,7 +1741,11 @@ async function main() {
                     image_url: scraped.imageUrl,
                     url: getArticleSlugUrl(dbPayload.category, dbPayload.title, inserted[0].id)
                 };
-                publishToInstagram(articleForIg).catch(err => console.error('[Instagram] Background error:', err.message));
+                try {
+                    await publishToInstagram(articleForIg);
+                } catch (igErr) {
+                    console.error('[Instagram] Publish error:', igErr.message);
+                }
             }
         }
         // Rate limit between article processing — always pause, not just on success
@@ -1753,6 +1757,40 @@ async function main() {
             const staggerMs = 15000; // 15 seconds
             console.log(`[STAGGER] Pausing ${staggerMs/1000}s before next source to regulate Gemini API traffic`);
             await new Promise(resolve => setTimeout(resolve, staggerMs));
+        }
+    }
+
+    // Instagram Catch-Up Check: Try to publish any unposted eligible article from the last 24 hours
+    if (!isDryRun && db) {
+        try {
+            const { data: unposted } = await db.from('articles')
+                .select('id, title, summary, category, image_url, source_url, created_at')
+                .eq('instagram_posted', false)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (unposted && unposted.length > 0) {
+                const eligible = unposted.find(a => {
+                    const cat = (a.category || '').toLowerCase();
+                    return !cat.includes('ερασιτέχνης') && !cat.includes('official');
+                });
+                if (eligible) {
+                    console.log(`[Instagram Catch-Up] Attempting auto-post for unposted article: "${eligible.title}"`);
+                    const articleForIg = {
+                        id: eligible.id,
+                        title: eligible.title,
+                        summary: eligible.summary,
+                        category: eligible.category,
+                        source: 'CatchUp',
+                        is_official: false,
+                        image_url: eligible.image_url,
+                        url: getArticleSlugUrl(eligible.category, eligible.title, eligible.id)
+                    };
+                    await publishToInstagram(articleForIg);
+                }
+            }
+        } catch (igErr) {
+            console.warn('[Instagram Catch-Up Warning]:', igErr.message);
         }
     }
 
