@@ -9,9 +9,9 @@ const path = require('path');
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
-// ── Text Wrapping Helper for SVG Headlines ──────────────────────────────────
+/// ── Text Wrapping Helper for SVG Headlines ──────────────────────────────────
 function wrapText(text, maxCharsPerLine = 24) {
-    const words = text.split(' ');
+    const words = (text || '').split(' ');
     const lines = [];
     let currentLine = '';
 
@@ -24,7 +24,7 @@ function wrapText(text, maxCharsPerLine = 24) {
         }
     }
     if (currentLine) lines.push(currentLine);
-    return lines.slice(0, 5); // Max 5 lines
+    return lines; // Return all lines to ensure titles are complete sentences
 }
 
 // ── XML/SVG Text Escaper ───────────────────────────────────────────────────
@@ -84,15 +84,31 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
         console.warn('[Instagram] Logo file not found:', err.message);
     }
 
-    // 4. Wrap Title Text
-    const lines = wrapText(title, 22);
+    // 4. Dynamic Typography & Wrap Title Text (Zero truncation - full complete title)
+    let maxCharsPerLine = 24;
+    let fontSize = 64;
+    let lineHeight = 84;
+
+    const titleLen = (title || '').length;
+    if (titleLen > 110) {
+        fontSize = 44;
+        lineHeight = 58;
+        maxCharsPerLine = 34;
+    } else if (titleLen > 70) {
+        fontSize = 52;
+        lineHeight = 70;
+        maxCharsPerLine = 28;
+    }
+
+    const lines = wrapText(title, maxCharsPerLine);
     const escapedLines = lines.map(l => escapeXml(l));
 
     // Calculate vertical position for text (centered nicely)
-    const startY = Math.max(480, 750 - (escapedLines.length * 42));
+    const totalTextHeight = lines.length * lineHeight;
+    const startY = Math.max(420, 720 - Math.floor(totalTextHeight / 2));
 
     const titleSvgSpans = escapedLines.map((line, idx) => {
-        const yPos = startY + (idx * 84);
+        const yPos = startY + (idx * lineHeight);
         return `<tspan x="90" y="${yPos}">${line}</tspan>`;
     }).join('\n');
 
@@ -138,11 +154,11 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
         <!-- Center Article Headline -->
         <g filter="url(#shadow)">
             <!-- Category Tag line -->
-            <text x="90" y="${startY - 60}" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="24" fill="#10b981" letter-spacing="3">
+            <text x="90" y="${startY - 45}" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="24" fill="#10b981" letter-spacing="3">
                 ΠΑΝΑΘΗΝΑΪΚΟΣ NEWS
             </text>
 
-            <text font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="64" fill="#ffffff" letter-spacing="-1.5">
+            <text font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="${fontSize}" fill="#ffffff" letter-spacing="-1.5">
                 ${titleSvgSpans}
             </text>
         </g>
