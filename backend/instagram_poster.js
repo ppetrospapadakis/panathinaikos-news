@@ -1,7 +1,12 @@
 /**
  * Instagram Auto-Poster & News Card Generator for PanathinaikosNews.gr
  * Generates branded 1080x1350 News Cards (0 AI cost) and publishes to Instagram Feed.
+ *
+ * ╔══════════════════════════════════════════════════════════╗
+ * ║  MASTER TOGGLE — change false → true to re-enable       ║
+ * ╚══════════════════════════════════════════════════════════╝
  */
+const INSTAGRAM_AUTOPOST_ENABLED = false;
 
 const sharp = require('sharp');
 const axios = require('axios');
@@ -184,10 +189,9 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
 
 // ── Publish to Instagram Feed & Post 1st Comment ─────────────────────────────
 async function publishToInstagram(article) {
-    // Master Pause Flag — PAUSED by user request until explicitly re-enabled
-    const INSTAGRAM_AUTOPOST_ENABLED = false;
+    // Master toggle is defined at the top of this file (INSTAGRAM_AUTOPOST_ENABLED)
     if (!INSTAGRAM_AUTOPOST_ENABLED) {
-        console.log('[Instagram] Auto-posting is currently PAUSED by user directive. Skipping.');
+        console.log('[Instagram] Auto-posting is currently PAUSED (INSTAGRAM_AUTOPOST_ENABLED = false). Skipping.');
         return null;
     }
 
