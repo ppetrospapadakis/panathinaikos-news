@@ -1297,6 +1297,15 @@ async function main() {
 
     // ── Process each source ───────────────────────────────────────────────────
     for (const target of SCRAPE_TARGETS) {
+        if (target.name === 'SDNA') {
+            const athensHour = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: 'Europe/Athens' }).format(new Date()), 10) % 24;
+            const athensMinute = parseInt(new Intl.DateTimeFormat('en-US', { minute: 'numeric', timeZone: 'Europe/Athens' }).format(new Date()), 10);
+            if (!(athensHour >= 10 && athensHour <= 22 && athensHour % 2 === 0 && athensMinute < 20)) {
+                console.log(`[SOURCE SKIPPED] SDNA is rate-limited to run only every 2 hours between 10-22. Current time: ${athensHour}:${athensMinute} EEST.`);
+                continue;
+            }
+        }
+        
         console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
 
         let links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
