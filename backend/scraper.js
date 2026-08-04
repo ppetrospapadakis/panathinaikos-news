@@ -436,11 +436,42 @@ async function scrapeArticleLinks(target, logErrorCallback) {
         const links = new Set();
         const isSitemap = target.url.endsWith('.xml') || target.url.includes('sitemap');
 
-        // Extract article URLs from SDNA Jina Markdown text
+        // Extract article URLs from SDNA Jina Markdown text with upfront relevance filtering
         if (target.name === 'SDNA' || (typeof html === 'string' && (html.startsWith('Title:') || html.includes('Markdown Content:')))) {
-            const regex = /https?:\/\/(www\.)?sdna\.gr\/[a-z0-9-]+\/\d+_[a-z0-9-]+/gi;
-            const matches = html.match(regex) || [];
-            matches.forEach(href => links.add(href.split('?')[0].split('#')[0]));
+            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/(?:www\.)?sdna\.gr\/[a-z0-9-]+\/\d+_[^)]+)\)/gi;
+            let match;
+            while ((match = markdownLinkRegex.exec(html)) !== null) {
+                const anchorText = match[1].trim();
+                const cleanHref = match[2].split('?')[0].split('#')[0];
+                
+                // Exclude non-PAO categories from sidebars/footers upfront
+                const excludedCategories = ['/kallitehniki-kolymbisi/', '/tenis/', '/formula-1/', '/moto-gp/', '/polo/'];
+                if (excludedCategories.some(cat => cleanHref.includes(cat))) continue;
+
+                // Extract URL slug text (e.g. "petaei-pros-tin-ellada-gia-ton-panathinaiko-o-libai-gkarsia")
+                const slugText = cleanHref.split('/').pop().replace(/^\d+_/, '').replace(/-/g, ' ');
+
+                // Check PAO relevance on anchor text and URL slug upfront
+                const isAnchorPao = anchorText.length > 5 && isPanathinaikosArticle(anchorText, anchorText);
+                const isSlugPao = isPanathinaikosArticle(slugText, slugText);
+
+                if (isAnchorPao || isSlugPao) {
+                    links.add(cleanHref);
+                }
+            }
+
+            // Fallback if no markdown links matched
+            if (links.size === 0) {
+                const rawRegex = /https?:\/\/(www\.)?sdna\.gr\/[a-z0-9-]+\/\d+_[a-z0-9-]+/gi;
+                const rawMatches = html.match(rawRegex) || [];
+                for (const href of rawMatches) {
+                    const cleanHref = href.split('?')[0].split('#')[0];
+                    const slugText = cleanHref.split('/').pop().replace(/^\d+_/, '').replace(/-/g, ' ');
+                    if (isPanathinaikosArticle(slugText, slugText)) {
+                        links.add(cleanHref);
+                    }
+                }
+            }
         }
 
         for (const sel of target.articleLinkSelectors) {
