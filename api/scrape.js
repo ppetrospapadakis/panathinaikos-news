@@ -36,7 +36,8 @@ module.exports = async (req, res) => {
 
         const isNightTime = (athensHour >= 1 && athensHour < 8);
         if (isNightTime) {
-            const isNightRunWindow = [1, 4, 7].includes(athensHour) && athensMinute >= 25 && athensMinute <= 35;
+            // Check for window 15-25 to catch exactly one ping whether cron is every 15 mins (hits at 15) or 20 mins (hits at 20)
+            const isNightRunWindow = [1, 4, 7].includes(athensHour) && athensMinute >= 15 && athensMinute <= 25;
             if (!isNightRunWindow) {
                 console.log(`[API SCRAPE SKIPPED] Night time throttling active (${athensHour}:${athensMinute} EEST). Trigger skipped.`);
                 return res.status(200).json({
