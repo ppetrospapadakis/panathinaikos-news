@@ -69,6 +69,9 @@ const http = axios.create({
 // not a permanent block. Setting retryOn403=true will retry those with longer backoff.
 async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 = false, timeoutMs = null) {
     const baseOrigin = (() => { try { return new URL(url).origin + '/'; } catch { return undefined; } })();
+    if (url.includes('sdna.gr')) {
+        extraHeaders['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+    }
     const headers = baseOrigin ? { 'Referer': baseOrigin, ...extraHeaders } : extraHeaders;
     const reqConfig = timeoutMs ? { headers, timeout: timeoutMs } : { headers };
 
