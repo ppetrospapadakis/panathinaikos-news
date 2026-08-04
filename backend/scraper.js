@@ -89,6 +89,12 @@ async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 
                 await new Promise(r => setTimeout(r, delay));
                 continue;
             }
+            
+            // Special handling: Silently drop SDNA 403 errors to avoid log spam, as Vercel is permanently blocked by Cloudflare Bot Fight Mode.
+            if (status === 403 && url.includes('sdna.gr')) {
+                err.isSilentSDNA403 = true;
+            }
+            
             throw err; // permanent block or max retries reached → propagate
         }
     }
@@ -813,8 +819,10 @@ async function scrapeArticlePage(url, categoryHint) {
 
         return { status: 'success', title, summary, content: bodyText, imageUrl, created_at, sourceUrl: url };
     } catch (err) {
-        console.warn(`[SCRAPER] Failed to scrape article ${url}: ${err.message}`);
-        return { status: 'failed_crawl', error: err.message };
+        if (!err.isSilentSDNA403) {
+            console.warn(`[SCRAPER] Failed to scrape article ${url}: ${err.message}`);
+        }
+        return { status: 'failed_crawl', error: err.message, isSilent: err.isSilentSDNA403 };
     }
 }
 
@@ -1356,12 +1364,13 @@ async function main() {
             const scraped = await scrapeArticlePage(articleUrl, target.category);
             if (!scraped || scraped.status === 'failed_crawl') {
                 const errMsg = scraped ? scraped.error : 'Unknown HTTP crawl failure';
-                logRunError(target.name, articleUrl, 'article_fetch', errMsg);
+                if (!scraped || !scraped.isSilent) { logRunError(target.name, articleUrl, 'article_fetch', errMsg); }
                 runStats.sources[target.name].skipped_crawling_failed++;
                 runStats.totals.skipped_crawling_failed++;
-                logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
+                if (!scraped || !scraped.isSilent) { logSkippedArticle(target.name, articleUrl, 'Unknown Title (Fetch Failed)', 'crawling_failed', `Αποτυχία λήψης άρθρου: ${errMsg.substring(0, 50)}`);
                 
                 
+                }
                 continue;
             }
             if (scraped.status === 'skipped_older') {
