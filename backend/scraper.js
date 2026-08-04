@@ -77,23 +77,7 @@ async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            let targetUrl = url;
-            let isProxied = false;
-            
-            // Bypass Cloudflare Datacenter blocks for SDNA
-            if (url.includes('sdna.gr')) {
-                targetUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-                isProxied = true;
-            }
-            
-            const response = await http.get(targetUrl, reqConfig);
-            
-            if (isProxied && response.data && response.data.contents) {
-                // Unwrap the proxy response to match standard axios response format
-                response.data = response.data.contents;
-            }
-            
-            return response;
+            return await http.get(url, reqConfig);
         } catch (err) {
             const status = err.response?.status;
             const isTransient = !status || status === 503 || status === 429 || status === 502 || status === 520 || status === 521;
