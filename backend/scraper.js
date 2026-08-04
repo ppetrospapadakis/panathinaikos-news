@@ -1357,6 +1357,16 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Old)', 'promo', 'Παλαιότερο των 4 ωρών');
                 existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${articleUrl.substring(0, 40)}`,
+                        summary: 'Skipped - Too Old',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: scraped.created_at || new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
             if (scraped.status === 'skipped_video') {
@@ -1364,6 +1374,16 @@ async function main() {
                 runStats.totals.skipped_size++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Video)', 'size', 'Βίντεο/Media άρθρο');
                 existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${articleUrl.substring(0, 40)}`,
+                        summary: 'Skipped - Video',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: scraped.created_at || new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
             if (scraped.status === 'skipped_size') {
