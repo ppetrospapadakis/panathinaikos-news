@@ -1335,8 +1335,17 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Excluded by URL)', 'promo', 'Φίλτρο διεύθυνσης URL (Promo/Live show)');
-                
-                
+                existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${articleUrl.substring(0, 40)}`,
+                        summary: 'Skipped - Promo URL',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
 
@@ -1416,8 +1425,17 @@ async function main() {
                 runStats.sources[target.name].skipped_relevance++;
                 runStats.totals.skipped_relevance++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Τοπικό φίλτρο λέξεων (Not PAO-relevant)');
-                
-                
+                existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
+                        summary: 'Skipped - Irrelevant',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: scraped.created_at || new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
 
@@ -1428,8 +1446,17 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο τίτλου (Promo/Live show)');
-                
-                
+                existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
+                        summary: 'Skipped - Promo Title',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: scraped.created_at || new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
 
@@ -1442,8 +1469,17 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Μπάσκετ σε Ποδόσφαιρο)');
-                
-                
+                existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
+                        summary: 'Skipped - Cross Category',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: scraped.created_at || new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
             if (target.category === 'Μπάσκετ' && isFootballUrl) {
@@ -1451,8 +1487,17 @@ async function main() {
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Ποδόσφαιρο σε Μπάσκετ)');
-                
-                
+                existingUrls.add(articleUrl);
+                if (!isDryRun) {
+                    db.from('articles').insert({
+                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
+                        summary: 'Skipped - Cross Category',
+                        content: 'Skipped',
+                        source_url: articleUrl,
+                        category: 'DELETED',
+                        created_at: scraped.created_at || new Date().toISOString()
+                    }).then(() => {}).catch(() => {});
+                }
                 continue;
             }
 
