@@ -1637,16 +1637,12 @@ async function main() {
             const currentScrapedTime = new Date(scraped.created_at);
             const canonicalScraped = getCanonicalArticleId(articleUrl);
             
-            // Collect candidates from the last 24 hours (1440 mins)
+            // Collect candidates from the last 4 hours (240 mins)
             const candidateArticles = existingArticles.filter(art => {
                 const dbTime = new Date(art.created_at);
                 const timeDiffMinutes = Math.abs(currentScrapedTime - dbTime) / (60 * 1000);
                 
-                const scrapedCategory = detectCategoryFromUrl(articleUrl, target.category);
-                const isAmateur = (art.category && art.category.includes('Ερασιτέχνης')) || 
-                                 (scrapedCategory && scrapedCategory.includes('Ερασιτέχνης'));
-                const maxWindow = isAmateur ? 1440 : 1440; // 24 hours (1440 mins) for candidate window
-                
+                const maxWindow = 240; // 4 hours (240 mins) candidate window
                 if (timeDiffMinutes > maxWindow) return false;
 
                 // If candidate already contains this URL or canonical ID, include as top candidate
