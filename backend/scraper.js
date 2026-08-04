@@ -676,7 +676,13 @@ async function scrapeArticlePage(url, categoryHint) {
             const timeMatch = html.match(/^Published Time:\s*(.+)$/m);
             if (timeMatch) {
                 const d = new Date(timeMatch[1].trim());
-                if (!isNaN(d.getTime())) created_at = d.toISOString();
+                if (!isNaN(d.getTime())) {
+                    const ageHours = (new Date().getTime() - d.getTime()) / (1000 * 60 * 60);
+                    if (ageHours > 4) {
+                        console.log(`  [SDNA PARSING WARNING] Article is too old (Published: ${d.toISOString()}, Age: ${ageHours.toFixed(1)}h). Skipping ${url}`);
+                        return { status: 'skipped_older', length: 0 };
+                    }
+                }
             }
 
             const imgMatches = html.match(/!\[.*?\]\((https?:\/\/[^\s\)]+)\)/g) || [];
@@ -831,9 +837,6 @@ async function scrapeArticlePage(url, categoryHint) {
                     console.log(`  [PARSING WARNING] Article is too old (Published: ${pubDate.toISOString()}, Age: ${ageHours.toFixed(1)}h). Maximum allowed age is 4h. Skipping ${url}`);
                     return { status: 'skipped_older', length: 0 };
                 }
-                
-                // Preserve true publication timestamp for valid recent articles
-                created_at = pubDate.toISOString();
             }
         }
 
