@@ -626,7 +626,8 @@ async function scrapeArticlePage(url, categoryHint) {
         return null;
     }
     try {
-        const response = await httpGetWithRetry(url);
+        const retryOn403 = url.includes('sdna.gr') || url.includes('paobc.gr');
+        const response = await httpGetWithRetry(url, {}, 3, retryOn403);
         console.log(`[HTTP GET] ${url} | Status: ${response.status}`);
         const html = response.data;
         const $ = cheerio.load(html);
@@ -1336,8 +1337,9 @@ async function main() {
                 continue;
             }
 
-            // Rate limit: 1s between article fetches
-            await sleep(1000);
+            // Rate limit: 1s between article fetches (3s for SDNA to avoid 403)
+            const delayMs = target.name === 'SDNA' ? 3000 : 1000;
+            await sleep(delayMs);
 
             const scraped = await scrapeArticlePage(articleUrl, target.category);
             if (!scraped || scraped.status === 'failed_crawl') {
