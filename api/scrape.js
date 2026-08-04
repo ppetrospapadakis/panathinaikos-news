@@ -51,26 +51,25 @@ module.exports = async (req, res) => {
     try {
         console.log('[API SCRAPE] Triggering GitHub Repository Dispatch...');
         
-        // Disabled external dispatch to enforce strict 20-minute internal GitHub Actions schedule
-        // const response = await axios.post(
-        //     'https://api.github.com/repos/ppetrospapadakis/panathinaikos-news/dispatches',
-        //     {
-        //         event_type: 'trigger-scrape'
-        //     },
-        //     {
-        //         headers: {
-        //             'Authorization': `Bearer ${pat.trim()}`,
-        //             'Accept': 'application/vnd.github+json',
-        //             'X-GitHub-Api-Version': '2022-11-28',
-        //             'User-Agent': 'Vercel-Serverless-Scrape'
-        //         }
-        //     }
-        // );
+        const response = await axios.post(
+            'https://api.github.com/repos/ppetrospapadakis/panathinaikos-news/dispatches',
+            {
+                event_type: 'trigger-scrape'
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${pat.trim()}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28',
+                    'User-Agent': 'Vercel-Serverless-Scrape'
+                }
+            }
+        );
 
         return res.status(200).json({
             success: true,
             message: 'Repository dispatch triggered successfully.',
-            status: 200
+            status: response.status
         });
     } catch (err) {
         console.error('[API SCRAPE] GitHub API dispatch error:', err.response ? err.response.data : err.message);
