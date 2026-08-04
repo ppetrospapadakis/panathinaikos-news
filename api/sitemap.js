@@ -46,16 +46,17 @@ function slugify(text) {
     if (!text) return "arthro";
     try {
         let latin = greekToLatin(text);
+        // ⚠️ Must match render-article.js slugify exactly — canonical URLs depend on this
         let slug = latin
             .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
             .trim()
             .replace(/\s+/g, '-')
-            .replace(/-+/g, '-');
-        if (slug.length > 60) {
-            let truncated = slug.substring(0, 60);
-            const lastDash = truncated.lastIndexOf('-');
-            truncated = lastDash > 8 ? truncated.substring(0, lastDash) : truncated;
+            .replace(/[^a-z0-9-]+/g, '')
+            .replace(/--+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
+        if (slug.length > 35) {
+            const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
             slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
         }
         return slug || "arthro";
@@ -109,10 +110,10 @@ module.exports = async (req, res) => {
             '/basket',
             '/erasitexnis',
             '/apopsi',
-            '/agones',
             '/fixtures',
             '/schedule',
             '/roster.html'
+            // /agones removed — disallowed in robots.txt, would send mixed signals to Google
         ];
 
         // B1: Added xmlns:news for Google News, B2: Added xmlns:image for Image Sitemap
