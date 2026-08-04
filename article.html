@@ -779,6 +779,15 @@
                     return `${day}/${month}/${year} - ${hours}:${minutes}`;
                 }
                 
+                function greekToLatin(text) {
+                    if (!text) return "";
+                    let str = text.toLowerCase().replace(/αι|αί/g,'ai').replace(/ει|εί/g,'ei').replace(/οι|οί/g,'oi').replace(/ου|ού/g,'ou').replace(/αυ|αύ/g,'av').replace(/ευ|εύ/g,'ev').replace(/μπ/g,'b').replace(/ντ/g,'nt').replace(/γκ/g,'gk').replace(/γγ/g,'ng').replace(/τζ/g,'tz').replace(/τσ/g,'ts').replace(/θ/g,'th').replace(/χ/g,'ch').replace(/ψ/g,'ps').replace(/ξ/g,'x');
+                    const m = {'α':'a','ά':'a','β':'v','γ':'g','δ':'d','ε':'e','έ':'e','ζ':'z','η':'i','ή':'i','ι':'i','ί':'i','ϊ':'i','ΐ':'i','κ':'k','λ':'l','μ':'m','ν':'n','ο':'o','ό':'o','π':'p','ρ':'r','σ':'s','ς':'s','τ':'t','υ':'y','ύ':'y','ϋ':'y','ΰ':'y','φ':'f','ω':'o','ώ':'o'};
+                    let res = '';
+                    for (let i = 0; i < str.length; i++) { const c = str[i]; res += m[c]!==undefined?m[c]:c; }
+                    return res;
+                }
+                
                 function slugify(text) {
                     if (!text) return "arthro";
                     try {
@@ -929,6 +938,15 @@
                     const hours = String(d.getHours()).padStart(2, '0');
                     const minutes = String(d.getMinutes()).padStart(2, '0');
                     return `${day}/${month}/${year} - ${hours}:${minutes}`;
+                }
+                
+                function greekToLatin(text) {
+                    if (!text) return "";
+                    let str = text.toLowerCase().replace(/αι|αί/g,'ai').replace(/ει|εί/g,'ei').replace(/οι|οί/g,'oi').replace(/ου|ού/g,'ou').replace(/αυ|αύ/g,'av').replace(/ευ|εύ/g,'ev').replace(/μπ/g,'b').replace(/ντ/g,'nt').replace(/γκ/g,'gk').replace(/γγ/g,'ng').replace(/τζ/g,'tz').replace(/τσ/g,'ts').replace(/θ/g,'th').replace(/χ/g,'ch').replace(/ψ/g,'ps').replace(/ξ/g,'x');
+                    const m = {'α':'a','ά':'a','β':'v','γ':'g','δ':'d','ε':'e','έ':'e','ζ':'z','η':'i','ή':'i','ι':'i','ί':'i','ϊ':'i','ΐ':'i','κ':'k','λ':'l','μ':'m','ν':'n','ο':'o','ό':'o','π':'p','ρ':'r','σ':'s','ς':'s','τ':'t','υ':'y','ύ':'y','ϋ':'y','ΰ':'y','φ':'f','ω':'o','ώ':'o'};
+                    let res = '';
+                    for (let i = 0; i < str.length; i++) { const c = str[i]; res += m[c]!==undefined?m[c]:c; }
+                    return res;
                 }
                 
                 function slugify(text) {
