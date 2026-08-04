@@ -1637,10 +1637,15 @@ async function main() {
             let duplicateArticleId = null;
 
             if (candidateArticles.length > 0) {
-                // Direct match by URL / canonical ID
+                // Helper to check if image is a real article image (not default logo/stadium)
+                const isRealImage = (img) => img && img !== '/logo.png' && !img.includes('logo.png') && img !== DEFAULT_STADIUM_IMG;
+
+                // Direct match by URL / canonical ID / identical non-fallback image
                 const directCanonicalMatch = candidateArticles.find(art => {
                     const dbUrls = (art.source_url || '').split(',').map(u => u.trim());
-                    return dbUrls.some(u => u === articleUrl || (canonicalScraped && getCanonicalArticleId(u) === canonicalScraped));
+                    const urlMatch = dbUrls.some(u => u === articleUrl || (canonicalScraped && getCanonicalArticleId(u) === canonicalScraped));
+                    const imgMatch = isRealImage(scraped.imageUrl) && isRealImage(art.image_url) && scraped.imageUrl === art.image_url;
+                    return urlMatch || imgMatch;
                 });
 
                 if (directCanonicalMatch) {
@@ -1654,11 +1659,17 @@ async function main() {
                     if (exactMatch) {
                         duplicateArticleId = exactMatch.id;
                     } else {
-                        // Check if any candidate has a title similarity > 0.05 OR summary similarity > 0.12
-                        const hasPossibleMatch = candidateArticles.some(art => 
-                            jaccardSimilarity(scraped.title, art.title) > 0.05 ||
-                            jaccardSimilarity(scraped.summary, art.summary) > 0.12
-                        );
+                        // Check if any candidate shares title keywords (>3 chars) OR has title/summary similarity
+                        const hasPossibleMatch = candidateArticles.some(art => {
+                            const stopWords = ['απο', 'τον', 'της', 'του', 'για', 'την', 'στην', 'κοντρα', 'μετα', 'στον', 'στους', 'στις', 'οτι'];
+                            const words1 = scraped.title.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 3 && !stopWords.includes(w));
+                            const words2 = art.title.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 3 && !stopWords.includes(w));
+                            const titleWordOverlap = words1.some(w => words2.some(w2 => w.includes(w2) || w2.includes(w)));
+                            
+                            return titleWordOverlap ||
+                                   jaccardSimilarity(scraped.title, art.title) > 0.05 ||
+                                   jaccardSimilarity(scraped.summary, art.summary) > 0.10;
+                        });
                         
                         if (!hasPossibleMatch) {
                             console.log(`  [AI DEDUPLICATION BYPASS] Jaccard similarity too low. Assuming unique event.`);
