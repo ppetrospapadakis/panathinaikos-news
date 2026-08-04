@@ -68,11 +68,28 @@ const http = axios.create({
 // retryOn403: some sites (SDNA, PAO BC) use 403 as a temporary CDN rate-limit,
 // not a permanent block. Setting retryOn403=true will retry those with longer backoff.
 async function httpGetWithRetry(url, extraHeaders = {}, retries = 3, retryOn403 = false, timeoutMs = null) {
+    let targetUrl = url;
+    let headers = { ...extraHeaders };
+
+    // SDNA bypass via Jina AI reader (bypasses Cloudflare Bot Fight Mode 403 on Vercel/GitHub Actions)
+    if (url.includes('sdna.gr') && !url.includes('r.jina.ai')) {
+        targetUrl = 'https://r.jina.ai/' + url;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                return await axios.get(targetUrl, { timeout: timeoutMs || 25000 });
+            } catch (err) {
+                console.warn(`[RETRY JINA ${attempt}/${retries}] SDNA via Jina failed on ${targetUrl}: ${err.message}`);
+                if (attempt < retries) await new Promise(r => setTimeout(r, 2000 * attempt));
+                else throw err;
+            }
+        }
+    }
+
     const baseOrigin = (() => { try { return new URL(url).origin + '/'; } catch { return undefined; } })();
     if (url.includes('sdna.gr')) {
-        extraHeaders['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+        headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
     }
-    const headers = baseOrigin ? { 'Referer': baseOrigin, ...extraHeaders } : extraHeaders;
+    if (baseOrigin) headers['Referer'] = baseOrigin;
     const reqConfig = timeoutMs ? { headers, timeout: timeoutMs } : { headers };
 
     for (let attempt = 1; attempt <= retries; attempt++) {
@@ -419,6 +436,13 @@ async function scrapeArticleLinks(target, logErrorCallback) {
         const links = new Set();
         const isSitemap = target.url.endsWith('.xml') || target.url.includes('sitemap');
 
+        // Extract article URLs from SDNA Jina Markdown text
+        if (target.name === 'SDNA' || (typeof html === 'string' && (html.startsWith('Title:') || html.includes('Markdown Content:')))) {
+            const regex = /https?:\/\/(www\.)?sdna\.gr\/[a-z0-9-]+\/\d+_[a-z0-9-]+/gi;
+            const matches = html.match(regex) || [];
+            matches.forEach(href => links.add(href.split('?')[0].split('#')[0]));
+        }
+
         for (const sel of target.articleLinkSelectors) {
             try {
                 const elements = $(sel);
@@ -639,6 +663,69 @@ async function scrapeArticlePage(url, categoryHint) {
         const response = await httpGetWithRetry(url, {}, 3, retryOn403);
         console.log(`[HTTP GET] ${url} | Status: ${response.status}`);
         const html = response.data;
+
+        // Custom Jina Markdown parser for SDNA articles
+        if (url.includes('sdna.gr') && typeof html === 'string' && (html.startsWith('Title:') || html.includes('Markdown Content:'))) {
+            let title = '';
+            let created_at = new Date().toISOString();
+            let imageUrl = null;
+
+            const titleMatch = html.match(/^Title:\s*(.+)$/m);
+            if (titleMatch) title = titleMatch[1].trim();
+
+            const timeMatch = html.match(/^Published Time:\s*(.+)$/m);
+            if (timeMatch) {
+                const d = new Date(timeMatch[1].trim());
+                if (!isNaN(d.getTime())) created_at = d.toISOString();
+            }
+
+            const imgMatches = html.match(/!\[.*?\]\((https?:\/\/[^\s\)]+)\)/g) || [];
+            for (const imgMarkdown of imgMatches) {
+                const srcMatch = imgMarkdown.match(/\((https?:\/\/[^\s\)]+)\)/);
+                if (srcMatch) {
+                    const src = srcMatch[1];
+                    if (src.includes('/styles/') || src.includes('/public/')) {
+                        imageUrl = src.replace('/styles/og_image/', '/styles/main/').replace(/\/(wm|thumbnails)\//gi, '/');
+                        break;
+                    }
+                }
+            }
+
+            let bodyText = html;
+            const splitPos = html.indexOf('Markdown Content:');
+            if (splitPos !== -1) bodyText = html.substring(splitPos + 'Markdown Content:'.length).trim();
+
+            const lines = bodyText.split('\n');
+            const cleanLines = [];
+            for (let line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) continue;
+                if (trimmed.startsWith('Title:') || trimmed.startsWith('URL Source:') || trimmed.startsWith('Published Time:')) continue;
+                if (trimmed.includes('Do Not Process My Personal Information') || trimmed.includes('IAB’s List')) continue;
+                if (trimmed.includes('Opted In') || trimmed.includes('Opted Out') || trimmed.includes('Personal Data Processing') || trimmed.includes('ΕΝΕΡΓΟΠΟΙΗΜΕΝΟ') || trimmed.includes('ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ')) continue;
+                if (trimmed.includes('Κατέβασε τώρα και ζήσε τη μοναδική εμπειρία')) continue;
+                if (trimmed.includes('Χρόνος ανάγνωσης')) continue;
+                if (trimmed.startsWith('*   [') || trimmed.startsWith('![Image')) continue;
+
+                if (trimmed.length > 20 && /[α-ωΑ-Ω]/i.test(trimmed)) {
+                    cleanLines.push(trimmed);
+                }
+            }
+
+            const cleanContent = cleanLines.join('\n\n');
+            const summary = (cleanContent.substring(0, 300) || title) + '...';
+
+            return {
+                status: 'success',
+                title: title || 'SDNA Article',
+                summary,
+                content: cleanContent.length > 100 ? cleanContent : bodyText.substring(0, 2000),
+                imageUrl: imageUrl || '/logo.png',
+                created_at,
+                sourceUrl: url
+            };
+        }
+
         const $ = cheerio.load(html);
 
         // ── Title ──────────────────────────────────────────────────────────────
@@ -1297,15 +1384,6 @@ async function main() {
 
     // ── Process each source ───────────────────────────────────────────────────
     for (const target of SCRAPE_TARGETS) {
-        if (target.name === 'SDNA') {
-            const athensHour = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: 'Europe/Athens' }).format(new Date()), 10) % 24;
-            const athensMinute = parseInt(new Intl.DateTimeFormat('en-US', { minute: 'numeric', timeZone: 'Europe/Athens' }).format(new Date()), 10);
-            if (!(athensHour >= 10 && athensHour <= 22 && athensHour % 2 === 0 && athensMinute < 20)) {
-                console.log(`[SOURCE SKIPPED] SDNA is rate-limited to run only every 2 hours between 10-22. Current time: ${athensHour}:${athensMinute} EEST.`);
-                continue;
-            }
-        }
-        
         console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
 
         let links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
