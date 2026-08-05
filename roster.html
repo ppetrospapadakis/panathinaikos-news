@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="el">
+<html class="dark icons-loaded" lang="el">
 <head>
 
     <!-- Preconnect for fonts -->
@@ -199,6 +199,17 @@
                 </div>
             </div>
 
+            <!-- TACTICAL ANALYSIS -->
+            <div id="analysis-container-football" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
+                </div>
+                <div id="analysis-text-football" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
+                    <!-- Dynamically loaded -->
+                </div>
+            </div>
+
             <!-- Football Comments Widget -->
             <div id="football-comments-container" class="mt-12 pt-8 border-t border-outline-variant/30"></div>
         </div>
@@ -253,6 +264,17 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="squad-rest-basketball">
                     <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- TACTICAL ANALYSIS -->
+            <div id="analysis-container-basketball" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
+                </div>
+                <div id="analysis-text-basketball" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
+                    <!-- Dynamically loaded -->
                 </div>
             </div>
 
@@ -624,12 +646,12 @@
                 renderPitchPlayers('pitch-starting', footballStarting);
                 renderPitchPlayers('pitch-bench', footballBench);
                 renderSquadList('squad-rest-football', footballRest);
-                
+                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
 
                 renderCourtPlayers('court-starting', basketballStarting);
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
-                
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
                 // Still try to load news even without Supabase CDN
                 initMoreNewsScroll();
             };
@@ -648,9 +670,31 @@
                     const starting = JSON.parse(fData.bullets[0]);
                     const bench = JSON.parse(fData.bullets[1]);
                     const rest = JSON.parse(fData.bullets[2]);
+                    const analysis = fData.content || '';
+
+                    window.liveFootballStarting = starting;
+                    window.liveFootballBench = bench;
+                    window.liveFootballRest = rest;
+
                     renderPitchPlayers('pitch-starting', starting);
                     renderPitchPlayers('pitch-bench', bench);
                     renderSquadList('squad-rest-football', rest);
+                    const elFootballContainer = document.getElementById('analysis-container-football');
+                    if (analysis.trim() !== '') {
+                        document.getElementById('analysis-text-football').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                        if (elFootballContainer) elFootballContainer.style.display = 'block';
+                    } else {
+                        if (elFootballContainer) elFootballContainer.style.display = 'none';
+                    }
+                } else {
+                    window.liveFootballStarting = footballStarting;
+                    window.liveFootballBench = footballBench;
+                    window.liveFootballRest = footballRest;
+
+                    renderPitchPlayers('pitch-starting', footballStarting);
+                    renderPitchPlayers('pitch-bench', footballBench);
+                    renderSquadList('squad-rest-football', footballRest);
+                    document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
                 }
 
                 // Fetch Basketball Roster
@@ -663,9 +707,31 @@
                     const starting = JSON.parse(bData.bullets[0]);
                     const backup = JSON.parse(bData.bullets[1]);
                     const rest = JSON.parse(bData.bullets[2]);
+                    const analysis = bData.content || '';
+
+                    window.liveBasketballStarting = starting;
+                    window.liveBasketballBackup = backup;
+                    window.liveBasketballRest = rest;
+
                     renderCourtPlayers('court-starting', starting);
                     renderCourtPlayers('court-backup', backup);
                     renderSquadList('squad-rest-basketball', rest);
+                    const elBasketballContainer = document.getElementById('analysis-container-basketball');
+                    if (analysis.trim() !== '') {
+                        document.getElementById('analysis-text-basketball').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                        if (elBasketballContainer) elBasketballContainer.style.display = 'block';
+                    } else {
+                        if (elBasketballContainer) elBasketballContainer.style.display = 'none';
+                    }
+                } else {
+                    window.liveBasketballStarting = basketballStarting;
+                    window.liveBasketballBackup = basketballBackup;
+                    window.liveBasketballRest = basketballRest;
+
+                    renderCourtPlayers('court-starting', basketballStarting);
+                    renderCourtPlayers('court-backup', basketballBackup);
+                    renderSquadList('squad-rest-basketball', basketballRest);
+                    document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
                 }
 
                 if (fData && fData.id) {
@@ -677,17 +743,22 @@
 
             } catch (err) {
                 console.error('Error loading dynamic roster:', err);
-                // Football fallback
+                window.liveFootballStarting = footballStarting;
+                window.liveFootballBench = footballBench;
+                window.liveFootballRest = footballRest;
+                window.liveBasketballStarting = basketballStarting;
+                window.liveBasketballBackup = basketballBackup;
+                window.liveBasketballRest = basketballRest;
+
                 renderPitchPlayers('pitch-starting', footballStarting);
                 renderPitchPlayers('pitch-bench', footballBench);
                 renderSquadList('squad-rest-football', footballRest);
+                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή.</p>';
                 
-                
-                // Basketball fallback
                 renderCourtPlayers('court-starting', basketballStarting);
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
-                
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη.</p>';
             }
         }
 
@@ -707,6 +778,9 @@
             if (!container || !articleId) return;
 
             const adminActive = isAdmin();
+            const ctaTitle = sport === 'football' ? '⚽ Φτιάξε τη δική σου 11άδα' : '🏀 Φτιάξε τη δική σου 5άδα';
+            const ctaBtnText = sport === 'football' ? 'Έναρξη 11άδας' : 'Έναρξη 5άδας';
+
             const nameFieldHtml = adminActive ? `
                 <div class="flex items-center gap-2.5 p-3.5 bg-primary/10 border border-primary/30 rounded-xl text-primary font-bold text-sm">
                     <span class="material-symbols-outlined text-[20px] text-primary">verified</span>
@@ -722,6 +796,24 @@
 
             container.innerHTML = `
             <div class="mt-8">
+                <!-- Lineup Studio CTA Banner -->
+                <div class="mb-8 p-6 bg-gradient-to-r from-primary/20 via-surface-container-high to-surface-container rounded-2xl border border-primary/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-1 text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-[11px] font-extrabold uppercase tracking-wider">Διαδραστικο Εργαλειο</span>
+                            <span class="text-xs text-on-surface-variant/70 font-semibold">11άδα Φιλάθλων</span>
+                        </div>
+                        <h4 class="text-lg md:text-xl font-extrabold text-on-surface flex items-center justify-center md:justify-start gap-2">
+                            <span>${ctaTitle}</span>
+                        </h4>
+                        <p class="text-xs text-on-surface-variant max-w-lg">Μετακίνησε παίκτες μεταξύ Βασικών, Πάγκου & Εκτός Αποστολής και μοιράσου το τακτικό σου πλάνο στα σχόλια!</p>
+                    </div>
+                    <button onclick="openLineupStudio('${sport}', '${articleId}')" class="px-6 py-3.5 bg-primary text-on-primary font-extrabold rounded-xl text-sm shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 shrink-0 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">tune</span>
+                        <span>${ctaBtnText}</span>
+                    </button>
+                </div>
+
                 <h3 class="font-h3 text-h3 text-on-surface mb-6 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary" style="font-size: 28px;">forum</span>
                     <span>Σχόλια (<span id="${sport}-comments-total-count">0</span>)</span>
@@ -794,6 +886,39 @@
 
                         const isCardAdmin = c.is_admin === true || c.user_name === 'PanathinaikosNews' || (c.user_name || '').toLowerCase() === 'panathinaikos news';
 
+                        // Parse optional user lineup data
+                        const lineupMatch = (c.comment_text || '').match(/\[LINEUP_DATA\]([\s\S]*?)\[\/LINEUP_DATA\]/);
+                        const cleanCommentText = (c.comment_text || '').replace(/\[LINEUP_DATA\][\s\S]*?\[\/LINEUP_DATA\]/, '').trim();
+
+                        let lineupBtnHtml = '';
+                        if (lineupMatch) {
+                            try {
+                                const parsedLineup = JSON.parse(lineupMatch[1]);
+                                window.userLineupsMap = window.userLineupsMap || {};
+                                window.userLineupsMap[c.id] = {
+                                    sport: parsedLineup.sport || sport,
+                                    name: c.user_name,
+                                    date: dateStr,
+                                    lineup: parsedLineup
+                                };
+
+                                const badgeTitle = sport === 'football' ? '11άδα Φιλάθλου' : '5άδα Φιλάθλου';
+                                const badgeIcon = sport === 'football' ? 'sports_soccer' : 'sports_basketball';
+
+                                lineupBtnHtml = `
+                                <div class="mt-3 pt-3 border-t border-outline-variant/20 flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/40 text-[11px] font-extrabold uppercase shadow-sm">
+                                        <span class="material-symbols-outlined text-[14px]">${badgeIcon}</span>
+                                        <span>${badgeTitle}</span>
+                                    </span>
+                                    <button onclick="openViewUserLineupModal('${c.id}')" class="px-3.5 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/40 text-primary text-xs font-extrabold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95">
+                                        <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                        <span>Δες την ομάδα</span>
+                                    </button>
+                                </div>`;
+                            } catch (_) {}
+                        }
+
                         if (isCardAdmin) {
                             return `
                             <div class="bg-primary/10 border border-primary/30 shadow-md rounded-2xl p-5 flex gap-4 items-start relative overflow-hidden">
@@ -813,7 +938,8 @@
                                         </div>
                                         ${deleteBtn}
                                     </div>
-                                    <p class="text-sm text-on-surface leading-relaxed mt-2.5 whitespace-pre-wrap font-medium">${c.comment_text}</p>
+                                    <p class="text-sm text-on-surface leading-relaxed mt-2.5 whitespace-pre-wrap font-medium">${cleanCommentText}</p>
+                                    ${lineupBtnHtml}
                                 </div>
                             </div>`;
                         }
@@ -831,7 +957,8 @@
                                     </div>
                                     ${deleteBtn}
                                 </div>
-                                <p class="text-sm text-on-surface-variant leading-relaxed mt-2 whitespace-pre-wrap">${c.comment_text}</p>
+                                <p class="text-sm text-on-surface-variant leading-relaxed mt-2 whitespace-pre-wrap">${cleanCommentText}</p>
+                                ${lineupBtnHtml}
                             </div>
                         </div>`;
                     }).join('');
@@ -1010,12 +1137,10 @@
     </script>
 <script>
         function checkAdminNav() {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                const el = document.getElementById('nav-item-fixtures');
-                if (el) el.classList.remove('hidden');
-                const tab = document.getElementById('tab-item-fixtures');
-                if (tab) tab.classList.remove('hidden');
-            }
+            const el = document.getElementById('nav-item-fixtures');
+            if (el) el.classList.remove('hidden');
+            const tab = document.getElementById('tab-item-fixtures');
+            if (tab) tab.classList.remove('hidden');
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', checkAdminNav);
@@ -1023,7 +1148,6 @@
             checkAdminNav();
         }
 </script>
-
 <script>
 (function() {
     function showGoogleModal() {
@@ -1087,14 +1211,12 @@
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('a[href*="preferences/source"]');
         if (btn) {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                return; // Admin logged in: open external Google preferences link in new tab directly
-            }
             e.preventDefault();
             showGoogleModal();
         }
     });
 })();
 </script>
+<script src="/roster_lineup.js?v=1"></script>
 </body>
 </html>
