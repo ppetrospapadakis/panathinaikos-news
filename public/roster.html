@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html class="dark icons-loaded" lang="el">
+<head>
+
+    <!-- Preconnect for fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=5"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=5"/>
+    <link rel="shortcut icon" href="/favicon.png?v=5"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=5"/>
+    <title>Panathinaikos - ΡΟΣΤΕΡ</title>
+    <meta name="description" content="Ρόστερ και ανάλυση Παναθηναϊκού — Ποδόσφαιρο & Μπάσκετ."/>
+    
+    <!-- Compiled Tailwind CSS -->
+    <link rel="preload" href="/style.css?v=5" as="style">
+    <link rel="stylesheet" href="/style.css?v=5">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" media="print" onload="this.media='all'"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" media="print" onload="this.media='all'"/>
+    
+    
+    <script>
+        document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
+            document.documentElement.classList.add('icons-loaded');
+        }).catch(() => { document.documentElement.classList.add('icons-loaded'); });
+    </script>
+
+    <!-- Google Analytics (Lazy Loaded) -->
+<script>
+  (function() {
+    let gtagLoaded = false;
+    function loadGtag() {
+        if (gtagLoaded) return;
+        gtagLoaded = true;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-HGPHW30Z14');
+        const script = document.createElement('script');
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14";
+        script.async = true;
+        document.head.appendChild(script);
+        ['scroll','mousemove','touchstart','keydown'].forEach(e => window.removeEventListener(e, loadGtag));
+    }
+    ['scroll','mousemove','touchstart','keydown'].forEach(e => window.addEventListener(e, loadGtag, {once:true, passive:true}));
+    setTimeout(loadGtag, 8000); // Fallback
+  })();
+</script>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden">
+
+    <!-- ═══ TOP HEADER ═══ -->
+    <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8 relative">
+            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" onclick="toggleDrawer()" aria-label="Menu">
+                <span class="material-symbols-outlined text-primary">menu</span>
+            </button>
+            <div class="absolute inset-0 px-[60px] sm:px-0 flex items-center justify-center pointer-events-none">
+                <a href="/" class="flex items-center pointer-events-auto">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-[64px] sm:h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+                </a>
+            </div>
+            <a href="https://www.google.com/preferences/source?q=panathinaikosnews.gr" target="_blank" rel="noopener noreferrer" class="z-10 group flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/40 bg-surface-container-high/80 hover:bg-surface-container-highest hover:border-primary/50 text-on-surface transition-all duration-300 shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer" title="Προσθήκη στις προτιμώμενες πηγές του Google">
+                <svg class="w-4 h-4 shrink-0 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span class="hidden md:inline font-body text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface transition-colors whitespace-nowrap">Προσθήκη στη Google</span>
+                <span class="md:hidden text-primary font-bold text-xs">+</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
+    <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
+        <div class="flex items-center justify-between gap-2 mb-8 pr-1">
+            <a href="/" class="flex items-center shrink min-w-0">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" width="261" height="74"/>
+            </a>
+            <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors shrink-0 p-1" onclick="toggleDrawer()">close</button>
+        </div>
+        <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
+        <nav class="flex flex-col gap-1">
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/">
+                <span class="material-symbols-outlined">feed</span><span>Ροή Ειδήσεων</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/podosfairo">
+                <span class="material-symbols-outlined">sports_soccer</span><span>Ποδόσφαιρο</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/basket">
+                <span class="material-symbols-outlined">sports_basketball</span><span>Μπάσκετ</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/erasitechnis">
+                <span class="material-symbols-outlined">directions_run</span><span>Ερασιτέχνης</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/apopsi">
+                <span class="material-symbols-outlined">rate_review</span><span>Άποψη</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all" href="/roster.html">
+                <span class="material-symbols-outlined">groups</span><span>Ρόστερ</span>
+            </a>
+            <a id="nav-item-fixtures" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
+                <span class="material-symbols-outlined">calendar_month</span><span>Πρόγραμμα</span>
+            </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
+            <p class="font-caption text-caption text-on-surface-variant/50">© 2026 Panathinaikos Editorial</p>
+            <a href="/login.html" class="text-on-surface-variant/30 hover:text-primary transition-colors" title="Admin Panel">
+                <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
+            </a>
+        </div>
+    </aside>
+    <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
+
+    <main class="mt-[80px]">
+        
+
+        <!-- Category Tab Bar -->
+        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
+            <div class="max-w-[1440px] mx-auto px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+                <a id="tab-all" href="/" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
+                <a id="tab-football-redirect" href="/podosfairo" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball-redirect" href="/basket" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="/erasitechnis" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🤾 Ερασιτέχνης</a>
+                <a id="tab-opinion" href="/apopsi" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
+                <a id="tab-roster" href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center">📊 ΡΟΣΤΕΡ</a>
+                <a id="tab-item-fixtures" href="/fixtures" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📅 ΠΡΟΓΡΑΜΜΑ</a>
+            </div>
+        </div>
+
+        <!-- Sport switcher inside body -->
+        <div class="flex justify-center gap-2 mt-8">
+            <button id="tab-football" onclick="switchSport('football')"
+                class="px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all">
+                ⚽ Ποδόσφαιρο
+            </button>
+            <button id="tab-basketball" onclick="switchSport('basketball')"
+                class="px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all">
+                🏀 Μπάσκετ
+            </button>
+        </div>
+
+        <!-- ═══ FOOTBALL VIEW ═══ -->
+        <div id="view-football" class="max-w-[1440px] mx-auto px-8 py-12 space-y-16">
+
+            <!-- PITCH GRID WRAPPER -->
+            <div class="min-[900px]:grid min-[900px]:grid-cols-2 min-[900px]:gap-8 max-[899px]:space-y-16">
+                <!-- PITCH 1: Starting XI -->
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Starting XI · 4-3-3</p>
+                            <h2 class="font-h2 text-h2">Βασική Ενδεκάδα</h2>
+                        </div>
+                    </div>
+                <div class="pitch rounded-2xl w-full" style="height:480px;" id="pitch-starting">
+                    <div class="pitch-centre-line"></div>
+                    <div class="pitch-centre-circle"></div>
+                    <div class="pitch-penalty-top"></div>
+                    <div class="pitch-penalty-bottom"></div>
+                    <div class="pitch-goal-top"></div>
+                    <div class="pitch-goal-bottom"></div>
+                    <!-- Players placed by JS -->
+                </div>
+            </div>
+
+            <!-- PITCH 2: Substitutes / 2nd Team -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Bench · 4-3-3</p>
+                        <h2 class="font-h2 text-h2">Αναπληρωματικοί</h2>
+                    </div>
+                </div>
+                <div class="pitch rounded-2xl w-full" style="height:480px;" id="pitch-bench">
+                    <div class="pitch-centre-line"></div>
+                    <div class="pitch-centre-circle"></div>
+                    <div class="pitch-penalty-top"></div>
+                    <div class="pitch-penalty-bottom"></div>
+                    <div class="pitch-goal-top"></div>
+                    <div class="pitch-goal-bottom"></div>
+                </div>
+            </div>
+            </div>
+
+            <!-- SQUAD LIST: Υπόλοιποι -->
+            <div>
+                <div class="mb-6">
+                    <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Full Squad</p>
+                    <h2 class="font-h2 text-h2">Υπόλοιποι</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="squad-rest-football">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- TACTICAL ANALYSIS -->
+            <div id="analysis-container-football" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
+                </div>
+                <div id="analysis-text-football" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
+                    <!-- Dynamically loaded -->
+                </div>
+            </div>
+
+            <!-- Football Comments Widget -->
+            <div id="football-comments-container" class="mt-12 pt-8 border-t border-outline-variant/30"></div>
+        </div>
+
+        <!-- ═══ BASKETBALL VIEW ═══ -->
+        <div id="view-basketball" class="max-w-[1440px] mx-auto px-8 py-12 space-y-16 hidden">
+
+            <!-- COURT GRID WRAPPER -->
+            <div class="min-[900px]:grid min-[900px]:grid-cols-2 min-[900px]:gap-8 max-[899px]:space-y-16">
+                <!-- COURT 1: Starting 5 -->
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Starting 5</p>
+                            <h2 class="font-h2 text-h2">Πρώτη Πεντάδα</h2>
+                        </div>
+                    </div>
+                <div class="court rounded-2xl w-full" style="height:480px;" id="court-starting">
+                    <div class="court-centre-line"></div>
+                    <div class="court-centre-circle"></div>
+                    <div class="court-arc-top"></div>
+                    <div class="court-arc-bottom"></div>
+                    <div class="court-key-top"></div>
+                    <div class="court-key-bottom"></div>
+                </div>
+            </div>
+
+            <!-- COURT 2: Backup 5 -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Rotation</p>
+                        <h2 class="font-h2 text-h2">Δεύτερη Πεντάδα</h2>
+                    </div>
+                </div>
+                <div class="court rounded-2xl w-full" style="height:480px;" id="court-backup">
+                    <div class="court-centre-line"></div>
+                    <div class="court-centre-circle"></div>
+                    <div class="court-arc-top"></div>
+                    <div class="court-arc-bottom"></div>
+                    <div class="court-key-top"></div>
+                    <div class="court-key-bottom"></div>
+                </div>
+            </div>
+            </div>
+
+            <!-- BENCH LIST: Υπόλοιποι -->
+            <div>
+                <div class="mb-6">
+                    <p class="font-label text-label text-primary uppercase tracking-widest mb-1">Full Roster</p>
+                    <h2 class="font-h2 text-h2">Υπόλοιποι</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="squad-rest-basketball">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- TACTICAL ANALYSIS -->
+            <div id="analysis-container-basketball" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-8 mt-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">analytics</span>
+                    <h2 class="font-h2 text-h2">Τακτική Ανάλυση &amp; ΡΟΣΤΕΡ</h2>
+                </div>
+                <div id="analysis-text-basketball" class="text-on-surface-variant leading-relaxed font-body text-base space-y-4">
+                    <!-- Dynamically loaded -->
+                </div>
+            </div>
+
+            <!-- Basketball Comments Widget -->
+            <div id="basketball-comments-container" class="mt-12 pt-8 border-t border-outline-variant/30"></div>
+        </div>
+
+        <!-- ═══ MORE NEWS ═══ -->
+        <div id="more-news-section" class="max-w-[1440px] mx-auto px-8 py-12 hidden border-t border-outline-variant/30 mt-12">
+            <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="more-news-grid"></div>
+        </div>
+    </main>
+
+        <!-- Footer -->
+    <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant">
+        <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col items-center gap-8">
+            <a href="/" class="flex items-center">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-[64px] sm:h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+            </a>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/privacy-policy">Πολιτική Απορρήτου</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/terms-of-service">Όροι Χρήσης</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/contact">Επικοινωνία</a>
+            </div>
+            <p class="font-caption text-caption text-on-surface-variant/70">© 2026 PanathinaikosNews. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+
+        function toggleDrawer() {
+            const d = document.getElementById('nav-drawer');
+            const o = document.getElementById('drawer-overlay');
+            d.classList.toggle('-translate-x-full');
+            o.classList.toggle('opacity-0');
+            o.classList.toggle('pointer-events-none');
+        }
+        window.toggleDrawer = toggleDrawer;
+
+        // ─────────────────────────────────────────────────────────────────
+        // FOOTBALL DATA
+        // ─────────────────────────────────────────────────────────────────
+        const footballStarting = [
+            // Formation 4-3-3 (top = GK, bottom = FW)
+            // [left%, top%, initials, name, number, pos]
+            [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1, 'GK'],
+
+            [15, 68, 'ΒΑ', 'Βαγιαννίδης', 2, 'RB'],
+            [38, 70, 'ΜΣ', 'Μαξίμοβιτς', 5, 'CB'],
+            [62, 70, 'ΤΟ', 'Τόμας', 4, 'CB'],
+            [85, 68, 'ΡΩΑ', 'Ρουά', 3, 'LB'],
+
+            [25, 48, 'ΝΤΡ', 'Ντρ. Σκι', 8, 'CM'],
+            [50, 44, 'ΓΡΑ', 'Γκρέι', 6, 'CM'],
+            [75, 48, 'ΘΟΥ', 'Θορ', 10, 'CAM'],
+
+            [18, 22, 'ΤΕΤ', 'Τετέ', 7, 'RW'],
+            [50, 18, 'ΙΩΑ', 'Ιωαννίδης', 9, 'ST'],
+            [82, 22, 'ΠΕΛ', 'Πελίστρι', 11, 'LW'],
+        ];
+
+        const footballBench = [
+            // Formation 4-3-3 on a smaller pitch
+            [50, 88, 'ΒΡΑ', 'Βρατσάνος', 23, 'GK'],
+
+            [15, 68, 'ΓΙΕ', 'Γιεντβάι', 14, 'RB'],
+            [38, 70, 'ΑΝΔ', 'Ανδρέ', 16, 'CB'],
+            [62, 70, 'ΛΩΡ', 'Λόρδος', 22, 'CB'],
+            [85, 68, 'ΚΟΡ', 'Κόρμπο', 3, 'LB'],
+
+            [25, 48, 'ΤΖΑ', 'Τζαβέλας', 18, 'CM'],
+            [50, 44, 'ΧΑΡ', 'Χαρίσης', 19, 'CM'],
+            [75, 48, 'ΜΠΑ', 'Μπαλόγκ', 17, 'CM'],
+
+            [18, 22, 'ΠΑΛ', 'Παλμέρι', 15, 'RW'],
+            [50, 18, 'ΟΑΔ', 'Οάδες', 20, 'ST'],
+            [82, 22, 'ΙΝΓ', 'Ίνγκασον', 21, 'LW'],
+        ];
+
+        const footballRest = [
+            { initials:'ΑΛΕ', name:'Αλεξανδρόπουλος', num:24, pos:'GK', detail:'3ος Τερματοφύλακας' },
+            { initials:'ΜΠΙ', name:'Μπίλε', num:25, pos:'CB', detail:'Ελεύθερος Ροφ' },
+            { initials:'ΣΑΝ', name:'Σάντσεζ', num:26, pos:'RB', detail:'Νεαρό Ταλέντο' },
+            { initials:'ΚΑΡ', name:'Καρβαλιό', num:27, pos:'CAM', detail:'Ερασιτεχνική Τμήμα' },
+            { initials:'ΔΗΜ', name:'Δημητρίου', num:28, pos:'LW', detail:'U21' },
+            { initials:'ΠΑΠ', name:'Παπαδόπουλος', num:29, pos:'CM', detail:'Academy' },
+        ];
+
+        // ─────────────────────────────────────────────────────────────────
+        // BASKETBALL DATA
+        // ─────────────────────────────────────────────────────────────────
+        const basketballStarting = [
+            [50, 82, 'ΣΛ', 'Σλούκας', 10, 'PG'],
+            [20, 65, 'ΛΟΥ', 'Λούντζης', 0, 'SG'],
+            [80, 65, 'ΗΛ', 'Ηλιόπουλος', 77, 'SF'],
+            [30, 38, 'ΠΑΠ', 'Παπαπέτρου', 21, 'PF'],
+            [70, 38, 'ΜΙΤ', 'Μιτόγλου', 44, 'C'],
+        ];
+
+        const basketballBackup = [
+            [50, 80, 'ΛΑΡ', 'Λαρεντζάκης', 5, 'PG'],
+            [20, 60, 'ΒΟΥ', 'Βουγιούκας', 14, 'SG'],
+            [80, 60, 'ΠΑΛ', 'Παλμέρ', 22, 'SF'],
+            [35, 35, 'ΓΙΑ', 'Γιαννόπουλος', 8, 'PF'],
+            [65, 35, 'ΟΑΥ', 'Ουάιτ', 30, 'C'],
+        ];
+
+        const basketballRest = [
+            { initials:'ΔΑΡ', name:'Δάρα', pos:'C', detail:'Βαθιά Ρότα' },
+            { initials:'ΠΑΠ', name:'Παπαγεωργίου', pos:'PG', detail:'Academy' },
+            { initials:'ΤΣΑ', name:'Τσαϊρέλης', pos:'SF', detail:'Two-Way' },
+            { initials:'ΑΓΓ', name:'Αγγελόπουλος', pos:'SG', detail:'U22' },
+        ];
+
+        // ─────────────────────────────────────────────────────────────────
+        // RENDER HELPERS
+        // ─────────────────────────────────────────────────────────────────
+        function renderPitchPlayers(containerId, players) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            // Remove old tokens
+            container.querySelectorAll('.player-token').forEach(el => el.remove());
+            players.forEach(([left, top, initials, name, num, pos]) => {
+                const token = document.createElement('div');
+                token.className = 'player-token';
+                token.style.left = left + '%';
+                token.style.top = top + '%';
+                token.innerHTML = `
+                    <div class="avatar" style="position:relative;">
+                        ${num}
+                        <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
+                    </div>
+                    <div class="name-tag">${name}</div>`;
+                container.appendChild(token);
+            });
+        }
+
+        function renderCourtPlayers(containerId, players) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.querySelectorAll('.bball-token').forEach(el => el.remove());
+            players.forEach((player, index) => {
+                const left = player[0];
+                const top = player[1];
+                const initials = player[2];
+                const name = player[3];
+                let num, pos;
+                if (player.length >= 6) {
+                    num = (player[4] !== undefined && player[4] !== '') ? player[4] : (index + 1);
+                    pos = player[5] || '';
+                } else {
+                    const val = player[4];
+                    if (val !== undefined && val !== '' && !isNaN(val)) {
+                        num = val;
+                        pos = player[5] || '';
+                    } else {
+                        num = index + 1;
+                        pos = val || '';
+                    }
+                }
+                const token = document.createElement('div');
+                token.className = 'bball-token';
+                token.style.left = left + '%';
+                token.style.top = top + '%';
+                token.innerHTML = `
+                    <div class="avatar" style="position:relative;">
+                        ${num}
+                        <div class="pos-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos}</div>
+                    </div>
+                    <div class="name-tag">${name}</div>`;
+                container.appendChild(token);
+            });
+        }
+
+        function renderSquadList(containerId, players) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = players.map(p => `
+            <div class="card-hover flex items-center gap-3 p-2.5 bg-surface-container rounded-xl border border-outline-variant/20">
+                <div class="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary shrink-0 text-xs">${p.initials}</div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm leading-tight">${p.name}</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5">${p.detail || p.pos}</p>
+                </div>
+                <span class="px-2 py-0.5 bg-surface-container-high rounded-full text-[10px] font-medium text-on-surface-variant uppercase">${p.pos || p.num || ''}</span>
+            </div>`).join('');
+        }
+
+
+        // ─────────────────────────────────────────────────────────────────
+        // INIT & DYNAMIC SUPABASE LOADING
+        // ─────────────────────────────────────────────────────────────────
+        
+        
+        function greekToLatin(text) {
+            if (!text) return "";
+            let str = text.toLowerCase();
+            str = str
+                .replace(/αι|αί/g, 'ai')
+                .replace(/ει|εί/g, 'ei')
+                .replace(/οι|οί/g, 'oi')
+                .replace(/ου|ού/g, 'ou')
+                .replace(/αυ|αύ/g, 'av')
+                .replace(/ευ|εύ/g, 'ev')
+                .replace(/μπ/g, 'b')
+                .replace(/ντ/g, 'nt')
+                .replace(/γκ/g, 'gk')
+                .replace(/γγ/g, 'ng')
+                .replace(/τζ/g, 'tz')
+                .replace(/τσ/g, 'ts')
+                .replace(/θ/g, 'th')
+                .replace(/χ/g, 'ch')
+                .replace(/ψ/g, 'ps')
+                .replace(/ξ/g, 'x');
+
+            const singleMap = {
+                'α': 'a', 'ά': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'έ': 'e',
+                'ζ': 'z', 'η': 'i', 'ή': 'i', 'ι': 'i', 'ί': 'i', 'ϊ': 'i', 'ΐ': 'i',
+                'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ο': 'o', 'ό': 'o', 'π': 'p',
+                'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'ύ': 'y', 'ϋ': 'y',
+                'ΰ': 'y', 'φ': 'f', 'ω': 'o', 'ώ': 'o'
+            };
+
+            let res = '';
+            for (let i = 0; i < str.length; i++) {
+                const c = str[i];
+                res += singleMap[c] !== undefined ? singleMap[c] : c;
+            }
+            return res;
+        }
+
+        function slugify(text) {
+            if (!text) return "arthro";
+            try {
+                let latin = greekToLatin(text);
+                let slug = latin
+                    .toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]+/g, '')
+                    .replace(/--+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '');
+                    
+                if (slug.length > 35) {
+                    const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+                    slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
+                }
+                return slug || "arthro";
+            } catch(e) {
+                return "arthro";
+            }
+        }
+
+        function getCategoryCleanName(category) {
+            const cat = (category || '').toLowerCase();
+            if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
+            if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
+            if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitexnis';
+            if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
+            return 'pao';
+        }
+
+        function formatExactDate(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} - ${hours}:${minutes}`;
+        }
+
+        let streamPage = 1;
+        let streamHasMore = true;
+        let isFetchingMore = false;
+
+        async function fetchMoreRosterNews() {
+            if (isFetchingMore || !streamHasMore) return;
+            isFetchingMore = true;
+            const sentinel = document.getElementById('roster-sentinel');
+            try {
+                const res = await fetch(`/api/articles?page=${streamPage}`);
+                const data = await res.json();
+                const articles = Array.isArray(data) ? data : (data.articles || []);
+                if (articles && articles.length > 0) {
+                    const section = document.getElementById('more-news-section');
+                    const grid = document.getElementById('more-news-grid');
+                    const html = articles.map(a => {
+                        const date = formatExactDate(a.created_at);
+                        const catClean = getCategoryCleanName(a.category);
+                        const slug = slugify(a.title);
+                        const url = `/${catClean}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                        const img = a.image_url || '/logo.png';
+                        return `
+                        <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                            <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                                <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.src='/logo.png'"/>
+                            </div>
+                            <div class="p-5 flex flex-col flex-1">
+                                <span class="font-label text-label text-primary uppercase mb-1 text-xs font-semibold">${date}</span>
+                                <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors text-sm sm:text-base font-bold line-clamp-2">${a.title}</h3>
+                            </div>
+                        </a>`;
+                    }).join('');
+                    grid.insertAdjacentHTML('beforeend', html);
+                    section.classList.remove('hidden');
+                    streamPage++;
+                }
+                if (!articles || articles.length < 5) {
+                    streamHasMore = false;
+                    if (sentinel) sentinel.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Error fetching more news:', err);
+            } finally {
+                isFetchingMore = false;
+            }
+        }
+
+        function initMoreNewsScroll() {
+            // 1. Inject sentinel into DOM FIRST (before first fetch)
+            const moreNewsSection = document.getElementById('more-news-section');
+            moreNewsSection.insertAdjacentHTML('afterend',
+                `<div id="roster-sentinel" class="w-full flex justify-center py-10">
+                    <div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                </div>`
+            );
+
+            const sentinel = document.getElementById('roster-sentinel');
+
+            // 2. Observe sentinel immediately — fetch triggers when it enters viewport
+            const observer = new IntersectionObserver(async entries => {
+                if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
+                    await fetchMoreRosterNews();
+                }
+            }, { rootMargin: '100px' }); // start loading 300px before user reaches bottom
+
+            observer.observe(sentinel);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Scroll active tab into view horizontally
+            const el = document.getElementById('tab-roster');
+            if (el && el.parentElement) {
+                const container = el.parentElement;
+                requestAnimationFrame(() => {
+                    const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
+                    container.scrollTo({ left: scrollLeft });
+                });
+            }
+
+            // Load Supabase script dynamically
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = () => {
+                const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                loadDynamicRoster(db);
+                // Load "Περισσότερες Ειδήσεις" independently — no category filter needed
+                initMoreNewsScroll();
+            };
+            script.onerror = () => {
+                // If script fails to load, render fallbacks immediately
+                renderPitchPlayers('pitch-starting', footballStarting);
+                renderPitchPlayers('pitch-bench', footballBench);
+                renderSquadList('squad-rest-football', footballRest);
+                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
+
+                renderCourtPlayers('court-starting', basketballStarting);
+                renderCourtPlayers('court-backup', basketballBackup);
+                renderSquadList('squad-rest-basketball', basketballRest);
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                // Still try to load news even without Supabase CDN
+                initMoreNewsScroll();
+            };
+            document.head.appendChild(script);
+        });
+
+        async function loadDynamicRoster(db) {
+            try {
+                // Fetch Football Roster
+                const { data: fData } = await db.from('articles')
+                    .select('*')
+                    .eq('source_url', 'opinion://system-roster-football')
+                    .maybeSingle();
+
+                if (fData && fData.bullets && fData.bullets.length >= 3) {
+                    const starting = JSON.parse(fData.bullets[0]);
+                    const bench = JSON.parse(fData.bullets[1]);
+                    const rest = JSON.parse(fData.bullets[2]);
+                    const analysis = fData.content || '';
+
+                    window.liveFootballStarting = starting;
+                    window.liveFootballBench = bench;
+                    window.liveFootballRest = rest;
+
+                    renderPitchPlayers('pitch-starting', starting);
+                    renderPitchPlayers('pitch-bench', bench);
+                    renderSquadList('squad-rest-football', rest);
+                    const elFootballContainer = document.getElementById('analysis-container-football');
+                    if (analysis.trim() !== '') {
+                        document.getElementById('analysis-text-football').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                        if (elFootballContainer) elFootballContainer.style.display = 'block';
+                    } else {
+                        if (elFootballContainer) elFootballContainer.style.display = 'none';
+                    }
+                } else {
+                    window.liveFootballStarting = footballStarting;
+                    window.liveFootballBench = footballBench;
+                    window.liveFootballRest = footballRest;
+
+                    renderPitchPlayers('pitch-starting', footballStarting);
+                    renderPitchPlayers('pitch-bench', footballBench);
+                    renderSquadList('squad-rest-football', footballRest);
+                    document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
+                }
+
+                // Fetch Basketball Roster
+                const { data: bData } = await db.from('articles')
+                    .select('*')
+                    .eq('source_url', 'opinion://system-roster-basketball')
+                    .maybeSingle();
+
+                if (bData && bData.bullets && bData.bullets.length >= 3) {
+                    const starting = JSON.parse(bData.bullets[0]);
+                    const backup = JSON.parse(bData.bullets[1]);
+                    const rest = JSON.parse(bData.bullets[2]);
+                    const analysis = bData.content || '';
+
+                    window.liveBasketballStarting = starting;
+                    window.liveBasketballBackup = backup;
+                    window.liveBasketballRest = rest;
+
+                    renderCourtPlayers('court-starting', starting);
+                    renderCourtPlayers('court-backup', backup);
+                    renderSquadList('squad-rest-basketball', rest);
+                    const elBasketballContainer = document.getElementById('analysis-container-basketball');
+                    if (analysis.trim() !== '') {
+                        document.getElementById('analysis-text-basketball').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                        if (elBasketballContainer) elBasketballContainer.style.display = 'block';
+                    } else {
+                        if (elBasketballContainer) elBasketballContainer.style.display = 'none';
+                    }
+                } else {
+                    window.liveBasketballStarting = basketballStarting;
+                    window.liveBasketballBackup = basketballBackup;
+                    window.liveBasketballRest = basketballRest;
+
+                    renderCourtPlayers('court-starting', basketballStarting);
+                    renderCourtPlayers('court-backup', basketballBackup);
+                    renderSquadList('squad-rest-basketball', basketballRest);
+                    document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                }
+
+                if (fData && fData.id) {
+                    initRosterComments('football', fData.id);
+                }
+                if (bData && bData.id) {
+                    initRosterComments('basketball', bData.id);
+                }
+
+            } catch (err) {
+                console.error('Error loading dynamic roster:', err);
+                window.liveFootballStarting = footballStarting;
+                window.liveFootballBench = footballBench;
+                window.liveFootballRest = footballRest;
+                window.liveBasketballStarting = basketballStarting;
+                window.liveBasketballBackup = basketballBackup;
+                window.liveBasketballRest = basketballRest;
+
+                renderPitchPlayers('pitch-starting', footballStarting);
+                renderPitchPlayers('pitch-bench', footballBench);
+                renderSquadList('squad-rest-football', footballRest);
+                document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή.</p>';
+                
+                renderCourtPlayers('court-starting', basketballStarting);
+                renderCourtPlayers('court-backup', basketballBackup);
+                renderSquadList('squad-rest-basketball', basketballRest);
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη.</p>';
+            }
+        }
+
+        // ── Roster Comments Controller ────────────────────
+        function isAdmin() {
+            const authed = sessionStorage.getItem('op_auth') === '1';
+            if (authed) {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+            }
+            return authed;
+        }
+        document.addEventListener('DOMContentLoaded', () => { isAdmin(); });
+
+        async function initRosterComments(sport, articleId) {
+            const container = document.getElementById(`${sport}-comments-container`);
+            if (!container || !articleId) return;
+
+            const adminActive = isAdmin();
+            const ctaTitle = sport === 'football' ? '⚽ Φτιάξε τη δική σου 11άδα' : '🏀 Φτιάξε τη δική σου 5άδα';
+            const ctaBtnText = sport === 'football' ? 'Έναρξη 11άδας' : 'Έναρξη 5άδας';
+
+            const nameFieldHtml = adminActive ? `
+                <div class="flex items-center gap-2.5 p-3.5 bg-primary/10 border border-primary/30 rounded-xl text-primary font-bold text-sm">
+                    <span class="material-symbols-outlined text-[20px] text-primary">verified</span>
+                    <span>Απάντηση ως: <strong class="text-on-surface font-extrabold">PanathinaikosNews (Διαχειριστής)</strong></span>
+                    <input type="hidden" id="${sport}-comment-user-name" value="PanathinaikosNews">
+                </div>
+            ` : `
+                <div>
+                    <label for="${sport}-comment-user-name" class="text-xs font-bold text-on-surface-variant block mb-1">Όνομα / Ψευδώνυμο</label>
+                    <input type="text" id="${sport}-comment-user-name" placeholder="Όνομα" required maxlength="50" class="w-full bg-background border border-outline-variant rounded-xl p-3 text-sm focus:outline-none focus:border-primary/50 text-on-surface">
+                </div>
+            `;
+
+            container.innerHTML = `
+            <div class="mt-8">
+                <!-- Lineup Studio CTA Banner -->
+                <div class="mb-8 p-6 bg-gradient-to-r from-primary/20 via-surface-container-high to-surface-container rounded-2xl border border-primary/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-1 text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-[11px] font-extrabold uppercase tracking-wider">Διαδραστικο Εργαλειο</span>
+                            <span class="text-xs text-on-surface-variant/70 font-semibold">11άδα Φιλάθλων</span>
+                        </div>
+                        <h4 class="text-lg md:text-xl font-extrabold text-on-surface flex items-center justify-center md:justify-start gap-2">
+                            <span>${ctaTitle}</span>
+                        </h4>
+                        <p class="text-xs text-on-surface-variant max-w-lg">Μετακίνησε παίκτες μεταξύ Βασικών, Πάγκου & Εκτός Αποστολής και μοιράσου το τακτικό σου πλάνο στα σχόλια!</p>
+                    </div>
+                    <button onclick="openLineupStudio('${sport}', '${articleId}')" class="px-6 py-3.5 bg-primary text-on-primary font-extrabold rounded-xl text-sm shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 shrink-0 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">tune</span>
+                        <span>${ctaBtnText}</span>
+                    </button>
+                </div>
+
+                <h3 class="font-h3 text-h3 text-on-surface mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 28px;">forum</span>
+                    <span>Σχόλια (<span id="${sport}-comments-total-count">0</span>)</span>
+                </h3>
+
+                <div id="${sport}-comments-toast" class="hidden p-4 mb-4 rounded-xl border bg-error-container text-on-error-container border-error/20 text-sm font-semibold transition-all"></div>
+
+                <div id="${sport}-comments-list-box" class="space-y-4 max-h-[600px] md:max-h-[1000px] overflow-y-auto mb-8 pr-2 hidden" style="scrollbar-width:thin;">
+                </div>
+                
+                <form id="${sport}-comment-form" class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 space-y-4">
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+                        <span>${adminActive ? 'Απαντηση Διαχειριστη' : 'Προσθηκη Σχολιου'}</span>
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${nameFieldHtml}
+                    </div>
+                    <div>
+                        <label for="${sport}-comment-text" class="text-xs font-bold text-on-surface-variant block mb-1">Το σχόλιό σας</label>
+                        <textarea id="${sport}-comment-text" rows="4" placeholder="${adminActive ? 'Γράψτε την επίσημη απάντηση της ομάδας PanathinaikosNews...' : 'Γράψτε ένα κόσμιο σχόλιο...'}" required maxlength="1000" class="w-full bg-background border border-outline-variant rounded-xl p-3 text-sm focus:outline-none focus:border-primary/50 text-on-surface resize-none"></textarea>
+                    </div>
+                    <button type="submit" id="${sport}-submit-comment-btn" class="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl text-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
+                        <span class="material-symbols-outlined text-[16px]">send</span>
+                        <span>${adminActive ? 'Δημοσίευση Απάντησης' : 'Υποβολή Σχολίου'}</span>
+                    </button>
+                </form>
+            </div>`;
+
+            const form = document.getElementById(`${sport}-comment-form`);
+            if (form) {
+                form.addEventListener('submit', (e) => handleRosterCommentSubmit(e, sport, articleId));
+            }
+
+            // Expose delete functions globally so that they work in inline onclick
+            window[`deleteRosterComment_${sport}`] = (id, event) => deleteRosterComment(id, event, sport, articleId);
+
+            await loadRosterComments(sport, articleId);
+        }
+
+        async function loadRosterComments(sport, articleId) {
+            const listBox = document.getElementById(`${sport}-comments-list-box`);
+            const totalCountSpan = document.getElementById(`${sport}-comments-total-count`);
+            if (!listBox) return;
+
+            try {
+                const res = await fetch(`/api/comments?article_id=${articleId}`);
+                if (res.ok) {
+                    const comments = await res.json();
+                    
+                    if (totalCountSpan) {
+                        totalCountSpan.textContent = comments.length;
+                    }
+
+                    if (comments.length === 0) {
+                        listBox.classList.add('hidden');
+                        listBox.innerHTML = '';
+                        return;
+                    }
+
+                    listBox.classList.remove('hidden');
+                    listBox.innerHTML = comments.map(c => {
+                        const date = new Date(c.created_at);
+                        const dateStr = date.toLocaleDateString('el-GR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+                        const deleteBtn = isAdmin() 
+                            ? `<button onclick="window['deleteRosterComment_${sport}']('${c.id}', event)" class="text-on-surface-variant/40 hover:text-error hover:bg-error/10 p-1.5 rounded-lg transition-all" title="Διαγραφή">
+                                   <span class="material-symbols-outlined text-[16px]">delete</span>
+                               </button>` 
+                            : '';
+
+                        const isCardAdmin = c.is_admin === true || c.user_name === 'PanathinaikosNews' || (c.user_name || '').toLowerCase() === 'panathinaikos news';
+
+                        // Parse optional user lineup data
+                        const lineupMatch = (c.comment_text || '').match(/\[LINEUP_DATA\]([\s\S]*?)\[\/LINEUP_DATA\]/);
+                        const cleanCommentText = (c.comment_text || '').replace(/\[LINEUP_DATA\][\s\S]*?\[\/LINEUP_DATA\]/, '').trim();
+
+                        let lineupBtnHtml = '';
+                        if (lineupMatch) {
+                            try {
+                                const parsedLineup = JSON.parse(lineupMatch[1]);
+                                window.userLineupsMap = window.userLineupsMap || {};
+                                window.userLineupsMap[c.id] = {
+                                    sport: parsedLineup.sport || sport,
+                                    name: c.user_name,
+                                    date: dateStr,
+                                    lineup: parsedLineup
+                                };
+
+                                const badgeTitle = sport === 'football' ? '11άδα Φιλάθλου' : '5άδα Φιλάθλου';
+                                const badgeIcon = sport === 'football' ? 'sports_soccer' : 'sports_basketball';
+
+                                lineupBtnHtml = `
+                                <div class="mt-3 pt-3 border-t border-outline-variant/20 flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/40 text-[11px] font-extrabold uppercase shadow-sm">
+                                        <span class="material-symbols-outlined text-[14px]">${badgeIcon}</span>
+                                        <span>${badgeTitle}</span>
+                                    </span>
+                                    <button onclick="openViewUserLineupModal('${c.id}')" class="px-3.5 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/40 text-primary text-xs font-extrabold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95">
+                                        <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                        <span>Δες την ομάδα</span>
+                                    </button>
+                                </div>`;
+                            } catch (_) {}
+                        }
+
+                        if (isCardAdmin) {
+                            return `
+                            <div class="bg-primary/10 border border-primary/30 shadow-md rounded-2xl p-5 flex gap-4 items-start relative overflow-hidden">
+                                <div class="w-10 h-10 rounded-full bg-primary text-on-primary font-bold flex items-center justify-center shrink-0 shadow-md border border-primary/40">
+                                    <span class="material-symbols-outlined text-[20px]">verified</span>
+                                </div>
+                                <div class="flex-1 min-w-0 z-10">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="font-bold text-sm text-primary flex items-center gap-1.5">
+                                                PanathinaikosNews
+                                                <span class="bg-primary/20 text-primary border border-primary/40 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[12px]">verified</span> ΔΙΑΧΕΙΡΙΣΤΗΣ
+                                                </span>
+                                            </span>
+                                            <span class="text-[11px] text-on-surface-variant/60">${dateStr}</span>
+                                        </div>
+                                        ${deleteBtn}
+                                    </div>
+                                    <p class="text-sm text-on-surface leading-relaxed mt-2.5 whitespace-pre-wrap font-medium">${cleanCommentText}</p>
+                                    ${lineupBtnHtml}
+                                </div>
+                            </div>`;
+                        }
+
+                        return `
+                        <div class="bg-surface-container/30 border border-outline-variant/10 rounded-2xl p-5 flex gap-4 items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold uppercase shrink-0">
+                                ${c.user_name.substring(0,2)}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-bold text-sm text-on-surface">${c.user_name}</span>
+                                        <span class="text-[11px] text-on-surface-variant/60">${dateStr}</span>
+                                    </div>
+                                    ${deleteBtn}
+                                </div>
+                                <p class="text-sm text-on-surface-variant leading-relaxed mt-2 whitespace-pre-wrap">${cleanCommentText}</p>
+                                ${lineupBtnHtml}
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            } catch(e) {
+                console.error('[Load comments failed]', e);
+            }
+        }
+
+        async function handleRosterCommentSubmit(event, sport, articleId) {
+            event.preventDefault();
+            const submitBtn = document.getElementById(`${sport}-submit-comment-btn`);
+            const toast = document.getElementById(`${sport}-comments-toast`);
+            
+            const nameEl = document.getElementById(`${sport}-comment-user-name`);
+            const textEl = document.getElementById(`${sport}-comment-text`);
+            if (!nameEl || !textEl || !articleId) return;
+
+            const adminActive = isAdmin();
+            const name = adminActive ? 'PanathinaikosNews' : nameEl.value.trim();
+            const text = textEl.value.trim();
+
+            if (toast) {
+                toast.classList.add('hidden');
+                toast.textContent = '';
+            }
+
+            function showToast(msg) {
+                if (toast) {
+                    toast.textContent = msg;
+                    toast.classList.remove('hidden');
+                    toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // --- Client-side Rate Limit Control (Bypassed for Admin) ---
+            const rateLimitKey = `rate_limit_comments_${articleId}`;
+            let rateData = { count: 0, firstSubmittedAt: null };
+            try {
+                const raw = localStorage.getItem(rateLimitKey);
+                if (raw) {
+                    rateData = JSON.parse(raw);
+                }
+            } catch (e) {}
+
+            const now = Date.now();
+            const fifteenMinsMs = 15 * 60 * 1000;
+
+            if (!adminActive) {
+                if (rateData.firstSubmittedAt && (now - rateData.firstSubmittedAt < fifteenMinsMs)) {
+                    if (rateData.count >= 2) {
+                        const remainingMs = fifteenMinsMs - (now - rateData.firstSubmittedAt);
+                        const remainingMins = Math.ceil(remainingMs / (60 * 1000));
+                        showToast(`Έχετε φτάσει το όριο των 2 σχολίων. Παρακαλώ περιμένετε ${remainingMins} λεπτά προτού ξανασχολιάσετε.`);
+                        return;
+                    }
+                } else {
+                    rateData.count = 0;
+                    rateData.firstSubmittedAt = null;
+                }
+
+                const hasLink = /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(text) ||
+                                /https?:\/\/|www\.|[a-zA-Z0-9-]+\.(com|gr|net|org|info|edu|gov|eu|club|xyz|site)/i.test(name);
+                if (hasLink) {
+                    showToast('Δεν επιτρέπονται σύνδεσμοι (links) στα σχόλια.');
+                    return;
+                }
+
+                const curseWords = [
+                    'μαλακ', 'πουστ', 'γαμησ', 'γαμω', 'γαμι', 'μουνι', 'μουνια', 'πουτανα', 'κωλο',
+                    'σκατα', 'fucking', 'fuck', 'bitch', 'asshole', 'shit', 'pussy', 'cunt', 'γαμημενη',
+                    'γαμημενο', 'γαμιολη', 'ξεκωλο', 'παπαρα', 'παπαρια', 'αρχιδια', 'αρχιδι'
+                ];
+                const lowerText = text.toLowerCase();
+                const lowerName = name.toLowerCase();
+                if (curseWords.some(w => lowerText.includes(w)) || curseWords.some(w => lowerName.includes(w))) {
+                    showToast('Το σχόλιό σας περιέχει ανάρμοστο λεξιλόγιο.');
+                    return;
+                }
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<span class="animate-spin rounded-full h-4 w-4 border-2 border-on-primary border-t-transparent"></span> <span>Αποστολή...</span>`;
+            }
+
+            try {
+                const payload = {
+                    article_id: articleId,
+                    user_name: name,
+                    comment_text: text
+                };
+
+                if (adminActive) {
+                    payload.admin_token = 'admin_secure_session';
+                    payload.is_admin = true;
+                }
+
+                const res = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    textEl.value = '';
+                    
+                    if (!adminActive) {
+                        if (rateData.count === 0) {
+                            rateData.firstSubmittedAt = now;
+                        }
+                        rateData.count += 1;
+                        try {
+                            localStorage.setItem(rateLimitKey, JSON.stringify(rateData));
+                        } catch (e) {}
+                    }
+
+                    await loadRosterComments(sport, articleId);
+                } else {
+                    const errData = await res.json();
+                    showToast(errData.error || 'Αποτυχία υποβολής σχολίου.');
+                }
+            } catch(e) {
+                showToast('Σφάλμα σύνδεσης. Δοκιμάστε ξανά.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">send</span> <span>Υποβολή Σχολίου</span>`;
+                }
+            }
+        }
+
+        async function deleteRosterComment(id, event, sport, articleId) {
+            if (event) event.stopPropagation();
+            if (!confirm('Θέλετε σίγουρα να διαγράψετε αυτό το σχόλιο;')) return;
+
+            try {
+                const res = await fetch('/api/comments', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, token: 'admin_secure_session' })
+                });
+                if (res.ok) {
+                    await loadRosterComments(sport, articleId);
+                } else {
+                    alert('Σφάλμα κατά τη διαγραφή.');
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Σφάλμα σύνδεσης.');
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // SPORT SWITCHER
+        // ─────────────────────────────────────────────────────────────────
+        function switchSport(sport) {
+            const isFootball = sport === 'football';
+            document.getElementById('view-football').classList.toggle('hidden', !isFootball);
+            document.getElementById('view-basketball').classList.toggle('hidden', isFootball);
+
+            document.getElementById('tab-football').className = isFootball
+                ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all'
+                : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
+            document.getElementById('tab-basketball').className = !isFootball
+                ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all'
+                : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
+        }
+        window.switchSport = switchSport;
+
+        // ─────────────────────────────────────────────────────────────────
+        // INIT
+        // ─────────────────────────────────────────────────────────────────
+        // Initialization handled by Supabase loader above
+    })();
+    </script>
+<script>
+        function checkAdminNav() {
+            const el = document.getElementById('nav-item-fixtures');
+            if (el) el.classList.remove('hidden');
+            const tab = document.getElementById('tab-item-fixtures');
+            if (tab) tab.classList.remove('hidden');
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAdminNav);
+        } else {
+            checkAdminNav();
+        }
+</script>
+<script>
+(function() {
+    function showGoogleModal() {
+        let modal = document.getElementById('google-news-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'google-news-modal';
+            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 opacity-0 pointer-events-none transition-all duration-300';
+            modal.innerHTML = `
+                <div class="relative w-full max-w-[310px] sm:max-w-md bg-[#1e2022] border border-outline-variant/30 rounded-2xl p-5 sm:p-6 shadow-2xl transform scale-95 transition-all duration-300 text-center space-y-4">
+                    <div class="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#282a2d] border border-outline-variant/30 flex items-center justify-center shadow-inner">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="font-h3 text-lg sm:text-xl font-bold text-on-surface">Σύντομα διαθέσιμο στη Google!</h3>
+                    
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                        Καθώς το <strong class="text-primary font-semibold">PanathinaikosNews</strong> είναι νέο site, η διαδικασία καταχώρησης από τη Google βρίσκεται σε εξέλιξη.
+                        <br/><br/>
+                        Η δυνατότητα προσθήκης στις προτιμώμενες πηγές σας θα ενεργοποιηθεί αυτόματα σε λίγες ημέρες!
+                    </p>
+                    
+                    <button id="close-google-modal-btn" class="w-full py-2.5 px-4 bg-primary text-on-primary font-bold text-xs sm:text-sm rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer">
+                        Κατάλαβα
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function(evt) {
+                if (evt.target === modal || evt.target.id === 'close-google-modal-btn') {
+                    closeGoogleModal();
+                }
+            });
+        }
+        
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            if (modal.firstElementChild) {
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            }
+        });
+    }
+
+    function closeGoogleModal() {
+        const modal = document.getElementById('google-news-modal');
+        if (modal) {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            if (modal.firstElementChild) {
+                modal.firstElementChild.classList.remove('scale-100');
+                modal.firstElementChild.classList.add('scale-95');
+            }
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('a[href*="preferences/source"]');
+        if (btn) {
+            e.preventDefault();
+            showGoogleModal();
+        }
+    });
+})();
+</script>
+<script src="/roster_lineup.js?v=1"></script>
+</body>
+</html>
