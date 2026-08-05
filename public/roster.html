@@ -779,7 +779,7 @@
 
             const adminActive = isAdmin();
             const ctaTitle = sport === 'football' ? '⚽ Φτιάξε τη δική σου 11άδα' : '🏀 Φτιάξε τη δική σου 5άδα';
-            const ctaBtnText = sport === 'football' ? 'Έναρξη 11άδας' : 'Έναρξη 5άδας';
+            const ctaBtnText = sport === 'football' ? 'Δημιουργία 11άδας' : 'Δημιουργία 5άδας';
 
             const nameFieldHtml = adminActive ? `
                 <div class="flex items-center gap-2.5 p-3.5 bg-primary/10 border border-primary/30 rounded-xl text-primary font-bold text-sm">
@@ -799,14 +799,10 @@
                 <!-- Lineup Studio CTA Banner -->
                 <div class="mb-8 p-6 bg-gradient-to-r from-primary/20 via-surface-container-high to-surface-container rounded-2xl border border-primary/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="space-y-1 text-center md:text-left">
-                        <div class="flex items-center justify-center md:justify-start gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-[11px] font-extrabold uppercase tracking-wider">Διαδραστικο Εργαλειο</span>
-                            <span class="text-xs text-on-surface-variant/70 font-semibold">11άδα Φιλάθλων</span>
-                        </div>
                         <h4 class="text-lg md:text-xl font-extrabold text-on-surface flex items-center justify-center md:justify-start gap-2">
                             <span>${ctaTitle}</span>
                         </h4>
-                        <p class="text-xs text-on-surface-variant max-w-lg">Μετακίνησε παίκτες μεταξύ Βασικών, Πάγκου & Εκτός Αποστολής και μοιράσου το τακτικό σου πλάνο στα σχόλια!</p>
+                        <p class="text-xs text-on-surface-variant max-w-lg">Μετακίνησε παίκτες και μοιράσου το τακτικό σου πλάνο στα σχόλια!</p>
                     </div>
                     <button onclick="openLineupStudio('${sport}', '${articleId}')" class="px-6 py-3.5 bg-primary text-on-primary font-extrabold rounded-xl text-sm shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 shrink-0 cursor-pointer">
                         <span class="material-symbols-outlined text-[20px]">tune</span>

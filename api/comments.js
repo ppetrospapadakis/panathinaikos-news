@@ -86,8 +86,15 @@ module.exports = async (req, res) => {
                 }
             }
 
-            if (cleanText.length < 2 || cleanText.length > 1000) {
+            // Validate text written by the user excluding embedded LINEUP_DATA payload
+            const userWrittenText = cleanText.replace(/\[LINEUP_DATA\][\s\S]*?\[\/LINEUP_DATA\]/, '').trim();
+
+            if (userWrittenText.length < 2 || userWrittenText.length > 1000) {
                 return res.status(400).json({ error: 'Το σχόλιο πρέπει να είναι μεταξύ 2 και 1000 χαρακτήρων.' });
+            }
+
+            if (cleanText.length > 5000) {
+                return res.status(400).json({ error: 'Το συνολικό μέγεθος του σχολίου υπερβαίνει το όριο.' });
             }
 
             if (!isAdminPost) {

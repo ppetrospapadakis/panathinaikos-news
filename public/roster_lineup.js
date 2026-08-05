@@ -8,6 +8,7 @@
         rest: []
     };
     let selectedPlayerForSwap = null;
+    let isDraggingToken = null;
     window.userLineupsMap = {};
 
     // Helper: Clone roster array safely
@@ -53,7 +54,7 @@
         }
 
         const isFootball = activeSport === 'football';
-        const sportTitle = isFootball ? '⚽ Φτιάξε τη δική σου 11άδα' : '🏀 Φτιάξε τη δική σου 5άδα';
+        const sportTitle = isFootball ? '⚽ Δημιουργία 11άδας' : '🏀 Δημιουργία 5άδας';
         const isAuthedAdmin = sessionStorage.getItem('op_auth') === '1';
 
         modal.innerHTML = `
@@ -66,7 +67,7 @@
                     </div>
                     <div>
                         <h3 class="font-extrabold text-lg sm:text-xl text-on-surface">${sportTitle}</h3>
-                        <p class="text-xs text-on-surface-variant">Σύρε (Drag & Drop) ή πάτα παίκτες για αλλαγή θέσης μεταξύ Βασικών, Πάγκου & Εκτός Αποστολής!</p>
+                        <p class="text-xs text-on-surface-variant">Μετακίνησε παίκτες στο γήπεδο ή μεταξύ κατηγοριών και μοιράσου το τακτικό σου πλάνο στα σχόλια!</p>
                     </div>
                 </div>
                 <button onclick="closeLineupStudio()" class="w-9 h-9 rounded-full bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant flex items-center justify-center transition-all cursor-pointer shrink-0">
@@ -74,14 +75,15 @@
                 </button>
             </div>
 
-            <!-- Pitch / Court Interactive Preview -->
+            <!-- Pitch / Court Interactive Preview with Full Graphic Lines -->
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider">
-                    <span>Τακτικο Πλανο Βασικων</span>
+                    <span>Τακτικό Πλάνο Βασικών (Σύρε ή πάτα στο γήπεδο για αλλαγή θέσης)</span>
                     <span class="text-[11px] text-on-surface-variant/70 font-normal">(${activeRosterState.starting.length} Παίκτες)</span>
                 </div>
-                <div class="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-surface-container-high rounded-2xl overflow-hidden border border-outline-variant/30 shadow-inner">
-                    ${renderStudioPitchHtml()}
+                <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" ondragover="studioPitchDragOver(event)" ondrop="studioPitchDrop(event)" onclick="handlePitchBackgroundClick(event)">
+                    ${renderStudioPitchLinesHtml(isFootball)}
+                    ${renderStudioPitchTokensHtml()}
                 </div>
             </div>
 
@@ -167,28 +169,49 @@
         </div>`;
     }
 
-    // Render interactive pitch layout for studio
-    function renderStudioPitchHtml() {
-        const isFootball = activeSport === 'football';
-        const bgStyle = isFootball
-            ? 'background: radial-gradient(circle, #1a3a2a 0%, #0d2016 100%);'
-            : 'background: radial-gradient(circle, #2d1f15 0%, #17100b 100%);';
+    // Render full pitch graphic lines inside studio modal
+    function renderStudioPitchLinesHtml(isFootball) {
+        if (isFootball) {
+            return `
+                <div class="pitch-centre-line"></div>
+                <div class="pitch-centre-circle"></div>
+                <div class="pitch-penalty-top"></div>
+                <div class="pitch-penalty-bottom"></div>
+                <div class="pitch-goal-top"></div>
+                <div class="pitch-goal-bottom"></div>`;
+        } else {
+            return `
+                <div class="court-centre-line"></div>
+                <div class="court-centre-circle"></div>
+                <div class="court-arc-top"></div>
+                <div class="court-arc-bottom"></div>
+                <div class="court-key-top"></div>
+                <div class="court-key-bottom"></div>`;
+        }
+    }
 
-        const tokensHtml = activeRosterState.starting.map(([left, top, initials, name, num, pos], idx) => {
+    // Render interactive player tokens on studio pitch
+    function renderStudioPitchTokensHtml() {
+        return activeRosterState.starting.map((item, idx) => {
+            let left, top, initials, name, num, pos;
+            if (Array.isArray(item)) {
+                left = item[0]; top = item[1]; initials = item[2]; name = item[3]; num = item[4]; pos = item[5] || initials;
+            } else {
+                left = item.left || 50; top = item.top || 50; initials = item.initials; name = item.name; num = item.num; pos = item.pos || initials;
+            }
+
             const isSelected = selectedPlayerForSwap && selectedPlayerForSwap.cat === 'starting' && selectedPlayerForSwap.idx === idx;
-            const borderClass = isSelected ? 'border-2 border-yellow-400 scale-110 shadow-yellow-500/50' : 'border border-primary/40';
+            const borderClass = isSelected ? 'border-2 border-yellow-400 scale-110 shadow-yellow-500/50' : 'border border-primary/40 hover:scale-105';
 
             return `
-            <div class="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 ${borderClass}" style="left:${left}%; top:${top}%; z-index:10;" onclick="handlePlayerTap('starting', ${idx})">
-                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow-md relative">
+            <div draggable="true" ondragstart="studioDragStart(event, 'starting', ${idx})" onclick="event.stopPropagation(); handlePlayerTap('starting', ${idx})" class="player-token cursor-grab active:cursor-grabbing transition-all duration-300 ${borderClass}" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
+                <div class="avatar relative">
                     ${num || idx + 1}
-                    <div class="absolute -top-1.5 -right-1.5 bg-background text-primary border border-primary/40 text-[9px] font-extrabold rounded-full px-1 py-0.2 min-w-[16px] text-center">${pos || initials}</div>
+                    <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
                 </div>
-                <div class="mt-1 bg-black/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap text-center shadow">${name}</div>
+                <div class="name-tag">${name}</div>
             </div>`;
         }).join('');
-
-        return `<div class="w-full h-full relative" style="${bgStyle}">${tokensHtml}</div>`;
     }
 
     // Render cards list inside a pool
@@ -220,6 +243,88 @@
         }).join('');
     }
 
+    // Handle pitch background click (moves selected player token to clicked spot)
+    window.handlePitchBackgroundClick = function(e) {
+        if (!selectedPlayerForSwap) return;
+        const pitchEl = document.getElementById('studio-pitch-container');
+        if (!pitchEl) return;
+
+        const rect = pitchEl.getBoundingClientRect();
+        const left = Math.min(92, Math.max(8, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+        const top = Math.min(92, Math.max(8, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
+
+        const { cat: srcCat, idx: srcIdx } = selectedPlayerForSwap;
+        if (srcCat === 'starting') {
+            // Reposition token on pitch
+            const item = activeRosterState.starting[srcIdx];
+            if (Array.isArray(item)) {
+                item[0] = left; item[1] = top;
+            } else {
+                item.left = left; item.top = top;
+            }
+        } else {
+            // Move player from bench/rest onto pitch at clicked position
+            const srcList = activeRosterState[srcCat];
+            const playerToMove = srcList[srcIdx];
+            if (playerToMove) {
+                srcList.splice(srcIdx, 1);
+                if (Array.isArray(playerToMove)) {
+                    playerToMove[0] = left; playerToMove[1] = top;
+                } else {
+                    playerToMove.left = left; playerToMove.top = top;
+                }
+                activeRosterState.starting.push(playerToMove);
+            }
+        }
+
+        selectedPlayerForSwap = null;
+        renderStudioModal();
+    };
+
+    // Pitch Drag & Drop handlers for free-positioning on pitch
+    window.studioPitchDragOver = function(e) {
+        e.preventDefault();
+    };
+
+    window.studioPitchDrop = function(e) {
+        e.preventDefault();
+        const pitchEl = document.getElementById('studio-pitch-container');
+        if (!pitchEl) return;
+
+        try {
+            const raw = e.dataTransfer.getData('text/plain');
+            if (!raw) return;
+            const { cat: srcCat, idx: srcIdx } = JSON.parse(raw);
+
+            const rect = pitchEl.getBoundingClientRect();
+            const left = Math.min(92, Math.max(8, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+            const top = Math.min(92, Math.max(8, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
+
+            if (srcCat === 'starting') {
+                const item = activeRosterState.starting[srcIdx];
+                if (Array.isArray(item)) {
+                    item[0] = left; item[1] = top;
+                } else {
+                    item.left = left; item.top = top;
+                }
+            } else {
+                const srcList = activeRosterState[srcCat];
+                const playerToMove = srcList[srcIdx];
+                if (playerToMove) {
+                    srcList.splice(srcIdx, 1);
+                    if (Array.isArray(playerToMove)) {
+                        playerToMove[0] = left; playerToMove[1] = top;
+                    } else {
+                        playerToMove.left = left; playerToMove.top = top;
+                    }
+                    activeRosterState.starting.push(playerToMove);
+                }
+            }
+            selectedPlayerForSwap = null;
+            renderStudioModal();
+        } catch (_) {}
+    };
+
     // Tap to Swap / Move Player
     window.handlePlayerTap = function(cat, idx) {
         if (!selectedPlayerForSwap) {
@@ -236,7 +341,7 @@
         renderStudioModal();
     };
 
-    // Drag & Drop event handlers
+    // Drag & Drop event handlers for pools
     window.studioDragStart = function(e, cat, idx) {
         e.dataTransfer.setData('text/plain', JSON.stringify({ cat, idx }));
     };
@@ -365,17 +470,13 @@
         const starting = lineup.starting || [];
         const bench = lineup.bench || [];
 
-        const bgStyle = isFootball
-            ? 'background: radial-gradient(circle, #1a3a2a 0%, #0d2016 100%);'
-            : 'background: radial-gradient(circle, #2d1f15 0%, #17100b 100%);';
-
         const pitchTokens = starting.map(([left, top, initials, name, num, pos], idx) => `
-            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:${left}%; top:${top}%; z-index:10;">
-                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow-md relative border border-primary/40">
+            <div class="player-token" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
+                <div class="avatar relative">
                     ${num || idx + 1}
-                    <div class="absolute -top-1.5 -right-1.5 bg-background text-primary border border-primary/40 text-[9px] font-extrabold rounded-full px-1 py-0.2 min-w-[16px] text-center">${pos || initials}</div>
+                    <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
                 </div>
-                <div class="mt-1 bg-black/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap text-center shadow">${name}</div>
+                <div class="name-tag">${name}</div>
             </div>
         `).join('');
 
@@ -387,6 +488,10 @@
                 <span class="text-primary font-mono">${num}</span> ${name}
             </span>`;
         }).join('');
+
+        const pitchLines = isFootball
+            ? `<div class="pitch-centre-line"></div><div class="pitch-centre-circle"></div><div class="pitch-penalty-top"></div><div class="pitch-penalty-bottom"></div><div class="pitch-goal-top"></div><div class="pitch-goal-bottom"></div>`
+            : `<div class="court-centre-line"></div><div class="court-centre-circle"></div><div class="court-arc-top"></div><div class="court-arc-bottom"></div><div class="court-key-top"></div><div class="court-key-bottom"></div>`;
 
         modal.innerHTML = `
         <div class="bg-surface-container border border-outline-variant/40 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
@@ -406,8 +511,9 @@
             </div>
 
             <!-- Pitch -->
-            <div class="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-surface-container-high rounded-2xl overflow-hidden border border-outline-variant/30 shadow-inner">
-                <div class="w-full h-full relative" style="${bgStyle}">${pitchTokens}</div>
+            <div class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:440px;">
+                ${pitchLines}
+                ${pitchTokens}
             </div>
 
             <!-- Bench -->
