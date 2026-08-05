@@ -42,10 +42,15 @@
         if (modal) modal.remove();
     };
 
-    // Render Studio Modal HTML
+    // Render Studio Modal HTML with scroll position preservation
     function renderStudioModal() {
         let modal = document.getElementById('lineup-studio-modal');
-        if (!modal) {
+        let currentScrollTop = 0;
+
+        if (modal) {
+            const innerBox = modal.querySelector('.overflow-y-auto') || modal;
+            if (innerBox) currentScrollTop = innerBox.scrollTop;
+        } else {
             modal = document.createElement('div');
             modal.id = 'lineup-studio-modal';
             modal.className = 'fixed inset-0 bg-black/85 z-[100] backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-fade-in';
@@ -53,7 +58,6 @@
         }
 
         const isFootball = activeSport === 'football';
-        const requiredCount = isFootball ? 11 : 5;
         const sportTitle = isFootball ? '⚽ Δημιουργία 11άδας' : '🏀 Δημιουργία 5άδας';
         const isAuthedAdmin = sessionStorage.getItem('op_auth') === '1';
 
@@ -67,7 +71,7 @@
                     </div>
                     <div>
                         <h3 class="font-extrabold text-lg sm:text-xl text-on-surface">${sportTitle}</h3>
-                        <p class="text-xs text-on-surface-variant">Πάτα ή σύρε 2 παίκτες για αντικατάσταση (swap) — Η βασική ομάδα διατηρεί πάντα ακριβώς ${requiredCount} παίκτες!</p>
+                        <p class="text-xs text-on-surface-variant">Πάτα ή σύρε 2 παίκτες για αντικατάσταση (swap)</p>
                     </div>
                 </div>
                 <button onclick="closeLineupStudio()" class="w-9 h-9 rounded-full bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant flex items-center justify-center transition-all cursor-pointer shrink-0">
@@ -78,7 +82,7 @@
             <!-- Pitch / Court Interactive Preview with Full Graphic Lines -->
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider">
-                    <span>Τακτικό Πλάνο Βασικών (${activeRosterState.starting.length}/${requiredCount})</span>
+                    <span>Τακτικό Πλάνο Βασικών</span>
                     <span class="text-[11px] text-on-surface-variant/70 font-normal">Πάτα παίκτη στο γήπεδο & μετά άλλον παίκτη για αντικατάσταση</span>
                 </div>
                 <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" ondragover="studioPitchDragOver(event)" ondrop="studioPitchDrop(event)" onclick="handlePitchBackgroundClick(event)">
@@ -87,7 +91,7 @@
                 </div>
             </div>
 
-            <!-- 3 Categorized Pools (Strict Swap-Only) -->
+            <!-- 3 Categorized Pools -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Starting Pool -->
                 <div class="bg-surface-container-low border border-primary/30 rounded-2xl p-4 space-y-3 dropzone" data-cat="starting" ondragover="studioDragOver(event)" ondragleave="studioDragLeave(event)" ondrop="studioDrop(event, 'starting')">
@@ -167,6 +171,12 @@
                 </div>
             </form>
         </div>`;
+
+        // Restore scroll position cleanly
+        const newInnerBox = modal.querySelector('.overflow-y-auto') || modal;
+        if (newInnerBox && currentScrollTop > 0) {
+            newInnerBox.scrollTop = currentScrollTop;
+        }
     }
 
     // Render full pitch graphic lines inside studio modal
@@ -204,7 +214,7 @@
             const borderClass = isSelected ? 'border-2 border-yellow-400 scale-110 shadow-yellow-500/50 bg-yellow-400/20' : 'border border-primary/40 hover:scale-105';
 
             return `
-            <div draggable="true" ondragstart="studioDragStart(event, 'starting', ${idx})" onclick="event.stopPropagation(); handlePlayerTap('starting', ${idx})" class="player-token cursor-grab active:cursor-grabbing transition-all duration-300 ${borderClass}" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
+            <div draggable="true" ondragstart="studioDragStart(event, 'starting', ${idx})" onclick="handlePlayerTap('starting', ${idx}, event)" class="player-token cursor-grab active:cursor-grabbing transition-all duration-300 ${borderClass}" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
                 <div class="avatar relative">
                     ${num || idx + 1}
                     <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
@@ -233,7 +243,7 @@
             const cardBg = isSelected ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300 font-extrabold' : 'bg-surface-container border-outline-variant/20 hover:border-primary/40 text-on-surface';
 
             return `
-            <div draggable="true" ondragstart="studioDragStart(event, '${cat}', ${idx})" onclick="handlePlayerTap('${cat}', ${idx})" class="p-2.5 rounded-xl border ${cardBg} flex items-center justify-between text-xs font-medium cursor-grab active:cursor-grabbing transition-all shadow-sm group select-none">
+            <div draggable="true" ondragstart="studioDragStart(event, '${cat}', ${idx})" onclick="handlePlayerTap('${cat}', ${idx}, event)" class="p-2.5 rounded-xl border ${cardBg} flex items-center justify-between text-xs font-medium cursor-grab active:cursor-grabbing transition-all shadow-sm group select-none">
                 <div class="flex items-center gap-2 truncate">
                     <span class="w-5 h-5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-extrabold flex items-center justify-center shrink-0">${num}</span>
                     <span class="font-bold truncate">${name}</span>
@@ -332,8 +342,12 @@
         } catch (_) {}
     };
 
-    // Tap to Select & Swap Players
-    window.handlePlayerTap = function(cat, idx) {
+    // Tap to Select & Swap Players (prevent default scroll jump)
+    window.handlePlayerTap = function(cat, idx, e) {
+        if (e) {
+            e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+        }
         if (!selectedPlayerForSwap) {
             selectedPlayerForSwap = { cat, idx };
         } else {
