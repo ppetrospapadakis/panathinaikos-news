@@ -29,6 +29,8 @@ Thumbs.db
 # Build output
 public/
 !public/site.webmanifest
+!public/roster.html
+!public/roster_lineup.js
 
 .vercel
 .env*
