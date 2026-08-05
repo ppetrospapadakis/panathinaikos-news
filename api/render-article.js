@@ -258,14 +258,11 @@ module.exports = async (req, res) => {
             day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit',
             timeZone: 'Europe/Athens', hour12: false
         });
-        // Sometime localedateString returns something like "13 Ιουλίου 2026, 17:21"
-        // Let's ensure it has "ΣΤΙΣ"
-        if (dateStr.includes(',')) {
-            dateStr = dateStr.replace(',', ' ΣΤΙΣ');
-        } else {
-            // fallback if it format is "13 Ιουλίου 2026 17:21"
-            dateStr = dateStr.replace(/ (\d{2}:\d{2})$/, ' ΣΤΙΣ $1');
-        }
+        dateStr = dateStr.replace(/,/g, '')
+                         .replace(/\s+/g, ' ')
+                         .replace(/\bστις\b/gi, '')
+                         .trim();
+        dateStr = dateStr.replace(/ (\d{2}:\d{2})$/, ' ΣΤΙΣ $1');
         // 4. Perform replacements
         
         // Title Replacement

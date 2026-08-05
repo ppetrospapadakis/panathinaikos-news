@@ -120,6 +120,10 @@ module.exports = async (req, res) => {
             .not('category', 'eq', 'SYSTEMROSTER')
             .not('category', 'eq', 'DELETED');
 
+        // Auto-cleanup expired pins (> 3 hours old) in Supabase DB so stale pins don't linger
+        const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+        supabase.from('articles').update({ pinned_at: null }).lt('pinned_at', threeHoursAgo).then(() => {}).catch(() => {});
+
         // Page 1: surface any pinned article first using B-Tree index on pinned_at.
         // Pinned window is 3 hours. Bypassed for hero queries (limit=1) to keep strictly chronological hero views.
         if (page === 1 && req.query.limit !== '1') {
