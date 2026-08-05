@@ -206,8 +206,10 @@
             let left, top, initials, name, num, pos;
             if (Array.isArray(item)) {
                 left = item[0]; top = item[1]; initials = item[2]; name = item[3]; num = item[4]; pos = item[5] || initials;
+            } else if (item && typeof item === 'object') {
+                left = item.left || 50; top = item.top || 50; initials = item.initials || ''; name = item.name || ''; num = item.num || (idx + 1); pos = item.pos || initials;
             } else {
-                left = item.left || 50; top = item.top || 50; initials = item.initials; name = item.name; num = item.num; pos = item.pos || initials;
+                return '';
             }
 
             const isSelected = selectedPlayerForSwap && selectedPlayerForSwap.cat === 'starting' && selectedPlayerForSwap.idx === idx;
@@ -235,8 +237,10 @@
             let name, num, pos, initials;
             if (Array.isArray(item)) {
                 initials = item[2]; name = item[3]; num = item[4]; pos = item[5] || initials;
+            } else if (item && typeof item === 'object') {
+                initials = item.initials || ''; name = item.name || ''; num = item.num || '#'; pos = item.pos || '';
             } else {
-                initials = item.initials; name = item.name; num = item.num || '#'; pos = item.pos || '';
+                return '';
             }
 
             const isSelected = selectedPlayerForSwap && selectedPlayerForSwap.cat === cat && selectedPlayerForSwap.idx === idx;
@@ -269,7 +273,7 @@
             const item = activeRosterState.starting[srcIdx];
             if (Array.isArray(item)) {
                 item[0] = left; item[1] = top;
-            } else {
+            } else if (item && typeof item === 'object') {
                 item.left = left; item.top = top;
             }
         } else {
@@ -292,7 +296,7 @@
         activeRosterState.starting.forEach((item, idx) => {
             let left, top;
             if (Array.isArray(item)) { left = item[0]; top = item[1]; }
-            else { left = item.left || 50; top = item.top || 50; }
+            else if (item && typeof item === 'object') { left = item.left || 50; top = item.top || 50; }
 
             const dist = Math.hypot(left - targetLeft, top - targetTop);
             if (dist < minDistance) {
@@ -327,7 +331,7 @@
                 const item = activeRosterState.starting[srcIdx];
                 if (Array.isArray(item)) {
                     item[0] = left; item[1] = top;
-                } else {
+                } else if (item && typeof item === 'object') {
                     item.left = left; item.top = top;
                 }
             } else {
@@ -386,9 +390,6 @@
 
             if (srcCat === targetCat) return;
 
-            // When dragging into a category without specifying a target player:
-            // If dragging from bench/rest to starting -> swap with first player in starting
-            // If dragging from starting to bench/rest -> swap with first player in target list
             const targetList = activeRosterState[targetCat];
             if (targetList && targetList.length > 0) {
                 performSwap(srcCat, srcIdx, targetCat, 0);
@@ -400,7 +401,6 @@
     };
 
     // STRICT SWAP FUNCTION: Swaps two players between any categories
-    // Preserves pitch coordinates (left%, top%) for whichever player is placed in 'starting'
     function performSwap(cat1, idx1, cat2, idx2) {
         if (cat1 === cat2 && idx1 === idx2) return;
 
@@ -411,22 +411,21 @@
         const p1 = list1[idx1];
         const p2 = list2[idx2];
 
-        // If one of the players is in 'starting' and the other is not,
-        // the incoming player inherits the starting position coordinates (left%, top%)
+        // Inherit pitch position coordinates if swapping starting player
         if (cat1 === 'starting' && cat2 !== 'starting') {
             let left = 50, top = 50;
             if (Array.isArray(p1)) { left = p1[0]; top = p1[1]; }
-            else { left = p1.left || 50; top = p1.top || 50; }
+            else if (p1 && typeof p1 === 'object') { left = p1.left || 50; top = p1.top || 50; }
 
             if (Array.isArray(p2)) { p2[0] = left; p2[1] = top; }
-            else { p2.left = left; p2.top = top; }
+            else if (p2 && typeof p2 === 'object') { p2.left = left; p2.top = top; }
         } else if (cat2 === 'starting' && cat1 !== 'starting') {
             let left = 50, top = 50;
             if (Array.isArray(p2)) { left = p2[0]; top = p2[1]; }
-            else { left = p2.left || 50; top = p2.top || 50; }
+            else if (p2 && typeof p2 === 'object') { left = p2.left || 50; top = p2.top || 50; }
 
             if (Array.isArray(p1)) { p1[0] = left; p1[1] = top; }
-            else { p1.left = left; p1.top = top; }
+            else if (p1 && typeof p1 === 'object') { p1.left = left; p1.top = top; }
         }
 
         // Execute swap
@@ -495,7 +494,7 @@
         }
     };
 
-    // Open Read-Only Fan Lineup Viewer Modal
+    // Open Read-Only Fan Lineup Viewer Modal (Defensive Array/Object Parsing)
     window.openViewUserLineupModal = function(commentId) {
         const item = window.userLineupsMap[commentId];
         if (!item) return;
@@ -515,20 +514,33 @@
         const starting = lineup.starting || [];
         const bench = lineup.bench || [];
 
-        const pitchTokens = starting.map(([left, top, initials, name, num, pos], idx) => `
+        const pitchTokens = starting.map((p, idx) => {
+            let left, top, initials, name, num, pos;
+            if (Array.isArray(p)) {
+                left = p[0]; top = p[1]; initials = p[2]; name = p[3]; num = p[4]; pos = p[5] || initials;
+            } else if (p && typeof p === 'object') {
+                left = p.left || 50; top = p.top || 50; initials = p.initials || ''; name = p.name || ''; num = p.num || (idx + 1); pos = p.pos || initials;
+            } else {
+                return '';
+            }
+
+            return `
             <div class="player-token" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
                 <div class="avatar relative">
                     ${num || idx + 1}
                     <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
                 </div>
                 <div class="name-tag">${name}</div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
 
         const benchCards = bench.map((b) => {
-            let name, num, pos;
-            if (Array.isArray(b)) { name = b[3]; num = b[4]; pos = b[5] || b[2]; }
-            else { name = b.name; num = b.num || '#'; pos = b.pos || ''; }
+            let name = '', num = '#', pos = '';
+            if (Array.isArray(b)) {
+                name = b[3]; num = b[4]; pos = b[5] || b[2];
+            } else if (b && typeof b === 'object') {
+                name = b.name || ''; num = b.num || '#'; pos = b.pos || b.initials || '';
+            }
             return `<span class="px-2.5 py-1 rounded-lg bg-surface-container-high border border-outline-variant/20 text-[11px] font-bold text-on-surface flex items-center gap-1.5">
                 <span class="text-primary font-mono">${num}</span> ${name}
             </span>`;
