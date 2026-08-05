@@ -101,7 +101,7 @@ module.exports = async (req, res) => {
             const { data, error } = await supabase
                 .from('articles')
                 .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
-                .or('source_url.ilike.%manual%,source_url.ilike.%opinion://manual%')
+                .or('source_url.ilike.manual%,source_url.ilike.opinion://manual%,category.ilike.%Άποψη%')
                 .order('created_at', { ascending: false })
                 .order('id', { ascending: false });
             if (error) throw error;
