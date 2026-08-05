@@ -175,6 +175,10 @@
       "destination": "/privacy-policy.html"
     },
     {
+      "source": "/roster",
+      "destination": "/roster.html"
+    },
+    {
       "source": "/terms-of-service",
       "destination": "/terms-of-service.html"
     },
