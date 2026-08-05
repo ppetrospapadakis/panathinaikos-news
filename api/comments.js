@@ -122,27 +122,11 @@ module.exports = async (req, res) => {
                 comment_text: cleanText 
             };
 
-            if (isAdminPost) {
-                dbPayload.is_admin = true;
-            }
-
-            let { data, error } = await supabase
+            const { data, error } = await supabase
                 .from('article_comments')
                 .insert([dbPayload])
                 .select('*')
                 .single();
-
-            // Fallback if 'is_admin' column is missing in Supabase schema
-            if (error && (error.message || '').includes('is_admin')) {
-                delete dbPayload.is_admin;
-                const retry = await supabase
-                    .from('article_comments')
-                    .insert([dbPayload])
-                    .select('*')
-                    .single();
-                data = retry.data;
-                error = retry.error;
-            }
 
             if (error) throw error;
             return res.status(201).json(data);
