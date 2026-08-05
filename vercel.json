@@ -5,7 +5,7 @@
   ],
   "headers": [
     {
-      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*)",
+      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*|roster.html|roster_lineup.js)",
       "headers": [
         {
           "key": "Cache-Control",
