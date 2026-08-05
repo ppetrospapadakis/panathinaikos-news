@@ -8,7 +8,6 @@
         rest: []
     };
     let selectedPlayerForSwap = null;
-    let isDraggingToken = null;
     window.userLineupsMap = {};
 
     // Helper: Clone roster array safely
@@ -54,6 +53,7 @@
         }
 
         const isFootball = activeSport === 'football';
+        const requiredCount = isFootball ? 11 : 5;
         const sportTitle = isFootball ? '⚽ Δημιουργία 11άδας' : '🏀 Δημιουργία 5άδας';
         const isAuthedAdmin = sessionStorage.getItem('op_auth') === '1';
 
@@ -67,7 +67,7 @@
                     </div>
                     <div>
                         <h3 class="font-extrabold text-lg sm:text-xl text-on-surface">${sportTitle}</h3>
-                        <p class="text-xs text-on-surface-variant">Μετακίνησε παίκτες στο γήπεδο ή μεταξύ κατηγοριών και μοιράσου το τακτικό σου πλάνο στα σχόλια!</p>
+                        <p class="text-xs text-on-surface-variant">Πάτα ή σύρε 2 παίκτες για αντικατάσταση (swap) — Η βασική ομάδα διατηρεί πάντα ακριβώς ${requiredCount} παίκτες!</p>
                     </div>
                 </div>
                 <button onclick="closeLineupStudio()" class="w-9 h-9 rounded-full bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant flex items-center justify-center transition-all cursor-pointer shrink-0">
@@ -78,8 +78,8 @@
             <!-- Pitch / Court Interactive Preview with Full Graphic Lines -->
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider">
-                    <span>Τακτικό Πλάνο Βασικών (Σύρε ή πάτα στο γήπεδο για αλλαγή θέσης)</span>
-                    <span class="text-[11px] text-on-surface-variant/70 font-normal">(${activeRosterState.starting.length} Παίκτες)</span>
+                    <span>Τακτικό Πλάνο Βασικών (${activeRosterState.starting.length}/${requiredCount})</span>
+                    <span class="text-[11px] text-on-surface-variant/70 font-normal">Πάτα παίκτη στο γήπεδο & μετά άλλον παίκτη για αντικατάσταση</span>
                 </div>
                 <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" ondragover="studioPitchDragOver(event)" ondrop="studioPitchDrop(event)" onclick="handlePitchBackgroundClick(event)">
                     ${renderStudioPitchLinesHtml(isFootball)}
@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            <!-- 3 Categorized Droppable Pools -->
+            <!-- 3 Categorized Pools (Strict Swap-Only) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Starting Pool -->
                 <div class="bg-surface-container-low border border-primary/30 rounded-2xl p-4 space-y-3 dropzone" data-cat="starting" ondragover="studioDragOver(event)" ondragleave="studioDragLeave(event)" ondrop="studioDrop(event, 'starting')">
@@ -201,7 +201,7 @@
             }
 
             const isSelected = selectedPlayerForSwap && selectedPlayerForSwap.cat === 'starting' && selectedPlayerForSwap.idx === idx;
-            const borderClass = isSelected ? 'border-2 border-yellow-400 scale-110 shadow-yellow-500/50' : 'border border-primary/40 hover:scale-105';
+            const borderClass = isSelected ? 'border-2 border-yellow-400 scale-110 shadow-yellow-500/50 bg-yellow-400/20' : 'border border-primary/40 hover:scale-105';
 
             return `
             <div draggable="true" ondragstart="studioDragStart(event, 'starting', ${idx})" onclick="event.stopPropagation(); handlePlayerTap('starting', ${idx})" class="player-token cursor-grab active:cursor-grabbing transition-all duration-300 ${borderClass}" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
@@ -218,7 +218,7 @@
     function renderPoolCardsHtml(cat) {
         const list = activeRosterState[cat] || [];
         if (list.length === 0) {
-            return `<div class="p-3 rounded-xl border border-dashed border-outline-variant/30 text-center text-xs text-on-surface-variant/40">Κενό (Σύρε παίκτη εδώ)</div>`;
+            return `<div class="p-3 rounded-xl border border-dashed border-outline-variant/30 text-center text-xs text-on-surface-variant/40">Κενό</div>`;
         }
 
         return list.map((item, idx) => {
@@ -230,7 +230,7 @@
             }
 
             const isSelected = selectedPlayerForSwap && selectedPlayerForSwap.cat === cat && selectedPlayerForSwap.idx === idx;
-            const cardBg = isSelected ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300' : 'bg-surface-container border-outline-variant/20 hover:border-primary/40 text-on-surface';
+            const cardBg = isSelected ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300 font-extrabold' : 'bg-surface-container border-outline-variant/20 hover:border-primary/40 text-on-surface';
 
             return `
             <div draggable="true" ondragstart="studioDragStart(event, '${cat}', ${idx})" onclick="handlePlayerTap('${cat}', ${idx})" class="p-2.5 rounded-xl border ${cardBg} flex items-center justify-between text-xs font-medium cursor-grab active:cursor-grabbing transition-all shadow-sm group select-none">
@@ -243,7 +243,7 @@
         }).join('');
     }
 
-    // Handle pitch background click (moves selected player token to clicked spot)
+    // Handle pitch background click (repositions selected starting player or swaps with nearest player)
     window.handlePitchBackgroundClick = function(e) {
         if (!selectedPlayerForSwap) return;
         const pitchEl = document.getElementById('studio-pitch-container');
@@ -255,7 +255,7 @@
 
         const { cat: srcCat, idx: srcIdx } = selectedPlayerForSwap;
         if (srcCat === 'starting') {
-            // Reposition token on pitch
+            // Reposition player on pitch
             const item = activeRosterState.starting[srcIdx];
             if (Array.isArray(item)) {
                 item[0] = left; item[1] = top;
@@ -263,17 +263,10 @@
                 item.left = left; item.top = top;
             }
         } else {
-            // Move player from bench/rest onto pitch at clicked position
-            const srcList = activeRosterState[srcCat];
-            const playerToMove = srcList[srcIdx];
-            if (playerToMove) {
-                srcList.splice(srcIdx, 1);
-                if (Array.isArray(playerToMove)) {
-                    playerToMove[0] = left; playerToMove[1] = top;
-                } else {
-                    playerToMove.left = left; playerToMove.top = top;
-                }
-                activeRosterState.starting.push(playerToMove);
+            // Player is coming from bench/rest -> find closest starting player on pitch and SWAP with them
+            const closestIdx = findClosestStartingPlayerIndex(left, top);
+            if (closestIdx !== -1) {
+                performSwap(srcCat, srcIdx, 'starting', closestIdx);
             }
         }
 
@@ -281,7 +274,27 @@
         renderStudioModal();
     };
 
-    // Pitch Drag & Drop handlers for free-positioning on pitch
+    // Find closest starting player to pitch coordinates
+    function findClosestStartingPlayerIndex(targetLeft, targetTop) {
+        let closestIdx = -1;
+        let minDistance = Infinity;
+
+        activeRosterState.starting.forEach((item, idx) => {
+            let left, top;
+            if (Array.isArray(item)) { left = item[0]; top = item[1]; }
+            else { left = item.left || 50; top = item.top || 50; }
+
+            const dist = Math.hypot(left - targetLeft, top - targetTop);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestIdx = idx;
+            }
+        });
+
+        return closestIdx;
+    }
+
+    // Pitch Drag & Drop handlers for free-positioning or swapping
     window.studioPitchDragOver = function(e) {
         e.preventDefault();
     };
@@ -308,16 +321,10 @@
                     item.left = left; item.top = top;
                 }
             } else {
-                const srcList = activeRosterState[srcCat];
-                const playerToMove = srcList[srcIdx];
-                if (playerToMove) {
-                    srcList.splice(srcIdx, 1);
-                    if (Array.isArray(playerToMove)) {
-                        playerToMove[0] = left; playerToMove[1] = top;
-                    } else {
-                        playerToMove.left = left; playerToMove.top = top;
-                    }
-                    activeRosterState.starting.push(playerToMove);
+                // Dragged from bench/rest onto pitch -> SWAP with closest starting player
+                const closestIdx = findClosestStartingPlayerIndex(left, top);
+                if (closestIdx !== -1) {
+                    performSwap(srcCat, srcIdx, 'starting', closestIdx);
                 }
             }
             selectedPlayerForSwap = null;
@@ -325,16 +332,16 @@
         } catch (_) {}
     };
 
-    // Tap to Swap / Move Player
+    // Tap to Select & Swap Players
     window.handlePlayerTap = function(cat, idx) {
         if (!selectedPlayerForSwap) {
             selectedPlayerForSwap = { cat, idx };
         } else {
             if (selectedPlayerForSwap.cat === cat && selectedPlayerForSwap.idx === idx) {
-                selectedPlayerForSwap = null; // Unselect
+                selectedPlayerForSwap = null; // Unselect if tapping same player
             } else {
-                // Swap/move
-                moveOrSwapPlayers(selectedPlayerForSwap.cat, selectedPlayerForSwap.idx, cat, idx);
+                // ALWAYS SWAP when tapping two different players
+                performSwap(selectedPlayerForSwap.cat, selectedPlayerForSwap.idx, cat, idx);
                 selectedPlayerForSwap = null;
             }
         }
@@ -362,31 +369,55 @@
             const raw = e.dataTransfer.getData('text/plain');
             if (!raw) return;
             const { cat: srcCat, idx: srcIdx } = JSON.parse(raw);
-            moveOrSwapPlayers(srcCat, srcIdx, targetCat, null);
+
+            if (srcCat === targetCat) return;
+
+            // When dragging into a category without specifying a target player:
+            // If dragging from bench/rest to starting -> swap with first player in starting
+            // If dragging from starting to bench/rest -> swap with first player in target list
+            const targetList = activeRosterState[targetCat];
+            if (targetList && targetList.length > 0) {
+                performSwap(srcCat, srcIdx, targetCat, 0);
+            }
+
             selectedPlayerForSwap = null;
             renderStudioModal();
         } catch (_) {}
     };
 
-    // Perform swap or move
-    function moveOrSwapPlayers(srcCat, srcIdx, targetCat, targetIdx) {
-        const srcList = activeRosterState[srcCat];
-        const targetList = activeRosterState[targetCat];
-        if (!srcList || !targetList) return;
+    // STRICT SWAP FUNCTION: Swaps two players between any categories
+    // Preserves pitch coordinates (left%, top%) for whichever player is placed in 'starting'
+    function performSwap(cat1, idx1, cat2, idx2) {
+        if (cat1 === cat2 && idx1 === idx2) return;
 
-        const p1 = srcList[srcIdx];
-        if (!p1) return;
+        const list1 = activeRosterState[cat1];
+        const list2 = activeRosterState[cat2];
+        if (!list1 || !list2 || !list1[idx1] || !list2[idx2]) return;
 
-        if (targetIdx !== null && targetIdx !== undefined && targetList[targetIdx]) {
-            // Swap positions
-            const p2 = targetList[targetIdx];
-            srcList[srcIdx] = p2;
-            targetList[targetIdx] = p1;
-        } else {
-            // Move to target list
-            srcList.splice(srcIdx, 1);
-            targetList.push(p1);
+        const p1 = list1[idx1];
+        const p2 = list2[idx2];
+
+        // If one of the players is in 'starting' and the other is not,
+        // the incoming player inherits the starting position coordinates (left%, top%)
+        if (cat1 === 'starting' && cat2 !== 'starting') {
+            let left = 50, top = 50;
+            if (Array.isArray(p1)) { left = p1[0]; top = p1[1]; }
+            else { left = p1.left || 50; top = p1.top || 50; }
+
+            if (Array.isArray(p2)) { p2[0] = left; p2[1] = top; }
+            else { p2.left = left; p2.top = top; }
+        } else if (cat2 === 'starting' && cat1 !== 'starting') {
+            let left = 50, top = 50;
+            if (Array.isArray(p2)) { left = p2[0]; top = p2[1]; }
+            else { left = p2.left || 50; top = p2.top || 50; }
+
+            if (Array.isArray(p1)) { p1[0] = left; p1[1] = top; }
+            else { p1.left = left; p1.top = top; }
         }
+
+        // Execute swap
+        list1[idx1] = p2;
+        list2[idx2] = p1;
     }
 
     // Submit custom lineup comment
