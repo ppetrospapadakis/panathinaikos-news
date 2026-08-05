@@ -439,7 +439,7 @@
         }
 
         const isFootball = item.sport === 'football';
-        const sportTitle = isFootball ? '⚽ 11άδα Φιλάθλου' : '🏀 5άδα Φιλάθλου';
+        const sportTitle = isFootball ? '⚽ 11άδα Χρήστη' : '🏀 5άδα Χρήστη';
         const lineup = item.lineup || {};
 
         const starting = lineup.starting || [];
