@@ -1547,6 +1547,16 @@ async function main() {
                 const articleAgeMins = scraped.created_at ? (Date.now() - new Date(scraped.created_at).getTime()) / (1000 * 60) : 999;
                 if (articleAgeMins > 25) {
                     existingUrls.add(articleUrl);
+                    if (!isDryRun) {
+                        db.from('articles').insert({
+                            title: `[SKIPPED] ${scraped.title ? scraped.title.substring(0, 40) : 'Too Short'}`,
+                            summary: 'Skipped - Too Short',
+                            content: 'Skipped',
+                            source_url: articleUrl,
+                            category: 'DELETED',
+                            created_at: scraped.created_at || new Date().toISOString()
+                        }).then(() => {}).catch(() => {});
+                    }
                 } else {
                     console.log(`    [SMART RETRY] Fresh short stub (${articleAgeMins.toFixed(0)}m old). Will re-check on next run if expanded.`);
                 }
