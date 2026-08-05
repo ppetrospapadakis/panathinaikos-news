@@ -101,11 +101,22 @@ module.exports = async (req, res) => {
             const { data, error } = await supabase
                 .from('articles')
                 .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
-                .or('source_url.ilike.manual%,source_url.ilike.opinion://manual%,category.ilike.%Άποψη%')
                 .order('created_at', { ascending: false })
-                .order('id', { ascending: false });
+                .order('id', { ascending: false })
+                .limit(100);
             if (error) throw error;
-            return res.status(200).json(data);
+
+            const ownArticles = (data || []).filter(a => {
+                const src = (a.source_url || '').toLowerCase();
+                const cat = (a.category || '').toLowerCase();
+                return src.startsWith('manual') || 
+                       src.includes('opinion://manual') || 
+                       src.includes('opinion://system-roster') || 
+                       cat.includes('άποψη') || 
+                       cat.includes('apopsi');
+            });
+
+            return res.status(200).json(ownArticles);
         }
 
         // 2. Feed pagination & filtering query
