@@ -108,12 +108,8 @@ function formatBodyContent(text) {
 
     if (rawParagraphs.length === 0) return '';
 
-    return rawParagraphs.map((para, idx) => {
-        // First paragraph gets slightly larger leading font size
-        const cls = idx === 0
-            ? 'text-[1.05rem] leading-[1.85] text-on-surface mb-6'
-            : 'text-[1rem] leading-[1.85] text-on-surface/90 mb-6';
-        return `<p class="${cls}">${para}</p>`;
+    return rawParagraphs.map((para) => {
+        return `<p class="text-[1rem] leading-[1.85] text-on-surface/90 mb-6">${para}</p>`;
     }).join('\n');
 }
 
