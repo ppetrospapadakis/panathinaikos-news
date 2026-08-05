@@ -8,7 +8,6 @@
         rest: []
     };
     let selectedPlayerForSwap = null;
-    let touchDragIdx = null;
     window.userLineupsMap = {};
 
     // Helper: Clone roster array safely
@@ -35,7 +34,6 @@
 
         activeRosterState = { starting, bench, rest };
         selectedPlayerForSwap = null;
-        touchDragIdx = null;
         renderStudioModal();
     };
 
@@ -73,7 +71,7 @@
                     </div>
                     <div>
                         <h3 class="font-extrabold text-lg sm:text-xl text-on-surface">${sportTitle}</h3>
-                        <p class="text-xs text-on-surface-variant">Πάτα ή σύρε 2 παίκτες για αντικατάσταση (swap)</p>
+                        <p class="text-xs text-on-surface-variant">Πάτα 2 παίκτες για αντικατάσταση (swap)</p>
                     </div>
                 </div>
                 <button onclick="closeLineupStudio()" class="w-9 h-9 rounded-full bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant flex items-center justify-center transition-all cursor-pointer shrink-0">
@@ -85,9 +83,9 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider">
                     <span>Τακτικό Πλάνο Βασικών</span>
-                    <span class="text-[11px] text-on-surface-variant/70 font-normal">Σύρε παίκτη στο γήπεδο ή πάτα 2 παίκτες για αλλαγή</span>
+                    <span class="text-[11px] text-on-surface-variant/70 font-normal">Πάτα έναν παίκτη και μετά έναν άλλον για αντικατάσταση</span>
                 </div>
-                <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" ondragover="studioPitchDragOver(event)" ondrop="studioPitchDrop(event)" onclick="handlePitchBackgroundClick(event)">
+                <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" onclick="handlePitchBackgroundClick(event)">
                     ${renderStudioPitchLinesHtml(isFootball)}
                     ${renderStudioPitchTokensHtml()}
                 </div>
@@ -96,7 +94,7 @@
             <!-- 3 Categorized Pools -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Starting Pool -->
-                <div class="bg-surface-container-low border border-primary/30 rounded-2xl p-4 space-y-3 dropzone" data-cat="starting" ondragover="studioDragOver(event)" ondragleave="studioDragLeave(event)" ondrop="studioDrop(event, 'starting')">
+                <div class="bg-surface-container-low border border-primary/30 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <h4 class="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">star</span>
@@ -109,7 +107,7 @@
                 </div>
 
                 <!-- Bench Pool -->
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-4 space-y-3 dropzone" data-cat="bench" ondragover="studioDragOver(event)" ondragleave="studioDragLeave(event)" ondrop="studioDrop(event, 'bench')">
+                <div class="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <h4 class="text-xs font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">chair</span>
@@ -122,7 +120,7 @@
                 </div>
 
                 <!-- Rest Pool -->
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-4 space-y-3 dropzone" data-cat="rest" ondragover="studioDragOver(event)" ondragleave="studioDragLeave(event)" ondrop="studioDrop(event, 'rest')">
+                <div class="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <h4 class="text-xs font-extrabold uppercase tracking-wider text-on-surface-variant/70 flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">groups</span>
@@ -202,7 +200,7 @@
         }
     }
 
-    // Render player tokens without rectangular outline box & with touch drag handlers
+    // Render player tokens for pure tap interaction
     function renderStudioPitchTokensHtml() {
         return activeRosterState.starting.map((item, idx) => {
             let left, top, initials, name, num, pos;
@@ -219,13 +217,8 @@
 
             return `
             <div id="studio-token-${idx}"
-                 draggable="true"
-                 ondragstart="studioDragStart(event, 'starting', ${idx})"
-                 ontouchstart="studioTouchStart(event, ${idx})"
-                 ontouchmove="studioTouchMove(event)"
-                 ontouchend="studioTouchEnd(event, ${idx})"
                  onclick="handlePlayerTap('starting', ${idx}, event)"
-                 class="player-token cursor-grab active:cursor-grabbing transition-all duration-200 ${borderClass}"
+                 class="player-token cursor-pointer transition-all duration-200 ${borderClass}"
                  style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20; border:none; background:transparent;">
                 <div class="avatar relative">
                     ${num || idx + 1}
@@ -235,55 +228,6 @@
             </div>`;
         }).join('');
     }
-
-    // Mobile Touch Drag handlers for pitch positioning
-    window.studioTouchStart = function(e, idx) {
-        e.stopPropagation();
-        touchDragIdx = idx;
-        const tokenEl = document.getElementById(`studio-token-${idx}`);
-        if (tokenEl) tokenEl.style.zIndex = '50';
-    };
-
-    window.studioTouchMove = function(e) {
-        if (touchDragIdx === null) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        const pitchEl = document.getElementById('studio-pitch-container');
-        if (!pitchEl) return;
-
-        const rect = pitchEl.getBoundingClientRect();
-        const left = Math.min(92, Math.max(8, Math.round(((touch.clientX - rect.left) / rect.width) * 100)));
-        const top = Math.min(92, Math.max(8, Math.round(((touch.clientY - rect.top) / rect.height) * 100)));
-
-        const tokenEl = document.getElementById(`studio-token-${touchDragIdx}`);
-        if (tokenEl) {
-            tokenEl.style.left = left + '%';
-            tokenEl.style.top = top + '%';
-        }
-    };
-
-    window.studioTouchEnd = function(e, idx) {
-        if (touchDragIdx === null) return;
-        e.stopPropagation();
-        const touch = e.changedTouches[0];
-        const pitchEl = document.getElementById('studio-pitch-container');
-        if (!pitchEl) { touchDragIdx = null; return; }
-
-        const rect = pitchEl.getBoundingClientRect();
-        const left = Math.min(92, Math.max(8, Math.round(((touch.clientX - rect.left) / rect.width) * 100)));
-        const top = Math.min(92, Math.max(8, Math.round(((touch.clientY - rect.top) / rect.height) * 100)));
-
-        const item = activeRosterState.starting[touchDragIdx];
-        if (Array.isArray(item)) {
-            item[0] = left; item[1] = top;
-        } else if (item && typeof item === 'object') {
-            item.left = left; item.top = top;
-        }
-
-        touchDragIdx = null;
-        selectedPlayerForSwap = null;
-        renderStudioModal();
-    };
 
     // Render cards list inside a pool
     function renderPoolCardsHtml(cat) {
@@ -306,7 +250,7 @@
             const cardBg = isSelected ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300 font-extrabold' : 'bg-surface-container border-outline-variant/20 hover:border-primary/40 text-on-surface';
 
             return `
-            <div draggable="true" ondragstart="studioDragStart(event, '${cat}', ${idx})" onclick="handlePlayerTap('${cat}', ${idx}, event)" class="p-2.5 rounded-xl border ${cardBg} flex items-center justify-between text-xs font-medium cursor-grab active:cursor-grabbing transition-all shadow-sm group select-none">
+            <div onclick="handlePlayerTap('${cat}', ${idx}, event)" class="p-2.5 rounded-xl border ${cardBg} flex items-center justify-between text-xs font-medium cursor-pointer transition-all shadow-sm group select-none">
                 <div class="flex items-center gap-2 truncate">
                     <span class="w-5 h-5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-extrabold flex items-center justify-center shrink-0">${num}</span>
                     <span class="font-bold truncate">${name}</span>
@@ -328,7 +272,7 @@
 
         const { cat: srcCat, idx: srcIdx } = selectedPlayerForSwap;
         if (srcCat === 'starting') {
-            // Reposition player on pitch
+            // Reposition starting player on pitch
             const item = activeRosterState.starting[srcIdx];
             if (Array.isArray(item)) {
                 item[0] = left; item[1] = top;
@@ -367,44 +311,6 @@
         return closestIdx;
     }
 
-    // Pitch Drag & Drop handlers for free-positioning or swapping
-    window.studioPitchDragOver = function(e) {
-        e.preventDefault();
-    };
-
-    window.studioPitchDrop = function(e) {
-        e.preventDefault();
-        const pitchEl = document.getElementById('studio-pitch-container');
-        if (!pitchEl) return;
-
-        try {
-            const raw = e.dataTransfer.getData('text/plain');
-            if (!raw) return;
-            const { cat: srcCat, idx: srcIdx } = JSON.parse(raw);
-
-            const rect = pitchEl.getBoundingClientRect();
-            const left = Math.min(92, Math.max(8, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
-            const top = Math.min(92, Math.max(8, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
-
-            if (srcCat === 'starting') {
-                const item = activeRosterState.starting[srcIdx];
-                if (Array.isArray(item)) {
-                    item[0] = left; item[1] = top;
-                } else if (item && typeof item === 'object') {
-                    item.left = left; item.top = top;
-                }
-            } else {
-                // Dragged from bench/rest onto pitch -> SWAP with closest starting player
-                const closestIdx = findClosestStartingPlayerIndex(left, top);
-                if (closestIdx !== -1) {
-                    performSwap(srcCat, srcIdx, 'starting', closestIdx);
-                }
-            }
-            selectedPlayerForSwap = null;
-            renderStudioModal();
-        } catch (_) {}
-    };
-
     // Tap to Select & Swap Players (prevent default scroll jump)
     window.handlePlayerTap = function(cat, idx, e) {
         if (e) {
@@ -423,40 +329,6 @@
             }
         }
         renderStudioModal();
-    };
-
-    // Drag & Drop event handlers for pools
-    window.studioDragStart = function(e, cat, idx) {
-        e.dataTransfer.setData('text/plain', JSON.stringify({ cat, idx }));
-    };
-
-    window.studioDragOver = function(e) {
-        e.preventDefault();
-        e.currentTarget.classList.add('border-primary', 'bg-primary/10');
-    };
-
-    window.studioDragLeave = function(e) {
-        e.currentTarget.classList.remove('border-primary', 'bg-primary/10');
-    };
-
-    window.studioDrop = function(e, targetCat) {
-        e.preventDefault();
-        e.currentTarget.classList.remove('border-primary', 'bg-primary/10');
-        try {
-            const raw = e.dataTransfer.getData('text/plain');
-            if (!raw) return;
-            const { cat: srcCat, idx: srcIdx } = JSON.parse(raw);
-
-            if (srcCat === targetCat) return;
-
-            const targetList = activeRosterState[targetCat];
-            if (targetList && targetList.length > 0) {
-                performSwap(srcCat, srcIdx, targetCat, 0);
-            }
-
-            selectedPlayerForSwap = null;
-            renderStudioModal();
-        } catch (_) {}
     };
 
     // STRICT SWAP FUNCTION: Swaps two players between any categories
@@ -481,7 +353,7 @@
         } else if (cat2 === 'starting' && cat1 !== 'starting') {
             let left = 50, top = 50;
             if (Array.isArray(p2)) { left = p2[0]; top = p2[1]; }
-            else if (p2 && typeof p2 === 'object') { left = p2.left || 50; top = p2.top || 50; }
+            else if (p2 && typeof p2 === 'object') { p2.left = left; p2.top = top; }
 
             if (Array.isArray(p1)) { p1[0] = left; p1[1] = top; }
             else if (p1 && typeof p1 === 'object') { p1.left = left; p1.top = top; }
