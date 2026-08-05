@@ -179,7 +179,8 @@ module.exports = async (req, res) => {
         const url = `/${catPath}/${slug}-id=${shortId}`;
         const pubDate = formatExactDate(article.created_at);
 
-        const isOwn = (article.source_url||'').toLowerCase().includes('manual') || (article.source_url||'').toLowerCase().includes('opinion://');
+        const srcLower = (article.source_url || '').toLowerCase();
+        const isOwn = srcLower.startsWith('manual') || srcLower.includes('manual://') || srcLower.includes('opinion://') || (article.category || '').toLowerCase().includes('άποψη');
         const isOfficial = (article.source_url||'').toLowerCase().includes('pao.gr') || (article.source_url||'').toLowerCase().includes('pao1908.com') || (article.source_url||'').toLowerCase().includes('paobc.gr');
         const ageMs = Date.now() - new Date(article.created_at).getTime();
         const isFresh = ageMs < 60 * 60 * 1000;

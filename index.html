@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="el">
+<html class="dark icons-loaded" lang="el">
 <head>
 <meta charset="utf-8"/>
     <!-- Resource Hints & Preconnects -->
@@ -17,12 +17,10 @@
   <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
     <!-- Favicon & Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=8"/>
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=8"/>
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-touch.png?v=8"/>
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=8"/>
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=8"/>
-    <link rel="manifest" href="/site.webmanifest"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=5"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=5"/>
+    <link rel="shortcut icon" href="/favicon.png?v=5"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=5"/>
     <meta name="theme-color" content="#111317"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος</title>
@@ -385,7 +383,11 @@
             if (!a) return false;
             const src = (a.source_url || '').toLowerCase();
             const cat = (a.category || '').toLowerCase();
-            return src.includes('manual') || src.includes('opinion://') || cat.includes('άποψη');
+            return src.startsWith('manual') || 
+                   src.includes('opinion://manual') || 
+                   src.includes('opinion://system-roster') || 
+                   cat.includes('άποψη') || 
+                   cat.includes('apopsi');
         }
 
         function getCategoryCleanName(category) {
@@ -558,7 +560,7 @@
             const slug      = slugify(a.title);
             const catPath   = getCategoryCleanName(a.category);
             const url       = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
-            const isOwn     = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
+            const isOwn     = isOwnArticle(a);
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
             const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
@@ -583,7 +585,7 @@
             const slug     = slugify(a.title);
             const catPath  = getCategoryCleanName(a.category);
             const url      = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
-            const isOwn    = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
+            const isOwn    = isOwnArticle(a);
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
             const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
@@ -621,7 +623,7 @@
             const slug    = slugify(a.title);
             const catPath = getCategoryCleanName(a.category);
             const url     = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
-            const isOwn   = (a.source_url||'').toLowerCase().includes('manual') || (a.source_url||'').toLowerCase().includes('opinion://');
+            const isOwn   = isOwnArticle(a);
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const ageMs   = Date.now() - new Date(a.created_at).getTime();
             const isFresh = ageMs < 60 * 60 * 1000;
@@ -724,7 +726,7 @@
             }).sort((a,b) => getTime(b.main.created_at) - getTime(a.main.created_at));
 
             sorted.forEach(g => {
-                const isOwn = (g.main.source_url||'').toLowerCase().includes('manual') || (g.main.source_url||'').toLowerCase().includes('opinion://');
+                const isOwn = isOwnArticle(g.main);
                 if (activeCategory === null || activeCategory === 'Άποψη') {
                     if (isOwn) ownGroups.push(g);
                     else scraperGroups.push(g);
@@ -1259,12 +1261,10 @@
 
 <script>
         function checkAdminNav() {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                const el = document.getElementById('nav-item-fixtures');
-                if (el) el.classList.remove('hidden');
-                const tab = document.getElementById('tab-item-fixtures');
-                if (tab) tab.classList.remove('hidden');
-            }
+            const el = document.getElementById('nav-item-fixtures');
+            if (el) el.classList.remove('hidden');
+            const tab = document.getElementById('tab-item-fixtures');
+            if (tab) tab.classList.remove('hidden');
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', checkAdminNav);
@@ -1272,8 +1272,6 @@
             checkAdminNav();
         }
 </script>
-
-
 <script>
 (function() {
     function showGoogleModal() {
@@ -1281,8 +1279,7 @@
         if (!modal) {
             modal = document.createElement('div');
             modal.id = 'google-news-modal';
-            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300';
-            modal.style.cssText = 'background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);';
+            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 opacity-0 pointer-events-none transition-all duration-300';
             modal.innerHTML = `
                 <div class="relative w-full max-w-[310px] sm:max-w-md bg-[#1e2022] border border-outline-variant/30 rounded-2xl p-5 sm:p-6 shadow-2xl transform scale-95 transition-all duration-300 text-center space-y-4">
                     <div class="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#282a2d] border border-outline-variant/30 flex items-center justify-center shadow-inner">
@@ -1338,9 +1335,6 @@
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('a[href*="preferences/source"]');
         if (btn) {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                return; // Admin logged in: open external Google preferences link in new tab directly
-            }
             e.preventDefault();
             showGoogleModal();
         }
