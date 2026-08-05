@@ -166,7 +166,7 @@
                     <button type="button" onclick="closeLineupStudio()" class="px-5 py-2.5 rounded-xl border border-outline-variant/40 text-on-surface-variant text-xs font-bold hover:bg-surface-container-highest transition-all cursor-pointer">Ακύρωση</button>
                     <button type="submit" id="studio-submit-btn" class="px-6 py-2.5 bg-primary text-on-primary font-extrabold rounded-xl text-xs flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[16px]">send</span>
-                        <span>Δημοσίευση 11άδας στα Σχόλια</span>
+                        <span>Δημοσίευση ${isFootball ? '11άδας' : '5άδας'} στα Σχόλια</span>
                     </button>
                 </div>
             </form>
@@ -420,7 +420,7 @@
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">send</span> <span>Δημοσίευση 11άδας στα Σχόλια</span>`;
+                submitBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">send</span> <span>Δημοσίευση ${activeSport === 'football' ? '11άδας' : '5άδας'} στα Σχόλια</span>`;
             }
         }
     };
