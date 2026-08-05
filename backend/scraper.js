@@ -793,47 +793,63 @@ async function scrapeArticlePage(url, categoryHint) {
         const DEFAULT_STADIUM_IMG = '/logo.png';
 
         // ── Build image URL (Node-safe, no DOM dependencies) ───────────────────
+        const isBrandingOrAuthorImage = (imgUrl) => {
+            if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.startsWith('http')) return true;
+            try {
+                const u = new URL(imgUrl);
+                const fullPath = u.pathname.toLowerCase();
+                const filename = fullPath.split('/').pop() || '';
+
+                const brandingAndAuthorKeywords = [
+                    'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+                    'site-logo', 'site_logo', 'default-image', 'default_image',
+                    'noimage', 'no-image', 'blank', 'generic',
+                    'author', 'writer', 'columnist', 'sintaktis', 'syntaktis', 'editor', 'reporter',
+                    'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic'
+                ];
+
+                const brandingPaths = [
+                    '/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/',
+                    '/assets/images/', '/site-assets/', '/authors/', '/author/', '/users/', '/avatars/',
+                    '/profiles/', '/columnists/', '/reporters/', '/editors/', '/sintaktes/'
+                ];
+
+                const hasKeyword = brandingAndAuthorKeywords.some(ind => filename.includes(ind));
+                const hasPath = brandingPaths.some(p => fullPath.includes(p));
+                return hasKeyword || hasPath;
+            } catch (_) {
+                return true;
+            }
+        };
+
         const scrapedImg = (
             $('meta[property="og:image"]').attr('content') ||
             $('meta[name="twitter:image"]').attr('content') ||
-            $('article img').first().attr('src') ||
-            $('img').first().attr('src') ||
             ''
         );
+
         let imageUrl = DEFAULT_STADIUM_IMG;
         const cleanedImg = sanitizeImageUrl(scrapedImg);
-        if (cleanedImg && cleanedImg.startsWith('http')) {
-            try {
-                const u = new URL(cleanedImg);
-                const pathParts = u.pathname.toLowerCase().split('/');
-                const filename = pathParts[pathParts.length - 1] || '';
-                const parentPath = pathParts.slice(0, -1).join('/');
 
-                // Only generic/structural branding keywords in the FILENAME itself
-                const filenameBrandingIndicators = [
-                    'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                    'og-image', 'og_image', 'site-logo', 'site_logo', 'default-image', 'default_image',
-                    'noimage', 'no-image', 'blank', 'generic', 'share-image', 'share_image'
-                ];
-
-                // Structural branding PARENT PATHS that indicate non-article images
-                const pathBrandingIndicators = [
-                    '/logos/', '/logo/', '/brand/', '/branding/',
-                    '/default_images/', '/default-images/',
-                    '/assets/images/', '/site-assets/'
-                ];
-
-                let isBranding = filenameBrandingIndicators.some(ind => filename.includes(ind));
-                if (!isBranding) {
-                    isBranding = pathBrandingIndicators.some(p => ('/' + parentPath + '/').includes(p));
+        if (cleanedImg && !isBrandingOrAuthorImage(cleanedImg)) {
+            imageUrl = cleanedImg;
+        } else {
+            const candidateImages = [];
+            $('article img, .article-body img, #article-body img, main img').each((_, el) => {
+                const src = $(el).attr('src') || $(el).attr('data-src');
+                if (src) {
+                    const cleanCandidate = sanitizeImageUrl(src);
+                    if (cleanCandidate && cleanCandidate.startsWith('http') && !isBrandingOrAuthorImage(cleanCandidate)) {
+                        candidateImages.push(cleanCandidate);
+                    }
                 }
+            });
 
-                if (!isBranding) {
-                    imageUrl = cleanedImg;
-                } else {
-                    console.log(`  [PARSING INFO] Extracted image '${cleanedImg}' detected as branding; using fallback.`);
-                }
-            } catch (_) {}
+            if (candidateImages.length > 0) {
+                imageUrl = candidateImages[0];
+            } else if (cleanedImg && cleanedImg.startsWith('http')) {
+                imageUrl = cleanedImg;
+            }
         }
         
         // ── Published date & Age Validation ────────────────────────────────────
