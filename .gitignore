@@ -28,6 +28,7 @@ Thumbs.db
 
 # Build output
 public/
+!public/site.webmanifest
 
 .vercel
 .env*
