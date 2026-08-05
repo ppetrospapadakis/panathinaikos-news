@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html class="dark icons-loaded" lang="el">
+<head>
+<meta charset="utf-8"/>
+    <!-- Resource Hints & Preconnects -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://wsrv.nl" crossorigin>
+    <link rel="dns-prefetch" href="https://rctltbuiitdnqlxizlym.supabase.co">
+    <!-- HERO_PRELOAD_INJECT -->
+
+    <!-- Google Discover Optimization Tag -->
+  <meta name="robots" content="max-image-preview:large">
+
+  
+
+  <!-- Vercel Analytics -->
+  <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=5"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=5"/>
+    <link rel="shortcut icon" href="/favicon.png?v=5"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=5"/>
+    <meta name="theme-color" content="#111317"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος</title>
+    <meta name="description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ."/>
+    <meta property="og:title" content="PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος" />
+    <meta property="og:description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ." />
+    <meta property="og:image" content="https://www.panathinaikosnews.gr/logo.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.panathinaikosnews.gr/" />
+    <meta property="og:locale" content="el_GR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PanathinaikosNews - Όλα τα νέα του Παναθηναϊκού σε ένα μέρος" />
+    <meta name="twitter:description" content="Όλα τα νέα του Παναθηναϊκού σε ένα μέρος. Ζωντανή ενημέρωση, αναλύσεις και ρεπορτάζ." />
+    <meta name="twitter:image" content="https://www.panathinaikosnews.gr/logo.png" />
+    <link rel="canonical" href="https://www.panathinaikosnews.gr/"/>
+    
+    <!-- Compiled Tailwind CSS -->
+    <link rel="preload" href="/style.css?v=5" as="style">
+    <link rel="stylesheet" href="/style.css?v=5">
+
+    <!-- Geist Font: loaded directly (not via CSS @import) to avoid render-blocking chain -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap"></noscript>
+
+    <!-- Material Symbols: display=swap to eliminate FOIT (Flash of Invisible Text) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    
+    <script>
+        // Reveal icons only after Material Symbols font is loaded to avoid flash of raw text
+        document.fonts.load('400 24px "Material Symbols Outlined"').then(() => {
+            document.documentElement.classList.add('icons-loaded');
+        }).catch(() => {
+            document.documentElement.classList.add('icons-loaded');
+        });
+    </script>
+
+    <!-- Google Analytics (Lazy Loaded) -->
+<script>
+  (function() {
+    let gtagLoaded = false;
+    function loadGtag() {
+        if (gtagLoaded) return;
+        gtagLoaded = true;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-HGPHW30Z14');
+        const script = document.createElement('script');
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14";
+        script.async = true;
+        document.head.appendChild(script);
+        ['scroll','mousemove','touchstart','keydown'].forEach(e => window.removeEventListener(e, loadGtag));
+    }
+    ['scroll','mousemove','touchstart','keydown'].forEach(e => window.addEventListener(e, loadGtag, {once:true, passive:true}));
+    setTimeout(loadGtag, 8000); // Fallback
+  })();
+</script>
+    <!-- Sync tab highlight: runs before paint to prevent flicker -->
+    <script>
+    (function() {
+        var TAB_ACTIVE   = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
+        var TAB_INACTIVE = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center';
+        var catMap = { 'football': 'tab-football', 'podosfairo': 'tab-football', 'basket': 'tab-basketball', 'basketball': 'tab-basketball', 'erasitexnis': 'tab-amateur', 'apopsi': 'tab-opinion', 'agones': null };
+        var cat = new URLSearchParams(window.location.search).get('category') || '';
+        var activeTabId = catMap[cat.toLowerCase()] || (cat === '' ? 'tab-all' : null);
+        // Apply before DOM is fully painted by hooking into DOMContentLoaded at capture phase
+        document.addEventListener('DOMContentLoaded', function() {
+            ['tab-all','tab-football','tab-basketball','tab-amateur','tab-opinion'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.className = (id === activeTabId) ? TAB_ACTIVE : TAB_INACTIVE;
+            });
+        }, true); // capture phase = runs before other listeners
+    })();
+    </script>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden overflow-y-scroll">
+
+    <!-- ═══ TOP HEADER ═══ -->
+    <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8 relative">
+            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" onclick="toggleDrawer()" aria-label="Menu">
+                <span class="material-symbols-outlined text-primary">menu</span>
+            </button>
+            <div class="absolute inset-0 px-[60px] sm:px-0 flex items-center justify-center pointer-events-none">
+                <a href="/" class="flex items-center pointer-events-auto">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-[64px] sm:h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+                </a>
+            </div>
+            <a href="https://www.google.com/preferences/source?q=panathinaikosnews.gr" target="_blank" rel="noopener noreferrer" class="z-10 group flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/40 bg-surface-container-high/80 hover:bg-surface-container-highest hover:border-primary/50 text-on-surface transition-all duration-300 shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer" title="Προσθήκη στις προτιμώμενες πηγές του Google">
+                <svg class="w-4 h-4 shrink-0 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span class="hidden md:inline font-body text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface transition-colors whitespace-nowrap">Προσθήκη στη Google</span>
+                <span class="md:hidden text-primary font-bold text-xs">+</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
+    <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
+        <div class="flex items-center justify-between gap-2 mb-8 pr-1">
+            <a href="/" class="flex items-center shrink min-w-0">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" width="261" height="74"/>
+            </a>
+            <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors shrink-0 p-1" onclick="toggleDrawer()">close</button>
+        </div>
+
+        <!-- Category label -->
+        <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
+
+        <nav class="flex flex-col gap-1">
+            <a id="nav-all" class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all" href="/" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed(null,'nav-all'); toggleDrawer(); }">
+                <span class="material-symbols-outlined">feed</span>
+                <span>Ροή Ειδήσεων</span>
+            </a>
+            <a id="nav-football" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/podosfairo" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed('Ποδόσφαιρο','nav-football'); toggleDrawer(); }">
+                <span class="material-symbols-outlined">sports_soccer</span>
+                <span>Ποδόσφαιρο</span>
+            </a>
+            <a id="nav-basketball" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/basket" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed('Μπάσκετ','nav-basketball'); toggleDrawer(); }">
+                <span class="material-symbols-outlined">sports_basketball</span>
+                <span>Μπάσκετ</span>
+            </a>
+            <a id="nav-amateur" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/erasitechnis" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed('Ερασιτέχνης','nav-amateur'); toggleDrawer(); }">
+                <span class="material-symbols-outlined">directions_run</span>
+                <span>Ερασιτέχνης</span>
+            </a>
+            <a id="nav-opinion" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/apopsi" onclick="if(!event.ctrlKey && !event.metaKey) { event.preventDefault(); filterFeed('Άποψη','nav-opinion'); toggleDrawer(); }">
+                <span class="material-symbols-outlined">rate_review</span>
+                <span>Άποψη</span>
+            </a>
+            <a id="nav-roster" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
+                <span class="material-symbols-outlined">groups</span>
+                <span>Ρόστερ</span>
+            </a>
+            <a id="nav-item-fixtures" class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/fixtures">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span>Πρόγραμμα</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
+            <p class="font-caption text-caption text-on-surface-variant/50">© 2026 PanathinaikosNews Editorial</p>
+            <a href="/login.html" class="text-on-surface-variant/30 hover:text-primary transition-colors" title="Admin Panel">
+                <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
+            </a>
+        </div>
+    </aside>
+    <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
+
+
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="mt-[80px]">
+
+        
+
+        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
+            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+                <a id="tab-all" href="/" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed(null,'tab-all');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
+                <a id="tab-football" href="/podosfairo" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ποδόσφαιρο','tab-football');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball" href="/basket" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Μπάσκετ','tab-basketball');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="/erasitexnis" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Ερασιτέχνης','tab-amateur');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🤾 Ερασιτέχνης</a>
+                <a id="tab-opinion" href="/apopsi" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault(); filterFeed('Άποψη','tab-opinion');}" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
+                <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📊 ΡΟΣΤΕΡ</a>
+                <a id="tab-item-fixtures" href="/fixtures" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📅 ΠΡΟΓΡΑΜΜΑ</a>
+            </div>
+        </div>
+
+        <!-- Dynamic Articles Grid (3-Phase Staggered Loading) -->
+        <section class="max-w-[1440px] mx-auto px-0 md:px-8 py-6 md:py-16" id="main-feed-section">
+            <!-- Phase 1 (Hero) + Phase 2 (Stream) grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 min-h-[500px] items-start">
+            <!-- Hero Section (Left 8 cols) -->
+            <div class="lg:col-span-8 flex flex-col" id="hero-container">
+                    <!-- HERO_START -->
+                    <div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end">
+                        <div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div>
+                        <div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div>
+                        <div class="h-4 bg-surface-container-high w-full rounded"></div>
+                    </div>
+                    <!-- HERO_END -->
+                </div>
+                <!-- Stream: right 4 cols — Phase 2 skeletons initially -->
+                <div class="md:col-span-4 flex flex-col w-full">
+                <div id="stream-title" class="flex items-center gap-2 mb-4 mt-4 lg:mt-0 px-2">
+                    <span class="material-symbols-outlined text-primary text-xl">rss_feed</span>
+                    <h2 class="font-label text-label text-primary uppercase tracking-widest font-bold">Ροη Ειδησεων</h2>
+                </div>
+                    <div id="stream-container" class="flex flex-col gap-3 px-4 md:px-0 min-h-[500px] max-h-[500px] lg:max-h-[700px]" style="overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e7d32 transparent;">
+                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl min-h-[110px]">
+                        <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                        <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div><div class="h-3 bg-surface-container-high w-1/2 rounded"></div></div>
+                    </div>
+                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl min-h-[110px]">
+                        <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                        <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
+                    </div>
+                    <div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl min-h-[110px]">
+                        <div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div>
+                        <div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <!-- Phase 3: deferred sections (populated when scrolled into view) -->
+            <div id="editorial-section"></div>
+            <div id="more-news-section"></div>
+            <!-- Infinite scroll sentinel -->
+            <div id="feed-sentinel" class="w-full flex justify-center mt-8 hidden">
+                <div id="sentinel-loader" class="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+            </div>
+        </section>
+
+        <!-- Quick links bar -->
+        <section class="max-w-[1440px] mx-auto px-4 md:px-8 pb-16">
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4" id="quick-links-container">
+            </div>
+        </section>
+    </main>
+
+        <!-- Footer -->
+    <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant">
+        <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col items-center gap-8">
+            <a href="/" class="flex items-center">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-[64px] sm:h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+            </a>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/privacy-policy">Πολιτική Απορρήτου</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/terms-of-service">Όροι Χρήσης</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/contact">Επικοινωνία</a>
+            </div>
+            <p class="font-caption text-caption text-on-surface-variant/70">© 2026 PanathinaikosNews. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- ═══ API ROUTE + APP LOGIC ═══ -->
+    <script>
+    (function() {
+
+        // ── State ──────────────────────────────────────────────────────────────
+        let activeCategory = null;
+        let allArticles    = [];   // full stream (page 1+)
+        let ownArticles    = [];   // manual/opinion articles
+        let streamPage     = 2;    // next page to load (page 1 already loaded)
+        let streamHasMore  = true;
+        window.currentHeroId = null;
+        window.currentHeroDate = null;
+        let isFetchingMore = false;
+        let editorialDone  = false;
+        let moreNewsDone   = false;
+           // ── Date Formatting Helpers ────────────────────────────────────────────
+        function formatExactDate(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} - ${hours}:${minutes}`;
+        }
+
+        let sentinelObserver   = null;
+        let editorialObserver  = null;
+        let moreNewsObserver   = null;
+
+        // ── Default image ──────────────────────────────────────────────────────
+        const DEFAULT_IMG = '/logo.png';
+
+        // ── Helpers ────────────────────────────────────────────────────────────
+        function toggleDrawer() {
+            const drawer = document.getElementById('nav-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            drawer.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('opacity-0');
+            overlay.classList.toggle('pointer-events-none');
+        }
+        window.toggleDrawer = toggleDrawer;
+
+
+
+        function timeAgo(dateStr) {
+            try {
+                const diff = Date.now() - new Date(dateStr).getTime();
+                const m = Math.floor(diff/60000), h = Math.floor(m/60), d = Math.floor(h/24);
+                if (isNaN(m)) return 'Πρόσφατα';
+                if (m < 1)  return 'Μόλις τώρα';
+                if (m < 60) return `${m}λ πριν`;
+                if (h < 24) return `${h}ω πριν`;
+                return `${d}μ πριν`;
+            } catch(e) { return 'Πρόσφατα'; }
+        }
+
+        function greekToLatin(text) {
+            if (!text) return "";
+            let str = text.toLowerCase();
+            str = str
+                .replace(/αι|αί/g, 'ai')
+                .replace(/ει|εί/g, 'ei')
+                .replace(/οι|οί/g, 'oi')
+                .replace(/ου|ού/g, 'ou')
+                .replace(/αυ|αύ/g, 'av')
+                .replace(/ευ|εύ/g, 'ev')
+                .replace(/μπ/g, 'b')
+                .replace(/ντ/g, 'nt')
+                .replace(/γκ/g, 'gk')
+                .replace(/γγ/g, 'ng')
+                .replace(/τζ/g, 'tz')
+                .replace(/τσ/g, 'ts')
+                .replace(/θ/g, 'th')
+                .replace(/χ/g, 'ch')
+                .replace(/ψ/g, 'ps')
+                .replace(/ξ/g, 'x');
+
+            const singleMap = {
+                'α': 'a', 'ά': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'έ': 'e',
+                'ζ': 'z', 'η': 'i', 'ή': 'i', 'ι': 'i', 'ί': 'i', 'ϊ': 'i', 'ΐ': 'i',
+                'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ο': 'o', 'ό': 'o', 'π': 'p',
+                'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'ύ': 'y', 'ϋ': 'y',
+                'ΰ': 'y', 'φ': 'f', 'ω': 'o', 'ώ': 'o'
+            };
+
+            let res = '';
+            for (let i = 0; i < str.length; i++) {
+                const c = str[i];
+                res += singleMap[c] !== undefined ? singleMap[c] : c;
+            }
+            return res;
+        }
+
+        function slugify(text) {
+            if (!text) return "arthro";
+            try {
+                let latin = greekToLatin(text);
+                let slug = latin
+                    .toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]+/g, '')
+                    .replace(/--+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '');
+                    
+                if (slug.length > 35) {
+                    const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+                    slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
+                }
+                return slug || "arthro";
+            } catch(e) {
+                return "arthro";
+            }
+        }
+
+        function isOwnArticle(a) {
+            if (!a) return false;
+            const src = (a.source_url || '').toLowerCase();
+            const cat = (a.category || '').toLowerCase();
+            return src.startsWith('manual') || 
+                   src.includes('opinion://manual') || 
+                   src.includes('opinion://system-roster') || 
+                   cat.includes('άποψη') || 
+                   cat.includes('apopsi');
+        }
+
+        function getCategoryCleanName(category) {
+            const cat = (category || '').toLowerCase();
+            if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
+            if (cat.includes('μπάσκετ')    || cat.includes('basketball')) return 'basket';
+            if (cat.includes('ερασιτέχνης')|| cat.includes('amateur'))   return 'erasitexnis';
+            if (cat.includes('άποψη')      || cat.includes('opinion'))   return 'apopsi';
+            return 'pao';
+        }
+
+        function getCategoryPath(category) {
+            if (!category) return '/';
+            return `/${getCategoryCleanName(category)}`;
+        }
+
+        function getApiCat(category) {
+            if (category === 'Ποδόσφαιρο') return 'football';
+            if (category === 'Μπάσκετ')    return 'basket';
+            if (category === 'Ερασιτέχνης')return 'erasitexnis';
+            if (category === 'Άποψη')      return 'apopsi';
+            return '';
+        }
+
+        function processImage(a) {
+            let imageUrl = a.image_url || '';
+            if (!imageUrl) { a.image_url = DEFAULT_IMG; return a; }
+            try {
+                if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+                let u;
+                if (imageUrl.startsWith('/')) {
+                    u = new URL(imageUrl, 'https://www.panathinaikosnews.gr');
+                } else {
+                    u = new URL(imageUrl);
+                }
+                const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+                const BRANDING_FN = ['logo','icon','avatar','branding','placeholder','fallback','watermark','og-image','og_image','site-logo','site_logo','default-image','default_image','noimage','no-image','blank','generic','share-image','share_image'];
+                const BRANDING_PATH = ['/logos/','/logo/','/brand/','/branding/','/default_images/','/default-images/','/assets/images/','/site-assets/'];
+                const isInternal = u.hostname.includes('localhost') || u.hostname.includes('panathinaikosnews.gr') || imageUrl.startsWith('/');
+                const isBranding = !isInternal && (BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p)));
+                if (isBranding) {
+                    a.image_url = DEFAULT_IMG;
+                } else if (!isInternal && !u.hostname.includes('wsrv.nl')) {
+                    // Proxy external image to reduce network payload & serve optimized WebP
+                    a.image_url = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=480&output=webp&q=80`;
+                }
+            } catch(_) {}
+            return a;
+        }
+
+        // ── Quick links (bottom bar) ───────────────────────────────────────────
+        const ALL_LINKS = [
+            { name: 'Όλα',           category: null,          icon: 'feed',            url: '/' },
+            { name: '⚽ Ποδόσφαιρο', category: 'Ποδόσφαιρο', icon: 'sports_soccer',   url: '/podosfairo' },
+            { name: '🏀 Μπάσκετ',   category: 'Μπάσκετ',    icon: 'sports_basketball',url: '/basket' },
+            { name: '🤾 Ερασιτέχνης',category: 'Ερασιτέχνης',icon: 'sports',          url: '/erasitexnis' },
+            { name: '✍️ Άποψη',     category: 'Άποψη',       icon: 'rate_review',     url: '/apopsi' },
+            { name: '📊 ΡΟΣΤΕΡ',    category: 'Roster',      icon: 'groups',          url: 'roster.html' },
+            { name: '📅 Πρόγραμμα', category: 'Schedule',    icon: 'calendar_month',  url: 'fixtures.html' }
+        ];
+
+        function renderQuickLinks() {
+            const container = document.getElementById('quick-links-container');
+            if (!container) return;
+            container.innerHTML = '';
+            ALL_LINKS
+                .filter(link => !(link.category === null && activeCategory === null))
+                .filter(link => link.category !== activeCategory)
+                .forEach(link => {
+                    const isHtml = link.url.endsWith('.html');
+                    const tag = `<a href="${link.url}" ${!isHtml ? `onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();filterFeed(${link.category?`'${link.category}'`:'null'});window.scrollTo({top:0,behavior:'smooth'})}"` : ''}
+                        class="flex flex-col items-center gap-2 py-4 px-3 sm:py-5 sm:px-4 bg-surface-container rounded-xl border border-outline-variant/20 hover:border-primary/40 card-hover transition-all group text-center">
+                        <span class="material-symbols-outlined text-primary text-2xl sm:text-3xl">${link.icon}</span>
+                        <span class="font-h4 text-xs sm:text-sm font-bold group-hover:text-primary transition-colors whitespace-nowrap">${link.name}</span>
+                    </a>`;
+                    container.insertAdjacentHTML('beforeend', tag);
+                });
+        }
+
+        // ── Tab / Drawer highlight ─────────────────────────────────────────────
+        function updateNavStyles(category) {
+            const TABS = ['tab-all','tab-football','tab-basketball','tab-amateur','tab-opinion'];
+            const TAB_MAP = {null:'tab-all','Ποδόσφαιρο':'tab-football','Μπάσκετ':'tab-basketball','Ερασιτέχνης':'tab-amateur','Άποψη':'tab-opinion'};
+            Object.values(TAB_MAP).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center';
+            });
+            const activeTab = TAB_MAP[category];
+            if (activeTab) {
+                const el = document.getElementById(activeTab);
+                if (el) {
+                    el.className = 'cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center';
+                    const container = el.parentElement;
+                    if (container) {
+                        requestAnimationFrame(() => {
+                            const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
+                            container.scrollTo({ left: scrollLeft });
+                        });
+                    }
+                }
+            }
+
+            const DRAWER = ['nav-all','nav-football','nav-basketball','nav-amateur','nav-opinion'];
+            const DRAWER_MAP = {null:'nav-all','Ποδόσφαιρο':'nav-football','Μπάσκετ':'nav-basketball','Ερασιτέχνης':'nav-amateur','Άποψη':'nav-opinion'};
+            DRAWER.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.className = 'flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all';
+            });
+            const activeDrawer = DRAWER_MAP[category];
+            if (activeDrawer) {
+                const el = document.getElementById(activeDrawer);
+                if (el) el.className = 'flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-body text-body transition-all';
+            }
+
+            const TITLES = {null:'Ροή Ειδήσεων','Ποδόσφαιρο':'Ποδόσφαιρο','Μπάσκετ':'Μπάσκετ','Ερασιτέχνης':'Ερασιτέχνης','Άποψη':'Η Άποψη Μας'};
+            const feedTitle = document.getElementById('feed-title');
+            if (feedTitle) feedTitle.textContent = TITLES[category] || 'Ροή Ειδήσεων';
+            const liveLabel = document.getElementById('feed-live-stream-label');
+            if (liveLabel) liveLabel.style.display = category === 'Άποψη' ? 'none' : 'block';
+        }
+
+
+
+        
+        
+
+        
+        
+        window.scrollCarousel = function(direction) {
+            const c = document.getElementById('own-carousel-container');
+            if (c) c.scrollBy({ left: direction === 'left' ? -380 : 380, behavior: 'smooth' });
+        };
+
+
+
+        // Helper to check if user is admin
+        function isAdmin() {
+            const authed = sessionStorage.getItem('op_auth') === '1';
+            if (authed) {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+            }
+            return authed;
+        }
+        document.addEventListener('DOMContentLoaded', () => { isAdmin(); });
+
+        // Render Pin Button for stream card
+        function pinButtonHtml(articleId, pinnedAt) {
+            if (!isAdmin()) return '';
+            const pinAgeMs = pinnedAt ? Date.now() - new Date(pinnedAt).getTime() : Infinity;
+            const isPinned = pinAgeMs < 3 * 60 * 60 * 1000;
+            const pinColor = isPinned ? 'text-primary bg-primary/20' : 'text-on-surface/40 hover:text-primary hover:bg-primary/20 bg-background/80';
+            const pinIcon = isPinned ? 'keep_off' : 'keep';
+            
+            return `
+            <div class="absolute top-2 right-2 z-20 flex gap-2" style="pointer-events: auto;">
+                <button onclick="window.togglePin('${articleId}', ${isPinned}, event)" class="w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant/30 backdrop-blur transition-all active:scale-90 ${pinColor}" title="${isPinned ? 'Unpin' : 'Pin'}">
+                    <span class="material-symbols-outlined" style="font-size:16px">${pinIcon}</span>
+                </button>
+                <button onclick="window.deleteArticle('${articleId}', event)" class="w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant/30 backdrop-blur transition-all active:scale-90 text-on-surface/40 hover:text-error hover:bg-error/20 bg-background/80" title="Διαγραφή">
+                    <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                </button>
+            </div>`;
+        }
+
+        // ── Render helpers ─────────────────────────────────────────────────────
+
+
+        function sideCardHtml(a) {
+            const slug      = slugify(a.title);
+            const catPath   = getCategoryCleanName(a.category);
+            const url       = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+            const isOwn     = isOwnArticle(a);
+            const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
+            const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+            const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+            const imgBoxClass = isOwn ? 'w-[128px] h-[72px]' : 'w-[72px] h-[72px]';
+            const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
+            const pinAgeMs = a.pinned_at ? Date.now() - new Date(a.pinned_at).getTime() : Infinity;
+            const isPinned = pinAgeMs < 3 * 60 * 60 * 1000;
+            const borderClass = isPinned ? 'border-primary/40 bg-primary/5' : 'border-outline-variant/10 bg-surface-container/30';
+            const pinPrefix = isPinned ? '📌 ' : '';
+            return `<a class="relative group cursor-pointer flex gap-3 items-start p-4 rounded-xl hover:bg-surface-container/70 transition-all card-hover border ${borderClass} text-left min-h-[110px]" href="${url}" data-article-id="${a.id}">${pinButtonHtml(a.id, a.pinned_at)}
+                <div class="${imgBoxClass} flex-shrink-0 rounded-lg overflow-hidden">
+                    <img referrerpolicy="no-referrer" class="w-full h-full ${imageFit} group-hover:scale-110 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="font-label text-label text-primary uppercase text-xs tracking-wider flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors mt-1 line-clamp-2" style="font-size:14px;line-height:1.4">${pinPrefix}${a.title}</h3>
+                </div>
+            </a>`;
+        }
+
+        function gridCardHtml(a) {
+            const slug     = slugify(a.title);
+            const catPath  = getCategoryCleanName(a.category);
+            const url      = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+            const isOwn    = isOwnArticle(a);
+            const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
+            const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+            const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+            const border   = isOwn ? 'border-primary/30 bg-primary/5' : 'border-outline-variant/10 bg-surface-container/30';
+            const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
+            let bulletsHtml = '';
+            if (a.bullets && a.bullets.length > 0) {
+                bulletsHtml = `<div class="mt-3 p-3 bg-surface-container-low/60 rounded-lg border border-outline-variant/20">
+                     <div class="text-xs uppercase tracking-widest text-primary font-bold mb-1">⚡ AI SUMMARY</div>
+                     <ul class="list-disc pl-5 space-y-1 text-xs text-on-surface-variant leading-relaxed">
+                         ${a.bullets.map(b=>`<li>${b}</li>`).join('')}
+                     </ul>
+                 </div>`;
+            }
+            return `<a class="group cursor-pointer rounded-xl border flex flex-col overflow-hidden card-hover ${border}" href="${url}" data-article-id="${a.id}">
+                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                    <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full ${imageFit} group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                </div>
+                <div class="p-5 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase mb-1 flex flex-wrap items-center gap-y-1">${formatExactDate(a.created_at)} ${badge} ${officialBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                    <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
+                    <div class="mt-auto">
+                        ${bulletsHtml}
+                    </div>
+                </div>
+            </a>`;
+        }
+
+        // ── Phase 1: Render Hero ───────────────────────────────────────────────
+        function renderHero(a) {
+            const heroEl = document.getElementById('hero-container');
+            if (!heroEl || !a || !a.title) return;
+
+            const slug    = slugify(a.title);
+            const catPath = getCategoryCleanName(a.category);
+            const url     = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+            const isOwn   = isOwnArticle(a);
+            const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
+            const ageMs   = Date.now() - new Date(a.created_at).getTime();
+            const isFresh = ageMs < 60 * 60 * 1000;
+            const showLatest = !isOwn && a.category !== 'Άποψη' && isFresh;
+            const latestBadge = showLatest
+                ? `<div class="absolute top-3 left-3 px-3 py-1 bg-tertiary text-on-tertiary font-label text-label rounded font-bold tracking-wider">LATEST</div>`
+                : '';
+            const officialHeroBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#60a5fa]/30 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
+
+            let bulletsHtml = '';
+            if (a.bullets && a.bullets.length > 0) {
+                bulletsHtml = `<div class="mt-4 p-4 bg-background/60 rounded-xl border border-primary/25 overflow-hidden">
+                    <div class="text-xs uppercase tracking-widest text-primary font-bold mb-2">⚡ AI SUMMARY</div>
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-on-surface-variant leading-relaxed">
+                        ${a.bullets.map(b=>`<li>${b}</li>`).join('')}
+                    </ul>
+                </div>`;
+            }
+
+            const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
+            const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
+
+            const heroContainer = document.getElementById('hero-container');
+            const streamContainer = document.getElementById('stream-container');
+            const streamWrapper = streamContainer ? streamContainer.parentElement : null;
+            if (heroContainer) heroContainer.className = 'lg:col-span-8 flex flex-col';
+            if (streamWrapper) streamWrapper.classList.remove('hidden');
+
+            heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
+                ${pinButtonHtml(a.id, a.pinned_at)}
+                <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    ${latestBadge}
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <span class="font-label text-label text-primary uppercase tracking-widest mb-2 flex items-center gap-y-1 flex-wrap">${formatExactDate(a.created_at)} ${heroBadge} ${officialHeroBadge} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                    <h2 class="font-h2 text-h2 group-hover:text-primary transition-colors leading-tight">${a.title}</h2>
+                    <p class="font-body text-body text-on-surface-variant mt-2 line-clamp-2">${a.summary||''}</p>
+                    <div class="mt-auto overflow-hidden">
+                        ${bulletsHtml}
+                    </div>
+                </div>
+            </a>`;
+
+            // Sync stream height to hero height on desktop
+            syncStreamHeight();
+        }
+
+        function syncStreamHeight() {
+            const hero   = document.getElementById('hero-container');
+            const stream = document.getElementById('stream-container');
+            if (!hero || !stream) return;
+            let isSyncing = false;
+            const doSync = () => {
+                if (window.innerWidth < 768) {
+                    stream.style.maxHeight = ''; // reset on mobile to avoid layout shifts
+                    return;
+                }
+                if (isSyncing) return;
+                isSyncing = true;
+                requestAnimationFrame(() => {
+                    isSyncing = false;
+                    const h = hero.clientHeight;
+                    const title = document.getElementById('stream-title');
+                    let titleOffset = 0;
+                    if (title) {
+                        const style = window.getComputedStyle(title);
+                        titleOffset = title.offsetHeight + parseFloat(style.marginTop || 0) + parseFloat(style.marginBottom || 0);
+                    }
+                    const targetHeight = h - titleOffset;
+                    requestAnimationFrame(() => {
+                        stream.style.maxHeight = targetHeight > 200 ? `${targetHeight}px` : '700px';
+                    });
+                });
+            };
+            [50, 300, 800].forEach(t => setTimeout(doSync, t));
+            const img = hero.querySelector('img');
+            if (img) img.addEventListener('load', doSync);
+            window.removeEventListener('resize', doSync);
+            window.addEventListener('resize', doSync);
+        }
+
+        // ── Phase 2: Render Stream (sidebar) ──────────────────────────────────
+        function renderStream(articles) {
+            const stream = document.getElementById('stream-container');
+            if (!stream) return;
+
+            // Separate scrapers vs own
+            let scraperGroups = [], ownGroups = [];
+            const groups = {};
+            articles.forEach(a => {
+                const gid = a.group_id || ('solo-' + a.id);
+                if (!groups[gid]) groups[gid] = [];
+                groups[gid].push(a);
+            });
+            const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
+            const sorted = Object.values(groups).map(g => {
+                g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
+                return { main: g[0], related: g.slice(1) };
+            }).sort((a,b) => getTime(b.main.created_at) - getTime(a.main.created_at));
+
+            sorted.forEach(g => {
+                const isOwn = isOwnArticle(g.main);
+                if (activeCategory === null || activeCategory === 'Άποψη') {
+                    if (isOwn) ownGroups.push(g);
+                    else scraperGroups.push(g);
+                } else {
+                    scraperGroups.push(g);
+                }
+            });
+
+            // Hero logic with cache mismatch handling
+            let candidateHeroGroup = null;
+            if (activeCategory !== 'Άποψη') {
+                if (activeCategory === null) {
+                    candidateHeroGroup = scraperGroups.find(g => !(g.main.category || '').includes('Ερασιτέχνης')) || ownGroups[0];
+                } else {
+                    candidateHeroGroup = scraperGroups[0] || ownGroups[0];
+                }
+            }
+            
+            if (candidateHeroGroup) {
+                if (!window.currentHeroId) {
+                    window.currentHeroId = candidateHeroGroup.main.id;
+                    window.currentHeroDate = candidateHeroGroup.main.created_at;
+                    renderHero(candidateHeroGroup.main);
+                } else if (activeCategory === null && new Date(candidateHeroGroup.main.created_at) > new Date(window.currentHeroDate)) {
+                    // Stream API returned a NEWER article than the Hero API/SSR!
+                    window.currentHeroId = candidateHeroGroup.main.id;
+                    window.currentHeroDate = candidateHeroGroup.main.created_at;
+                    renderHero(candidateHeroGroup.main);
+                }
+            }
+
+            // Safely filter out the Hero from groups to prevent duplicates
+            if (window.currentHeroId) {
+                scraperGroups = scraperGroups.filter(g => g.main.id !== window.currentHeroId);
+                ownGroups = ownGroups.filter(g => g.main.id !== window.currentHeroId);
+            }
+
+            // Stream = scraper articles + own articles merged by date
+            let sideCandidates = scraperGroups;
+
+            // Prioritize pinned articles (within 3 hours) to the absolute top of the stream candidates
+            sideCandidates.sort((a, b) => {
+                const pinAgeA = a.main.pinned_at ? Date.now() - new Date(a.main.pinned_at).getTime() : Infinity;
+                const pinAgeB = b.main.pinned_at ? Date.now() - new Date(b.main.pinned_at).getTime() : Infinity;
+                const isPinnedA = pinAgeA < 3 * 60 * 60 * 1000;
+                const isPinnedB = pinAgeB < 3 * 60 * 60 * 1000;
+                if (isPinnedA && !isPinnedB) return -1;
+                if (!isPinnedA && isPinnedB) return 1;
+                return 0; // maintain original recency sort otherwise
+            });
+
+            // Render first 20 into sidebar
+            stream.innerHTML = sideCandidates.slice(0, 20).map(g => sideCardHtml(g.main)).join('');
+
+            // Sidebar infinite scroll from local cache + API
+            let sideCount = Math.min(20, sideCandidates.length);
+            
+            const loadMoreStream = async () => {
+                if (sideCount >= sideCandidates.length && !isFetchingMore && streamHasMore) {
+                    const oldLength = allArticles.length;
+                    await fetchMorePages();
+                    const newArticles = allArticles.slice(oldLength);
+                    
+                    const newGroupsObj = {};
+                    newArticles.forEach(a => {
+                        const gid = a.group_id || ('solo-' + a.id);
+                        if (!newGroupsObj[gid]) newGroupsObj[gid] = [];
+                        newGroupsObj[gid].push(a);
+                    });
+                    
+                    const getTime = (str) => { const t = new Date(str).getTime(); return isNaN(t) ? 0 : t; };
+                    Object.values(newGroupsObj).forEach(g => {
+                        g.sort((a,b) => getTime(b.created_at) - getTime(a.created_at));
+                        if (window.currentHeroId && g[0].id === window.currentHeroId) return;
+                        sideCandidates.push({ main: g[0], related: g.slice(1) });
+                    });
+                }
+
+                if (sideCount < sideCandidates.length) {
+                    const batch = sideCandidates.slice(sideCount, sideCount + 10);
+                    batch.forEach(g => stream.insertAdjacentHTML('beforeend', sideCardHtml(g.main)));
+                    sideCount += batch.length;
+                }
+            };
+            
+            stream.addEventListener('scroll', async () => {
+                if (stream.scrollTop + stream.clientHeight >= stream.scrollHeight - 150) {
+                    await loadMoreStream();
+                }
+            });
+            
+            if (window.streamMobileScrollHandler) {
+                window.removeEventListener('scroll', window.streamMobileScrollHandler);
+            }
+            window.streamMobileScrollHandler = async () => {
+                if (window.innerWidth >= 1024) return;
+                const rect = stream.getBoundingClientRect();
+                if (rect.bottom <= window.innerHeight + 800) {
+                    await loadMoreStream();
+                }
+            };
+            window.addEventListener('scroll', window.streamMobileScrollHandler);
+            
+
+            // Phase 3 setup (deferred bottom sections)
+            setupPhase3(scraperGroups, ownGroups, sideCandidates);
+
+            // Sync height
+            syncStreamHeight();
+        }
+
+        // ── Phase 3: Deferred bottom sections ─────────────────────────────────
+        function setupPhase3(scraperGroups, ownGroups, sideCandidates) {
+            // Disconnect old observers
+            if (editorialObserver) editorialObserver.disconnect();
+            if (moreNewsObserver)  moreNewsObserver.disconnect();
+            if (sentinelObserver)  sentinelObserver.disconnect();
+            editorialDone = false;
+            moreNewsDone  = false;
+
+            const editorialEl = document.getElementById('editorial-section');
+            const moreNewsEl  = document.getElementById('more-news-section');
+            const sentinel    = document.getElementById('feed-sentinel');
+
+            // Reset sections
+            if (editorialEl) editorialEl.innerHTML = '';
+            if (moreNewsEl)  moreNewsEl.innerHTML  = '';
+            if (sentinel)    sentinel.classList.add('hidden');
+
+            // Editorial section (Αρθρογραφία) — own articles, homepage only
+            if (activeCategory === null) {
+                const ownToShow = ownArticles.length > 0
+                    ? ownArticles
+                    : ownGroups.map(g => g.main);
+
+                if (ownToShow.length > 0 && editorialEl) {
+                    editorialObserver = new IntersectionObserver(entries => {
+                        if (entries[0].isIntersecting && !editorialDone) {
+                            editorialDone = true;
+                            editorialObserver.disconnect();
+                            renderEditorial(ownToShow, editorialEl);
+                        }
+                    }, { rootMargin: '100px' });
+                    editorialObserver.observe(editorialEl);
+                }
+            }
+
+            // More News section (Περισσότερες Ειδήσεις)
+            const bottomArticles = activeCategory === 'Άποψη'
+                ? ownArticles.filter(a => isOwnArticle(a) && a.id !== window.currentHeroId)
+                : (activeCategory === null ? scraperGroups.map(g => g.main) : sideCandidates.map(g => g.main));
+
+            if (bottomArticles.length > 0 && moreNewsEl) {
+                moreNewsObserver = new IntersectionObserver(entries => {
+                    if (entries[0].isIntersecting && !moreNewsDone) {
+                        moreNewsDone = true;
+                        moreNewsObserver.disconnect();
+                        renderMoreNews(bottomArticles, moreNewsEl);
+                        // Activate bottom infinite scroll after section renders
+                        setupSentinel();
+                    }
+                }, { rootMargin: '100px' });
+                moreNewsObserver.observe(moreNewsEl);
+            }
+        }
+
+        function renderEditorial(articles, container) {
+            const carouselCards = articles.map(a => {
+                const slug   = slugify(a.title);
+                const cat    = getCategoryCleanName(a.category);
+                const url    = `/${cat}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
+                    <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
+                        <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                            <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-contain bg-surface-container/50 group-hover:scale-105 transition-transform duration-500" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'"/>
+                        </div>
+                        <div class="p-5 flex flex-col flex-1">
+                            <span class="font-label text-label text-primary uppercase mb-1 flex items-center flex-wrap gap-y-1">${formatExactDate(a.created_at)} <span id="comments-badge-${a.id}" class="ml-2 inline-flex items-center text-on-surface-variant/70 gap-0.5 text-[11px] font-bold"></span></span>
+                            <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors line-clamp-2">${a.title}</h3>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-2">${a.summary||''}</p>
+                        </div>
+                    </a>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30 px-4 md:px-0">
+                <h2 class="font-h2 text-h2 mb-6 flex items-center gap-3 flex-wrap">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-10 md:h-12 w-auto object-contain" width="169" height="48"/>
+                    <span class="text-on-surface/90 font-semibold">- Αρθρογραφία</span>
+                </h2>
+                <div class="relative group/carousel">
+                    <button onclick="scrollCarousel('left')" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <div id="own-carousel-container" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-4" style="scrollbar-width:none;-ms-overflow-style:none;">
+                        ${carouselCards}
+                    </div>
+                    <button onclick="scrollCarousel('right')" class="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container border border-outline-variant/30 flex items-center justify-center text-primary shadow-lg hover:bg-surface-container-high transition-all active:scale-95 opacity-0 group-hover/carousel:opacity-100 duration-200">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>`;
+            setTimeout(fetchCommentCounts, 150);
+        }
+
+        function renderMoreNews(articles, container) {
+            const label = activeCategory === 'Άποψη' ? 'Περισσότερη αρθρογραφία' : 'Περισσότερες Ειδήσεις';
+            container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30 px-4 md:px-0">
+                <h2 class="font-h2 text-h2 mb-6">${label}</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 md:px-0" id="bottom-grid-cards"></div>`;
+
+            const grid = document.getElementById('bottom-grid-cards');
+            articles.forEach(a => grid.insertAdjacentHTML('beforeend', gridCardHtml(a)));
+            setTimeout(fetchCommentCounts, 150);
+        }
+
+        // ── Sentinel (bottom page infinite scroll for more API pages) ──────────
+        function setupSentinel() {
+            const sentinel = document.getElementById('feed-sentinel');
+            if (!sentinel || !streamHasMore) return;
+            sentinel.classList.remove('hidden');
+            if (sentinelObserver) sentinelObserver.disconnect();
+            sentinelObserver = new IntersectionObserver(async entries => {
+                if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
+                    await fetchMorePages();
+                }
+            }, { rootMargin: '100px' });
+            sentinelObserver.observe(sentinel);
+        }
+
+        async function fetchMorePages() {
+            if (isFetchingMore || !streamHasMore) return;
+            if (activeCategory === 'Άποψη') {
+                streamHasMore = false;
+                const sentinel = document.getElementById('feed-sentinel');
+                if (sentinel) sentinel.classList.add('hidden');
+                return;
+            }
+            isFetchingMore = true;
+            const sentinel = document.getElementById('feed-sentinel');
+            try {
+                const apiCat = getApiCat(activeCategory);
+                const streamCat = activeCategory === 'Άποψη' ? '' : apiCat;
+                const res  = await fetch(`/api/articles?category=${streamCat}&page=${streamPage}`);
+                const data = await res.json();
+                if (!data || data.length === 0) {
+                    streamHasMore = false;
+                    if (sentinel) sentinel.classList.add('hidden');
+                    return;
+                }
+                const processed = data.map(processImage);
+                allArticles = allArticles.concat(processed);
+                streamPage++;
+                await new Promise(r => setTimeout(r, 400));
+
+                // Append to bottom grid
+                const grid = document.getElementById('bottom-grid-cards');
+                if (grid) processed.forEach(a => grid.insertAdjacentHTML('beforeend', gridCardHtml(a)));
+                setTimeout(fetchCommentCounts, 100);
+            } catch(err) {
+                console.error('[Sentinel]', err);
+            } finally {
+                isFetchingMore = false;
+            }
+        }
+
+        // ── Main Load Pipeline ─────────────────────────────────────────────────
+        async function startLoad() {
+            // Reset state
+            allArticles   = [];
+            ownArticles   = [];
+            streamPage    = 2;
+            streamHasMore = true;
+            editorialDone = false;
+            moreNewsDone  = false;
+            window.currentHeroId = null;
+            window.currentHeroDate = null;
+
+            const heroEl   = document.getElementById('hero-container');
+            const hasSsrHero = heroEl && heroEl.querySelector('[data-ssr="true"]');
+            if (hasSsrHero) {
+                const ssrHero = heroEl.querySelector('[data-ssr="true"]');
+                const parsed = JSON.parse(ssrHero.getAttribute('data-article') || 'null');
+                if (parsed) {
+                    window.currentHeroId = parsed.id;
+                    window.currentHeroDate = parsed.created_at;
+                    if (isAdmin()) {
+                        renderHero(processImage(parsed)); // Re-render client-side to inject admin buttons
+                    }
+                }
+            }
+
+            const streamEl = document.getElementById('stream-container');
+            const editEl   = document.getElementById('editorial-section');
+            const moreEl   = document.getElementById('more-news-section');
+            const sentinel = document.getElementById('feed-sentinel');
+            
+            if (heroEl && !hasSsrHero) heroEl.innerHTML = `<div class="animate-pulse flex flex-col gap-4 bg-surface-container rounded-xl p-8 min-h-[420px] justify-end"><div class="h-6 bg-surface-container-high w-1/4 rounded mb-2"></div><div class="h-8 bg-surface-container-high w-3/4 rounded mb-2"></div><div class="h-4 bg-surface-container-high w-full rounded"></div></div>`;
+            if (streamEl) streamEl.innerHTML = `<div class="animate-pulse flex gap-4 items-start bg-surface-container/20 p-4 rounded-xl"><div class="w-[72px] h-[72px] bg-surface-container-high rounded-lg shrink-0"></div><div class="space-y-2 w-full"><div class="h-3 bg-surface-container-high w-1/3 rounded"></div><div class="h-4 bg-surface-container-high w-3/4 rounded"></div></div></div>`.repeat(3);
+            if (editEl)   editEl.innerHTML   = '';
+            if (moreEl)   moreEl.innerHTML   = '';
+            if (sentinel) sentinel.classList.add('hidden');
+            if (sentinelObserver) sentinelObserver.disconnect();
+
+            const apiCat = getApiCat(activeCategory);
+
+            // PHASE 1 — hero (limit=1) fires immediately if no SSR hero
+            if (!hasSsrHero) {
+                const heroPromise = fetch(`/api/articles?limit=1&category=${apiCat}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data[0]) {
+                            window.currentHeroId = data[0].id;
+                            window.currentHeroDate = data[0].created_at;
+                            renderHero(processImage(data[0]));
+                        }
+                    })
+                    .catch(err => console.error('[Phase1]', err));
+            }
+
+            const streamCat = activeCategory === 'Άποψη' ? '' : apiCat;
+
+            // PHASE 2 — stream page 1 + own articles in parallel
+            const streamPromise = fetch(`/api/articles?category=${streamCat}&page=1`)
+                .then(r => r.json())
+                .then(data => data.map(processImage))
+                .catch(() => []);
+
+            const ownPromise = (activeCategory === null || activeCategory === 'Άποψη')
+                ? fetch('/api/articles?opinionOnly=true').then(r => r.json()).then(data => data.map(processImage)).catch(() => [])
+                : Promise.resolve([]);
+
+            // Fire stream and own articles in parallel AFTER Hero is painted
+            const [streamData, ownData] = await Promise.all([streamPromise, ownPromise]);
+            allArticles = streamData;
+            ownArticles = ownData;
+
+            renderStream(streamData);
+            renderQuickLinks();
+            setTimeout(fetchCommentCounts, 150);
+        }
+
+        // ── Category filter (updates URL + triggers reload) ────────────────────
+        function filterFeed(category) {
+            activeCategory = category;
+            window.history.pushState({ category }, '', getCategoryPath(category));
+            filterFeedWithoutPush(category);
+        }
+        window.filterFeed = filterFeed;
+
+        function filterFeedWithoutPush(category) {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            activeCategory = category;
+            updateNavStyles(category);
+            const heroEl = document.getElementById('hero-container');
+            if (heroEl) {
+                const ssrEl = heroEl.querySelector('[data-ssr="true"]');
+                if (ssrEl) {
+                    ssrEl.removeAttribute('data-ssr');
+                }
+            }
+            startLoad();
+            renderQuickLinks();
+        }
+
+        window.addEventListener('popstate', event => {
+            const cat = event.state && event.state.category ? event.state.category : null;
+            filterFeedWithoutPush(cat);
+        });
+
+        // ── URL routing on page load ───────────────────────────────────────────
+        function initPageFilter() {
+            const path = window.location.pathname.replace(/\/$/, '').toLowerCase();
+            let cat = null;
+            if      (path.endsWith('/podosfairo'))              cat = 'Ποδόσφαιρο';
+            else if (path.endsWith('/basket'))                  cat = 'Μπάσκετ';
+            else if (path.endsWith('/erasitechnis') || path.endsWith('/erasitexnis')) cat = 'Ερασιτέχνης';
+            else if (path.endsWith('/apopsi'))                  cat = 'Άποψη';
+
+            if (!cat) {
+                const p = new URLSearchParams(window.location.search).get('category') || '';
+                if (p === 'football')                       cat = 'Ποδόσφαιρο';
+                else if (p === 'basket' || p === 'basketball') cat = 'Μπάσκετ';
+                else if (p === 'erasitexnis' || p === 'erasitechnis' || p === 'amateur') cat = 'Ερασιτέχνης';
+                else if (p === 'apopsi' || p === 'opinion') cat = 'Άποψη';
+            }
+
+            activeCategory = cat;
+            updateNavStyles(cat);
+            startLoad();
+        }
+
+        // Admin Inline Pinning Function (destined for homepage sidebar)
+        async function togglePin(articleId, isPinned, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Optimistic UI: Find button and show loading state instantly
+            let btn = null;
+            if (event && event.currentTarget) {
+                btn = event.currentTarget;
+            } else if (event && event.target) {
+                btn = event.target.closest('button');
+            }
+            if (btn) {
+                const iconSpan = btn.querySelector('.material-symbols-outlined');
+                if (iconSpan) {
+                    iconSpan.innerText = 'sync';
+                    iconSpan.classList.add('animate-spin');
+                }
+            }
+            
+            const SUPABASE_URL = "https://rctltbuiitdnqlxizlym.supabase.co";
+            const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI";
+            
+            if (typeof supabase === 'undefined') {
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+            }
+            
+            const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            try {
+                if (isPinned) {
+                    const { error } = await db.from('articles').update({ pinned_at: null }).eq('id', articleId);
+                    if (error) throw error;
+                } else {
+                    // Enforce single pin
+                    await db.from('articles').update({ pinned_at: null }).not('pinned_at', 'is', null);
+                    const { error } = await db.from('articles').update({ pinned_at: new Date().toISOString() }).eq('id', articleId);
+                    if (error) throw error;
+                }
+                // Async reload data instead of whole page reload
+                await startLoad();
+            } catch (err) {
+                alert('Σφάλμα: ' + err.message);
+                if (btn) {
+                    const iconSpan = btn.querySelector('.material-symbols-outlined');
+                    if (iconSpan) {
+                        iconSpan.innerText = isPinned ? 'keep_off' : 'keep';
+                        iconSpan.classList.remove('animate-spin');
+                    }
+                }
+            }
+        }
+        window.togglePin = togglePin;
+
+        async function deleteArticle(articleId, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!confirm('Είσαι σίγουρος ότι θέλεις να αποκρύψεις αυτό το άρθρο;\n\nΤο άρθρο θα εξαφανιστεί από όλες τις λίστες, αλλά θα παραμένει προσβάσιμο από το άμεσο URL του (για Google).')) return;
+            
+            const SUPABASE_URL = "https://rctltbuiitdnqlxizlym.supabase.co";
+            const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI";
+            
+            if (typeof supabase === 'undefined') {
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+            }
+            const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            try {
+                // Soft-delete: mark as DELETED so it's hidden from all feeds/lists
+                // but the article page remains accessible via its direct URL (no 404 for Google)
+                const { error } = await db.from('articles').update({ category: 'DELETED' }).eq('id', articleId);
+                if (error) throw error;
+                
+                // Remove the article element from the DOM
+                const card = document.querySelector(`[data-article-id="${articleId}"]`);
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 300);
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Σφάλμα κατά την απόκρυψη: ' + e.message);
+            }
+        }
+        window.deleteArticle = deleteArticle;
+
+
+        let initialLoadDone = false;
+        async function fetchCommentCounts() {
+            if (!initialLoadDone) return;
+            const badgeElements = document.querySelectorAll('[id^="comments-badge-"]');
+            const articleIds = Array.from(badgeElements).map(el => el.id.replace('comments-badge-', ''));
+            if (articleIds.length === 0) return;
+            try {
+                const res = await fetch(`/api/comments?action=batch_counts&article_ids=${articleIds.join(',')}`);
+                if (res.ok) {
+                    const counts = await res.json();
+                    Object.keys(counts).forEach(artId => {
+                        const badge = document.getElementById('comments-badge-' + artId);
+                        if (badge && counts[artId] > 0) {
+                            badge.innerHTML = `<span class="material-symbols-outlined text-[12px] text-primary/70">forum</span>${counts[artId]}`;
+                        }
+                    });
+                }
+            } catch(e) {
+                console.error('[Comments count error]', e);
+            }
+        }
+        window.fetchCommentCounts = fetchCommentCounts;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPageFilter();
+        });
+
+        window.addEventListener('load', () => {
+            // Defer completely to unblock PageSpeed critical request chains
+            setTimeout(() => {
+                initialLoadDone = true;
+                fetchCommentCounts();
+            }, 2500);
+        });
+
+    })();
+    </script>
+
+
+<script>
+        function checkAdminNav() {
+            const el = document.getElementById('nav-item-fixtures');
+            if (el) el.classList.remove('hidden');
+            const tab = document.getElementById('tab-item-fixtures');
+            if (tab) tab.classList.remove('hidden');
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAdminNav);
+        } else {
+            checkAdminNav();
+        }
+</script>
+<script>
+(function() {
+    function showGoogleModal() {
+        let modal = document.getElementById('google-news-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'google-news-modal';
+            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 opacity-0 pointer-events-none transition-all duration-300';
+            modal.innerHTML = `
+                <div class="relative w-full max-w-[310px] sm:max-w-md bg-[#1e2022] border border-outline-variant/30 rounded-2xl p-5 sm:p-6 shadow-2xl transform scale-95 transition-all duration-300 text-center space-y-4">
+                    <div class="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#282a2d] border border-outline-variant/30 flex items-center justify-center shadow-inner">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="font-h3 text-lg sm:text-xl font-bold text-on-surface">Σύντομα διαθέσιμο στη Google!</h3>
+                    
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                        Καθώς το <strong class="text-primary font-semibold">PanathinaikosNews</strong> είναι νέο site, η διαδικασία καταχώρησης από τη Google βρίσκεται σε εξέλιξη.
+                        <br/><br/>
+                        Η δυνατότητα προσθήκης στις προτιμώμενες πηγές σας θα ενεργοποιηθεί αυτόματα σε λίγες ημέρες!
+                    </p>
+                    
+                    <button id="close-google-modal-btn" class="w-full py-2.5 px-4 bg-primary text-on-primary font-bold text-xs sm:text-sm rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer">
+                        Κατάλαβα
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function(evt) {
+                if (evt.target === modal || evt.target.id === 'close-google-modal-btn') {
+                    closeGoogleModal();
+                }
+            });
+        }
+        
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            if (modal.firstElementChild) {
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            }
+        });
+    }
+
+    function closeGoogleModal() {
+        const modal = document.getElementById('google-news-modal');
+        if (modal) {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            if (modal.firstElementChild) {
+                modal.firstElementChild.classList.remove('scale-100');
+                modal.firstElementChild.classList.add('scale-95');
+            }
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('a[href*="preferences/source"]');
+        if (btn) {
+            e.preventDefault();
+            showGoogleModal();
+        }
+    });
+})();
+</script>
+</body>
+</html>
+<!-- Force Vercel rebuild - July 8, 2026 -->
