@@ -1092,7 +1092,7 @@
             if (!confirm('Θέλετε σίγουρα να διαγράψετε αυτό το σχόλιο;')) return;
 
             try {
-                const res = await fetch('/api/comments', {
+                const res = await fetch(`/api/comments?id=${encodeURIComponent(id)}&token=admin_secure_session`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, token: 'admin_secure_session' })
@@ -1100,7 +1100,8 @@
                 if (res.ok) {
                     await loadRosterComments(sport, articleId);
                 } else {
-                    alert('Σφάλμα κατά τη διαγραφή.');
+                    const errData = await res.json().catch(() => ({}));
+                    alert(errData.error || 'Σφάλμα κατά τη διαγραφή.');
                 }
             } catch(e) {
                 console.error(e);

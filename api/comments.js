@@ -133,7 +133,22 @@ module.exports = async (req, res) => {
         }
 
         if (req.method === 'DELETE') {
-            const { id, token } = req.body || {};
+            let id = req.query ? req.query.id : null;
+            let token = req.query ? req.query.token : null;
+
+            if (req.body) {
+                if (typeof req.body === 'string') {
+                    try {
+                        const parsed = JSON.parse(req.body);
+                        if (parsed.id) id = parsed.id;
+                        if (parsed.token) token = parsed.token;
+                    } catch(e) {}
+                } else if (typeof req.body === 'object') {
+                    if (req.body.id) id = req.body.id;
+                    if (req.body.token) token = req.body.token;
+                }
+            }
+
             if (!token || token !== 'admin_secure_session') {
                 return res.status(401).json({ error: 'Unauthorized delete action.' });
             }
