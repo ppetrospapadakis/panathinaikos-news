@@ -183,10 +183,6 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/site.webmanifest",
-      "destination": "/site.webmanifest"
-    },
-    {
       "source": "/feed.xml",
       "destination": "/api/feed"
     },
