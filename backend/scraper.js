@@ -444,8 +444,8 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                 const anchorText = match[1].trim();
                 const cleanHref = match[2].split('?')[0].split('#')[0];
                 
-                // Exclude non-PAO categories from sidebars/footers upfront
-                const excludedCategories = ['/kallitehniki-kolymbisi/', '/tenis/', '/formula-1/', '/moto-gp/', '/polo/'];
+                // Exclude non-PAO categories and TV guides from sidebars/footers upfront
+                const excludedCategories = ['/kallitehniki-kolymbisi/', '/tenis/', '/formula-1/', '/moto-gp/', '/polo/', 'tileoptikes-metadoseis', 'tileoptiki-metadosi'];
                 if (excludedCategories.some(cat => cleanHref.includes(cat))) continue;
 
                 // Extract URL slug text (e.g. "petaei-pros-tin-ellada-gia-ton-panathinaiko-o-libai-gkarsia")
@@ -500,7 +500,13 @@ async function scrapeArticleLinks(target, logErrorCallback) {
                         if (!href.includes(target.baseUrl.replace('https://www.','').replace('https://',''))) return;
                         if (u.pathname === '/' || u.pathname === '') return;
                         
-                        const blacklist = ['/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/', 'galacticos', 'interwetten', 'gazz-floor', '/podcast', '/tv', '/shows/', '/live-', '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos', 'papatheodwroy', 'papatheodorou'];
+                        const blacklist = [
+                            '/archive/', '/author/', '/tag/', '/category/', '/video/', '/webtv/', '/en/',
+                            'galacticos', 'interwetten', 'gazz-floor', '/podcast', '/tv', '/shows/', '/live-',
+                            '/recommendation/', '/recommendations/', 'proinos-typos', 'proinos_typos',
+                            'papatheodwroy', 'papatheodorou', 'tileoptikes-metadoseis', 'tileoptiki-metadosi',
+                            'tv-guide', 'ti-tha-deite'
+                        ];
                         if (blacklist.some(b => u.pathname.toLowerCase().includes(b))) return;
                         
                         // For sources with sdnaNumericOnly, only accept paths with a numeric article ID (e.g. /podosfairo/1449282_title)
