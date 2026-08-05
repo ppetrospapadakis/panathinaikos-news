@@ -8,6 +8,7 @@
         rest: []
     };
     let selectedPlayerForSwap = null;
+    let touchDragIdx = null;
     window.userLineupsMap = {};
 
     // Helper: Clone roster array safely
@@ -34,6 +35,7 @@
 
         activeRosterState = { starting, bench, rest };
         selectedPlayerForSwap = null;
+        touchDragIdx = null;
         renderStudioModal();
     };
 
@@ -83,7 +85,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider">
                     <span>Τακτικό Πλάνο Βασικών</span>
-                    <span class="text-[11px] text-on-surface-variant/70 font-normal">Πάτα παίκτη στο γήπεδο & μετά άλλον παίκτη για αντικατάσταση</span>
+                    <span class="text-[11px] text-on-surface-variant/70 font-normal">Σύρε παίκτη στο γήπεδο ή πάτα 2 παίκτες για αλλαγή</span>
                 </div>
                 <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" ondragover="studioPitchDragOver(event)" ondrop="studioPitchDrop(event)" onclick="handlePitchBackgroundClick(event)">
                     ${renderStudioPitchLinesHtml(isFootball)}
@@ -200,7 +202,7 @@
         }
     }
 
-    // Render interactive player tokens on studio pitch
+    // Render player tokens without rectangular outline box & with touch drag handlers
     function renderStudioPitchTokensHtml() {
         return activeRosterState.starting.map((item, idx) => {
             let left, top, initials, name, num, pos;
@@ -213,10 +215,18 @@
             }
 
             const isSelected = selectedPlayerForSwap && selectedPlayerForSwap.cat === 'starting' && selectedPlayerForSwap.idx === idx;
-            const borderClass = isSelected ? 'border-2 border-yellow-400 scale-110 shadow-yellow-500/50 bg-yellow-400/20' : 'border border-primary/40 hover:scale-105';
+            const borderClass = isSelected ? 'ring-2 ring-yellow-400 scale-110 shadow-yellow-500/50' : 'hover:scale-105';
 
             return `
-            <div draggable="true" ondragstart="studioDragStart(event, 'starting', ${idx})" onclick="handlePlayerTap('starting', ${idx}, event)" class="player-token cursor-grab active:cursor-grabbing transition-all duration-300 ${borderClass}" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
+            <div id="studio-token-${idx}"
+                 draggable="true"
+                 ondragstart="studioDragStart(event, 'starting', ${idx})"
+                 ontouchstart="studioTouchStart(event, ${idx})"
+                 ontouchmove="studioTouchMove(event)"
+                 ontouchend="studioTouchEnd(event, ${idx})"
+                 onclick="handlePlayerTap('starting', ${idx}, event)"
+                 class="player-token cursor-grab active:cursor-grabbing transition-all duration-200 ${borderClass}"
+                 style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20; border:none; background:transparent;">
                 <div class="avatar relative">
                     ${num || idx + 1}
                     <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
@@ -225,6 +235,55 @@
             </div>`;
         }).join('');
     }
+
+    // Mobile Touch Drag handlers for pitch positioning
+    window.studioTouchStart = function(e, idx) {
+        e.stopPropagation();
+        touchDragIdx = idx;
+        const tokenEl = document.getElementById(`studio-token-${idx}`);
+        if (tokenEl) tokenEl.style.zIndex = '50';
+    };
+
+    window.studioTouchMove = function(e) {
+        if (touchDragIdx === null) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const pitchEl = document.getElementById('studio-pitch-container');
+        if (!pitchEl) return;
+
+        const rect = pitchEl.getBoundingClientRect();
+        const left = Math.min(92, Math.max(8, Math.round(((touch.clientX - rect.left) / rect.width) * 100)));
+        const top = Math.min(92, Math.max(8, Math.round(((touch.clientY - rect.top) / rect.height) * 100)));
+
+        const tokenEl = document.getElementById(`studio-token-${touchDragIdx}`);
+        if (tokenEl) {
+            tokenEl.style.left = left + '%';
+            tokenEl.style.top = top + '%';
+        }
+    };
+
+    window.studioTouchEnd = function(e, idx) {
+        if (touchDragIdx === null) return;
+        e.stopPropagation();
+        const touch = e.changedTouches[0];
+        const pitchEl = document.getElementById('studio-pitch-container');
+        if (!pitchEl) { touchDragIdx = null; return; }
+
+        const rect = pitchEl.getBoundingClientRect();
+        const left = Math.min(92, Math.max(8, Math.round(((touch.clientX - rect.left) / rect.width) * 100)));
+        const top = Math.min(92, Math.max(8, Math.round(((touch.clientY - rect.top) / rect.height) * 100)));
+
+        const item = activeRosterState.starting[touchDragIdx];
+        if (Array.isArray(item)) {
+            item[0] = left; item[1] = top;
+        } else if (item && typeof item === 'object') {
+            item.left = left; item.top = top;
+        }
+
+        touchDragIdx = null;
+        selectedPlayerForSwap = null;
+        renderStudioModal();
+    };
 
     // Render cards list inside a pool
     function renderPoolCardsHtml(cat) {
@@ -525,7 +584,7 @@
             }
 
             return `
-            <div class="player-token" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20;">
+            <div class="player-token" style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20; border:none; background:transparent;">
                 <div class="avatar relative">
                     ${num || idx + 1}
                     <div class="num-badge" style="font-size:8px; width:20px; height:20px; right:-6px; top:-6px; display:flex; align-items:center; justify-content:center;">${pos || initials}</div>
