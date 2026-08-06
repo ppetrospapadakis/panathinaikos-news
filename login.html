@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="el">
+<html class="dark icons-loaded" lang="el">
 <head>
 
     <meta charset="utf-8"/>
@@ -98,37 +98,33 @@
         <button class="md:hidden material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleSidebar()">close</button>
     </div>
     
-    <nav class="flex-grow flex flex-col gap-1.5">
-        <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-3.5 px-4 py-3 bg-primary/15 text-primary border-l-4 border-primary font-bold text-sm rounded-r-xl transition-all text-left">
-            <span class="material-symbols-outlined text-xl shrink-0">edit_note</span>
-            <span class="truncate">Δημιουργία Άρθρου</span>
+    <nav class="flex-grow flex flex-col gap-2">
+        <button id="admin-tab-opinion" onclick="switchAdminTab('opinion')" class="w-full flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-all duration-200 active:scale-95 text-left">
+            <span class="material-symbols-outlined">edit_note</span>
+            <span>Article Editor</span>
         </button>
-        <button id="admin-tab-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
-            <span class="material-symbols-outlined text-xl shrink-0">sports_soccer</span>
-            <span class="truncate">Ρόστερ Ποδοσφαίρου</span>
+        <button id="admin-tab-football" onclick="switchAdminTab('football')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+            <span class="material-symbols-outlined">sports_soccer</span>
+            <span>Roster Ποδοσφαίρου</span>
         </button>
-        <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
-            <span class="material-symbols-outlined text-xl shrink-0">sports_basketball</span>
-            <span class="truncate">Ρόστερ Μπάσκετ</span>
-        </button>
-        <button id="admin-tab-fixtures" onclick="switchAdminTab('fixtures')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
-            <span class="material-symbols-outlined text-xl shrink-0">calendar_month</span>
-            <span class="truncate">Πρόγραμμα Αγώνων</span>
+        <button id="admin-tab-basketball" onclick="switchAdminTab('basketball')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+            <span class="material-symbols-outlined">sports_basketball</span>
+            <span>Roster Μπάσκετ</span>
         </button>
         
-        <div class="pt-4 border-t border-outline-variant/30 mt-3 flex flex-col gap-1.5">
-            <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 px-4 mb-1">Αναλυτικά & Αρχείο</p>
-            <button id="admin-tab-analytics-ingestion" onclick="switchAdminTab('analytics-ingestion')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
-                <span class="material-symbols-outlined text-xl shrink-0">insights</span>
-                <span class="truncate">Στατιστικά Scraper</span>
+        <div class="pt-4 border-t border-outline-variant/30 mt-2 flex flex-col gap-2">
+            <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 px-4 mb-1">Analytics</p>
+            <button id="admin-tab-analytics-ingestion" onclick="switchAdminTab('analytics-ingestion')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+                <span class="material-symbols-outlined">insights</span>
+                <span>Ingestion Stats</span>
             </button>
-            <button id="admin-tab-analytics-engagement" onclick="switchAdminTab('analytics-engagement')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
-                <span class="material-symbols-outlined text-xl shrink-0">bar_chart</span>
-                <span class="truncate">Επισκεψιμότητα</span>
+            <button id="admin-tab-analytics-engagement" onclick="switchAdminTab('analytics-engagement')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <span>Reader Traffic</span>
             </button>
-            <button id="admin-tab-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-3.5 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-medium text-sm rounded-xl transition-all text-left">
-                <span class="material-symbols-outlined text-xl shrink-0">delete_history</span>
-                <span class="truncate">Διαγραμμένα Άρθρα</span>
+            <button id="admin-tab-deleted" onclick="switchAdminTab('deleted')" class="w-full flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body transition-all duration-200 active:scale-95 text-left">
+                <span class="material-symbols-outlined">delete_history</span>
+                <span>Διαγραμμένα Άρθρα</span>
             </button>
         </div>
     </nav>
@@ -151,15 +147,23 @@
     <div class="max-w-[1200px] mx-auto px-6 py-12">
 
         <!-- Page Header -->
-        <div class="mb-10">
-            <div class="flex items-center gap-3 mb-4">
-                <span id="page-header-icon" class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
-                <div>
-                    <p id="page-header-tag" class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
-                    <h1 id="page-header-title" class="text-3xl font-bold text-on-surface">Η Άποψή Μου</h1>
+        <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="page-header-icon" class="material-symbols-outlined text-primary" style="font-size:32px">edit_note</span>
+                    <div>
+                        <p id="page-header-tag" class="text-xs uppercase tracking-widest text-primary font-bold">Private Editor</p>
+                        <h1 id="page-header-title" class="text-3xl font-bold text-on-surface">Η Άποψή Μου</h1>
+                    </div>
                 </div>
+                <p id="page-header-desc" class="text-on-surface-variant max-w-xl">Γράψε τη δική σου αθλητική ανάλυση, άποψη ή σχόλιο για τον Παναθηναϊκό. Τα άρθρα σου εμφανίζονται στη ροή ειδήσεων με την κατηγορία <span class="text-primary font-semibold">✍️ Άποψη</span>.</p>
             </div>
-            <p id="page-header-desc" class="text-on-surface-variant max-w-xl">Γράψε τη δική σου αθλητική ανάλυση, άποψη ή σχόλιο για τον Παναθηναϊκό. Τα άρθρα σου εμφανίζονται στη ροή ειδήσεων με την κατηγορία <span class="text-primary font-semibold">✍️ Άποψη</span>.</p>
+
+            <!-- Instant Scrape Trigger Button -->
+            <button id="instant-scrape-btn" onclick="triggerInstantScrape()" class="px-5 py-3 bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-extrabold rounded-2xl text-xs flex items-center gap-2.5 shadow-xl hover:scale-[1.03] active:scale-95 transition-all cursor-pointer shrink-0">
+                <span class="material-symbols-outlined text-[20px]">bolt</span>
+                <span>⚡ Instant Scrape Now</span>
+            </button>
         </div>
 
         <!-- Admin Sub-navigation Tabs (only shown when authenticated) -->
@@ -858,41 +862,6 @@
             <button onclick="deleteSelectedPlayer()" class="bg-red-950 text-red-400 border border-red-500/30 font-bold py-2 px-3 rounded-lg text-xs hover:bg-red-900 transition-colors" title="Διαγραφή">
                 <span class="material-symbols-outlined" style="font-size:16px">delete</span>
             </button>
-        </div>
-    </div>
-        </div>
-    <!-- ── TAB 7: FIXTURES / SCHEDULE MANAGER ── -->
-        <div id="panel-section-fixtures" class="admin-panel-content hidden">
-            <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 mb-8">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-on-surface flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">calendar_month</span>
-                            Διαχείριση Προγράμματος Αγώνων
-                        </h3>
-                        <p class="text-sm text-on-surface-variant mt-1">
-                            Πρόσθεσε νέους αγώνες, άλλαξε ημερομηνίες/σκορ ή όρισε τον ενεργό (προσεχή) αγώνα για την ομάδα.
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3 w-full md:w-auto">
-                        <select id="admin-fixtures-category-filter" onchange="loadAdminFixtures(this.value)" class="editor-input py-2 px-3 text-xs rounded-xl font-semibold bg-surface-container-high border border-outline-variant/30 text-on-surface">
-                            <option value="all">🏆 Όλα τα Αθλήματα</option>
-                            <option value="football">⚽ Ποδόσφαιρο</option>
-                            <option value="basketball">🏀 Μπάσκετ</option>
-                            <option value="amateur">🤾 Ερασιτέχνης</option>
-                        </select>
-                        <button onclick="openAddFixtureModal()" class="px-4 py-2.5 bg-primary text-on-primary font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg hover:opacity-90 transition-all cursor-pointer whitespace-nowrap active:scale-95">
-                            <span class="material-symbols-outlined text-sm">add</span> + Νέος Αγώνας
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="admin-fixtures-list" class="flex flex-col gap-3">
-                <!-- Loaded dynamically by JS -->
-            </div>
-        </div>
-
         <!-- ── TAB 6: DELETED ARTICLES MANAGER ── -->
         <div id="panel-section-deleted" class="admin-panel-content hidden">
             <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-6 mb-8">
@@ -906,93 +875,18 @@
                             Δες όλα τα άρθρα που έχουν διαγραφεί. Μπορείς να κάνεις προεπισκόπηση ή να τα επαναφέρεις στην ενεργή ροή ειδήσεων.
                         </p>
                     </div>
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <button onclick="loadDeletedArticles()" class="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 rounded-xl text-xs font-semibold text-on-surface flex items-center gap-2 transition-all cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">refresh</span> Ανανέωση
-                        </button>
-                        <button onclick="emptyRecycleBin()" class="px-4 py-2 bg-error/10 hover:bg-error/20 border border-error/30 text-error rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer active:scale-95 shadow-sm">
-                            <span class="material-symbols-outlined text-sm">delete_forever</span> Οριστική Διαγραφή Όλων
-                        </button>
-                    </div>
+                    <button onclick="loadDeletedArticles()" class="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 rounded-xl text-xs font-semibold text-on-surface flex items-center gap-2 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">refresh</span> Ανανέωση
+                    </button>
                 </div>
             </div>
 
             <div id="deleted-articles-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Loaded dynamically by JS -->
             </div>
+        </div>
     </div>
 </main>
-
-<!-- ═══ FIXTURE EDIT MODAL ═══ -->
-<div id="fixture-edit-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-surface-container rounded-2xl border border-outline-variant max-w-[560px] w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="flex items-center justify-between p-5 border-b border-outline-variant/30 sticky top-0 bg-surface-container z-10">
-            <h3 id="fixture-modal-title" class="text-base font-bold text-primary uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined">event</span> Προσθήκη / Επεξεργασία Αγώνα
-            </h3>
-            <button onclick="closeFixtureModal()" class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer">close</button>
-        </div>
-        <div class="p-6 flex flex-col gap-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Άθλημα (Category)</label>
-                    <select id="fix-category" class="editor-input text-sm py-2 px-3 w-full rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface">
-                        <option value="football">⚽ Ποδόσφαιρο (Football)</option>
-                        <option value="basketball">🏀 Μπάσκετ (Basketball)</option>
-                        <option value="amateur">🤾 Ερασιτέχνης (Amateur)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Διοργάνωση (Competition)</label>
-                    <input id="fix-competition" type="text" class="editor-input text-sm py-2 px-3 w-full rounded-xl" placeholder="π.χ. Super League, Conference League"/>
-                </div>
-            </div>
-
-            <div>
-                <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Ημερομηνία & Ώρα Αγώνα</label>
-                <input id="fix-date" type="datetime-local" class="editor-input text-sm py-2 px-3 w-full rounded-xl"/>
-            </div>
-
-            <div class="grid grid-cols-3 gap-3">
-                <div class="col-span-2">
-                    <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Γηπεδούχος Ομάδα</label>
-                    <input id="fix-home-name" type="text" class="editor-input text-sm py-2 px-3 w-full rounded-xl" placeholder="π.χ. Παναθηναϊκός"/>
-                </div>
-                <div>
-                    <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Σκορ (Home)</label>
-                    <input id="fix-home-score" type="number" min="0" max="150" class="editor-input text-sm py-2 px-3 w-full rounded-xl font-mono font-bold text-center" placeholder="-"/>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-3">
-                <div class="col-span-2">
-                    <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Φιλοξενούμενη Ομάδα</label>
-                    <input id="fix-away-name" type="text" class="editor-input text-sm py-2 px-3 w-full rounded-xl" placeholder="π.χ. Ολυμπιακός, ΤΣΣΚΑ 1948"/>
-                </div>
-                <div>
-                    <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block">Σκορ (Away)</label>
-                    <input id="fix-away-score" type="number" min="0" max="150" class="editor-input text-sm py-2 px-3 w-full rounded-xl font-mono font-bold text-center" placeholder="-"/>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3 p-3 bg-surface-container-high rounded-xl border border-outline-variant/20">
-                <input id="fix-is-current" type="checkbox" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"/>
-                <label for="fix-is-current" class="text-xs font-semibold text-on-surface cursor-pointer select-none">
-                    📌 Ορισμός ως ο επόμενος ενεργός αγώνας (Next Current Match)
-                </label>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/30">
-                <button onclick="closeFixtureModal()" class="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-xs font-semibold text-on-surface cursor-pointer">
-                    Ακύρωση
-                </button>
-                <button id="fixture-save-btn" onclick="saveFixture()" class="px-5 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs flex items-center gap-1.5 shadow-md hover:opacity-90 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-sm">save</span> 💾 Αποθήκευση Αγώνα
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- ═══ PREVIEW MODAL ═══ -->
 <div id="preview-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 hidden">
@@ -1048,7 +942,6 @@ function checkPassword() {
         
         // Show sidebar and apply margins
         document.getElementById('admin-sidebar').classList.remove('hidden');
-        const adminTabs = document.getElementById('admin-tabs'); if (adminTabs) adminTabs.classList.remove('hidden');
         document.getElementById('admin-main').classList.add('md:pl-[260px]');
         document.getElementById('admin-header').classList.add('md:pl-[260px]');
         

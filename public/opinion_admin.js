@@ -1788,3 +1788,33 @@ function renderTrafficCharts(data, filterSource = 'ALL') {
     }
 }
 
+// ── Instant Admin Scrape Trigger ──────────────────────────────────────────────
+async function triggerInstantScrape() {
+    const btn = document.getElementById('instant-scrape-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[18px]">sync</span> <span>Ενεργοποίηση...</span>`;
+    }
+
+    try {
+        const res = await fetch('/api/scrape?token=pao1908_secure&force=true');
+        const data = await res.json().catch(() => ({}));
+        if (data.success) {
+            alert('⚡ Ο Scraper ενεργοποιήθηκε ακαριαία! Η σάρωση όλων των πηγών ξεκίνησε στο GitHub.');
+        } else {
+            alert('❌ Σφάλμα: ' + (data.error || data.message || 'Αποτυχία ενεργοποίησης'));
+        }
+    } catch(e) {
+        console.error(e);
+        alert('❌ Σφάλμα σύνδεσης.');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">bolt</span> <span>⚡ Instant Scrape Now</span>`;
+        }
+    }
+}
+window.triggerInstantScrape = triggerInstantScrape;
+    }
+}
+

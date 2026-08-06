@@ -1461,6 +1461,12 @@ async function main() {
         }
         if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
 
+        // Limit link inspection depth to top 5 newest links per site
+        if (links.length > 5) {
+            console.log(`  → Limiting inspection depth to top 5 newest links (out of ${links.length} found).`);
+            links = links.slice(0, 5);
+        }
+
         // Hack for Sportime first run to not flood with 30 old articles
         if (target.name === 'Sportime') {
             // Clean & filter links to ensure only actual article pages are processed
