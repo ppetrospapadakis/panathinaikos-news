@@ -117,7 +117,13 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
-    const rawId = (req.query.id || '').trim();
+    // Support both ?id=XXXXXXXX (old) and ?slug=titlos-XXXXXXXX (new format)
+    let rawId = (req.query.id || '').trim();
+    if (!rawId && req.query.slug) {
+        // Extract trailing 8 hex chars from new-format slug: titlos-arthrou-67e7db6d
+        const slugMatch = (req.query.slug || '').match(/-([0-9a-f]{8})$/i);
+        if (slugMatch) rawId = slugMatch[1];
+    }
 
     if (!rawId) {
         return res.status(400).send('<h1>Σφάλμα: Λείπει το ID άρθρου.</h1>');

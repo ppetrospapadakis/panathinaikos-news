@@ -199,6 +199,10 @@
       "destination": "/api/feed"
     },
     {
+      "source": "/:category/:slug",
+      "destination": "/api/render-article?slug=:slug"
+    },
+    {
       "source": "/:category/:slug-id=:id",
       "destination": "/api/render-article?id=:id"
     },
