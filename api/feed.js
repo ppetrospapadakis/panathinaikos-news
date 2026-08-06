@@ -120,7 +120,7 @@ module.exports = async (req, res) => {
             const cleanCat = getCategoryCleanName(art.category);
             const cleanSlug = slugify(art.title);
             const shortId = (art.id || '').substring(0, 8);
-            const url = `${domain}/${cleanCat}/${cleanSlug}-id=${shortId}`;
+            const url = `${domain}/${cleanCat}/${cleanSlug}-${shortId}`;
             const pubDate = new Date(art.created_at).toUTCString();
             const description = art.summary || (art.content ? art.content.substring(0, 300) + '...' : '');
 

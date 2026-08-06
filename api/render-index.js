@@ -176,7 +176,7 @@ module.exports = async (req, res) => {
         const slug = slugify(article.title);
         const catPath = getCategoryCleanName(article.category);
         const shortId = (article.id || '').substring(0, 8);
-        const url = `/${catPath}/${slug}-id=${shortId}`;
+        const url = `/${catPath}/${slug}-${shortId}`;
         const pubDate = formatExactDate(article.created_at);
 
         const srcLower = (article.source_url || '').toLowerCase();

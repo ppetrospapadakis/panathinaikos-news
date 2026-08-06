@@ -282,7 +282,7 @@ module.exports = async (req, res) => {
     <meta property="og:title" content="${escapeHtml(article.title)}"/>
     <meta property="og:description" content="${escapeHtml(article.summary || '')}"/>
     <meta property="og:image" content="${imageUrl}"/>
-    <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
+    <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}"/>
     <meta property="og:type" content="article"/>
     <meta property="og:locale" content="el_GR"/>
     <meta name="twitter:card" content="summary_large_image"/>
@@ -291,13 +291,13 @@ module.exports = async (req, res) => {
     <meta name="twitter:title" content="${escapeHtml(article.title)}"/>
     <meta name="twitter:description" content="${escapeHtml(article.summary || '')}"/>
     <meta name="twitter:image" content="${imageUrl}"/>
-    <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"/>
+    <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}"/>
     <script type="application/ld+json">
     [
       {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
-        "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}",
+        "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}",
         "headline": ${JSON.stringify(article.title)},
         "image": [
           ${JSON.stringify(imageUrl)}
@@ -340,7 +340,7 @@ module.exports = async (req, res) => {
             "@type": "ListItem",
             "position": 3,
             "name": ${JSON.stringify(article.title)},
-            "item": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-id=${shortId}"
+            "item": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}"
           }
         ]
       },

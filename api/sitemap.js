@@ -139,7 +139,7 @@ module.exports = async (req, res) => {
             const cleanCat = getCategoryCleanName(art.category);
             const cleanSlug = slugify(art.title);
             const shortId = (art.id || '').substring(0, 8);
-            const url = `${domain}/${cleanCat}/${cleanSlug}-id=${shortId}`;
+            const url = `${domain}/${cleanCat}/${cleanSlug}-${shortId}`;
             const artDate = new Date(art.created_at).toISOString().split('T')[0];
             const artMs = new Date(art.created_at).getTime();
             const isRecent = (nowMs - artMs) < FORTY_EIGHT_HOURS_MS;
