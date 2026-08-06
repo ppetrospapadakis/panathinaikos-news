@@ -1143,6 +1143,9 @@ function setupDraggableToken(token, sport, rosterType, idx) {
 let selectedPlayerInfo = null;
 
 function showPopoverForPlayer(sport, rosterType, idx, token) {
+    if (adminSwapSource) {
+        if (handleAdminPlayerClickForSwap(sport, rosterType, idx)) return;
+    }
     selectedPlayerInfo = { sport, rosterType, idx, token };
     
     const rosterList = currentRoster[sport][rosterType];
@@ -1310,7 +1313,11 @@ function adminRenderReserves(sport) {
             <input type="text" value="${player.name || ''}" placeholder="Όνομα" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
             <input type="text" value="${player.pos || player.num || ''}" placeholder="Θέση" class="editor-input py-1 px-2 text-xs w-16" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
             <input type="text" value="${player.detail || ''}" placeholder="Λεπτομέρεια" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'detail', this.value)"/>
-            <button onclick="deleteReserve('${sport}', ${idx})" class="material-symbols-outlined text-red-400 hover:text-red-300 p-1">delete</button>
+            <div class="flex items-center gap-1 border-l border-outline-variant/30 pl-2">
+         <button onclick="moveReserveToLineup('${sport}', ${idx}, 'starting')" class="px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-md text-[10px] font-bold cursor-pointer transition-all" title="Μεταφορά στους Βασικούς">🟢 Βασικός</button>
+         <button onclick="moveReserveToLineup('${sport}', ${idx}, 'backup')" class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-md text-[10px] font-bold cursor-pointer transition-all" title="Μεταφορά στον Πάγκο">🟡 Πάγκος</button>
+         <button onclick="deleteReserve('${sport}', ${idx})" class="material-symbols-outlined text-red-400 hover:text-red-300 p-1 cursor-pointer">delete</button>
+     </div>
         `;
         container.appendChild(card);
     });
@@ -2078,4 +2085,208 @@ async function setFixtureCurrent(id) {
     }
 }
 window.setFixtureCurrent = setFixtureCurrent;
+
+
+
+// ── 2-CLICK ROSTER SWAP & CATEGORY TRANSFER SYSTEM ─────────────────────────
+let adminSwapSource = null; // { sport, rosterType, idx, player }
+
+function startAdminSwapMode() {
+    if (!selectedPlayerInfo) return;
+    const { sport, rosterType, idx } = selectedPlayerInfo;
+    const rosterList = currentRoster[sport][rosterType];
+    const player = rosterList[idx];
+    if (!player) return;
+
+    adminSwapSource = { sport, rosterType, idx, player };
+
+    // Highlight source token
+    document.querySelectorAll('.draggable-player').forEach(el => el.classList.remove('swap-source-highlight'));
+    if (selectedPlayerInfo.token) {
+        selectedPlayerInfo.token.classList.add('swap-source-highlight');
+    }
+
+    closePopover();
+    showAdminSwapToast(player);
+}
+window.startAdminSwapMode = startAdminSwapMode;
+
+function showAdminSwapToast(sourcePlayer) {
+    let toast = document.getElementById('admin-swap-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'admin-swap-toast';
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] bg-amber-950/95 border-2 border-amber-500 text-amber-100 px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-4 animate-bounce';
+        document.body.appendChild(toast);
+    }
+
+    const playerName = sourcePlayer[3] || sourcePlayer.name || 'Παίκτης';
+    toast.innerHTML = `
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-amber-400 text-xl animate-spin">sync</span>
+            <span class="text-xs font-bold">Επίλεξε 2ο παίκτη για να αλλάξει θέση με τον: <strong class="text-white font-extrabold text-sm underline">${playerName}</strong></span>
+        </div>
+        <button onclick="cancelAdminSwapMode()" class="px-3 py-1 bg-amber-900 hover:bg-amber-800 text-white rounded-lg text-xs font-bold border border-amber-500/40 cursor-pointer">
+            Ακύρωση
+        </button>
+    `;
+    toast.classList.remove('hidden');
+}
+
+function cancelAdminSwapMode() {
+    adminSwapSource = null;
+    document.querySelectorAll('.draggable-player').forEach(el => el.classList.remove('swap-source-highlight'));
+    const toast = document.getElementById('admin-swap-toast');
+    if (toast) toast.classList.add('hidden');
+}
+window.cancelAdminSwapMode = cancelAdminSwapMode;
+
+function handleAdminPlayerClickForSwap(targetSport, targetRosterType, targetIdx) {
+    if (!adminSwapSource) return false;
+
+    const source = adminSwapSource;
+    if (source.sport !== targetSport) {
+        alert('Η αντιμετάθεση γίνεται μόνο μεταξύ παικτών του ίδιου αθλήματος!');
+        cancelAdminSwapMode();
+        return true;
+    }
+
+    if (source.rosterType === targetRosterType && source.idx === targetIdx) {
+        cancelAdminSwapMode();
+        return true;
+    }
+
+    // Perform Swap
+    const sourceList = currentRoster[source.sport][source.rosterType];
+    const targetList = currentRoster[targetSport][targetRosterType];
+
+    const sourceItem = sourceList[source.idx];
+    const targetItem = targetList[targetIdx];
+
+    if (!sourceItem || !targetItem) {
+        cancelAdminSwapMode();
+        return true;
+    }
+
+    // If both are array format (starting or backup), swap coordinates & items
+    if (Array.isArray(sourceItem) && Array.isArray(targetItem)) {
+        // Swap coordinates (left, top) so target takes source position and vice-versa
+        const tempLeft = sourceItem[0];
+        const tempTop = sourceItem[1];
+
+        sourceItem[0] = targetItem[0];
+        sourceItem[1] = targetItem[1];
+
+        targetItem[0] = tempLeft;
+        targetItem[1] = tempTop;
+    }
+
+    // Swap items in lists
+    sourceList[source.idx] = targetItem;
+    targetList[targetIdx] = sourceItem;
+
+    // Update textareas
+    syncRosterStateToTextareas(targetSport);
+
+    // Re-render
+    adminRenderRosterSection(targetSport, 'starting');
+    adminRenderRosterSection(targetSport, 'backup');
+    adminRenderReserves(targetSport);
+
+    cancelAdminSwapMode();
+    return true;
+}
+window.handleAdminPlayerClickForSwap = handleAdminPlayerClickForSwap;
+
+function movePlayerToCategory(targetCategory) {
+    if (!selectedPlayerInfo) return;
+    const { sport, rosterType, idx } = selectedPlayerInfo;
+
+    if (rosterType === targetCategory) {
+        closePopover();
+        return;
+    }
+
+    const currentList = currentRoster[sport][rosterType];
+    const player = currentList[idx];
+    if (!player) return;
+
+    // Remove from current list
+    currentList.splice(idx, 1);
+
+    // Convert player payload if moving between array (pitch/court) and object (reserves) format
+    let newPlayerPayload;
+    if (targetCategory === 'rest') {
+        // Moving to reserves: convert to object
+        newPlayerPayload = {
+            initials: player[2] || 'ΠΑΙ',
+            name: player[3] || 'Παίκτης',
+            pos: player[5] || player[4] || '',
+            num: player[4] || '',
+            detail: 'Εφεδρεία'
+        };
+    } else {
+        // Moving to pitch/court starting/backup: convert to array [left, top, initials, name, num, pos]
+        if (Array.isArray(player)) {
+            newPlayerPayload = [...player];
+        } else {
+            newPlayerPayload = [
+                50, 50,
+                player.initials || 'ΠΑΙ',
+                player.name || 'Παίκτης',
+                player.num || player.pos || 10,
+                player.pos || ''
+            ];
+        }
+    }
+
+    // Add to target category list
+    currentRoster[sport][targetCategory].push(newPlayerPayload);
+
+    // Update textareas & UI
+    syncRosterStateToTextareas(sport);
+    adminRenderRosterSection(sport, 'starting');
+    adminRenderRosterSection(sport, 'backup');
+    adminRenderReserves(sport);
+
+    closePopover();
+}
+window.movePlayerToCategory = movePlayerToCategory;
+
+function moveReserveToLineup(sport, reserveIdx, targetCategory) {
+    const reserves = currentRoster[sport].rest;
+    const playerObj = reserves[reserveIdx];
+    if (!playerObj) return;
+
+    // Remove from reserves
+    reserves.splice(reserveIdx, 1);
+
+    // Convert reserve object to pitch/court player array
+    const playerArray = [
+        50, 50,
+        playerObj.initials || 'ΠΑΙ',
+        playerObj.name || 'Παίκτης',
+        playerObj.num || playerObj.pos || 10,
+        playerObj.pos || ''
+    ];
+
+    // Add to target category (starting or backup)
+    currentRoster[sport][targetCategory].push(playerArray);
+
+    // Sync & Re-render
+    syncRosterStateToTextareas(sport);
+    adminRenderRosterSection(sport, 'starting');
+    adminRenderRosterSection(sport, 'backup');
+    adminRenderReserves(sport);
+}
+window.moveReserveToLineup = moveReserveToLineup;
+
+function syncRosterStateToTextareas(sport) {
+    ['starting', 'backup', 'rest'].forEach(type => {
+        const textarea = document.getElementById(`roster-${sport}-${type}`);
+        if (textarea && currentRoster[sport][type]) {
+            textarea.value = JSON.stringify(currentRoster[sport][type], null, 2);
+        }
+    });
+}
 

@@ -3662,3 +3662,15 @@ body {
     gap: 3rem;
   }
 }
+
+/* Admin Roster Swap Highlight */
+.draggable-player.swap-source-highlight {
+    outline: 3px solid #f59e0b !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.9) !important;
+    animation: pulse-swap 1.2s infinite ease-in-out;
+    z-index: 100 !important;
+}
+@keyframes pulse-swap {
+    0%, 100% { transform: scale(1.15); }
+    50% { transform: scale(1.05); }
+}
