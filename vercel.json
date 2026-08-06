@@ -3,6 +3,14 @@
   "regions": [
     "fra1"
   ],
+  "functions": {
+    "api/render-article.js": {
+      "includeFiles": "article.html"
+    },
+    "api/render-index.js": {
+      "includeFiles": "index.html"
+    }
+  },
   "headers": [
     {
       "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*|roster.html|roster_lineup.js|opinion_admin.js)",

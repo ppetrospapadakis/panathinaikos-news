@@ -7,13 +7,24 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Cache HTML template at module level — avoids synchronous disk I/O on every request
-const _indexTemplatePath = path.join(__dirname, '../index.html');
 let _indexTemplate = null;
 function getIndexTemplate() {
     if (!_indexTemplate) {
-        _indexTemplate = fs.readFileSync(_indexTemplatePath, 'utf8');
+        const possiblePaths = [
+            path.join(__dirname, '../index.html'),
+            path.join(process.cwd(), 'index.html'),
+            path.join(__dirname, 'index.html')
+        ];
+        for (const p of possiblePaths) {
+            try {
+                if (fs.existsSync(p)) {
+                    _indexTemplate = fs.readFileSync(p, 'utf8');
+                    if (_indexTemplate) break;
+                }
+            } catch (e) {}
+        }
     }
-    return _indexTemplate;
+    return _indexTemplate || '';
 }
 
 function greekToLatin(text) {
