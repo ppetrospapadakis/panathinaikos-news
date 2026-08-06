@@ -5,7 +5,7 @@
   ],
   "headers": [
     {
-      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*|roster.html|roster_lineup.js)",
+      "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*|roster.html|roster_lineup.js|opinion_admin.js)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "source": "/(style.css|logo.png|favicon.png|favicon.ico|opinion_admin.js|images/.*)",
+      "source": "/(style.css|logo.png|favicon.png|favicon.ico|images/.*)",
       "headers": [
         {
           "key": "Cache-Control",
