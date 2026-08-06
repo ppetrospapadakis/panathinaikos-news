@@ -252,16 +252,7 @@
         }
     }
 
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('a[href*="preferences/source"]');
-        if (btn) {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                return; // Admin logged in: open external Google preferences link in new tab directly
-            }
-            e.preventDefault();
-            showGoogleModal();
-        }
-    });
+    // Direct external Google News link active for all users (modal disabled)
 })();
 </script>
 </body>

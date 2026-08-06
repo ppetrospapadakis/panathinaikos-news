@@ -753,16 +753,7 @@
         }
     }
 
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('a[href*="preferences/source"]');
-        if (btn) {
-            if (sessionStorage.getItem('op_auth') === '1') {
-                return; // Logged in admin -> direct navigation to target Google News URL
-            }
-            e.preventDefault();
-            showGoogleModal();
-        }
-    });
+    // Direct external Google News link active for all users (modal disabled)
 })();
 </script>
 </body>
