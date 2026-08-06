@@ -133,6 +133,9 @@ function switchAdminTab(tab) {
         }
     }
 
+    if (tab === 'fixtures') {
+        loadAdminFixtures(window.currentAdminFixtureCategoryFilter || 'all');
+    }
     if (tab === 'analytics-ingestion') {
         loadScraperRuns();
     }
@@ -1913,10 +1916,18 @@ function renderAdminFixturesList(container, fixtures) {
         return;
     }
 
+    let firstCurrentElId = null;
     let html = '';
     fixtures.forEach(m => {
         const dateStr = m.match_date ? new Date(m.match_date).toLocaleString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Χωρίς ημερομηνία';
-        const isCurrentBadge = m.is_current ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wider">📌 Current Match</span>' : '';
+        const isCurrent = Boolean(m.is_current);
+        const cardId = `admin-fixture-card-${m.id}`;
+
+        if (isCurrent && !firstCurrentElId) {
+            firstCurrentElId = cardId;
+        }
+
+        const isCurrentBadge = isCurrent ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wider">📌 Current Match</span>' : '';
         const homeScoreText = (m.home_score !== null && m.home_score !== undefined) ? m.home_score : '-';
         const awayScoreText = (m.away_score !== null && m.away_score !== undefined) ? m.away_score : '-';
 
@@ -1924,13 +1935,12 @@ function renderAdminFixturesList(container, fixtures) {
         if (m.category === 'basketball') catBadge = '🏀 Μπάσκετ';
         else if (m.category === 'amateur') catBadge = '🤾 Ερασιτέχνης';
 
-        const isCurrent = Boolean(m.is_current);
         const currentBtnText = isCurrent ? 'Unset Current' : '📌 Set Current';
         const currentBtnStyle = isCurrent ? 'bg-primary/20 text-primary border-primary/40' : 'bg-surface-container-high hover:bg-surface-container-highest border-outline-variant/30 text-on-surface';
         const currentIcon = isCurrent ? 'keep_off' : 'push_pin';
 
         html += `
-        <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/40 transition-all">
+        <div id="${cardId}" class="bg-surface-container rounded-2xl border ${isCurrent ? 'border-primary ring-1 ring-primary/40 shadow-lg shadow-primary/5' : 'border-outline-variant/30'} p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/40 transition-all scroll-mt-28">
             <div class="flex-1 space-y-2">
                 <div class="flex flex-wrap items-center gap-2 text-xs">
                     <span class="font-bold text-primary">${catBadge}</span>
@@ -1956,6 +1966,15 @@ function renderAdminFixturesList(container, fixtures) {
     });
 
     container.innerHTML = html;
+
+    if (firstCurrentElId) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            const el = document.getElementById(firstCurrentElId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }));
+    }
 }
 
 function openAddFixtureModal() {
