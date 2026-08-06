@@ -111,27 +111,39 @@ module.exports = async (req, res) => {
         }
 
         // 1b. Fetch all own opinion articles (for dedicated section)
+        // Query DB directly so old articles are never missed regardless of how many scraped articles exist
         if (req.query.opinionOnly === 'true') {
-            const { data, error } = await supabase
-                .from('articles')
-                .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
-                .order('created_at', { ascending: false })
-                .order('id', { ascending: false })
-                .limit(100);
-            if (error) throw error;
+            const [opinionRes, manualRes] = await Promise.all([
+                supabase
+                    .from('articles')
+                    .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
+                    .ilike('category', '%Άποψη%')
+                    .not('category', 'eq', 'DELETED')
+                    .order('created_at', { ascending: false })
+                    .order('id', { ascending: false })
+                    .limit(100),
+                supabase
+                    .from('articles')
+                    .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
+                    .like('source_url', 'opinion://%')
+                    .not('category', 'eq', 'DELETED')
+                    .order('created_at', { ascending: false })
+                    .order('id', { ascending: false })
+                    .limit(100)
+            ]);
 
-            const ownArticles = (data || []).filter(a => {
-                const src = (a.source_url || '').toLowerCase();
-                const cat = (a.category || '').toLowerCase();
-                return src.startsWith('manual') || 
-                       src.includes('opinion://manual') || 
-                       src.includes('opinion://system-roster') || 
-                       cat.includes('άποψη') || 
-                       cat.includes('apopsi');
-            });
+            if (opinionRes.error) throw opinionRes.error;
+            if (manualRes.error) throw manualRes.error;
 
-            return res.status(200).json(ownArticles);
+            // Merge + deduplicate by id, sort by date
+            const seen = new Set();
+            const merged = [...(opinionRes.data || []), ...(manualRes.data || [])]
+                .filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; })
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            return res.status(200).json(merged);
         }
+
 
         // 2. Feed pagination & filtering query
         const page = parseInt(req.query.page, 10) || 1;
