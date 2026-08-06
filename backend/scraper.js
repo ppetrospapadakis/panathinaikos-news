@@ -1462,6 +1462,7 @@ async function main() {
     for (const { target, links: rawLinks } of targetResults) {
         console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
         let links = rawLinks;
+        let sourceNewArticlesProcessed = 0;
 
         if (links === null) {
             runStats.sources[target.name].skipped_crawling_failed++;
@@ -1977,6 +1978,7 @@ async function main() {
             existingUrls.add(articleUrl);
             existingArticles.unshift({ id: inserted[0].id, title: scraped.title, source_url: articleUrl, group_id, created_at: scraped.created_at });
             totalNew++;
+            sourceNewArticlesProcessed++;
             console.log(`    ✅ Inserted (id=${inserted[0].id})`);
             warmUpArticleCache(scraped.imageUrl, finalTitle, inserted[0].id, dbPayload.category);
 
@@ -1999,15 +2001,11 @@ async function main() {
                 }
             }
         }
-        // Rate limit between article processing — always pause, not just on success
-        if (!process.env.VERCEL) {
-            await sleep(2000);
-        }
-        // After finishing all articles for this source, stagger before next target (15s pause to protect Gemini API Rate Limits)
-        if (!isDryRun) {
-            const staggerMs = 15000; // 15 seconds
-            console.log(`[STAGGER] Pausing ${staggerMs/1000}s before next source to regulate Gemini API traffic`);
-            await new Promise(resolve => setTimeout(resolve, staggerMs));
+        // Rate limit between article processing — only pause if new articles were processed
+        if (!isDryRun && sourceNewArticlesProcessed > 0) {
+            const staggerMs = 3000; // 3 seconds is plenty to regulate Gemini API traffic when new articles are added
+            console.log(`[STAGGER] Processed ${sourceNewArticlesProcessed} new article(s). Pausing ${staggerMs/1000}s before next source.`);
+            await sleep(staggerMs);
         }
     }
 
