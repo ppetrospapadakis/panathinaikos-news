@@ -855,7 +855,10 @@
             if (moreNewsEl)  moreNewsEl.innerHTML  = '';
             if (sentinel)    sentinel.classList.add('hidden');
 
-            // Editorial section (Αρθρογραφία) — own articles, homepage only
+            const heroId = window.currentHeroId || (ownArticles.length > 0 ? ownArticles[0].id : null);
+            const otherOwnArticles = ownArticles.filter(a => isOwnArticle(a) && a.id !== heroId);
+
+            // Editorial section (Αρθρογραφία / Περισσότερη αρθρογραφία)
             if (activeCategory === null) {
                 const ownToShow = ownArticles.length > 0
                     ? ownArticles
@@ -871,13 +874,23 @@
                     }, { rootMargin: '100px' });
                     editorialObserver.observe(editorialEl);
                 }
+            } else if (activeCategory === 'Άποψη' && otherOwnArticles.length > 0) {
+                if (editorialEl) {
+                    editorialObserver = new IntersectionObserver(entries => {
+                        if (entries[0].isIntersecting && !editorialDone) {
+                            editorialDone = true;
+                            editorialObserver.disconnect();
+                            renderEditorialGrid(otherOwnArticles, editorialEl);
+                        }
+                    }, { rootMargin: '100px' });
+                    editorialObserver.observe(editorialEl);
+                }
             }
 
             // More News section (Περισσότερες Ειδήσεις)
-            const heroId = window.currentHeroId || (ownArticles.length > 0 ? ownArticles[0].id : null);
-            const bottomArticles = activeCategory === 'Άποψη'
-                ? ownArticles.filter(a => isOwnArticle(a) && a.id !== heroId)
-                : (activeCategory === null ? scraperGroups.map(g => g.main) : sideCandidates.map(g => g.main));
+            const bottomArticles = (activeCategory === null || activeCategory === 'Άποψη')
+                ? scraperGroups.map(g => g.main)
+                : sideCandidates.map(g => g.main);
 
             if (bottomArticles.length > 0 && moreNewsEl) {
                 moreNewsObserver = new IntersectionObserver(entries => {
@@ -891,6 +904,16 @@
                 }, { rootMargin: '100px' });
                 moreNewsObserver.observe(moreNewsEl);
             }
+        }
+
+        function renderEditorialGrid(articles, container) {
+            container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30 px-4 md:px-0">
+                <h2 class="font-h2 text-h2 mb-6">Περισσότερη αρθρογραφία</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 md:px-0">
+                ${articles.map(a => gridCardHtml(a)).join('')}
+            </div>`;
+            setTimeout(fetchCommentCounts, 150);
         }
 
         function renderEditorial(articles, container) {
@@ -933,9 +956,8 @@
         }
 
         function renderMoreNews(articles, container) {
-            const label = activeCategory === 'Άποψη' ? 'Περισσότερη αρθρογραφία' : 'Περισσότερες Ειδήσεις';
             container.innerHTML = `<div class="mt-12 pt-8 border-t border-outline-variant/30 px-4 md:px-0">
-                <h2 class="font-h2 text-h2 mb-6">${label}</h2>
+                <h2 class="font-h2 text-h2 mb-6">Περισσότερες Ειδήσεις</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 md:px-0" id="bottom-grid-cards"></div>`;
 
@@ -960,12 +982,6 @@
 
         async function fetchMorePages() {
             if (isFetchingMore || !streamHasMore) return;
-            if (activeCategory === 'Άποψη') {
-                streamHasMore = false;
-                const sentinel = document.getElementById('feed-sentinel');
-                if (sentinel) sentinel.classList.add('hidden');
-                return;
-            }
             isFetchingMore = true;
             const sentinel = document.getElementById('feed-sentinel');
             try {
