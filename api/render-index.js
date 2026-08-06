@@ -233,6 +233,21 @@ module.exports = async (req, res) => {
         const preloadTag = `<link rel="preload" as="image" fetchpriority="high" href="${imageUrl}">`;
 
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
+
+        // Inject dynamic OG meta for homepage hero (important for Google Discover)
+        const ogMeta = `
+    <!-- Dynamic Hero OG Meta (SSR) -->
+    <meta property="og:title" content="${escapeHtml(article.title)}"/>
+    <meta property="og:description" content="${escapeHtml(article.summary || article.title)}"/>
+    <meta property="og:image" content="${imageUrl}"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="628"/>
+    <meta property="og:url" content="https://www.panathinaikosnews.gr"/>
+    <meta property="og:type" content="website"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:image" content="${imageUrl}"/>
+    <meta name="robots" content="index, follow, max-image-preview:large"/>`;
+        html = html.replace('<!-- {{SSR_OG_META}} -->', ogMeta);
         
         const heroRegex = /(<!-- HERO_START -->)([\s\S]*?)(<!-- HERO_END -->)/i;
         if (heroRegex.test(html)) {

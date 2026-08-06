@@ -87,22 +87,53 @@ function escapeXml(unsafe) {
     });
 }
 
+const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+
+function proxyImageUrl(rawUrl) {
+    if (!rawUrl) return DEFAULT_IMG;
+    try {
+        let url = rawUrl;
+        if (url.startsWith('//')) url = 'https:' + url;
+        if (!url.startsWith('http')) return DEFAULT_IMG;
+
+        const u = new URL(url);
+        const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+        const brandingKeywords = ['logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+            'og-image', 'og_image', 'site-logo', 'site_logo', 'noimage', 'no-image', 'blank', 'generic'];
+        const brandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/site-assets/'];
+        const isBranding = brandingKeywords.some(k => filename.includes(k))
+            || brandingPaths.some(p => ('/' + u.pathname.toLowerCase() + '/').includes(p));
+        if (isBranding) return DEFAULT_IMG;
+
+        // Already proxied? Return as-is
+        if (u.hostname.includes('wsrv.nl')) return url;
+        // lh3.googleusercontent or googleapis — return as-is (already CDN, no proxy)
+        if (u.hostname.includes('googleusercontent.com') || u.hostname.includes('googleapis.com')) return url;
+
+        return `https://wsrv.nl/?url=${encodeURIComponent(u.href)}&w=1200&h=628&fit=cover&output=webp&q=82`;
+    } catch (_) {
+        return DEFAULT_IMG;
+    }
+}
+
 module.exports = async (req, res) => {
-    // Set headers for XML and Vercel edge caching
+    // Short cache so Google Discover sees fresh articles quickly
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, s-maxage=1200, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
 
     const domain = 'https://www.panathinaikosnews.gr';
 
     try {
-        // Fetch the 50 most recent articles for the RSS feed
+        // Fetch the 100 most recent articles for the RSS feed (exclude system/erasitexnis)
         const { data: articles, error } = await supabase
             .from('articles')
             .select('id, title, summary, content, category, image_url, created_at')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
+            .not('category', 'ilike', '%Ερασιτέχνης%')
+            .not('category', 'ilike', '%amateur%')
             .order('created_at', { ascending: false })
-            .limit(50);
+            .limit(100);
 
         if (error) throw error;
 
@@ -124,6 +155,9 @@ module.exports = async (req, res) => {
             const pubDate = new Date(art.created_at).toUTCString();
             const description = art.summary || (art.content ? art.content.substring(0, 300) + '...' : '');
 
+            // Proxy image so Google can always fetch it, with correct 1200x628 crop
+            const proxiedImage = proxyImageUrl(art.image_url);
+
             rss += `    <item>\n`;
             rss += `      <title>${escapeXml(art.title)}</title>\n`;
             rss += `      <link>${url}</link>\n`;
@@ -131,17 +165,11 @@ module.exports = async (req, res) => {
             rss += `      <description><![CDATA[${description}]]></description>\n`;
             rss += `      <pubDate>${pubDate}</pubDate>\n`;
             rss += `      <category>${escapeXml(art.category || 'Γενικά')}</category>\n`;
-            
-            if (art.image_url && art.image_url.startsWith('http')) {
-                let type = 'image/jpeg';
-                if (art.image_url.endsWith('.png')) type = 'image/png';
-                else if (art.image_url.endsWith('.webp')) type = 'image/webp';
-                else if (art.image_url.endsWith('.svg')) type = 'image/svg+xml';
-                
-                rss += `      <enclosure url="${escapeXml(art.image_url)}" length="0" type="${type}" />\n`;
-                rss += `      <media:content url="${escapeXml(art.image_url)}" medium="image" />\n`;
-            }
-            
+            // enclosure: non-zero length estimate required by some aggregators
+            rss += `      <enclosure url="${escapeXml(proxiedImage)}" length="102400" type="image/webp" />\n`;
+            rss += `      <media:content url="${escapeXml(proxiedImage)}" medium="image" width="1200" height="628">\n`;
+            rss += `        <media:title><![CDATA[${escapeXml(art.title)}]]></media:title>\n`;
+            rss += `      </media:content>\n`;
             rss += `    </item>\n`;
         }
 
