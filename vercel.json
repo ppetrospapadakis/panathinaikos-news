@@ -211,6 +211,10 @@
       "destination": "/api/feed"
     },
     {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
       "source": "/:category/:slug",
       "destination": "/api/render-article?slug=:slug"
     },
