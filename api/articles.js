@@ -145,6 +145,7 @@ module.exports = async (req, res) => {
                 .filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; })
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
+            applyMonotonicJitter(merged);
             return res.status(200).json(merged);
         }
 
@@ -241,9 +242,40 @@ module.exports = async (req, res) => {
                 uniqueArticles.push(current);
             }
         }
-        
+
+        applyMonotonicJitter(uniqueArticles);
         return res.status(200).json(uniqueArticles);
     } catch (err) {
         return res.status(500).json({ error: err.message, stack: err.stack, name: err.name });
     }
 };
+
+function applyMonotonicJitter(articles) {
+    if (!articles || !Array.isArray(articles) || articles.length === 0) return;
+    let lastDisplayMs = null;
+    articles.forEach((art, index) => {
+        if (!art || !art.created_at) return;
+        const realMs = new Date(art.created_at).getTime();
+        
+        let hash = 0;
+        const str = String(art.id || index);
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+        }
+        const gapMins = (Math.abs(hash) % 3) + 2; // 2 to 4 minutes gap
+        const gapMs = gapMins * 60 * 1000;
+
+        let displayMs;
+        if (index === 0) {
+            const baseJitterMs = (Math.abs(hash) % 3) * 60 * 1000; // 0 to 2 min base jitter
+            displayMs = realMs - baseJitterMs;
+        } else {
+            const maxAllowedMs = lastDisplayMs - gapMs;
+            displayMs = Math.min(realMs, maxAllowedMs);
+        }
+
+        lastDisplayMs = displayMs;
+        art.created_at = new Date(displayMs).toISOString();
+    });
+}

@@ -96,6 +96,36 @@ function formatExactDate(dateString) {
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
 }
 
+function applyMonotonicJitter(articles) {
+    if (!articles || !Array.isArray(articles) || articles.length === 0) return;
+    let lastDisplayMs = null;
+    articles.forEach((art, index) => {
+        if (!art || !art.created_at) return;
+        const realMs = new Date(art.created_at).getTime();
+        
+        let hash = 0;
+        const str = String(art.id || index);
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+        }
+        const gapMins = (Math.abs(hash) % 3) + 2; // 2 to 4 minutes gap
+        const gapMs = gapMins * 60 * 1000;
+
+        let displayMs;
+        if (index === 0) {
+            const baseJitterMs = (Math.abs(hash) % 3) * 60 * 1000; // 0 to 2 min base jitter
+            displayMs = realMs - baseJitterMs;
+        } else {
+            const maxAllowedMs = lastDisplayMs - gapMs;
+            displayMs = Math.min(realMs, maxAllowedMs);
+        }
+
+        lastDisplayMs = displayMs;
+        art.created_at = new Date(displayMs).toISOString();
+    });
+}
+
 function escapeHtml(unsafe) {
     return (unsafe || '')
          .replace(/&/g, "&amp;")
@@ -137,6 +167,9 @@ module.exports = async (req, res) => {
             .limit(1);
 
         const { data: articles, error } = await query;
+        if (articles && articles.length > 0) {
+            applyMonotonicJitter(articles);
+        }
         let article = (articles && articles.length > 0) ? articles[0] : null;
 
         // 2. Get cached template (no disk I/O after first request)
