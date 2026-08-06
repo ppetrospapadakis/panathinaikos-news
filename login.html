@@ -904,23 +904,6 @@
             <input type="text" id="popover-extra-input" class="editor-input py-1.5 px-3 text-sm"/>
         </div>
 
-        <!-- 2-Click Category Transfer Selector -->
-        <div class="flex flex-col gap-1.5 pt-2 border-t border-outline-variant/30">
-            <label class="text-[11px] text-primary uppercase font-extrabold flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">swap_horiz</span> Μετακίνηση Κατηγορίας
-            </label>
-            <div class="grid grid-cols-3 gap-1">
-                <button onclick="movePlayerToCategory('starting')" class="px-2 py-1.5 bg-surface-container-high hover:bg-primary/20 hover:text-primary rounded-lg text-[10px] font-bold text-on-surface transition-all border border-outline-variant/20" title="Μεταφορά στους Βασικούς">
-                    🟢 Βασικός
-                </button>
-                <button onclick="movePlayerToCategory('backup')" class="px-2 py-1.5 bg-surface-container-high hover:bg-primary/20 hover:text-primary rounded-lg text-[10px] font-bold text-on-surface transition-all border border-outline-variant/20" title="Μεταφορά στον Πάγκο">
-                    🟡 Πάγκος
-                </button>
-                <button onclick="movePlayerToCategory('rest')" class="px-2 py-1.5 bg-surface-container-high hover:bg-primary/20 hover:text-primary rounded-lg text-[10px] font-bold text-on-surface transition-all border border-outline-variant/20" title="Μεταφορά στις Εφεδρείες">
-                    ⚪ Εκτός
-                </button>
-            </div>
-        </div>
 
         <!-- 2-Click Swap Mode Trigger -->
         <button onclick="startAdminSwapMode()" class="w-full mt-1.5 py-2 px-3 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95">
