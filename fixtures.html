@@ -141,6 +141,23 @@
 
     <!-- Global Filter Dropdown Handlers -->
     <script>
+        window.initDesktopFilterState = function() {
+            const menu = document.getElementById('filter-dropdown-menu');
+            const chevron = document.getElementById('filter-chevron');
+            if (!menu) return;
+            if (window.innerWidth >= 1024) {
+                // Desktop: Expanded by default
+                menu.classList.remove('hidden', 'opacity-0', 'scale-95');
+                menu.classList.add('opacity-100', 'scale-100');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            } else {
+                // Mobile: Collapsed by default
+                menu.classList.add('hidden', 'opacity-0', 'scale-95');
+                menu.classList.remove('opacity-100', 'scale-100');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        };
+
         window.toggleFilterDropdown = function(e) {
             if (e) {
                 e.stopPropagation();
@@ -180,17 +197,27 @@
                 labelEl.textContent = category === 'all' ? 'Φίλτρα Αγώνων' : `Φίλτρο: ${label}`;
             }
 
-            window.closeFilterDropdown();
+            // On mobile, close dropdown after selection. On desktop, keep expanded unless user manually clicks button!
+            if (window.innerWidth < 1024) {
+                window.closeFilterDropdown();
+            }
             if (typeof window.fetchFixtures === 'function') {
                 window.fetchFixtures(category);
             }
         };
 
         document.addEventListener('click', (e) => {
-            const wrapper = document.getElementById('filter-dropdown-wrapper');
-            if (wrapper && !wrapper.contains(e.target)) {
-                window.closeFilterDropdown();
+            // Only auto-close on mobile outside clicks. On desktop, user asked for collapse ONLY on button click.
+            if (window.innerWidth < 1024) {
+                const wrapper = document.getElementById('filter-dropdown-wrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    window.closeFilterDropdown();
+                }
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.initDesktopFilterState();
         });
     </script>
 
@@ -292,39 +319,39 @@
         
 
         <!-- Main Content Area -->
-        <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6 min-h-[60vh] flex flex-col">
-            <!-- Top Controls Bar (Filter Dropdown Stacked ABOVE Matches Box) -->
-            <div class="flex items-center justify-start mb-4 relative z-20">
-                <div class="relative inline-block text-left" id="filter-dropdown-wrapper">
-                    <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
+        <div class="max-w-[1140px] mx-auto px-4 sm:px-6 py-6 min-h-[60vh] flex flex-col lg:flex-row lg:items-start gap-6">
+            <!-- Left Sidebar Controls / Filters (Desktop: Left side | Mobile: Stacked above) -->
+            <div class="w-full lg:w-64 shrink-0 relative z-20" id="filter-dropdown-wrapper">
+                <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="w-full inline-flex items-center justify-between gap-2.5 px-4 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
+                    <div class="flex items-center gap-2.5">
                         <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
                         <span id="filter-selected-label">Φίλτρα Αγώνων</span>
-                        <span class="material-symbols-outlined text-on-surface-variant text-[18px] transition-transform duration-200" id="filter-chevron">expand_more</span>
-                    </button>
-
-                    <!-- Dropdown Menu Panel -->
-                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-52 rounded-2xl bg-surface-container-high border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left" style="background-color: #24272c !important;">
-                        <div class="px-3 py-2 font-label text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest border-b border-outline-variant/20 mb-1">
-                            Επιλογή Αθλήματος
-                        </div>
-                        <button onclick="selectFilter('all', 'Όλα τα Αθλήματα')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span>🏆</span><span>Όλα τα Αθλήματα</span>
-                        </button>
-                        <button onclick="selectFilter('football', '⚽ Ποδόσφαιρο')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span>⚽</span><span>Ποδόσφαιρο</span>
-                        </button>
-                        <button onclick="selectFilter('basketball', '🏀 Μπάσκετ')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span>🏀</span><span>Μπάσκετ</span>
-                        </button>
-                        <button onclick="selectFilter('amateur', '🤾 Ερασιτέχνης')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
-                            <span>🤾</span><span>Ερασιτέχνης</span>
-                        </button>
                     </div>
+                    <span class="material-symbols-outlined text-on-surface-variant text-[18px] transition-transform duration-200" id="filter-chevron">expand_more</span>
+                </button>
+
+                <!-- Dropdown / Panel Menu -->
+                <div id="filter-dropdown-menu" class="hidden absolute lg:static left-0 mt-2 w-full rounded-2xl bg-surface-container-high border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left" style="background-color: #24272c !important;">
+                    <div class="px-3 py-2 font-label text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest border-b border-outline-variant/20 mb-1">
+                        Επιλογή Αθλήματος
+                    </div>
+                    <button onclick="selectFilter('all', 'Όλα τα Αθλήματα')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                        <span>🏆</span><span>Όλα τα Αθλήματα</span>
+                    </button>
+                    <button onclick="selectFilter('football', '⚽ Ποδόσφαιρο')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                        <span>⚽</span><span>Ποδόσφαιρο</span>
+                    </button>
+                    <button onclick="selectFilter('basketball', '🏀 Μπάσκετ')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                        <span>🏀</span><span>Μπάσκετ</span>
+                    </button>
+                    <button onclick="selectFilter('amateur', '🤾 Ερασιτέχνης')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                        <span>🤾</span><span>Ερασιτέχνης</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Scrollable Match Box Container (500px mobile / 800px desktop) -->
-            <div id="fixtures-box" class="h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
+            <div id="fixtures-box" class="flex-1 w-full h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
                 <!-- Loading Spinner -->
                 <div id="fixtures-loading" class="w-full flex justify-center py-16">
                     <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
@@ -338,16 +365,6 @@
                     <span class="material-symbols-outlined text-on-surface-variant/40 text-5xl mb-2">event_busy</span>
                     <p class="font-body text-body text-on-surface-variant">Δεν βρέθηκαν προγραμματισμένοι αγώνες γι' αυτή την κατηγορία.</p>
                 </div>
-            </div>
-        </div>
-
-            <!-- Match List Container (Flashscore Style) -->
-            <div id="fixtures-list" class="flex flex-col gap-2.5 hidden"></div>
-
-            <!-- Empty State -->
-            <div id="fixtures-empty" class="hidden text-center py-16 bg-surface-container-low/50 rounded-2xl border border-outline-variant/20">
-                <span class="material-symbols-outlined text-on-surface-variant/40 text-5xl mb-2">event_busy</span>
-                <p class="font-body text-body text-on-surface-variant">Δεν βρέθηκαν προγραμματισμένοι αγώνες γι' αυτή την κατηγορία.</p>
             </div>
         </div>
 
