@@ -47,19 +47,33 @@ function areSimilar(titleA, titleB) {
     const cosineSimilarity = dotProduct / (Math.sqrt(magA) * Math.sqrt(magB));
     
     // 2. Keyword Entity Overlap check (ignoring common Greek & site stopwords)
-    const stopwords = new Set(['στην', 'στον', 'στους', 'στις', 'στη', 'στο', 'τους', 'προς', 'μετά', 'από', 'για', 'και', 'που', 'πως', 'ότι', 'παναθηναϊκός', 'παναθηναϊκό', 'παναθηναϊκού', 'παναθηναϊκά', 'τριφύλλι', 'πράσινοι', 'πράσινα']);
+    const stopwords = new Set([
+        'ο', 'η', 'το', 'οι', 'αι', 'τα', 'του', 'της', 'των', 'τον', 'την', 'τους', 'τις', 'τισ',
+        'ένα', 'ένας', 'μία', 'μια', 'έναν', 'στην', 'στον', 'στους', 'στις', 'στη', 'στο', 'προς',
+        'μετά', 'από', 'για', 'και', 'που', 'πως', 'πώς', 'πού', 'ότι', 'με', 'σε', 'κατά', 'διά',
+        'παναθηναϊκός', 'παναθηναϊκό', 'παναθηναϊκού', 'παναθηναϊκά', 'τριφύλλι', 'πράσινοι', 'πράσινα',
+        'δείτε', 'βίντεο', 'video', 'φωτογραφίες', 'pics', 'live', 'line', 'vids'
+    ]);
     const wordsA = new Set(cleanA.split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w)));
     const wordsB = new Set(cleanB.split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w)));
     
     let overlapping = 0;
+    let mainEntityMatch = false;
+
     for (const w of wordsA) {
-        if (wordsB.has(w)) overlapping++;
+        if (wordsB.has(w)) {
+            overlapping++;
+            if (w.length >= 6) mainEntityMatch = true; // Key subject name like γιάγκουσιτς, τσιριβέγια, αταμάν, κλπ
+        }
     }
     
     const minWords = Math.min(wordsA.size, wordsB.size);
     const wordOverlapRatio = minWords > 0 ? (overlapping / minWords) : 0;
     
-    return cosineSimilarity > 0.65 || (cosineSimilarity > 0.50 && overlapping >= 3) || (wordOverlapRatio >= 0.75 && overlapping >= 3);
+    return cosineSimilarity > 0.50 || 
+           (cosineSimilarity > 0.35 && overlapping >= 2) || 
+           (wordOverlapRatio >= 0.50 && overlapping >= 2) ||
+           (mainEntityMatch && overlapping >= 1 && (cosineSimilarity > 0.25 || wordOverlapRatio >= 0.20));
 }
 
 module.exports = async (req, res) => {
