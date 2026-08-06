@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html class="dark icons-loaded" lang="el">
+<head>
+    <!-- Preconnect for fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=5"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=5"/>
+    <link rel="shortcut icon" href="/favicon.png?v=5"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=5"/>
+    <title>Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News</title>
+    <meta name="description" content="Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη."/>
+    
+    <!-- Open Graph / SEO -->
+    <meta property="og:title" content="Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News"/>
+    <meta property="og:description" content="Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη."/>
+    <meta property="og:image" content="https://www.panathinaikosnews.gr/favicon.png?v=5"/>
+    <meta property="og:url" content="https://www.panathinaikosnews.gr/fixtures"/>
+    <meta property="og:type" content="website"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News"/>
+    <meta name="twitter:description" content="Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη."/>
+    <meta name="twitter:image" content="https://www.panathinaikosnews.gr/favicon.png?v=5"/>
+
+    <link rel="canonical" href="https://www.panathinaikosnews.gr/fixtures"/>
+
+    <!-- Tailwind & Custom Styles -->
+    <link rel="preload" href="/style.css?v=5" as="style">
+    <link rel="stylesheet" href="/style.css?v=5"/>
+
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"/>
+
+    <!-- Supabase Client JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Global Drawer Toggle Function -->
+    <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('nav-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (!drawer || !overlay) return;
+            const isOpen = !drawer.classList.contains('-translate-x-full');
+            if (isOpen) {
+                drawer.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                drawer.classList.remove('-translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        }
+        window.toggleDrawer = toggleDrawer;
+    </script>
+
+    <!-- Feature Gate Protection Check (Instant - Before Render) -->
+    <script>
+        (function() {
+            const FEATURE_FIXTURES_PUBLIC = true; // Unlocked page for all public visitors
+            function isFixturesAccessible() {
+                if (FEATURE_FIXTURES_PUBLIC) return true;
+                return sessionStorage.getItem('op_auth') === '1';
+            }
+            window.isFixturesAccessible = isFixturesAccessible;
+
+            if (!isFixturesAccessible()) {
+                window.location.replace('/');
+            }
+        })();
+    </script>
+
+    <!-- Schema.org JSON-LD Structured Data for Google SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Παναθηναϊκός Πρόγραμμα & Αποτελέσματα | Panathinaikos News",
+      "description": "Δείτε το πλήρες πρόγραμμα και τα αποτελέσματα των αγώνων του Παναθηναϊκού σε Ποδόσφαιρο, Μπάσκετ και Ερασιτέχνη.",
+      "url": "https://www.panathinaikosnews.gr/fixtures",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Panathinaikos News",
+        "url": "https://www.panathinaikosnews.gr",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.panathinaikosnews.gr/favicon.png?v=5"
+        }
+      }
+    }
+    </script>
+
+    <!-- Google Analytics (Lazy Loaded) -->
+    <script>
+      (function() {
+        let gtagLoaded = false;
+        function loadGtag() {
+            if (gtagLoaded) return;
+            gtagLoaded = true;
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-HGPHW30Z14');
+            const script = document.createElement('script');
+            script.src = "https://www.googletagmanager.com/gtag/js?id=G-HGPHW30Z14";
+            script.async = true;
+            document.head.appendChild(script);
+            ['scroll','mousemove','touchstart','keydown'].forEach(e => window.removeEventListener(e, loadGtag));
+        }
+        ['scroll','mousemove','touchstart','keydown'].forEach(e => window.addEventListener(e, loadGtag, {once:true, passive:true}));
+        setTimeout(loadGtag, 8000);
+      })();
+    </script>
+
+    <style>
+        #fixtures-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        #fixtures-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 9999px;
+        }
+        #fixtures-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 9999px;
+        }
+        #fixtures-box::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.5);
+        }
+    </style>
+
+
+    <!-- Global Filter Dropdown Handlers -->
+    <script>
+        window.toggleFilterDropdown = function(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            const menu = document.getElementById('filter-dropdown-menu');
+            const chevron = document.getElementById('filter-chevron');
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    menu.classList.remove('opacity-0', 'scale-95');
+                    menu.classList.add('opacity-100', 'scale-100');
+                });
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            } else {
+                window.closeFilterDropdown();
+            }
+        };
+
+        window.closeFilterDropdown = function() {
+            const menu = document.getElementById('filter-dropdown-menu');
+            const chevron = document.getElementById('filter-chevron');
+            if (!menu || menu.classList.contains('hidden')) return;
+            menu.classList.remove('opacity-100', 'scale-100');
+            menu.classList.add('opacity-0', 'scale-95');
+            if (chevron) chevron.style.transform = 'rotate(0deg)';
+            setTimeout(() => {
+                menu.classList.add('hidden');
+            }, 150);
+        };
+
+        window.selectFilter = function(category, label) {
+            const labelEl = document.getElementById('filter-selected-label');
+            if (labelEl) {
+                labelEl.textContent = category === 'all' ? 'Φίλτρα Αγώνων' : `Φίλτρο: ${label}`;
+            }
+
+            window.closeFilterDropdown();
+            if (typeof window.fetchFixtures === 'function') {
+                window.fetchFixtures(category);
+            }
+        };
+
+        document.addEventListener('click', (e) => {
+            const wrapper = document.getElementById('filter-dropdown-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                window.closeFilterDropdown();
+            }
+        });
+    </script>
+
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden">
+
+    <!-- ═══ TOP HEADER ═══ -->
+    <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
+        <div class="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 md:px-8 relative">
+            <button class="flex items-center gap-2 cursor-pointer active:opacity-70 transition-opacity z-10" onclick="toggleDrawer()" aria-label="Menu">
+                <span class="material-symbols-outlined text-primary">menu</span>
+            </button>
+            <div class="absolute inset-0 px-[60px] sm:px-0 flex items-center justify-center pointer-events-none">
+                <a href="/" class="flex items-center pointer-events-auto">
+                    <img src="/logo.png" alt="PanathinaikosNews" class="h-[64px] sm:h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+                </a>
+            </div>
+            <a href="https://www.google.com/preferences/source?q=panathinaikosnews.gr" target="_blank" rel="noopener noreferrer" class="z-10 group flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/40 bg-surface-container-high/80 hover:bg-surface-container-highest hover:border-primary/50 text-on-surface transition-all duration-300 shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer" title="Προσθήκη στις προτιμώμενες πηγές του Google">
+                <svg class="w-4 h-4 shrink-0 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span class="hidden md:inline font-body text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface transition-colors whitespace-nowrap">Προσθήκη στη Google</span>
+                <span class="md:hidden text-primary font-bold text-xs">+</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ═══ PUBLIC NAVIGATION DRAWER ═══ -->
+    <aside id="nav-drawer" class="fixed inset-y-0 left-0 w-80 z-[60] bg-surface-container-low shadow-2xl flex flex-col h-full p-6 -translate-x-full transition-transform duration-500 ease-in-out">
+        <div class="flex items-center justify-between gap-2 mb-8 pr-1">
+            <a href="/" class="flex items-center shrink min-w-0">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" width="261" height="74"/>
+            </a>
+            <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors shrink-0 p-1" onclick="toggleDrawer()">close</button>
+        </div>
+        <p class="font-label text-label text-on-surface-variant uppercase tracking-[0.15em] px-4 mb-3">Κατηγορίες</p>
+        <nav class="flex flex-col gap-1">
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/">
+                <span class="material-symbols-outlined">feed</span><span>Ροή Ειδήσεων</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/podosfairo">
+                <span class="material-symbols-outlined">sports_soccer</span><span>Ποδόσφαιρο</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/basket">
+                <span class="material-symbols-outlined">sports_basketball</span><span>Μπάσκετ</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/erasitechnis">
+                <span class="material-symbols-outlined">directions_run</span><span>Ερασιτέχνης</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/apopsi">
+                <span class="material-symbols-outlined">rate_review</span><span>Άποψη</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl font-body text-body transition-all" href="/roster.html">
+                <span class="material-symbols-outlined">groups</span><span>Ρόστερ</span>
+            </a>
+            <a id="nav-item-fixtures" class="flex items-center gap-4 px-4 py-3 bg-primary-container text-on-primary-container rounded-xl font-body text-body transition-all" href="/fixtures">
+                <span class="material-symbols-outlined">calendar_month</span><span>Πρόγραμμα</span>
+            </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-outline-variant/30 flex items-center justify-between">
+            <p class="font-caption text-caption text-on-surface-variant/50">© 2026 Panathinaikos Editorial</p>
+            <a href="/login.html" class="text-on-surface-variant/30 hover:text-primary transition-colors" title="Admin Panel">
+                <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
+            </a>
+        </div>
+    </aside>
+    <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-[55] opacity-0 pointer-events-none transition-opacity duration-500" onclick="toggleDrawer()"></div>
+
+    <main class="mt-[80px]">
+        <!-- Main Site Sticky Horizontal Navigation Bar -->
+        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
+            <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+                <a id="tab-all" href="/" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
+                <a id="tab-football" href="/podosfairo" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
+                <a id="tab-basketball" href="/basket" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🏀 Μπάσκετ</a>
+                <a id="tab-amateur" href="/erasitexnis" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">🤾 Ερασιτέχνης</a>
+                <a id="tab-opinion" href="/apopsi" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">✍️ Άποψη</a>
+                <a href="/roster.html" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">📊 ΡΟΣΤΕΡ</a>
+                <a id="tab-item-fixtures" href="/fixtures" class="px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all whitespace-nowrap lg:flex-1 text-center font-bold">📅 ΠΡΟΓΡΑΜΜΑ</a>
+            </div>
+        </div>
+
+        
+
+        <!-- Main Content Area -->
+        <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6 min-h-[60vh] flex flex-col">
+            <!-- Top Controls Bar (Filter Dropdown Stacked ABOVE Matches Box) -->
+            <div class="flex items-center justify-start mb-4 relative z-20">
+                <div class="relative inline-block text-left" id="filter-dropdown-wrapper">
+                    <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
+                        <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
+                        <span id="filter-selected-label">Φίλτρα Αγώνων</span>
+                        <span class="material-symbols-outlined text-on-surface-variant text-[18px] transition-transform duration-200" id="filter-chevron">expand_more</span>
+                    </button>
+
+                    <!-- Dropdown Menu Panel -->
+                    <div id="filter-dropdown-menu" class="hidden absolute left-0 mt-2 w-52 rounded-2xl bg-surface-container-high border border-outline-variant/40 shadow-2xl p-1.5 z-30 transition-all duration-200 opacity-0 scale-95 origin-top-left" style="background-color: #24272c !important;">
+                        <div class="px-3 py-2 font-label text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest border-b border-outline-variant/20 mb-1">
+                            Επιλογή Αθλήματος
+                        </div>
+                        <button onclick="selectFilter('all', 'Όλα τα Αθλήματα')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>🏆</span><span>Όλα τα Αθλήματα</span>
+                        </button>
+                        <button onclick="selectFilter('football', '⚽ Ποδόσφαιρο')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>⚽</span><span>Ποδόσφαιρο</span>
+                        </button>
+                        <button onclick="selectFilter('basketball', '🏀 Μπάσκετ')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>🏀</span><span>Μπάσκετ</span>
+                        </button>
+                        <button onclick="selectFilter('amateur', '🤾 Ερασιτέχνης')" class="filter-option flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all text-left cursor-pointer">
+                            <span>🤾</span><span>Ερασιτέχνης</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable Match Box Container (500px mobile / 800px desktop) -->
+            <div id="fixtures-box" class="h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
+                <!-- Loading Spinner -->
+                <div id="fixtures-loading" class="w-full flex justify-center py-16">
+                    <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                </div>
+
+                <!-- Match List Container (Flashscore Style) -->
+                <div id="fixtures-list" class="flex flex-col gap-2.5 hidden"></div>
+
+                <!-- Empty State -->
+                <div id="fixtures-empty" class="hidden text-center py-16 bg-surface-container-low/50 rounded-2xl border border-outline-variant/20">
+                    <span class="material-symbols-outlined text-on-surface-variant/40 text-5xl mb-2">event_busy</span>
+                    <p class="font-body text-body text-on-surface-variant">Δεν βρέθηκαν προγραμματισμένοι αγώνες γι' αυτή την κατηγορία.</p>
+                </div>
+            </div>
+        </div>
+
+            <!-- Match List Container (Flashscore Style) -->
+            <div id="fixtures-list" class="flex flex-col gap-2.5 hidden"></div>
+
+            <!-- Empty State -->
+            <div id="fixtures-empty" class="hidden text-center py-16 bg-surface-container-low/50 rounded-2xl border border-outline-variant/20">
+                <span class="material-symbols-outlined text-on-surface-variant/40 text-5xl mb-2">event_busy</span>
+                <p class="font-body text-body text-on-surface-variant">Δεν βρέθηκαν προγραμματισμένοι αγώνες γι' αυτή την κατηγορία.</p>
+            </div>
+        </div>
+
+        <!-- Reusable Component: More News Grid -->
+        <section id="more-news-section" class="border-t border-outline-variant/20 bg-surface-container-lowest/30 py-16 hidden">
+            <div class="max-w-[1440px] mx-auto px-4 md:px-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2.5 h-8 bg-primary rounded-full"></span>
+                        <h2 class="font-h2 text-h2 uppercase tracking-wide">Περισσότερες Ειδήσεις</h2>
+                    </div>
+                </div>
+                <div id="more-news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            </div>
+        </section>
+    </main>
+
+        <!-- Footer -->
+    <footer class="w-full py-16 bg-surface-container-lowest border-t border-outline-variant">
+        <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col items-center gap-8">
+            <a href="/" class="flex items-center">
+                <img src="/logo.png" alt="PanathinaikosNews" class="h-[64px] sm:h-[68px] md:h-[74px] w-auto object-contain" width="261" height="74"/>
+            </a>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/privacy-policy">Πολιτική Απορρήτου</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/terms-of-service">Όροι Χρήσης</a>
+                <a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="/contact">Επικοινωνία</a>
+            </div>
+            <p class="font-caption text-caption text-on-surface-variant/70">© 2026 PanathinaikosNews. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Logic & Functionality Script -->
+    <script>
+        // Supabase Client Initialization
+        const SUPABASE_URL = "https://rctltbuiitdnqlxizlym.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Current Active Category (Default: 'all')
+        let currentCategory = 'all';
+
+        // Helper: Check Shamrock
+        function isPAO(teamName) {
+            if (!teamName) return false;
+            const lower = teamName.toLowerCase();
+            return lower.includes('παναθηναϊκ') || lower.includes('παναθηναικ') || lower.includes('panathinaikos') || lower.includes('pao');
+        }
+
+        function renderTeamName(name) {
+            const pao = isPAO(name);
+            return `<div class="flex items-center gap-1 sm:gap-1.5 font-medium text-xs sm:text-sm md:text-base min-w-0 ${pao ? 'text-primary font-semibold' : 'text-on-surface'}">
+                <span class="truncate">${name}</span>
+                ${pao ? '<img src="/favicon.png?v=5" class="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain shrink-0" alt="☘"/>' : ''}
+            </div>`;
+        }
+
+        // Helper: Competition Logo / Badge Mapping
+        function getCompetitionLogoHtml(comp) {
+            if (!comp) return '';
+            const c = comp.toLowerCase().trim();
+
+            if (c.includes('superleague') || c.includes('super league')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-900/40 text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-500/30">Super League</span>`;
+            }
+            if (c.includes('euroleague')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-900/40 text-orange-400 text-[10px] font-bold uppercase tracking-wider border border-orange-500/30">Euroleague</span>`;
+            }
+            if (c.includes('basket') || c.includes('basketleague')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-900/40 text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">Basket League</span>`;
+            }
+            if (c.includes('cup') || c.includes('κύπελλο') || c.includes('kypello')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-900/40 text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-500/30">Κύπελλο</span>`;
+            }
+            if (c.includes('conference')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-teal-900/40 text-teal-400 text-[10px] font-bold uppercase tracking-wider border border-teal-500/30">Conference</span>`;
+            }
+            if (c.includes('champions')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-indigo-900/40 text-indigo-400 text-[10px] font-bold uppercase tracking-wider border border-indigo-500/30">Champions League</span>`;
+            }
+            if (c.includes('volley')) {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-cyan-900/40 text-cyan-400 text-[10px] font-bold uppercase tracking-wider border border-cyan-500/30">Volley League</span>`;
+            }
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[10px] font-medium uppercase tracking-wider border border-outline-variant/30">${comp}</span>`;
+        }
+
+        // Format Date: DD.MM. HH:mm
+        function formatMatchDate(dateStr) {
+            const d = new Date(dateStr);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}.${month}. ${hours}:${minutes}`;
+        }
+
+        // Fetch & Render Fixtures
+        async function fetchFixtures(category) {
+            const loader = document.getElementById('fixtures-loading');
+            const list = document.getElementById('fixtures-list');
+            const empty = document.getElementById('fixtures-empty');
+
+            loader.classList.remove('hidden');
+            list.classList.add('hidden');
+            empty.classList.add('hidden');
+            list.innerHTML = '';
+
+            try {
+                let query = supabaseClient.from('fixtures').select('*');
+                if (category && category !== 'all') {
+                    query = query.eq('category', category);
+                }
+
+                const { data: matches, error } = await query.order('match_date', { ascending: true });
+
+                if (error) throw error;
+
+                if (!matches || matches.length === 0) {
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                let currentMatchElId = null;
+
+                const html = matches.map(m => {
+                    const compBadge = getCompetitionLogoHtml(m.competition);
+                    const formattedDate = formatMatchDate(m.match_date);
+                    const homeScoreDisplay = m.home_score !== null && m.home_score !== undefined ? m.home_score : '-';
+                    const awayScoreDisplay = m.away_score !== null && m.away_score !== undefined ? m.away_score : '-';
+                    const isCurrent = !!m.is_current;
+                    const rowId = isCurrent ? 'current-match-row' : `match-${m.id}`;
+
+                    if (isCurrent) currentMatchElId = rowId;
+
+                    return `
+                    <div id="${rowId}" class="group relative flex items-center justify-between p-2.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5 scroll-mt-40' : 'border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-high/60'} transition-all duration-300 gap-2 sm:gap-4">
+                        ${isCurrent ? '<div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-primary rounded-r-full"></div>' : ''}
+                        
+                        <!-- Left: Date & Competition Badge -->
+                        <div class="flex flex-col gap-1 min-w-[85px] sm:min-w-[120px] shrink-0">
+                            <span class="font-label text-[11px] sm:text-xs font-semibold ${isCurrent ? 'text-primary' : 'text-on-surface-variant'}">${formattedDate}</span>
+                            <div>${compBadge}</div>
+                        </div>
+
+                        <!-- Middle: Teams -->
+                        <div class="flex flex-col justify-center gap-1 flex-1 min-w-0 px-1 sm:px-2">
+                            ${renderTeamName(m.home_team_name)}
+                            ${renderTeamName(m.away_team_name)}
+                        </div>
+
+                        <!-- Right: Scores -->
+                        <div class="flex flex-col items-center justify-center min-w-[32px] sm:min-w-[44px] shrink-0 gap-1 font-h4 font-bold text-sm sm:text-base md:text-lg border-l border-outline-variant/20 pl-2 sm:pl-4">
+                            <span class="${m.home_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${homeScoreDisplay}</span>
+                            <span class="${m.away_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${awayScoreDisplay}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                list.innerHTML = html;
+                list.classList.remove('hidden');
+
+                // Scroll to current match inside the fixtures box (cross-browser, works on mobile)
+                if (currentMatchElId) {
+                    // Use two nested rAFs so the DOM layout is fully settled before measuring
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        const box = document.getElementById('fixtures-box');
+                        const el = document.getElementById(currentMatchElId);
+                        if (box && el) {
+                            // Compute offset relative to the scrollable box (not document)
+                            const boxRect = box.getBoundingClientRect();
+                            const elRect  = el.getBoundingClientRect();
+                            const offset  = elRect.top - boxRect.top + box.scrollTop;
+                            box.scrollTop = Math.max(0, offset - box.clientHeight / 2 + el.offsetHeight / 2);
+                        }
+                    }));
+                }
+
+            } catch (err) {
+                console.error('Error fetching fixtures:', err);
+                empty.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Switch Category Sub-Tabs
+        function switchCategory(category) {
+            currentCategory = category;
+            const tabs = ['all', 'football', 'basketball', 'amateur'];
+            tabs.forEach(t => {
+                const tabEl = document.getElementById(`fixture-cat-${t}`);
+                if (tabEl) {
+                    if (t === category) {
+                        tabEl.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all cursor-pointer whitespace-nowrap';
+                    } else {
+                        tabEl.className = 'px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer whitespace-nowrap';
+                    }
+                }
+            });
+            fetchFixtures(category);
+        }
+        window.switchCategory = switchCategory;
+
+        
+        
+        function formatExactDate(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} - ${hours}:${minutes}`;
+        }
+
+        function greekToLatin(text) {
+            if (!text) return "";
+            let str = text.toLowerCase();
+            str = str
+                .replace(/αι|αί/g, 'ai')
+                .replace(/ει|εί/g, 'ei')
+                .replace(/οι|οί/g, 'oi')
+                .replace(/ου|ού/g, 'ou')
+                .replace(/αυ|αύ/g, 'av')
+                .replace(/ευ|εύ/g, 'ev')
+                .replace(/μπ/g, 'b')
+                .replace(/ντ/g, 'nt')
+                .replace(/γκ/g, 'gk')
+                .replace(/γγ/g, 'ng')
+                .replace(/τζ/g, 'tz')
+                .replace(/τσ/g, 'ts')
+                .replace(/θ/g, 'th')
+                .replace(/χ/g, 'ch')
+                .replace(/ψ/g, 'ps')
+                .replace(/ξ/g, 'x');
+
+            const singleMap = {
+                'α': 'a', 'ά': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'έ': 'e',
+                'ζ': 'z', 'η': 'i', 'ή': 'i', 'ι': 'i', 'ί': 'i', 'ϊ': 'i', 'ΐ': 'i',
+                'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ο': 'o', 'ό': 'o', 'π': 'p',
+                'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'ύ': 'y', 'ϋ': 'y',
+                'ΰ': 'y', 'φ': 'f', 'ω': 'o', 'ώ': 'o'
+            };
+
+            let res = '';
+            for (let i = 0; i < str.length; i++) {
+                const c = str[i];
+                res += singleMap[c] !== undefined ? singleMap[c] : c;
+            }
+            return res;
+        }
+
+        function slugify(text) {
+            if (!text) return "arthro";
+            try {
+                let latin = greekToLatin(text);
+                let slug = latin
+                    .toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]+/g, '')
+                    .replace(/--+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '');
+                    
+                if (slug.length > 35) {
+                    const truncated = slug.substring(0, 35).replace(/-[^-]*$/, '');
+                    slug = truncated.length > 8 ? truncated : slug.substring(0, 35);
+                }
+                return slug || "arthro";
+            } catch(e) {
+                return "arthro";
+            }
+        }
+
+        function getCategoryCleanName(category) {
+            const cat = (category || '').toLowerCase();
+            if (cat.includes('ποδόσφαιρο') || cat.includes('football')) return 'podosfairo';
+            if (cat.includes('μπάσκετ') || cat.includes('basketball')) return 'basket';
+            if (cat.includes('ερασιτέχνης') || cat.includes('amateur')) return 'erasitexnis';
+            if (cat.includes('άποψη') || cat.includes('opinion')) return 'apopsi';
+            return 'pao';
+        }
+
+        let streamPage = 1;
+        let streamHasMore = true;
+        let isFetchingMore = false;
+
+        async function fetchMoreNews() {
+            if (isFetchingMore || !streamHasMore) return;
+            isFetchingMore = true;
+
+            try {
+                const res = await fetch(`/api/articles?page=${streamPage}`);
+                const data = await res.json();
+                const articles = Array.isArray(data) ? data : (data.articles || []);
+                if (articles && articles.length > 0) {
+                    const section = document.getElementById('more-news-section');
+                    const grid = document.getElementById('more-news-grid');
+                    const html = articles.map(a => {
+                        const date = formatExactDate(a.created_at);
+                        const catClean = getCategoryCleanName(a.category);
+                        const slug = slugify(a.title);
+                        const url = `/${catClean}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                        const img = a.image_url || '/logo.png';
+                        return `
+                        <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                            <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                                <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.src='/logo.png'"/>
+                            </div>
+                            <div class="p-5 flex flex-col flex-1">
+                                <span class="font-label text-label text-primary uppercase mb-1 text-xs font-semibold">${date}</span>
+                                <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors text-sm sm:text-base font-bold line-clamp-2">${a.title}</h3>
+                            </div>
+                        </a>`;
+                    }).join('');
+                    grid.insertAdjacentHTML('beforeend', html);
+                    section.classList.remove('hidden');
+                    streamPage++;
+                }
+                if (!articles || articles.length < 5) {
+                    streamHasMore = false;
+                    const sentinel = document.getElementById('fixtures-sentinel');
+                    if (sentinel) sentinel.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Error fetching more news:', err);
+            } finally {
+                isFetchingMore = false;
+            }
+        }
+
+        // Init Page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Scroll the horizontal nav bar so the active ΠΡΟΓΡΑΜΜΑ tab is centred (mobile fix)
+            requestAnimationFrame(() => {
+                const activeTab = document.getElementById('tab-item-fixtures');
+                if (activeTab) {
+                    const container = activeTab.parentElement;
+                    if (container) {
+                        const scrollLeft = activeTab.offsetLeft - (container.clientWidth / 2) + (activeTab.clientWidth / 2);
+                        container.scrollTo({ left: Math.max(0, scrollLeft) });
+                    }
+                }
+            });
+
+            fetchFixtures('all');
+
+            // More news scroll observer
+            const moreNewsSection = document.getElementById('more-news-section');
+            moreNewsSection.insertAdjacentHTML('afterend',
+                `<div id="fixtures-sentinel" class="w-full flex justify-center py-10">
+                    <div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                </div>`
+            );
+            const sentinel = document.getElementById('fixtures-sentinel');
+            const observer = new IntersectionObserver(async entries => {
+                if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
+                    await fetchMoreNews();
+                }
+            }, { rootMargin: '100px' });
+            observer.observe(sentinel);
+        });
+    </script>
+<script>
+(function() {
+    function showGoogleModal() {
+        let modal = document.getElementById('google-news-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'google-news-modal';
+            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 opacity-0 pointer-events-none transition-all duration-300';
+            modal.innerHTML = `
+                <div class="relative w-full max-w-[310px] sm:max-w-md bg-[#1e2022] border border-outline-variant/30 rounded-2xl p-5 sm:p-6 shadow-2xl transform scale-95 transition-all duration-300 text-center space-y-4">
+                    <div class="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#282a2d] border border-outline-variant/30 flex items-center justify-center shadow-inner">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="font-h3 text-lg sm:text-xl font-bold text-on-surface">Σύντομα διαθέσιμο στη Google!</h3>
+                    
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                        Καθώς το <strong class="text-primary font-semibold">PanathinaikosNews</strong> είναι νέο site, η διαδικασία καταχώρησης από τη Google βρίσκεται σε εξέλιξη.
+                        <br/><br/>
+                        Η δυνατότητα προσθήκης στις προτιμώμενες πηγές σας θα ενεργοποιηθεί αυτόματα σε λίγες ημέρες!
+                    </p>
+                    
+                    <button id="close-google-modal-btn" class="w-full py-2.5 px-4 bg-primary text-on-primary font-bold text-xs sm:text-sm rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer">
+                        Κατάλαβα
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function(evt) {
+                if (evt.target === modal || evt.target.id === 'close-google-modal-btn') {
+                    closeGoogleModal();
+                }
+            });
+        }
+        
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            if (modal.firstElementChild) {
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            }
+        });
+    }
+
+    function closeGoogleModal() {
+        const modal = document.getElementById('google-news-modal');
+        if (modal) {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            if (modal.firstElementChild) {
+                modal.firstElementChild.classList.remove('scale-100');
+                modal.firstElementChild.classList.add('scale-95');
+            }
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('a[href*="preferences/source"]');
+        if (btn) {
+            if (sessionStorage.getItem('op_auth') === '1') {
+                return; // Logged in admin -> direct navigation to target Google News URL
+            }
+            e.preventDefault();
+            showGoogleModal();
+        }
+    });
+})();
+</script>
+</body>
+</html>
