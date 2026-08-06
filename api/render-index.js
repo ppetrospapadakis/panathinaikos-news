@@ -153,7 +153,13 @@ module.exports = async (req, res) => {
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER');
         if (categoryFilter) {
-            if (categoryFilter === 'Άποψη') {
+            if (categoryFilter === 'Ποδόσφαιρο') {
+                query = query.or('category.ilike.%Ποδόσφαιρο%,category.ilike.%football%');
+            } else if (categoryFilter === 'Μπάσκετ') {
+                query = query.or('category.ilike.%Μπάσκετ%,category.ilike.%basket%');
+            } else if (categoryFilter === 'Ερασιτέχνης') {
+                query = query.or('category.ilike.%Ερασιτέχνης%,category.ilike.%amateur%');
+            } else if (categoryFilter === 'Άποψη') {
                 query = query.ilike('category', '%Άποψη%');
             } else {
                 query = query.ilike('category', `%${categoryFilter}%`);

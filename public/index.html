@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark icons-loaded" lang="el">
 <head>
 <meta charset="utf-8"/>
@@ -749,7 +749,7 @@
                     window.currentHeroId = candidateHeroGroup.main.id;
                     window.currentHeroDate = candidateHeroGroup.main.created_at;
                     renderHero(candidateHeroGroup.main);
-                } else if (activeCategory === null && new Date(candidateHeroGroup.main.created_at) > new Date(window.currentHeroDate)) {
+                } else if (new Date(candidateHeroGroup.main.created_at) > new Date(window.currentHeroDate)) {
                     // Stream API returned a NEWER article than the Hero API/SSR!
                     window.currentHeroId = candidateHeroGroup.main.id;
                     window.currentHeroDate = candidateHeroGroup.main.created_at;

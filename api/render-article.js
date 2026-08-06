@@ -113,6 +113,36 @@ function formatBodyContent(text) {
     }).join('\n');
 }
 
+function applyMonotonicJitter(articles) {
+    if (!articles || !Array.isArray(articles) || articles.length === 0) return;
+    let lastDisplayMs = null;
+    articles.forEach((art, index) => {
+        if (!art || !art.created_at) return;
+        const realMs = new Date(art.created_at).getTime();
+        
+        let hash = 0;
+        const str = String(art.id || index);
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+        }
+        const gapMins = (Math.abs(hash) % 3) + 2; // 2 to 4 minutes gap
+        const gapMs = gapMins * 60 * 1000;
+
+        let displayMs;
+        if (index === 0) {
+            const baseJitterMs = (Math.abs(hash) % 3) * 60 * 1000; // 0 to 2 min base jitter
+            displayMs = realMs - baseJitterMs;
+        } else {
+            const maxAllowedMs = lastDisplayMs - gapMs;
+            displayMs = Math.min(realMs, maxAllowedMs);
+        }
+
+        lastDisplayMs = displayMs;
+        art.created_at = new Date(displayMs).toISOString();
+    });
+}
+
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
@@ -254,16 +284,15 @@ module.exports = async (req, res) => {
             sourcesHtml = `<div id="article-source-container" class="border-t border-outline-variant/30 pt-10 flex flex-wrap justify-center gap-4 px-4 md:px-0">${linksHtml}</div>`;
         }
 
+        applyMonotonicJitter([article]);
         const pubDate = new Date(article.created_at);
-        let dateStr = pubDate.toLocaleDateString('el-GR', {
-            day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit',
-            timeZone: 'Europe/Athens', hour12: false
-        });
-        dateStr = dateStr.replace(/,/g, '')
-                         .replace(/\s+/g, ' ')
-                         .replace(/\bστις\b/gi, '')
-                         .trim();
-        dateStr = dateStr.replace(/ (\d{2}:\d{2})$/, ' ΣΤΙΣ $1');
+        const monthNames = ['Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου', 'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'];
+        const day = String(pubDate.getDate());
+        const month = monthNames[pubDate.getMonth()];
+        const year = pubDate.getFullYear();
+        const hours = String(pubDate.getHours()).padStart(2, '0');
+        const minutes = String(pubDate.getMinutes()).padStart(2, '0');
+        const dateStr = `${day} ${month} ${year} στις ${hours}:${minutes}`;
         // 4. Perform replacements
         
         // Title Replacement
