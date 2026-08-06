@@ -1868,6 +1868,7 @@ let adminFixturesCache = [];
 let editingFixtureId = null;
 
 async function loadAdminFixtures(categoryFilter = 'all') {
+    window.currentAdminFixtureCategoryFilter = categoryFilter;
     if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
         db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     }
@@ -1923,6 +1924,11 @@ function renderAdminFixturesList(container, fixtures) {
         if (m.category === 'basketball') catBadge = '🏀 Μπάσκετ';
         else if (m.category === 'amateur') catBadge = '🤾 Ερασιτέχνης';
 
+        const isCurrent = Boolean(m.is_current);
+        const currentBtnText = isCurrent ? 'Unset Current' : '📌 Set Current';
+        const currentBtnStyle = isCurrent ? 'bg-primary/20 text-primary border-primary/40' : 'bg-surface-container-high hover:bg-surface-container-highest border-outline-variant/30 text-on-surface';
+        const currentIcon = isCurrent ? 'keep_off' : 'push_pin';
+
         html += `
         <div class="bg-surface-container rounded-2xl border border-outline-variant/30 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/40 transition-all">
             <div class="flex-1 space-y-2">
@@ -1942,7 +1948,7 @@ function renderAdminFixturesList(container, fixtures) {
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                ${!m.is_current ? `<button onclick="setFixtureCurrent('${m.id}')" class="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-xs font-semibold text-on-surface flex items-center gap-1 transition-all cursor-pointer" title="Ορισμός ως τρέχων αγώνας"><span class="material-symbols-outlined text-[16px]">push_pin</span> 📌 Set Current</button>` : ''}
+                <button onclick="toggleFixtureCurrent('${m.id}', ${isCurrent})" class="px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${currentBtnStyle}" title="Toggle Current Match"><span class="material-symbols-outlined text-[16px]">${currentIcon}</span> ${currentBtnText}</button>
                 <button onclick="editFixtureModal('${m.id}')" class="px-3.5 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"><span class="material-symbols-outlined text-[16px]">edit</span> Επεξεργασία</button>
                 <button onclick="deleteFixture('${m.id}')" class="px-3 py-1.5 rounded-xl bg-error/10 hover:bg-error/20 text-error border border-error/20 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer" title="Διαγραφή αγώνα"><span class="material-symbols-outlined text-[16px]">delete</span></button>
             </div>
@@ -2047,10 +2053,6 @@ async function saveFixture() {
     saveBtn.textContent = 'Αποθήκευση...';
 
     try {
-        if (isCurrent) {
-            await db.from('fixtures').update({ is_current: false }).eq('is_current', true);
-        }
-
         const payload = {
             category: category,
             sport_name: sportName,
@@ -2074,7 +2076,7 @@ async function saveFixture() {
         }
 
         closeFixtureModal();
-        loadAdminFixtures('all');
+        loadAdminFixtures(window.currentAdminFixtureCategoryFilter || 'all');
     } catch (err) {
         console.error('Save Fixture Error:', err);
         alert('Σφάλμα αποθήκευσης: ' + err.message);
@@ -2095,29 +2097,30 @@ async function deleteFixture(id) {
     try {
         const res = await db.from('fixtures').delete().eq('id', id);
         if (res.error) throw res.error;
-        loadAdminFixtures('all');
+        loadAdminFixtures(window.currentAdminFixtureCategoryFilter || 'all');
     } catch (err) {
         alert('Σφάλμα διαγραφής: ' + err.message);
     }
 }
 window.deleteFixture = deleteFixture;
 
-async function setFixtureCurrent(id) {
+async function toggleFixtureCurrent(id, isCurrentlyCurrent) {
     if (!db && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
         db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     }
     if (!db) return;
 
     try {
-        await db.from('fixtures').update({ is_current: false }).eq('is_current', true);
-        const res = await db.from('fixtures').update({ is_current: true }).eq('id', id);
+        const newStatus = !isCurrentlyCurrent;
+        const res = await db.from('fixtures').update({ is_current: newStatus }).eq('id', id);
         if (res.error) throw res.error;
-        loadAdminFixtures('all');
+        loadAdminFixtures(window.currentAdminFixtureCategoryFilter || 'all');
     } catch (err) {
-        alert('Σφάλμα ορισμού ενεργού αγώνα: ' + err.message);
+        alert('Σφάλμα ενημέρωσης αγώνα: ' + err.message);
     }
 }
-window.setFixtureCurrent = setFixtureCurrent;
+window.toggleFixtureCurrent = toggleFixtureCurrent;
+window.setFixtureCurrent = (id) => toggleFixtureCurrent(id, false);
 
 
 

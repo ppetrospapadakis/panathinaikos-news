@@ -495,9 +495,11 @@
                     const homeScoreDisplay = m.home_score !== null && m.home_score !== undefined ? m.home_score : '-';
                     const awayScoreDisplay = m.away_score !== null && m.away_score !== undefined ? m.away_score : '-';
                     const isCurrent = !!m.is_current;
-                    const rowId = isCurrent ? 'current-match-row' : `match-${m.id}`;
+                    const rowId = `match-${m.id}`;
 
-                    if (isCurrent) currentMatchElId = rowId;
+                    if (isCurrent && !currentMatchElId) {
+                        currentMatchElId = rowId;
+                    }
 
                     return `
                     <div id="${rowId}" class="group relative flex items-center justify-between p-2.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5 scroll-mt-40' : 'border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-high/60'} transition-all duration-300 gap-2 sm:gap-4">
