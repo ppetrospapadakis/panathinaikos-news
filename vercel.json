@@ -9,6 +9,9 @@
     },
     "api/render-index.js": {
       "includeFiles": "index.html"
+    },
+    "api/render-admin.js": {
+      "includeFiles": "login.html"
     }
   },
   "headers": [
@@ -131,16 +134,20 @@
       "destination": "/api/render-index?category=apopsi"
     },
     {
+      "source": "/login.html",
+      "destination": "/api/render-admin"
+    },
+    {
       "source": "/analytics",
-      "destination": "/login.html"
+      "destination": "/api/render-admin"
     },
     {
       "source": "/dashboard",
-      "destination": "/login.html"
+      "destination": "/api/render-admin"
     },
     {
       "source": "/admin",
-      "destination": "/login.html"
+      "destination": "/api/render-admin"
     },
     {
       "source": "/contact",
