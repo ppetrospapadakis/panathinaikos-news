@@ -119,7 +119,8 @@ module.exports = async (req, res) => {
     const PUBLICATION_NAME = 'PanathinaikosNews';
     const PUBLICATION_LANGUAGE = 'el';
     const reqUrl = req.url || '';
-    const isNewsSitemap = reqUrl.includes('news') || (req.query && (req.query.news || req.query.type === 'news'));
+    const matchedPath = req.headers['x-matched-path'] || '';
+    const isNewsSitemap = reqUrl.includes('news') || matchedPath.includes('news') || (req.query && (req.query.news || req.query.type === 'news'));
 
     try {
         if (isNewsSitemap) {
