@@ -215,11 +215,11 @@
       "destination": "/api/:path*"
     },
     {
-      "source": "/:category/:slug",
+      "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug",
       "destination": "/api/render-article?slug=:slug"
     },
     {
-      "source": "/:category/:slug-id=:id",
+      "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug-id=:id",
       "destination": "/api/render-article?id=:id"
     },
     {
