@@ -164,8 +164,8 @@
 
                 <div class="flex items-center justify-end gap-3 pt-2">
                     <button type="button" onclick="closeLineupStudio()" class="px-5 py-2.5 rounded-xl border border-outline-variant/40 text-on-surface-variant text-xs font-bold hover:bg-surface-container-highest transition-all cursor-pointer">Ακύρωση</button>
-                    <button type="submit" id="studio-submit-btn" class="px-6 py-2.5 bg-primary text-on-primary font-extrabold rounded-xl text-xs flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer">
-                        <span class="material-symbols-outlined text-[16px]">send</span>
+                    <button type="submit" id="studio-submit-btn" class="px-4 py-2.5 bg-primary text-on-primary font-extrabold rounded-xl text-[10px] sm:text-xs flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[14px] sm:text-[16px] shrink-0">send</span>
                         <span>Δημοσίευση ${isFootball ? '11άδας' : '5άδας'} στα Σχόλια</span>
                     </button>
                 </div>
