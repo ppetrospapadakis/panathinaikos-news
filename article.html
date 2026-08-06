@@ -400,7 +400,9 @@
             const params = new URLSearchParams(window.location.search);
             let articleId = params.get('id');
             if (!articleId) {
-                const match = window.location.pathname.match(/-id=([a-zA-Z0-9-]+)/);
+                // Support new format (slug-XXXXXXXX) and old format (slug-id=XXXXXXXX)
+                let match = window.location.pathname.match(/-([0-9a-f]{8})(?:[/?&#]|$)/i);
+                if (!match) match = window.location.pathname.match(/-id=([a-zA-Z0-9-]+)/);
                 if (match) articleId = match[1];
             }
             currentArticleId = articleId;
@@ -435,10 +437,11 @@
             }
 
             if (!articleId) {
-                // Fallback: extract from path, e.g. /podosfairo/slug-id=123
-                const match = window.location.pathname.match(/-id=([^/&?]+)/);
-                if (match) {
-                    articleId = match[1];
+                // Fallback: support new format (slug-XXXXXXXX) and old format (slug-id=XXXXXXXX)
+                let fallbackMatch = window.location.pathname.match(/-([0-9a-f]{8})(?:[/?&#]|$)/i);
+                if (!fallbackMatch) fallbackMatch = window.location.pathname.match(/-id=([^/&?]+)/);
+                if (fallbackMatch) {
+                    articleId = fallbackMatch[1];
                 }
             }
 
@@ -723,9 +726,11 @@
                 }
             }
 
-            const match = window.location.pathname.match(/-id=([a-zA-Z0-9-]+)/);
-            if (match && match[1]) {
-                const urlId = match[1].trim();
+            // Support new format (slug-XXXXXXXX) and old format (slug-id=XXXXXXXX)
+            let urlMatch = window.location.pathname.match(/-([0-9a-f]{8})(?:[/?&#]|$)/i);
+            if (!urlMatch) urlMatch = window.location.pathname.match(/-id=([a-zA-Z0-9-]+)/);
+            if (urlMatch && urlMatch[1]) {
+                const urlId = urlMatch[1].trim();
                 const aIdStr = String(a.id || '').trim();
                 if (aIdStr.startsWith(urlId) || urlId.startsWith(aIdStr)) return true;
             }
@@ -824,7 +829,7 @@
                 const htmlString = articles.map(a => {
                     const slug = slugify(a.title);
                     const catPath = getCategoryCleanName(a.category);
-                    const url = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                    const url = `/${catPath}/${slug}-${(a.id||"").substring(0,8)}`;
                     const isOwn = isOwnArticle(a);
                     const isOfficial = (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
                     const officialBadge = isOfficial ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
@@ -844,7 +849,7 @@
                 const gridCardsHtml = articles.map(a => {
                     const slug = slugify(a.title);
                     const catPath = getCategoryCleanName(a.category);
-                    const url = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                    const url = `/${catPath}/${slug}-${(a.id||"").substring(0,8)}`;
                     const isOwn = isOwnArticle(a);
                     const isOfficial = (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
                     const officialBadge = isOfficial ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider gap-0.5"><span class="material-symbols-outlined text-[11px]">verified</span>Official</span>` : '';
@@ -985,7 +990,7 @@
                 const gridCardsHtml = articles.map(a => {
                     const slug = slugify(a.title);
                     const catPath = getCategoryCleanName(a.category);
-                    const url = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                    const url = `/${catPath}/${slug}-${(a.id||"").substring(0,8)}`;
                     const DEFAULT_IMG = '/logo.png';
                     return `<a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}">
                         <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">

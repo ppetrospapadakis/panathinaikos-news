@@ -559,7 +559,7 @@
         function sideCardHtml(a) {
             const slug      = slugify(a.title);
             const catPath   = getCategoryCleanName(a.category);
-            const url       = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+            const url       = `/${catPath}/${slug}-${(a.id||"").substring(0,8)}`;
             const isOwn     = isOwnArticle(a);
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge     = isOwn ? `<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
@@ -584,7 +584,7 @@
         function gridCardHtml(a) {
             const slug     = slugify(a.title);
             const catPath  = getCategoryCleanName(a.category);
-            const url      = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+            const url      = `/${catPath}/${slug}-${(a.id||"").substring(0,8)}`;
             const isOwn    = isOwnArticle(a);
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const badge    = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
@@ -622,7 +622,7 @@
 
             const slug    = slugify(a.title);
             const catPath = getCategoryCleanName(a.category);
-            const url     = `/${catPath}/${slug}-id=${(a.id||"").substring(0,8)}`;
+            const url     = `/${catPath}/${slug}-${(a.id||"").substring(0,8)}`;
             const isOwn   = isOwnArticle(a);
             const isOfficial= (a.source_url||'').toLowerCase().includes('pao.gr') || (a.source_url||'').toLowerCase().includes('pao1908.com') || (a.source_url||'').toLowerCase().includes('paobc.gr');
             const ageMs   = Date.now() - new Date(a.created_at).getTime();
@@ -897,7 +897,7 @@
             const carouselCards = articles.map(a => {
                 const slug   = slugify(a.title);
                 const cat    = getCategoryCleanName(a.category);
-                const url    = `/${cat}/${slug}-id=${(a.id||"").substring(0,8)}`;
+                const url    = `/${cat}/${slug}-${(a.id||"").substring(0,8)}`;
                 return `<div class="snap-start flex-shrink-0 w-[290px] md:w-[360px]">
                     <a class="group cursor-pointer rounded-xl border border-primary/30 bg-primary/5 flex flex-col overflow-hidden card-hover h-full" href="${url}" data-article-id="${a.id}">
                         <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
