@@ -1043,7 +1043,15 @@ function adminRenderRosterSection(sport, rosterType) {
             <div class="name-tag">${name}</div>
         `;
         
+        
         container.appendChild(token);
+        
+        // Double-click opens detailed edit popover for name/number changes
+        token.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            cancelAdminSwapMode();
+            showPopoverForPlayer(sport, rosterType, idx, token);
+        });
         
         setupDraggableToken(token, sport, rosterType, idx);
     });
