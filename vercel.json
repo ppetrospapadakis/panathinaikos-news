@@ -195,6 +195,10 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/news-sitemap.xml",
+      "destination": "/api/news-sitemap"
+    },
+    {
       "source": "/site.webmanifest",
       "destination": "/api/webmanifest"
     },

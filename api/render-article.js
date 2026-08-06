@@ -328,51 +328,75 @@ module.exports = async (req, res) => {
 
         const shortId = (article.id || '').substring(0, 8);
         // SEO and metadata replacement
+        const canonicalUrl = `https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}`;
+        const keywordsList = `Παναθηναϊκός, ΠΑΟ, ${article.category || 'Ποδόσφαιρο'}, Ειδήσεις Παναθηναϊκός, Νέα ΠΑΟ, Panathinaikos`;
+
         const metaTags = `
     <!-- Dynamic SEO and OpenGraph Metadata -->
     <link rel="preload" as="image" fetchpriority="high" href="${imageUrl}"/>
     <meta name="description" content="${escapeHtml(article.summary || article.title)}"/>
-    <meta name="robots" content="index, follow, max-image-preview:large"/>
-    <meta property="og:title" content="${escapeHtml(article.title)}"/>
-    <meta property="og:description" content="${escapeHtml(article.summary || '')}"/>
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/>
+    <meta name="googlebot-news" content="index, follow, max-image-preview:large"/>
+    <meta name="keywords" content="${escapeHtml(keywordsList)}"/>
+    <meta property="og:site_name" content="PanathinaikosNews"/>
+    <meta property="og:title" content="${escapeHtml(article.title)} | PanathinaikosNews"/>
+    <meta property="og:description" content="${escapeHtml(article.summary || article.title)}"/>
+    <meta property="og:url" content="${canonicalUrl}"/>
     <meta property="og:image" content="${imageUrl}"/>
-    <meta property="og:url" content="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="628"/>
     <meta property="og:type" content="article"/>
     <meta property="og:locale" content="el_GR"/>
+    <meta property="article:published_time" content="${article.created_at}"/>
+    <meta property="article:modified_time" content="${article.updated_at || article.created_at}"/>
+    <meta property="article:section" content="${escapeHtml(article.category || 'Ποδόσφαιρο')}"/>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:site" content="@PanaNewsGr"/>
     <meta name="twitter:creator" content="@PanaNewsGr"/>
     <meta name="twitter:title" content="${escapeHtml(article.title)}"/>
     <meta name="twitter:description" content="${escapeHtml(article.summary || '')}"/>
     <meta name="twitter:image" content="${imageUrl}"/>
-    <link rel="canonical" href="https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}"/>
+    <link rel="canonical" href="${canonicalUrl}"/>
     <script type="application/ld+json">
     [
       {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
-        "mainEntityOfPage": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "${canonicalUrl}"
+        },
         "headline": ${JSON.stringify(article.title)},
-        "image": [
-          ${JSON.stringify(imageUrl)}
-        ],
+        "description": ${JSON.stringify(article.summary || article.title)},
+        "image": {
+          "@type": "ImageObject",
+          "url": ${JSON.stringify(imageUrl)},
+          "width": 1200,
+          "height": 628
+        },
         "datePublished": ${JSON.stringify(article.created_at)},
+        "dateCreated": ${JSON.stringify(article.created_at)},
         "dateModified": ${JSON.stringify(article.updated_at || article.created_at)},
+        "inLanguage": "el-GR",
+        "isAccessibleForFree": true,
+        "keywords": ${JSON.stringify(keywordsList)},
+        "articleSection": ${JSON.stringify(article.category || 'Ποδόσφαιρο')},
         "author": {
           "@type": "Organization",
-          "name": "PanathinaikosNews",
+          "name": "PanathinaikosNews Editorial Team",
           "url": "https://www.panathinaikosnews.gr"
         },
         "publisher": {
-          "@type": "Organization",
+          "@type": "NewsMediaOrganization",
           "name": "PanathinaikosNews",
+          "url": "https://www.panathinaikosnews.gr",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://www.panathinaikosnews.gr/logo.png"
+            "url": "https://www.panathinaikosnews.gr/logo.png",
+            "width": 512,
+            "height": 512
           }
-        },
-        "description": ${JSON.stringify(article.summary || article.title)},
-        "articleSection": ${JSON.stringify(article.category || 'Ποδόσφαιρο')}
+        }
       },
       {
         "@context": "https://schema.org",
@@ -394,20 +418,20 @@ module.exports = async (req, res) => {
             "@type": "ListItem",
             "position": 3,
             "name": ${JSON.stringify(article.title)},
-            "item": "https://www.panathinaikosnews.gr/${cleanCat}/${slugify(article.title)}-${shortId}"
+            "item": "${canonicalUrl}"
           }
         ]
       },
       {
         "@context": "https://schema.org",
-        "@type": "SportsTeam",
-        "name": "Παναθηναϊκός",
-        "alternateName": "Panathinaikos FC / BC",
+        "@type": "NewsMediaOrganization",
+        "name": "PanathinaikosNews",
         "url": "https://www.panathinaikosnews.gr",
-        "sport": "Football / Basketball",
-        "memberOf": {
-          "@type": "SportsOrganization",
-          "name": "Super League Greece / EuroLeague"
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.panathinaikosnews.gr/logo.png",
+          "width": 512,
+          "height": 512
         }
       }
     ]
