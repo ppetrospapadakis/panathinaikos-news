@@ -211,6 +211,10 @@
       "destination": "/api/feed"
     },
     {
+      "source": "/feed",
+      "destination": "/api/feed"
+    },
+    {
       "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug",
       "destination": "/api/render-article?slug=:slug"
     },
