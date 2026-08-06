@@ -63,7 +63,7 @@ function areSimilar(titleA, titleB) {
     for (const w of wordsA) {
         if (wordsB.has(w)) {
             overlapping++;
-            if (w.length >= 6) mainEntityMatch = true; // Key subject name like γιάγκουσιτς, τσιριβέγια, αταμάν, κλπ
+            if (w.length >= 5) mainEntityMatch = true; // Key subject name like νίστρουπ, γιάγκουσιτς, αταμάν, όσμαν, κλπ
         }
     }
     
@@ -73,7 +73,7 @@ function areSimilar(titleA, titleB) {
     return cosineSimilarity > 0.50 || 
            (cosineSimilarity > 0.35 && overlapping >= 2) || 
            (wordOverlapRatio >= 0.50 && overlapping >= 2) ||
-           (mainEntityMatch && overlapping >= 1 && (cosineSimilarity > 0.25 || wordOverlapRatio >= 0.20));
+           (mainEntityMatch && overlapping >= 1 && (cosineSimilarity > 0.20 || wordOverlapRatio >= 0.20));
 }
 
 module.exports = async (req, res) => {
