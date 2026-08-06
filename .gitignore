@@ -31,6 +31,10 @@ public/
 !public/site.webmanifest
 !public/roster.html
 !public/roster_lineup.js
+!public/login.html
+!public/fixtures.html
+!public/index.html
+!public/article.html
 
 .vercel
 .env*
