@@ -1815,6 +1815,4 @@ async function triggerInstantScrape() {
     }
 }
 window.triggerInstantScrape = triggerInstantScrape;
-    }
-}
 
