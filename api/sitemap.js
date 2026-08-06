@@ -84,17 +84,44 @@ function xmlEscape(str) {
         .replace(/'/g, '&apos;');
 }
 
+const DEFAULT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+
+function proxyImageUrl(rawUrl) {
+    if (!rawUrl) return DEFAULT_IMG;
+    try {
+        let url = rawUrl;
+        if (url.startsWith('//')) url = 'https:' + url;
+        if (!url.startsWith('http')) return DEFAULT_IMG;
+
+        const u = new URL(url);
+        const filename = u.pathname.substring(u.pathname.lastIndexOf('/') + 1).toLowerCase();
+        const brandingKeywords = ['logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+            'og-image', 'og_image', 'site-logo', 'site_logo', 'noimage', 'no-image', 'blank', 'generic'];
+        const brandingPaths = ['/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/site-assets/'];
+        const isBranding = brandingKeywords.some(k => filename.includes(k))
+            || brandingPaths.some(p => ('/' + u.pathname.toLowerCase() + '/').includes(p));
+        if (isBranding) return DEFAULT_IMG;
+
+        if (u.hostname.includes('wsrv.nl')) return url;
+        if (u.hostname.includes('googleusercontent.com') || u.hostname.includes('googleapis.com')) return url;
+
+        return `https://wsrv.nl/?url=${encodeURIComponent(u.href)}&w=1200&h=628&fit=cover&output=webp&q=82`;
+    } catch (_) {
+        return DEFAULT_IMG;
+    }
+}
+
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1200');
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=120');
 
     try {
-        // B3: Reduced from 10000 to 2000 to avoid Vercel function timeout on large DBs
         const { data: articles, error } = await supabase
             .from('articles')
             .select('id, title, category, created_at, image_url')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
+            .not('category', 'ilike', '%Ερασιτέχνης%')
             .order('created_at', { ascending: false })
             .limit(2000);
 
@@ -165,8 +192,9 @@ module.exports = async (req, res) => {
 
             // B2: Image sitemap entries — include article image if available
             if (art.image_url) {
+                const imgLoc = proxyImageUrl(art.image_url);
                 xml += `    <image:image>\n`;
-                xml += `      <image:loc>${xmlEscape(art.image_url)}</image:loc>\n`;
+                xml += `      <image:loc>${xmlEscape(imgLoc)}</image:loc>\n`;
                 xml += `      <image:title>${xmlEscape(art.title)}</image:title>\n`;
                 xml += `    </image:image>\n`;
             }
