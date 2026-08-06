@@ -113,9 +113,66 @@ function proxyImageUrl(rawUrl) {
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=120');
+    res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=60');
+
+    const domain = 'https://www.panathinaikosnews.gr';
+    const PUBLICATION_NAME = 'PanathinaikosNews';
+    const PUBLICATION_LANGUAGE = 'el';
+    const isNewsSitemap = req.query.type === 'news' || (req.url || '').includes('news-sitemap');
 
     try {
+        if (isNewsSitemap) {
+            const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+            const { data: articles, error } = await supabase
+                .from('articles')
+                .select('id, title, category, created_at, image_url')
+                .not('category', 'eq', 'SystemRoster')
+                .not('category', 'eq', 'SYSTEMROSTER')
+                .gte('created_at', fortyEightHoursAgo)
+                .order('created_at', { ascending: false })
+                .limit(500);
+
+            if (error) throw error;
+
+            let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+            xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+            xml += `        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"\n`;
+            xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
+
+            for (const art of (articles || [])) {
+                const cleanCat = getCategoryCleanName(art.category);
+                const cleanSlug = slugify(art.title);
+                const shortId = (art.id || '').substring(0, 8);
+                const url = `${domain}/${cleanCat}/${cleanSlug}-${shortId}`;
+                const pubDateISO = new Date(art.created_at).toISOString();
+
+                xml += `  <url>\n`;
+                xml += `    <loc>${url}</loc>\n`;
+                xml += `    <news:news>\n`;
+                xml += `      <news:publication>\n`;
+                xml += `        <news:name>${xmlEscape(PUBLICATION_NAME)}</news:name>\n`;
+                xml += `        <news:language>${PUBLICATION_LANGUAGE}</news:language>\n`;
+                xml += `      </news:publication>\n`;
+                xml += `      <news:publication_date>${pubDateISO}</news:publication_date>\n`;
+                xml += `      <news:title>${xmlEscape(art.title)}</news:title>\n`;
+                xml += `    </news:news>\n`;
+
+                if (art.image_url) {
+                    const imgLoc = proxyImageUrl(art.image_url);
+                    xml += `    <image:image>\n`;
+                    xml += `      <image:loc>${xmlEscape(imgLoc)}</image:loc>\n`;
+                    xml += `      <image:title>${xmlEscape(art.title)}</image:title>\n`;
+                    xml += `    </image:image>\n`;
+                }
+
+                xml += `  </url>\n`;
+            }
+
+            xml += `</urlset>`;
+            return res.status(200).send(xml);
+        }
+
+        // Standard Sitemap
         const { data: articles, error } = await supabase
             .from('articles')
             .select('id, title, category, created_at, image_url')
@@ -127,10 +184,6 @@ module.exports = async (req, res) => {
 
         if (error) throw error;
 
-        const domain = 'https://www.panathinaikosnews.gr';
-        const PUBLICATION_NAME = 'PanathinaikosNews';
-        const PUBLICATION_LANGUAGE = 'el';
-
         const staticRoutes = [
             '',
             '/podosfairo',
@@ -140,10 +193,8 @@ module.exports = async (req, res) => {
             '/fixtures',
             '/schedule',
             '/roster.html'
-            // /agones removed — disallowed in robots.txt, would send mixed signals to Google
         ];
 
-        // B1: Added xmlns:news for Google News, B2: Added xmlns:image for Image Sitemap
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
         xml += `        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"\n`;
@@ -177,7 +228,6 @@ module.exports = async (req, res) => {
             xml += `    <changefreq>monthly</changefreq>\n`;
             xml += `    <priority>0.8</priority>\n`;
 
-            // B1: Google News entries — only for articles published in the last 48 hours
             if (isRecent && art.title) {
                 const pubDateISO = new Date(art.created_at).toISOString();
                 xml += `    <news:news>\n`;
@@ -190,7 +240,6 @@ module.exports = async (req, res) => {
                 xml += `    </news:news>\n`;
             }
 
-            // B2: Image sitemap entries — include article image if available
             if (art.image_url) {
                 const imgLoc = proxyImageUrl(art.image_url);
                 xml += `    <image:image>\n`;
