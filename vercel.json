@@ -135,6 +135,14 @@
   ],
   "rewrites": [
     {
+      "source": "/feed.xml",
+      "destination": "/api/feed"
+    },
+    {
+      "source": "/feed",
+      "destination": "/api/feed"
+    },
+    {
       "source": "/news-sitemap.xml",
       "destination": "/api/sitemap"
     },
@@ -205,14 +213,6 @@
     {
       "source": "/manifest.json",
       "destination": "/api/webmanifest"
-    },
-    {
-      "source": "/feed.xml",
-      "destination": "/api/feed"
-    },
-    {
-      "source": "/feed",
-      "destination": "/api/feed"
     },
     {
       "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug",
