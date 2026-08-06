@@ -27,7 +27,7 @@ Thumbs.db
 *.swp
 
 # Build output
-public/
+public/*
 !public/site.webmanifest
 !public/roster.html
 !public/roster_lineup.js
