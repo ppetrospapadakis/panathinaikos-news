@@ -1121,6 +1121,7 @@ function setupDraggableToken(token, sport, rosterType, idx) {
         if (e.cancelable) e.preventDefault();
     };
     
+    
     const onEnd = (e) => {
         if (!isDragging) return;
         isDragging = false;
@@ -1132,7 +1133,18 @@ function setupDraggableToken(token, sport, rosterType, idx) {
         document.removeEventListener('touchend', onEnd);
         
         if (totalMoveDist < 8) {
-            showPopoverForPlayer(sport, rosterType, idx, token);
+            // Click event handling:
+            if (adminSwapSource) {
+                // If swap source active, 2nd click swaps player A and player B instantly!
+                if (handleAdminPlayerClickForSwap(sport, rosterType, idx)) return;
+            } else {
+                // 1st click: Automatically set as swap source & open edit popover
+                adminSwapSource = { sport, rosterType, idx, player: currentRoster[sport][rosterType][idx] };
+                document.querySelectorAll('.draggable-player').forEach(el => el.classList.remove('swap-source-highlight'));
+                token.classList.add('swap-source-highlight');
+                showAdminSwapToast(adminSwapSource.player);
+                showPopoverForPlayer(sport, rosterType, idx, token);
+            }
         }
     };
     
