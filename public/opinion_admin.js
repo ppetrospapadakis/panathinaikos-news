@@ -1296,6 +1296,7 @@ function addPlayer(sport, rosterType) {
 }
 
 // Reserves
+
 function adminRenderReserves(sport) {
     const container = document.getElementById(`admin-reserves-${sport}`);
     if (!container) return;
@@ -1310,7 +1311,12 @@ function adminRenderReserves(sport) {
     
     restList.forEach((player, idx) => {
         const card = document.createElement('div');
-        card.className = 'flex items-center gap-2 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30';
+        card.className = 'reserve-card-item flex items-center gap-2 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30 hover:border-amber-500/50 cursor-pointer transition-all';
+        card.onclick = (e) => {
+            // Ignore click if user clicked inside input or delete button
+            if (['INPUT', 'BUTTON', 'SPAN'].includes(e.target.tagName)) return;
+            handleAdminPlayerClick(sport, 'rest', idx, e, card);
+        };
         
         let moveButtons = `
             <div class="flex flex-col gap-1 mr-1">
@@ -1325,11 +1331,10 @@ function adminRenderReserves(sport) {
             <input type="text" value="${player.name || ''}" placeholder="Όνομα" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
             <input type="text" value="${player.pos || player.num || ''}" placeholder="Θέση" class="editor-input py-1 px-2 text-xs w-16" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
             <input type="text" value="${player.detail || ''}" placeholder="Λεπτομέρεια" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'detail', this.value)"/>
-            <div class="flex items-center gap-1 border-l border-outline-variant/30 pl-2">
-         <button onclick="moveReserveToLineup('${sport}', ${idx}, 'starting')" class="px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-md text-[10px] font-bold cursor-pointer transition-all" title="Μεταφορά στους Βασικούς">🟢 Βασικός</button>
-         <button onclick="moveReserveToLineup('${sport}', ${idx}, 'backup')" class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-md text-[10px] font-bold cursor-pointer transition-all" title="Μεταφορά στον Πάγκο">🟡 Πάγκος</button>
-         <button onclick="deleteReserve('${sport}', ${idx})" class="material-symbols-outlined text-red-400 hover:text-red-300 p-1 cursor-pointer">delete</button>
-     </div>
+            <button onclick="handleAdminPlayerClick('${sport}', 'rest', ${idx}, event, this.parentElement)" class="px-2 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer" title="Αντικατάσταση παίκτη">
+                <span class="material-symbols-outlined text-[14px]">sync</span> Swap
+            </button>
+            <button onclick="deleteReserve('${sport}', ${idx})" class="material-symbols-outlined text-red-400 hover:text-red-300 p-1 cursor-pointer">delete</button>
         `;
         container.appendChild(card);
     });
@@ -2292,6 +2297,175 @@ function moveReserveToLineup(sport, reserveIdx, targetCategory) {
     adminRenderReserves(sport);
 }
 window.moveReserveToLineup = moveReserveToLineup;
+
+function syncRosterStateToTextareas(sport) {
+    ['starting', 'backup', 'rest'].forEach(type => {
+        const textarea = document.getElementById(`roster-${sport}-${type}`);
+        if (textarea && currentRoster[sport][type]) {
+            textarea.value = JSON.stringify(currentRoster[sport][type], null, 2);
+        }
+    });
+}
+
+
+
+// ── PURE 2-CLICK PLAYER SWAP & POSITION MANAGER ──────────────────────────────
+/* old adminSwapSource removed */ // { sport, rosterType, idx, player }
+
+function handleAdminPlayerClick(sport, rosterType, idx, event, targetEl) {
+    if (event) event.stopPropagation();
+
+    // 1. If NO player selected yet: Select Player 1
+    if (!adminSwapSource) {
+        const player = currentRoster[sport][rosterType][idx];
+        if (!player) return;
+
+        adminSwapSource = { sport, rosterType, idx, player };
+
+        // Highlight selected Player 1
+        clearAdminSwapHighlights();
+        if (targetEl) targetEl.classList.add('swap-source-highlight');
+
+        showAdminSwapToast(player);
+        return;
+    }
+
+    // 2. If SAME player clicked: Deselect / Cancel
+    if (adminSwapSource.sport === sport && adminSwapSource.rosterType === rosterType && adminSwapSource.idx === idx) {
+        cancelAdminSwapMode();
+        return;
+    }
+
+    // 3. If player from DIFFERENT sport clicked: Reset to new selection
+    if (adminSwapSource.sport !== sport) {
+        cancelAdminSwapMode();
+        handleAdminPlayerClick(sport, rosterType, idx, event, targetEl);
+        return;
+    }
+
+    // 4. PERFORM INSTANT 2-CLICK SWAP between Player 1 and Player 2!
+    executeAdminPlayerSwap(adminSwapSource, { sport, rosterType, idx });
+    cancelAdminSwapMode();
+}
+window.handleAdminPlayerClick = handleAdminPlayerClick;
+
+function clearAdminSwapHighlights() {
+    document.querySelectorAll('.draggable-player, .reserve-card-item').forEach(el => {
+        el.classList.remove('swap-source-highlight');
+    });
+}
+
+function showAdminSwapToast(sourcePlayer) {
+    let toast = document.getElementById('admin-swap-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'admin-swap-toast';
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] bg-amber-950/95 border-2 border-amber-500 text-amber-100 px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-4 animate-bounce';
+        document.body.appendChild(toast);
+    }
+
+    const playerName = sourcePlayer[3] || sourcePlayer.name || 'Παίκτης 1';
+    toast.innerHTML = `
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-amber-400 text-xl animate-spin">sync</span>
+            <span class="text-xs font-bold">Επίλεξες τον: <strong class="text-white font-extrabold text-sm underline">${playerName}</strong>. Πάτα 2ο παίκτη για άμεση αντικατάσταση!</span>
+        </div>
+        <button onclick="cancelAdminSwapMode()" class="px-3 py-1 bg-amber-900 hover:bg-amber-800 text-white rounded-lg text-xs font-bold border border-amber-500/40 cursor-pointer">
+            Ακύρωση
+        </button>
+    `;
+    toast.classList.remove('hidden');
+}
+
+function cancelAdminSwapMode() {
+    adminSwapSource = null;
+    clearAdminSwapHighlights();
+    const toast = document.getElementById('admin-swap-toast');
+    if (toast) toast.classList.add('hidden');
+}
+window.cancelAdminSwapMode = cancelAdminSwapMode;
+
+function executeAdminPlayerSwap(src, tgt) {
+    const sport = src.sport;
+    const srcList = currentRoster[sport][src.rosterType];
+    const tgtList = currentRoster[sport][tgt.rosterType];
+
+    let p1 = srcList[src.idx];
+    let p2 = tgtList[tgt.idx];
+
+    if (!p1 || !p2) return;
+
+    // CASE A: Both are Pitch/Court players (Arrays: [left, top, initials, name, num, pos])
+    if (Array.isArray(p1) && Array.isArray(p2)) {
+        // Swap pitch positions (left, top) so Player 2 takes Player 1's position and vice-versa
+        const tempLeft = p1[0];
+        const tempTop = p1[1];
+
+        p1[0] = p2[0];
+        p1[1] = p2[1];
+
+        p2[0] = tempLeft;
+        p2[1] = tempTop;
+
+        // Swap items in lists
+        srcList[src.idx] = p2;
+        tgtList[tgt.idx] = p1;
+    }
+    // CASE B: One is Pitch/Court player (Array) and one is Reserve player (Object: {initials, name, pos, num, detail})
+    else if (Array.isArray(p1) && !Array.isArray(p2)) {
+        // p1 is Pitch/Court Array, p2 is Reserve Object
+        const convertedP2 = [
+            p1[0], p1[1], // Inherit pitch coordinates
+            p2.initials || 'ΠΑΙ',
+            p2.name || 'Παίκτης',
+            p2.num || p2.pos || 10,
+            p2.pos || ''
+        ];
+
+        const convertedP1 = {
+            initials: p1[2] || 'ΠΑΙ',
+            name: p1[3] || 'Παίκτης',
+            num: p1[4] || '',
+            pos: p1[5] || p1[4] || '',
+            detail: 'Εφεδρεία'
+        };
+
+        srcList[src.idx] = convertedP2;
+        tgtList[tgt.idx] = convertedP1;
+    }
+    else if (!Array.isArray(p1) && Array.isArray(p2)) {
+        // p1 is Reserve Object, p2 is Pitch/Court Array
+        const convertedP1 = [
+            p2[0], p2[1], // Inherit pitch coordinates
+            p1.initials || 'ΠΑΙ',
+            p1.name || 'Παίκτης',
+            p1.num || p1.pos || 10,
+            p1.pos || ''
+        ];
+
+        const convertedP2 = {
+            initials: p2[2] || 'ΠΑΙ',
+            name: p2[3] || 'Παίκτης',
+            num: p2[4] || '',
+            pos: p2[5] || p2[4] || '',
+            detail: 'Εφεδρεία'
+        };
+
+        srcList[src.idx] = convertedP2;
+        tgtList[tgt.idx] = convertedP1;
+    }
+    // CASE C: Both are Reserve Objects
+    else {
+        srcList[src.idx] = p2;
+        tgtList[tgt.idx] = p1;
+    }
+
+    // Sync all textareas & Re-render UI
+    syncRosterStateToTextareas(sport);
+    adminRenderRosterSection(sport, 'starting');
+    adminRenderRosterSection(sport, 'backup');
+    adminRenderReserves(sport);
+}
 
 function syncRosterStateToTextareas(sport) {
     ['starting', 'backup', 'rest'].forEach(type => {
