@@ -140,8 +140,7 @@ module.exports = async (req, res) => {
         let { data: articles, error } = await query.limit(1);
         let article = (articles && articles.length > 0) ? articles[0] : null;
 
-        const isAdminPreview = req.query.admin_preview === 'true';
-        if (error || !article || (article.category === 'DELETED' && !isAdminPreview)) {
+        if (error || !article) {
             console.error('Database fetch error:', error);
             return res.status(404).send('<h1>Το άρθρο δεν βρέθηκε στη βάση δεδομένων.</h1>');
         }
@@ -382,9 +381,10 @@ module.exports = async (req, res) => {
                 ''
             );
         } else {
+            const displayCat = article.category === 'DELETED' ? 'Ποδόσφαιρο' : article.category;
             html = html.replace(
                 /<span id="article-category" class="text-primary"><\/span>/g,
-                `<span id="article-category" class="text-primary">${article.category}</span>`
+                `<span id="article-category" class="text-primary">${displayCat}</span>`
             );
         }
 
