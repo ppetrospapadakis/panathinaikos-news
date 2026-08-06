@@ -385,7 +385,6 @@
             const cat = (a.category || '').toLowerCase();
             return src.startsWith('manual') || 
                    src.includes('opinion://manual') || 
-                   src.includes('opinion://system-roster') || 
                    cat.includes('άποψη') || 
                    cat.includes('apopsi');
         }
@@ -737,12 +736,12 @@
 
             // Hero logic with cache mismatch handling
             let candidateHeroGroup = null;
-            if (activeCategory !== 'Άποψη') {
-                if (activeCategory === null) {
-                    candidateHeroGroup = scraperGroups.find(g => !(g.main.category || '').includes('Ερασιτέχνης')) || ownGroups[0];
-                } else {
-                    candidateHeroGroup = scraperGroups[0] || ownGroups[0];
-                }
+            if (activeCategory === 'Άποψη') {
+                candidateHeroGroup = ownGroups[0] || (ownArticles[0] ? { main: ownArticles[0], related: [] } : null);
+            } else if (activeCategory === null) {
+                candidateHeroGroup = scraperGroups.find(g => !(g.main.category || '').includes('Ερασιτέχνης')) || ownGroups[0];
+            } else {
+                candidateHeroGroup = scraperGroups[0] || ownGroups[0];
             }
             
             if (candidateHeroGroup) {
@@ -875,8 +874,9 @@
             }
 
             // More News section (Περισσότερες Ειδήσεις)
+            const heroId = window.currentHeroId || (ownArticles.length > 0 ? ownArticles[0].id : null);
             const bottomArticles = activeCategory === 'Άποψη'
-                ? ownArticles.filter(a => isOwnArticle(a) && a.id !== window.currentHeroId)
+                ? ownArticles.filter(a => isOwnArticle(a) && a.id !== heroId)
                 : (activeCategory === null ? scraperGroups.map(g => g.main) : sideCandidates.map(g => g.main));
 
             if (bottomArticles.length > 0 && moreNewsEl) {
