@@ -1313,6 +1313,7 @@ function addPlayer(sport, rosterType) {
 
 // Reserves
 
+
 function adminRenderReserves(sport) {
     const container = document.getElementById(`admin-reserves-${sport}`);
     if (!container) return;
@@ -1327,15 +1328,14 @@ function adminRenderReserves(sport) {
     
     restList.forEach((player, idx) => {
         const card = document.createElement('div');
-        card.className = 'reserve-card-item flex items-center gap-2 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30 hover:border-amber-500/50 cursor-pointer transition-all';
+        card.className = 'reserve-card-item flex items-center gap-2.5 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30 hover:border-amber-500/50 cursor-pointer transition-all shadow-sm w-full';
         card.onclick = (e) => {
-            // Ignore click if user clicked inside input or delete button
             if (['INPUT', 'BUTTON', 'SPAN'].includes(e.target.tagName)) return;
             handleAdminPlayerClick(sport, 'rest', idx, e, card);
         };
         
         let moveButtons = `
-            <div class="flex flex-col gap-1 mr-1">
+            <div class="flex flex-col gap-0.5 mr-1 shrink-0">
                 <button onclick="moveReserve('${sport}', ${idx}, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-0.5 text-[18px] leading-none ${idx === 0 ? 'opacity-30 pointer-events-none' : ''}">arrow_drop_up</button>
                 <button onclick="moveReserve('${sport}', ${idx}, 1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-0.5 text-[18px] leading-none ${idx === restList.length - 1 ? 'opacity-30 pointer-events-none' : ''}">arrow_drop_down</button>
             </div>
@@ -1343,14 +1343,13 @@ function adminRenderReserves(sport) {
         
         card.innerHTML = `
             ${moveButtons}
-            <input type="text" value="${player.initials || ''}" placeholder="Αρχ" class="editor-input py-1 px-2 text-center text-xs font-bold w-12 text-primary" style="background:#111317;" maxlength="3" oninput="updateReserveField('${sport}', ${idx}, 'initials', this.value)"/>
-            <input type="text" value="${player.name || ''}" placeholder="Όνομα" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
-            <input type="text" value="${player.pos || player.num || ''}" placeholder="Θέση" class="editor-input py-1 px-2 text-xs w-16" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
-            <input type="text" value="${player.detail || ''}" placeholder="Λεπτομέρεια" class="editor-input py-1 px-2 text-xs flex-1" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'detail', this.value)"/>
-            <button onclick="handleAdminPlayerClick('${sport}', 'rest', ${idx}, event, this.parentElement)" class="px-2 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer" title="Αντικατάσταση παίκτη">
-                <span class="material-symbols-outlined text-[14px]">sync</span> Swap
+            <input type="text" value="${player.initials || ''}" placeholder="Αρχ" class="editor-input py-2 px-2.5 text-center text-xs font-bold w-14 text-primary shrink-0" style="background:#111317;" maxlength="3" oninput="updateReserveField('${sport}', ${idx}, 'initials', this.value)"/>
+            <input type="text" value="${player.name || ''}" placeholder="Όνομα Παίκτη" class="editor-input py-2 px-3 text-sm font-semibold flex-1 min-w-[120px]" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
+            <input type="text" value="${player.pos || player.num || ''}" placeholder="Θέση/Νο" class="editor-input py-2 px-2.5 text-xs text-center font-mono w-20 shrink-0" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
+            <button onclick="handleAdminPlayerClick('${sport}', 'rest', ${idx}, event, this.parentElement)" class="p-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 rounded-xl transition-all cursor-pointer shrink-0" title="Αντικατάσταση (Swap)">
+                <span class="material-symbols-outlined text-[18px] block">sync</span>
             </button>
-            <button onclick="deleteReserve('${sport}', ${idx})" class="material-symbols-outlined text-red-400 hover:text-red-300 p-1 cursor-pointer">delete</button>
+            <button onclick="deleteReserve('${sport}', ${idx})" class="material-symbols-outlined text-red-400 hover:text-red-300 p-1.5 shrink-0 cursor-pointer" title="Διαγραφή">delete</button>
         `;
         container.appendChild(card);
     });
