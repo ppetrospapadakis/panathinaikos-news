@@ -250,32 +250,24 @@ module.exports = async (req, res) => {
     }
 };
 
+function getArticleDisplayDate(id, created_at) {
+    if (!created_at || !id) return created_at;
+    let hash = 0;
+    const str = String(id);
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    const offsetMins = (Math.abs(hash) % 14) + 1;
+    const realMs = new Date(created_at).getTime();
+    return new Date(realMs - offsetMins * 60 * 1000).toISOString();
+}
+
 function applyMonotonicJitter(articles) {
-    if (!articles || !Array.isArray(articles) || articles.length === 0) return;
-    let lastDisplayMs = null;
-    articles.forEach((art, index) => {
-        if (!art || !art.created_at) return;
-        const realMs = new Date(art.created_at).getTime();
-        
-        let hash = 0;
-        const str = String(art.id || index);
-        for (let i = 0; i < str.length; i++) {
-            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            hash |= 0;
+    if (!articles || !Array.isArray(articles)) return;
+    articles.forEach(art => {
+        if (art && art.created_at && art.id) {
+            art.created_at = getArticleDisplayDate(art.id, art.created_at);
         }
-        const gapMins = (Math.abs(hash) % 3) + 2; // 2 to 4 minutes gap
-        const gapMs = gapMins * 60 * 1000;
-
-        let displayMs;
-        if (index === 0) {
-            const baseJitterMs = (Math.abs(hash) % 3) * 60 * 1000; // 0 to 2 min base jitter
-            displayMs = realMs - baseJitterMs;
-        } else {
-            const maxAllowedMs = lastDisplayMs - gapMs;
-            displayMs = Math.min(realMs, maxAllowedMs);
-        }
-
-        lastDisplayMs = displayMs;
-        art.created_at = new Date(displayMs).toISOString();
     });
 }
