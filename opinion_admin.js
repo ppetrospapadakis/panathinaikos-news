@@ -1980,6 +1980,31 @@ function renderAdminFixturesList(container, fixtures) {
     }
 }
 
+function ensureArticleUrlFieldExists() {
+    let artUrlEl = document.getElementById('fix-article-url');
+    if (!artUrlEl) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mt-1 mb-1';
+        wrapper.innerHTML = `
+            <label class="text-[11px] uppercase font-bold text-on-surface-variant mb-1 block flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px] text-primary">link</span>
+                Σχετικό Άρθρο (URL)
+            </label>
+            <input id="fix-article-url" type="url" class="editor-input text-sm py-2 px-3 w-full rounded-xl" placeholder="https://www.panathinaikosnews.gr/..."/>
+            <p class="text-[10px] text-on-surface-variant/60 mt-1">Προαιρετικό. Αν συμπληρωθεί, θα εμφανιστεί κουμπί "Σχετικό άρθρο" δίπλα στο σκορ στον αγώνα.</p>
+        `;
+        const modalBody = document.querySelector('#fixture-edit-modal .p-6');
+        const currentCheckboxRow = document.getElementById('fix-is-current')?.closest('.flex');
+        if (modalBody && currentCheckboxRow) {
+            modalBody.insertBefore(wrapper, currentCheckboxRow);
+        } else if (modalBody) {
+            modalBody.appendChild(wrapper);
+        }
+        artUrlEl = document.getElementById('fix-article-url');
+    }
+    return artUrlEl;
+}
+
 function openAddFixtureModal() {
     editingFixtureId = null;
     document.getElementById('fixture-modal-title').textContent = 'Προσθήκη Νέου Αγώνα';
@@ -1990,7 +2015,7 @@ function openAddFixtureModal() {
     document.getElementById('fix-home-score').value = '';
     document.getElementById('fix-away-name').value = '';
     document.getElementById('fix-away-score').value = '';
-    const artUrlEl = document.getElementById('fix-article-url');
+    const artUrlEl = ensureArticleUrlFieldExists();
     if (artUrlEl) artUrlEl.value = '';
     document.getElementById('fix-is-current').checked = false;
     
@@ -2026,7 +2051,7 @@ function editFixtureModal(id) {
     document.getElementById('fix-home-score').value = (found.home_score !== null && found.home_score !== undefined) ? found.home_score : '';
     document.getElementById('fix-away-name').value = found.away_team_name || '';
     document.getElementById('fix-away-score').value = (found.away_score !== null && found.away_score !== undefined) ? found.away_score : '';
-    const artUrlEl = document.getElementById('fix-article-url');
+    const artUrlEl = ensureArticleUrlFieldExists();
     if (artUrlEl) artUrlEl.value = found.article_url || '';
     document.getElementById('fix-is-current').checked = Boolean(found.is_current);
 
