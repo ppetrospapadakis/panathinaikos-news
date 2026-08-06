@@ -111,6 +111,8 @@ function formatBodyContent(text) {
     return rawParagraphs.map((para) => {
         return `<p class="text-[1rem] leading-[1.85] text-on-surface/90 mb-6">${para}</p>`;
     }).join('\n');
+}
+
 function getGreekDateParts(dateString) {
     if (!dateString) return null;
     const d = new Date(dateString);
