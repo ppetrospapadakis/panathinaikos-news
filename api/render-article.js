@@ -111,6 +111,31 @@ function formatBodyContent(text) {
     return rawParagraphs.map((para) => {
         return `<p class="text-[1rem] leading-[1.85] text-on-surface/90 mb-6">${para}</p>`;
     }).join('\n');
+function getGreekDateParts(dateString) {
+    if (!dateString) return null;
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return null;
+
+    const year = d.getUTCFullYear();
+    const mar31 = new Date(Date.UTC(year, 2, 31));
+    const dstStart = new Date(Date.UTC(year, 2, 31 - mar31.getUTCDay(), 1, 0, 0));
+    const oct31 = new Date(Date.UTC(year, 9, 31));
+    const dstEnd = new Date(Date.UTC(year, 9, 31 - oct31.getUTCDay(), 1, 0, 0));
+
+    const isDst = d >= dstStart && d < dstEnd;
+    const offsetHours = isDst ? 3 : 2;
+
+    const greekMs = d.getTime() + (offsetHours * 60 * 60 * 1000);
+    const greekDate = new Date(greekMs);
+
+    return {
+        day: String(greekDate.getUTCDate()).padStart(2, '0'),
+        monthNum: String(greekDate.getUTCMonth() + 1).padStart(2, '0'),
+        monthIndex: greekDate.getUTCMonth(),
+        year: greekDate.getUTCFullYear(),
+        hours: String(greekDate.getUTCHours()).padStart(2, '0'),
+        minutes: String(greekDate.getUTCMinutes()).padStart(2, '0')
+    };
 }
 
 function applyMonotonicJitter(articles) {
@@ -285,22 +310,9 @@ module.exports = async (req, res) => {
         }
 
         applyMonotonicJitter([article]);
-        const pubDate = new Date(article.created_at);
-        const parts = new Intl.DateTimeFormat('el-GR', {
-            timeZone: 'Europe/Athens',
-            day: 'numeric', month: 'long', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', hour12: false
-        }).formatToParts(pubDate);
-
-        let day='', month='', year='', hours='', minutes='';
-        for (const p of parts) {
-            if (p.type==='day') day=p.value;
-            if (p.type==='month') month=p.value;
-            if (p.type==='year') year=p.value;
-            if (p.type==='hour') hours=p.value;
-            if (p.type==='minute') minutes=p.value;
-        }
-        const dateStr = `${day} ${month} ${year} στις ${hours}:${minutes}`;
+        const monthNames = ['Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου', 'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'];
+        const p = getGreekDateParts(article.created_at);
+        const dateStr = p ? `${parseInt(p.day, 10)} ${monthNames[p.monthIndex]} ${p.year} στις ${p.hours}:${p.minutes}` : '';
         // 4. Perform replacements
         
         // Title Replacement

@@ -85,28 +85,37 @@ function getCategoryCleanName(category) {
     return 'podosfairo';
 }
 
+function getGreekDateParts(dateString) {
+    if (!dateString) return null;
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return null;
+
+    const year = d.getUTCFullYear();
+    const mar31 = new Date(Date.UTC(year, 2, 31));
+    const dstStart = new Date(Date.UTC(year, 2, 31 - mar31.getUTCDay(), 1, 0, 0));
+    const oct31 = new Date(Date.UTC(year, 9, 31));
+    const dstEnd = new Date(Date.UTC(year, 9, 31 - oct31.getUTCDay(), 1, 0, 0));
+
+    const isDst = d >= dstStart && d < dstEnd;
+    const offsetHours = isDst ? 3 : 2;
+
+    const greekMs = d.getTime() + (offsetHours * 60 * 60 * 1000);
+    const greekDate = new Date(greekMs);
+
+    return {
+        day: String(greekDate.getUTCDate()).padStart(2, '0'),
+        monthNum: String(greekDate.getUTCMonth() + 1).padStart(2, '0'),
+        monthIndex: greekDate.getUTCMonth(),
+        year: greekDate.getUTCFullYear(),
+        hours: String(greekDate.getUTCHours()).padStart(2, '0'),
+        minutes: String(greekDate.getUTCMinutes()).padStart(2, '0')
+    };
+}
+
 function formatExactDate(dateString) {
-    if (!dateString) return '';
-    try {
-        const d = new Date(dateString);
-        if (isNaN(d.getTime())) return '';
-        const parts = new Intl.DateTimeFormat('el-GR', {
-            timeZone: 'Europe/Athens',
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', hour12: false
-        }).formatToParts(d);
-        let day='', month='', year='', hours='', minutes='';
-        for (const p of parts) {
-            if (p.type==='day') day=p.value;
-            if (p.type==='month') month=p.value;
-            if (p.type==='year') year=p.value;
-            if (p.type==='hour') hours=p.value;
-            if (p.type==='minute') minutes=p.value;
-        }
-        return `${day}/${month}/${year} - ${hours}:${minutes}`;
-    } catch (_) {
-        return '';
-    }
+    const p = getGreekDateParts(dateString);
+    if (!p) return '';
+    return `${p.day}/${p.monthNum}/${p.year} - ${p.hours}:${p.minutes}`;
 }
 
 function applyMonotonicJitter(articles) {
