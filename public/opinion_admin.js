@@ -1044,14 +1044,21 @@ function adminRenderRosterSection(sport, rosterType) {
         `;
         
         
+        
         container.appendChild(token);
         
+        // Direct 1st-click select / 2nd-click instant SWAP on pitch/court player token!
+        token.onclick = (e) => {
+            e.stopPropagation();
+            handleAdminPlayerClick(sport, rosterType, idx, e, token);
+        };
+        
         // Double-click opens detailed edit popover for name/number changes
-        token.addEventListener('dblclick', (e) => {
+        token.ondblclick = (e) => {
             e.stopPropagation();
             cancelAdminSwapMode();
             showPopoverForPlayer(sport, rosterType, idx, token);
-        });
+        };
         
         setupDraggableToken(token, sport, rosterType, idx);
     });
@@ -1086,7 +1093,8 @@ function setupDraggableToken(token, sport, rosterType, idx) {
         document.addEventListener('mouseup', onEnd);
         document.addEventListener('touchend', onEnd);
         
-        if (e.cancelable) e.preventDefault();
+        // Allow click events if not dragging
+        if (isDragging && totalMoveDist > 5 && e.cancelable) e.preventDefault();
     };
     
     const onMove = (e) => {
@@ -1144,7 +1152,7 @@ function setupDraggableToken(token, sport, rosterType, idx) {
             // Click event handling:
             if (adminSwapSource) {
                 // If swap source active, 2nd click swaps player A and player B instantly!
-                if (handleAdminPlayerClickForSwap(sport, rosterType, idx)) return;
+                if (handleAdminPlayerClick(sport, rosterType, idx)) return;
             } else {
                 // 1st click: Automatically set as swap source & open edit popover
                 adminSwapSource = { sport, rosterType, idx, player: currentRoster[sport][rosterType][idx] };
@@ -1164,7 +1172,7 @@ let selectedPlayerInfo = null;
 
 function showPopoverForPlayer(sport, rosterType, idx, token) {
     if (adminSwapSource) {
-        if (handleAdminPlayerClickForSwap(sport, rosterType, idx)) return;
+        if (handleAdminPlayerClick(sport, rosterType, idx)) return;
     }
     selectedPlayerInfo = { sport, rosterType, idx, token };
     
@@ -2166,7 +2174,7 @@ function cancelAdminSwapMode() {
 }
 window.cancelAdminSwapMode = cancelAdminSwapMode;
 
-function handleAdminPlayerClickForSwap(targetSport, targetRosterType, targetIdx) {
+function handleAdminPlayerClick(targetSport, targetRosterType, targetIdx) {
     if (!adminSwapSource) return false;
 
     const source = adminSwapSource;
@@ -2221,7 +2229,7 @@ function handleAdminPlayerClickForSwap(targetSport, targetRosterType, targetIdx)
     cancelAdminSwapMode();
     return true;
 }
-window.handleAdminPlayerClickForSwap = handleAdminPlayerClickForSwap;
+window.handleAdminPlayerClick = handleAdminPlayerClick;
 
 function movePlayerToCategory(targetCategory) {
     if (!selectedPlayerInfo) return;
