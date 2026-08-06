@@ -71,7 +71,7 @@
                     </div>
                     <div>
                         <h3 class="font-extrabold text-lg sm:text-xl text-on-surface">${sportTitle}</h3>
-                        <p class="text-xs text-on-surface-variant">Πάτα 2 παίκτες για αντικατάσταση (swap)</p>
+                        <p class="text-xs text-on-surface-variant">Σύρε τους παίκτες στο γήπεδο για αλλαγή διάταξης • Πάτα 2 παίκτες για αντικατάσταση (swap)</p>
                     </div>
                 </div>
                 <button onclick="closeLineupStudio()" class="w-9 h-9 rounded-full bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant flex items-center justify-center transition-all cursor-pointer shrink-0">
@@ -83,7 +83,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider">
                     <span>Τακτικό Πλάνο Βασικών</span>
-                    <span class="text-[11px] text-on-surface-variant/70 font-normal">Πάτα έναν παίκτη και μετά έναν άλλον για αντικατάσταση</span>
+                    <span class="text-[11px] text-on-surface-variant/90 font-normal">Σύρε παίκτη στο γήπεδο για αλλαγή διάταξης • Πάτα 2 παίκτες για αντικατάσταση</span>
                 </div>
                 <div id="studio-pitch-container" class="${isFootball ? 'pitch' : 'court'} rounded-2xl w-full relative overflow-hidden shadow-xl" style="height:460px;" onclick="handlePitchBackgroundClick(event)">
                     ${renderStudioPitchLinesHtml(isFootball)}
