@@ -44,7 +44,7 @@
       ]
     },
     {
-      "source": "/(sitemap.xml|feed.xml|api/sitemap|api/feed)",
+      "source": "/(sitemap.xml|news-sitemap.xml|feed.xml|api/sitemap|api/news-sitemap|api/feed)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -135,6 +135,14 @@
   ],
   "rewrites": [
     {
+      "source": "/news-sitemap.xml",
+      "destination": "/api/news-sitemap"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
       "source": "/basket",
       "destination": "/api/render-index?category=basket"
     },
@@ -189,14 +197,6 @@
     {
       "source": "/terms-of-service",
       "destination": "/terms-of-service.html"
-    },
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/news-sitemap.xml",
-      "destination": "/api/news-sitemap"
     },
     {
       "source": "/site.webmanifest",
