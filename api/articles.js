@@ -119,14 +119,18 @@ module.exports = async (req, res) => {
                     .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
                     .ilike('category', '%Άποψη%')
                     .not('category', 'eq', 'DELETED')
+                    .not('category', 'eq', 'SystemRoster')
+                    .not('category', 'eq', 'SYSTEMROSTER')
                     .order('created_at', { ascending: false })
                     .order('id', { ascending: false })
                     .limit(100),
                 supabase
                     .from('articles')
                     .select('id, title, summary, content, image_url, category, created_at, updated_at, source_url, bullets, group_id, pinned_at')
-                    .like('source_url', 'opinion://%')
+                    .like('source_url', 'opinion://manual%')   // only manual, NOT system-roster
                     .not('category', 'eq', 'DELETED')
+                    .not('category', 'eq', 'SystemRoster')
+                    .not('category', 'eq', 'SYSTEMROSTER')
                     .order('created_at', { ascending: false })
                     .order('id', { ascending: false })
                     .limit(100)
