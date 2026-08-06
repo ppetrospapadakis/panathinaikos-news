@@ -1448,11 +1448,21 @@ async function main() {
 
     let totalNew = 0, totalSkipped = 0;
 
-    // ── Process each source ───────────────────────────────────────────────────
-    for (const target of SCRAPE_TARGETS) {
-        console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
-
+    // ── 1. Fetch listing index pages for all 14 targets in parallel ────────────
+    console.log('[INDEX FETCH] Fetching listing index pages for all 14 targets in parallel...');
+    const targetResults = await Promise.all(SCRAPE_TARGETS.map(async (target) => {
         let links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
+        if (links && links.length > 5) {
+            links = links.slice(0, 5);
+        }
+        return { target, links };
+    }));
+
+    // ── 2. Process fetched articles sequentially with full safety ──────────────
+    for (const { target, links: rawLinks } of targetResults) {
+        console.log(`\n[SOURCE] ${target.name} | ${target.category}`);
+        let links = rawLinks;
+
         if (links === null) {
             runStats.sources[target.name].skipped_crawling_failed++;
             runStats.totals.skipped_crawling_failed++;
@@ -1461,25 +1471,11 @@ async function main() {
         }
         if (links.length === 0) { console.log(`  → No links found, skipping.`); continue; }
 
-        // Limit link inspection depth to top 5 newest links per site
-        if (links.length > 5) {
-            console.log(`  → Limiting inspection depth to top 5 newest links (out of ${links.length} found).`);
-            links = links.slice(0, 5);
-        }
-
         // Hack for Sportime first run to not flood with 30 old articles
         if (target.name === 'Sportime') {
             // Clean & filter links to ensure only actual article pages are processed
             const cleanLinks = links.filter(l => !l.endsWith('/feed') && !l.endsWith('/panathinaikos') && !l.endsWith('/panathinaikos/') && !l.includes('/category/') && l.length > 35);
             links = Array.from(new Set(cleanLinks));
-
-            const newLinks = links.filter(l => !existingUrls.has(l));
-            if (newLinks.length > 2) {
-                console.log(`[SPORTIME] First run detected! Processing latest article "${newLinks[0]}" and ignoring ${newLinks.length - 1} older articles.`);
-                for (let i = 1; i < newLinks.length; i++) {
-                    
-                }
-            }
         }
 
         runStats.sources[target.name].scraped += links.length;
