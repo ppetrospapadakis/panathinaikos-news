@@ -517,6 +517,15 @@
                             ${renderTeamName(m.away_team_name)}
                         </div>
 
+                        <!-- Optional Related Article Button -->
+                        ${m.article_url ? `
+                        <a href="${escapeHtml(m.article_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
+                            <span class="material-symbols-outlined text-[14px] sm:text-[16px]">newspaper</span>
+                            <span class="hidden sm:inline">Σχετικό άρθρο</span>
+                            <span class="sm:hidden">Άρθρο</span>
+                        </a>
+                        ` : ''}
+
                         <!-- Right: Scores -->
                         <div class="flex flex-col items-center justify-center min-w-[32px] sm:min-w-[44px] shrink-0 gap-1 font-h4 font-bold text-sm sm:text-base md:text-lg border-l border-outline-variant/20 pl-2 sm:pl-4">
                             <span class="${m.home_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${homeScoreDisplay}</span>

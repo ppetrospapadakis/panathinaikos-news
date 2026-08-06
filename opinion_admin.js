@@ -1939,6 +1939,8 @@ function renderAdminFixturesList(container, fixtures) {
         const currentBtnStyle = isCurrent ? 'bg-primary/20 text-primary border-primary/40' : 'bg-surface-container-high hover:bg-surface-container-highest border-outline-variant/30 text-on-surface';
         const currentIcon = isCurrent ? 'keep_off' : 'push_pin';
 
+        const hasArticleBadge = m.article_url ? `<a href="${escapeHtml(m.article_url)}" target="_blank" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-tertiary/20 text-tertiary border border-tertiary/30 flex items-center gap-1 hover:underline"><span class="material-symbols-outlined text-[12px]">newspaper</span> Άρθρο</a>` : '';
+
         html += `
         <div id="${cardId}" class="bg-surface-container rounded-2xl border ${isCurrent ? 'border-primary ring-1 ring-primary/40 shadow-lg shadow-primary/5' : 'border-outline-variant/30'} p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/40 transition-all scroll-mt-28">
             <div class="flex-1 space-y-2">
@@ -1949,6 +1951,7 @@ function renderAdminFixturesList(container, fixtures) {
                     <span class="text-on-surface-variant/40">•</span>
                     <span class="text-on-surface-variant font-mono">${dateStr}</span>
                     ${isCurrentBadge}
+                    ${hasArticleBadge}
                 </div>
                 <div class="flex items-center gap-4 text-base font-bold text-on-surface">
                     <span class="truncate">${m.home_team_name}</span>
@@ -1987,6 +1990,8 @@ function openAddFixtureModal() {
     document.getElementById('fix-home-score').value = '';
     document.getElementById('fix-away-name').value = '';
     document.getElementById('fix-away-score').value = '';
+    const artUrlEl = document.getElementById('fix-article-url');
+    if (artUrlEl) artUrlEl.value = '';
     document.getElementById('fix-is-current').checked = false;
     
     document.getElementById('fixture-edit-modal').classList.remove('hidden');
@@ -2021,6 +2026,8 @@ function editFixtureModal(id) {
     document.getElementById('fix-home-score').value = (found.home_score !== null && found.home_score !== undefined) ? found.home_score : '';
     document.getElementById('fix-away-name').value = found.away_team_name || '';
     document.getElementById('fix-away-score').value = (found.away_score !== null && found.away_score !== undefined) ? found.away_score : '';
+    const artUrlEl = document.getElementById('fix-article-url');
+    if (artUrlEl) artUrlEl.value = found.article_url || '';
     document.getElementById('fix-is-current').checked = Boolean(found.is_current);
 
     document.getElementById('fixture-edit-modal').classList.remove('hidden');
@@ -2048,6 +2055,8 @@ async function saveFixture() {
     const homeScoreVal = document.getElementById('fix-home-score').value;
     const awayName = document.getElementById('fix-away-name').value.trim();
     const awayScoreVal = document.getElementById('fix-away-score').value;
+    const artUrlInput = document.getElementById('fix-article-url');
+    const articleUrlVal = artUrlInput ? artUrlInput.value.trim() : '';
     const isCurrent = document.getElementById('fix-is-current').checked;
 
     if (!homeName || !awayName) {
@@ -2081,6 +2090,7 @@ async function saveFixture() {
             home_score: homeScore,
             away_team_name: awayName,
             away_score: awayScore,
+            article_url: articleUrlVal || null,
             is_current: isCurrent,
             updated_at: new Date().toISOString()
         };
