@@ -286,12 +286,20 @@ module.exports = async (req, res) => {
 
         applyMonotonicJitter([article]);
         const pubDate = new Date(article.created_at);
-        const monthNames = ['Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου', 'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'];
-        const day = String(pubDate.getDate());
-        const month = monthNames[pubDate.getMonth()];
-        const year = pubDate.getFullYear();
-        const hours = String(pubDate.getHours()).padStart(2, '0');
-        const minutes = String(pubDate.getMinutes()).padStart(2, '0');
+        const parts = new Intl.DateTimeFormat('el-GR', {
+            timeZone: 'Europe/Athens',
+            day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        }).formatToParts(pubDate);
+
+        let day='', month='', year='', hours='', minutes='';
+        for (const p of parts) {
+            if (p.type==='day') day=p.value;
+            if (p.type==='month') month=p.value;
+            if (p.type==='year') year=p.value;
+            if (p.type==='hour') hours=p.value;
+            if (p.type==='minute') minutes=p.value;
+        }
         const dateStr = `${day} ${month} ${year} στις ${hours}:${minutes}`;
         // 4. Perform replacements
         
