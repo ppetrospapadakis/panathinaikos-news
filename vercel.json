@@ -136,7 +136,11 @@
   "rewrites": [
     {
       "source": "/news-sitemap.xml",
-      "destination": "/api/news-sitemap"
+      "destination": "/api/news-sitemap.js"
+    },
+    {
+      "source": "/api/news-sitemap",
+      "destination": "/api/news-sitemap.js"
     },
     {
       "source": "/sitemap.xml",
