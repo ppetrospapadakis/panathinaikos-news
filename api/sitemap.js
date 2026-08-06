@@ -118,7 +118,8 @@ module.exports = async (req, res) => {
     const domain = 'https://www.panathinaikosnews.gr';
     const PUBLICATION_NAME = 'PanathinaikosNews';
     const PUBLICATION_LANGUAGE = 'el';
-    const isNewsSitemap = req.query.type === 'news' || (req.url || '').includes('news-sitemap');
+    const reqUrl = req.url || '';
+    const isNewsSitemap = reqUrl.includes('type=news') || reqUrl.includes('news-sitemap') || (req.query && req.query.type === 'news');
 
     try {
         if (isNewsSitemap) {
