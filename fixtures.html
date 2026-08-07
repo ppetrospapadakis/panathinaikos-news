@@ -473,6 +473,157 @@
             return `${day}.${month}. ${hours}:${minutes}`;
         }
 
+        // State for Windowed Fixture Rendering (10 past + 1 current + 10 future)
+        let allCurrentMatches = [];
+        let showAllOlderMatches = false;
+        let showAllNewerMatches = false;
+
+        function renderSingleMatchRow(m) {
+            const compBadge = getCompetitionLogoHtml(m.competition);
+            const formattedDate = formatMatchDate(m.match_date);
+            const homeScoreDisplay = m.home_score !== null && m.home_score !== undefined ? m.home_score : '-';
+            const awayScoreDisplay = m.away_score !== null && m.away_score !== undefined ? m.away_score : '-';
+            const isCurrent = !!m.is_current;
+            const rowId = `match-${m.id}`;
+            const hasArticle = Boolean(m.article_url);
+            const articleHref = hasArticle ? escapeHtml(m.article_url) : '';
+
+            const clickAttr = hasArticle ? `onclick="window.open('${articleHref}', '_blank')"` : '';
+            const cursorClass = hasArticle ? 'cursor-pointer hover:border-primary/60 active:scale-[0.995]' : '';
+
+            return `
+            <div id="${rowId}" ${clickAttr} class="group relative flex items-center justify-between p-2.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5 scroll-mt-36' : 'border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-high/60'} ${cursorClass} transition-all duration-300 gap-2 sm:gap-4">
+                ${isCurrent ? '<div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-primary rounded-r-full"></div>' : ''}
+                
+                <!-- Left: Date & Competition Badge -->
+                <div class="flex flex-col gap-1 min-w-[85px] sm:min-w-[120px] shrink-0">
+                    <span class="font-label text-[11px] sm:text-xs font-semibold ${isCurrent ? 'text-primary' : 'text-on-surface-variant'}">${formattedDate}</span>
+                    <div>${compBadge}</div>
+                </div>
+
+                <!-- Middle: Teams -->
+                <div class="flex flex-col justify-center gap-1 flex-1 min-w-0 px-1 sm:px-2">
+                    ${renderTeamName(m.home_team_name)}
+                    ${renderTeamName(m.away_team_name)}
+                </div>
+
+                <!-- Desktop Only: Related Article Button -->
+                ${hasArticle ? `
+                <a href="${articleHref}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
+                    <span class="material-symbols-outlined text-[16px]">newspaper</span>
+                    <span>Σχετικό άρθρο</span>
+                </a>
+                ` : ''}
+
+                <!-- Right: Scores -->
+                <div class="flex flex-col items-center justify-center min-w-[32px] sm:min-w-[44px] shrink-0 gap-1 font-h4 font-bold text-sm sm:text-base md:text-lg border-l border-outline-variant/20 pl-2 sm:pl-4">
+                    <span class="${m.home_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${homeScoreDisplay}</span>
+                    <span class="${m.away_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${awayScoreDisplay}</span>
+                </div>
+            </div>`;
+        }
+
+        function renderFixturesUI() {
+            const list = document.getElementById('fixtures-list');
+            const empty = document.getElementById('fixtures-empty');
+
+            if (!allCurrentMatches || allCurrentMatches.length === 0) {
+                empty.classList.remove('hidden');
+                list.classList.add('hidden');
+                return;
+            }
+
+            // Determine current match index
+            let curIdx = allCurrentMatches.findIndex(m => m.is_current);
+            if (curIdx === -1) {
+                const nowStr = new Date().toISOString();
+                curIdx = allCurrentMatches.findIndex(m => m.match_date >= nowStr);
+            }
+            if (curIdx === -1) {
+                curIdx = allCurrentMatches.length - 1;
+            }
+
+            const pastMatches = allCurrentMatches.slice(0, curIdx);
+            const currentMatch = allCurrentMatches[curIdx];
+            const futureMatches = allCurrentMatches.slice(curIdx + 1);
+
+            const hiddenPastMatches = pastMatches.slice(0, Math.max(0, pastMatches.length - 10));
+            const shownPastMatches = pastMatches.slice(Math.max(0, pastMatches.length - 10));
+
+            const shownFutureMatches = futureMatches.slice(0, 10);
+            const hiddenFutureMatches = futureMatches.slice(10);
+
+            let htmlParts = [];
+
+            // Top Button for older past matches
+            if (hiddenPastMatches.length > 0) {
+                if (showAllOlderMatches) {
+                    htmlParts.push(hiddenPastMatches.map(m => renderSingleMatchRow(m)).join(''));
+                } else {
+                    htmlParts.push(`
+                    <div id="container-show-older" class="flex justify-center py-2 my-2">
+                        <button onclick="window.expandOlderMatches()" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-label text-xs sm:text-sm font-bold tracking-wide transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer">
+                            <span class="material-symbols-outlined text-lg">unfold_more</span>
+                            <span>Εμφάνιση παλαιότερων αγώνων (${hiddenPastMatches.length})</span>
+                        </button>
+                    </div>`);
+                }
+            }
+
+            // Shown past matches (10 closest)
+            if (shownPastMatches.length > 0) {
+                htmlParts.push(shownPastMatches.map(m => renderSingleMatchRow(m)).join(''));
+            }
+
+            // Current match
+            if (currentMatch) {
+                htmlParts.push(renderSingleMatchRow(currentMatch));
+            }
+
+            // Shown future matches (10 closest)
+            if (shownFutureMatches.length > 0) {
+                htmlParts.push(shownFutureMatches.map(m => renderSingleMatchRow(m)).join(''));
+            }
+
+            // Bottom Button for newer future matches
+            if (hiddenFutureMatches.length > 0) {
+                if (showAllNewerMatches) {
+                    htmlParts.push(hiddenFutureMatches.map(m => renderSingleMatchRow(m)).join(''));
+                } else {
+                    htmlParts.push(`
+                    <div id="container-show-newer" class="flex justify-center py-2 my-2">
+                        <button onclick="window.expandNewerMatches()" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-label text-xs sm:text-sm font-bold tracking-wide transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer">
+                            <span class="material-symbols-outlined text-lg">unfold_more</span>
+                            <span>Εμφάνιση επόμενων αγώνων (${hiddenFutureMatches.length})</span>
+                        </button>
+                    </div>`);
+                }
+            }
+
+            list.innerHTML = htmlParts.join('');
+            list.classList.remove('hidden');
+
+            // Scroll to current match on initial render
+            if (currentMatch && !showAllOlderMatches && !showAllNewerMatches) {
+                setTimeout(() => {
+                    const el = document.getElementById(`match-${currentMatch.id}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 150);
+            }
+        }
+
+        window.expandOlderMatches = function() {
+            showAllOlderMatches = true;
+            renderFixturesUI();
+        };
+
+        window.expandNewerMatches = function() {
+            showAllNewerMatches = true;
+            renderFixturesUI();
+        };
+
         // Fetch & Render Fixtures
         async function fetchFixtures(category) {
             const loader = document.getElementById('fixtures-loading');
@@ -483,6 +634,8 @@
             list.classList.add('hidden');
             empty.classList.add('hidden');
             list.innerHTML = '';
+            showAllOlderMatches = false;
+            showAllNewerMatches = false;
 
             try {
                 let query = supabaseClient.from('fixtures').select('*');
@@ -494,74 +647,8 @@
 
                 if (error) throw error;
 
-                if (!matches || matches.length === 0) {
-                    empty.classList.remove('hidden');
-                    return;
-                }
-
-                let currentMatchElId = null;
-
-                const html = matches.map(m => {
-                    const compBadge = getCompetitionLogoHtml(m.competition);
-                    const formattedDate = formatMatchDate(m.match_date);
-                    const homeScoreDisplay = m.home_score !== null && m.home_score !== undefined ? m.home_score : '-';
-                    const awayScoreDisplay = m.away_score !== null && m.away_score !== undefined ? m.away_score : '-';
-                    const isCurrent = !!m.is_current;
-                    const rowId = `match-${m.id}`;
-                    const hasArticle = Boolean(m.article_url);
-                    const articleHref = hasArticle ? escapeHtml(m.article_url) : '';
-
-                    if (isCurrent && !currentMatchElId) {
-                        currentMatchElId = rowId;
-                    }
-
-                    const clickAttr = hasArticle ? `onclick="window.open('${articleHref}', '_blank')"` : '';
-                    const cursorClass = hasArticle ? 'cursor-pointer hover:border-primary/60 active:scale-[0.995]' : '';
-
-                    return `
-                    <div id="${rowId}" ${clickAttr} class="group relative flex items-center justify-between p-2.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5 scroll-mt-36' : 'border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-high/60'} ${cursorClass} transition-all duration-300 gap-2 sm:gap-4">
-                        ${isCurrent ? '<div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-primary rounded-r-full"></div>' : ''}
-                        
-                        <!-- Left: Date & Competition Badge -->
-                        <div class="flex flex-col gap-1 min-w-[85px] sm:min-w-[120px] shrink-0">
-                            <span class="font-label text-[11px] sm:text-xs font-semibold ${isCurrent ? 'text-primary' : 'text-on-surface-variant'}">${formattedDate}</span>
-                            <div>${compBadge}</div>
-                        </div>
-
-                        <!-- Middle: Teams -->
-                        <div class="flex flex-col justify-center gap-1 flex-1 min-w-0 px-1 sm:px-2">
-                            ${renderTeamName(m.home_team_name)}
-                            ${renderTeamName(m.away_team_name)}
-                        </div>
-
-                        <!-- Desktop Only: Related Article Button (Hidden on Mobile for max space) -->
-                        ${hasArticle ? `
-                        <a href="${articleHref}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
-                            <span class="material-symbols-outlined text-[16px]">newspaper</span>
-                            <span>Σχετικό άρθρο</span>
-                        </a>
-                        ` : ''}
-
-                        <!-- Right: Scores -->
-                        <div class="flex flex-col items-center justify-center min-w-[32px] sm:min-w-[44px] shrink-0 gap-1 font-h4 font-bold text-sm sm:text-base md:text-lg border-l border-outline-variant/20 pl-2 sm:pl-4">
-                            <span class="${m.home_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${homeScoreDisplay}</span>
-                            <span class="${m.away_score !== null ? 'text-on-surface' : 'text-on-surface-variant/40'}">${awayScoreDisplay}</span>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                list.innerHTML = html;
-                list.classList.remove('hidden');
-
-                // Smooth Scroll to current match (cross-browser, mobile & desktop)
-                if (currentMatchElId) {
-                    setTimeout(() => {
-                        const el = document.getElementById(currentMatchElId);
-                        if (el) {
-                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                    }, 150);
-                }
+                allCurrentMatches = matches || [];
+                renderFixturesUI();
 
             } catch (err) {
                 console.error('Error fetching fixtures:', err);
