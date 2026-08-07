@@ -1,3 +1,13 @@
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // ── Roster & Analysis Editing Logic ──────────────────────────────────────────
 const footballStartingDefault = [
     [50, 88, 'ΦΝ', 'Φιλίποβιτς', 1, 'GK'],
