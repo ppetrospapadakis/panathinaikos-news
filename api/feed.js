@@ -124,14 +124,12 @@ module.exports = async (req, res) => {
     const domain = 'https://www.panathinaikosnews.gr';
 
     try {
-        // Fetch the 100 most recent articles for the RSS feed (exclude system/erasitexnis)
+        // Fetch the 100 most recent articles for the RSS feed (exclude system)
         const { data: articles, error } = await supabase
             .from('articles')
             .select('id, title, summary, content, category, image_url, created_at')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
-            .not('category', 'ilike', '%Ερασιτέχνης%')
-            .not('category', 'ilike', '%amateur%')
             .order('created_at', { ascending: false })
             .limit(100);
 

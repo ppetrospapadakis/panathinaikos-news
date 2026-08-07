@@ -180,7 +180,6 @@ module.exports = async (req, res) => {
             .select('id, title, category, created_at, image_url')
             .not('category', 'eq', 'SystemRoster')
             .not('category', 'eq', 'SYSTEMROSTER')
-            .not('category', 'ilike', '%Ερασιτέχνης%')
             .order('created_at', { ascending: false })
             .limit(2000);
 
