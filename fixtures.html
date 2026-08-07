@@ -320,8 +320,8 @@
 
         <!-- Main Content Area -->
         <div class="max-w-[1140px] mx-auto px-4 sm:px-6 py-6 min-h-[60vh] flex flex-col lg:flex-row lg:items-start gap-6">
-            <!-- Left Sidebar Controls / Filters (Desktop: Left side | Mobile: Stacked above) -->
-            <div class="w-full lg:w-64 shrink-0 relative z-20" id="filter-dropdown-wrapper">
+            <!-- Left Sidebar Controls / Filters (Sticky below top navbar during scroll) -->
+            <div class="w-full lg:w-64 shrink-0 sticky top-[136px] z-25 bg-background/95 backdrop-blur-md py-1 transition-all" id="filter-dropdown-wrapper">
                 <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="w-full inline-flex items-center justify-between gap-2.5 px-4 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
                     <div class="flex items-center gap-2.5">
                         <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
@@ -350,8 +350,8 @@
                 </div>
             </div>
 
-            <!-- Scrollable Match Box Container (500px mobile / 800px desktop) -->
-            <div id="fixtures-box" class="flex-1 w-full h-[500px] md:h-[800px] overflow-y-auto pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
+            <!-- Match Box Container -->
+            <div id="fixtures-box" class="flex-1 w-full min-h-[400px] pr-1.5 sm:pr-3 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-sm p-3 sm:p-5 shadow-inner">
                 <!-- Loading Spinner -->
                 <div id="fixtures-loading" class="w-full flex justify-center py-16">
                     <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
