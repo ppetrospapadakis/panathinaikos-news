@@ -87,7 +87,7 @@ function switchAdminTab(tab) {
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 
     // Style active sidebar menu items
-    ['opinion', 'football', 'basketball', 'fixtures', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
+    ['opinion', 'football', 'basketball', 'fixtures', 'comments', 'analytics-ingestion', 'analytics-engagement', 'deleted'].forEach(t => {
         const btn = document.getElementById(`admin-tab-${t}`);
         if (btn) {
             if (t === tab) {
@@ -140,6 +140,11 @@ function switchAdminTab(tab) {
             headerTag.textContent = 'Recycle Bin';
             headerTitle.textContent = 'Διαγραμμένα Άρθρα';
             headerDesc.textContent = 'Δες όλα τα άρθρα που έχουν διαγραφεί. Μπορείς να κάνεις προεπισκόπηση ή να τα επαναφέρεις στην ενεργή ροή ειδήσεων.';
+        } else if (tab === 'comments') {
+            headerIcon.textContent = 'forum';
+            headerTag.textContent = 'Moderation';
+            headerTitle.textContent = 'Διαχείριση Σχολίων';
+            headerDesc.textContent = 'Δες όλα τα σχόλια του site. Μπορείς να τα διαγράψεις οριστικά ή να τα κρύψεις μόνο από αυτή την admin προβολή.';
         }
     }
 
@@ -155,8 +160,185 @@ function switchAdminTab(tab) {
     if (tab === 'deleted') {
         loadDeletedArticles();
     }
+    if (tab === 'comments') {
+        loadAdminComments();
+    }
 }
 window.switchAdminTab = switchAdminTab;
+
+// ── Comments Management ───────────────────────────────────────────────────────
+let _adminCommentsCache = [];
+let _adminCommentsShowHidden = false;
+
+function getHiddenCommentIds() {
+    try { return JSON.parse(localStorage.getItem('admin_hidden_comments') || '[]'); } catch { return []; }
+}
+function setHiddenCommentIds(ids) {
+    localStorage.setItem('admin_hidden_comments', JSON.stringify(ids));
+}
+
+function adminCommentIsHidden(id) {
+    return getHiddenCommentIds().includes(id);
+}
+
+window.toggleAdminCommentsShowHidden = function() {
+    _adminCommentsShowHidden = !_adminCommentsShowHidden;
+    const btn = document.getElementById('comments-toggle-hidden-btn');
+    if (btn) {
+        btn.innerHTML = _adminCommentsShowHidden
+            ? '<span class="material-symbols-outlined">visibility_off</span> Απόκρυψη Κρυμμένων'
+            : '<span class="material-symbols-outlined">visibility</span> Εμφάνιση Κρυμμένων';
+    }
+    renderAdminComments();
+};
+
+function slugifyAdmin(text) {
+    if (!text) return 'arthro';
+    let str = text.toLowerCase();
+    str = str.replace(/[αά]/g,'a').replace(/[εέ]/g,'e').replace(/[ηή]/g,'i').replace(/[ιίϊΐ]/g,'i')
+             .replace(/[οό]/g,'o').replace(/[υύϋΰ]/g,'y').replace(/[ωώ]/g,'o')
+             .replace(/θ/g,'th').replace(/χ/g,'ch').replace(/ψ/g,'ps').replace(/ξ/g,'x')
+             .replace(/μπ/g,'b').replace(/ντ/g,'nt').replace(/γκ/g,'gk')
+             .replace(/[^a-z0-9]+/g,'-').replace(/--+/g,'-').replace(/^-+|-+$/g,'');
+    return str.substring(0,35) || 'arthro';
+}
+
+function buildArticleUrl(articleId, title, category) {
+    const catMap = { 'ποδόσφαιρο': 'podosfairo', 'μπάσκετ': 'basket', 'ερασιτέχνης': 'erasitexnis', 'άποψη': 'apopsi' };
+    const catLower = (category || '').toLowerCase();
+    let catPath = catMap[catLower] || 'podosfairo';
+    const slug = slugifyAdmin(title);
+    const shortId = (articleId || '').substring(0,8);
+    return `/${catPath}/${slug}-${shortId}`;
+}
+
+function isRosterComment(comment) {
+    return (comment.comment_text || '').includes('[LINEUP_DATA]');
+}
+
+async function loadAdminComments() {
+    const container = document.getElementById('admin-comments-list');
+    if (!container) return;
+    if (!db) {
+        container.innerHTML = '<div class="text-center py-10 text-on-surface-variant/60">Δεν έχει συνδεθεί η βάση δεδομένων.</div>';
+        return;
+    }
+
+    container.innerHTML = `<div class="flex items-center justify-center py-12"><div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div></div>`;
+
+    try {
+        // Fetch all comments
+        const { data: comments, error: cErr } = await db
+            .from('article_comments')
+            .select('id, article_id, user_name, comment_text, created_at')
+            .order('created_at', { ascending: false })
+            .limit(200);
+        if (cErr) throw cErr;
+
+        // Fetch article titles for those IDs
+        const articleIds = [...new Set((comments || []).map(c => c.article_id).filter(Boolean))];
+        let articlesMap = {};
+        if (articleIds.length > 0) {
+            const { data: arts } = await db
+                .from('articles')
+                .select('id, title, category')
+                .in('id', articleIds);
+            (arts || []).forEach(a => { articlesMap[a.id] = a; });
+        }
+
+        _adminCommentsCache = (comments || []).map(c => ({ ...c, _article: articlesMap[c.article_id] || null }));
+        renderAdminComments();
+    } catch (err) {
+        container.innerHTML = `<div class="text-center py-10 text-error">Σφάλμα φόρτωσης: ${escapeHtml(err.message)}</div>`;
+    }
+}
+window.loadAdminComments = loadAdminComments;
+
+function renderAdminComments() {
+    const container = document.getElementById('admin-comments-list');
+    if (!container) return;
+    const hiddenIds = getHiddenCommentIds();
+
+    const toShow = _adminCommentsShowHidden
+        ? _adminCommentsCache
+        : _adminCommentsCache.filter(c => !hiddenIds.includes(c.id));
+
+    if (toShow.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 bg-surface-container rounded-2xl border border-outline-variant/30 p-8 space-y-3">
+            <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">forum</span>
+            <p class="text-on-surface-variant/60 text-sm">${_adminCommentsCache.length === 0 ? 'Δεν υπάρχουν σχόλια.' : 'Όλα τα σχόλια είναι κρυμμένα.'}</p>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = toShow.map(c => {
+        const isHidden = hiddenIds.includes(c.id);
+        const isRoster = isRosterComment(c);
+        const article = c._article;
+        let displayText = (c.comment_text || '').replace(/\[LINEUP_DATA\][\s\S]*?\[\/LINEUP_DATA\]/, '[📋 Lineup Data]').trim();
+        const dateStr = c.created_at ? new Date(c.created_at).toLocaleString('el-GR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+
+        let linkHtml = '';
+        if (isRoster) {
+            linkHtml = `<a href="/roster" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"><span class="material-symbols-outlined text-[13px]">open_in_new</span>Σελίδα Ρόστερ</a>`;
+        } else if (article) {
+            const url = buildArticleUrl(article.id, article.title, article.category);
+            linkHtml = `<a href="${url}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"><span class="material-symbols-outlined text-[13px]">open_in_new</span>${escapeHtml(article.title)}</a>`;
+        } else {
+            linkHtml = `<span class="text-[11px] text-on-surface-variant/40">(Άγνωστο άρθρο)</span>`;
+        }
+
+        const hiddenBadge = isHidden ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-yellow-500/15 border border-yellow-400/30 text-yellow-400 text-[10px] font-bold"><span class="material-symbols-outlined text-[11px]">visibility_off</span>Κρυμμένο</span>` : '';
+
+        return `<div class="bg-surface-container border ${isHidden ? 'border-yellow-400/20 opacity-60' : 'border-outline-variant/20'} rounded-2xl p-4 flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <span class="font-bold text-sm text-on-surface">${escapeHtml(c.user_name || 'Ανώνυμος')}</span>
+                        ${hiddenBadge}
+                        ${isRoster ? '<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold">📋 ΡΟΣΤΕΡ</span>' : ''}
+                    </div>
+                    <p class="text-xs text-on-surface-variant/60 mb-2">${dateStr}</p>
+                    <p class="text-sm text-on-surface leading-relaxed whitespace-pre-line line-clamp-4">${escapeHtml(displayText)}</p>
+                </div>
+                <div class="flex flex-col gap-2 shrink-0">
+                    <button onclick="adminToggleHideComment('${c.id}')" title="${isHidden ? 'Εμφάνιση' : 'Απόκρυψη από admin'}" class="w-8 h-8 flex items-center justify-center rounded-lg ${isHidden ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-500/30' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-highest'} transition-all">
+                        <span class="material-symbols-outlined text-[16px]">${isHidden ? 'visibility' : 'visibility_off'}</span>
+                    </button>
+                    <button onclick="adminDeleteComment('${c.id}')" title="Διαγραφή" class="w-8 h-8 flex items-center justify-center rounded-lg bg-error/10 text-error border border-error/20 hover:bg-error/20 transition-all">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pt-2 border-t border-outline-variant/20">${linkHtml}</div>
+        </div>`;
+    }).join('');
+}
+
+window.adminToggleHideComment = function(id) {
+    const hiddenIds = getHiddenCommentIds();
+    if (hiddenIds.includes(id)) {
+        setHiddenCommentIds(hiddenIds.filter(x => x !== id));
+    } else {
+        setHiddenCommentIds([...hiddenIds, id]);
+    }
+    renderAdminComments();
+};
+
+window.adminDeleteComment = async function(id) {
+    if (!confirm('Να διαγραφεί οριστικά αυτό το σχόλιο;')) return;
+    try {
+        const res = await fetch(`/api/comments?id=${encodeURIComponent(id)}&token=admin_secure_session`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Σφάλμα διαγραφής');
+        _adminCommentsCache = _adminCommentsCache.filter(c => c.id !== id);
+        // Also remove from hidden list if present
+        setHiddenCommentIds(getHiddenCommentIds().filter(x => x !== id));
+        renderAdminComments();
+    } catch (err) {
+        alert('Σφάλμα: ' + err.message);
+    }
+};
 
 // ── Deleted Articles Manager (Trash / Recycle Bin) ───────────────────────────
 let deletedArticlesCache = [];
