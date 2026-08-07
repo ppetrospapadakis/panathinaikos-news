@@ -217,7 +217,7 @@
 
             return `
             <div id="studio-token-${idx}"
-                 onclick="handlePlayerTap('starting', ${idx}, event)"
+                 onclick="handlePlayerTap('starting', ${idx}, event); event.stopPropagation();"
                  class="player-token cursor-pointer transition-all duration-200 ${borderClass}"
                  style="left:${left}%; top:${top}%; position:absolute; transform:translate(-50%, -50%); z-index:20; border:none; background:transparent;">
                 <div class="avatar relative">
@@ -263,6 +263,7 @@
     // Handle pitch background click (repositions selected starting player or swaps with nearest player)
     window.handlePitchBackgroundClick = function(e) {
         if (!selectedPlayerForSwap) return;
+        if (e && e.target && e.target.closest('.player-token')) return;
         const pitchEl = document.getElementById('studio-pitch-container');
         if (!pitchEl) return;
 
@@ -357,6 +358,20 @@
 
             if (Array.isArray(p1)) { p1[0] = left; p1[1] = top; }
             else if (p1 && typeof p1 === 'object') { p1.left = left; p1.top = top; }
+        } else if (cat1 === 'starting' && cat2 === 'starting') {
+            let left1 = 50, top1 = 50;
+            if (Array.isArray(p1)) { left1 = p1[0]; top1 = p1[1]; }
+            else if (p1 && typeof p1 === 'object') { left1 = p1.left || 50; top1 = p1.top || 50; }
+
+            let left2 = 50, top2 = 50;
+            if (Array.isArray(p2)) { left2 = p2[0]; top2 = p2[1]; }
+            else if (p2 && typeof p2 === 'object') { left2 = p2.left || 50; top2 = p2.top || 50; }
+
+            if (Array.isArray(p1)) { p1[0] = left2; p1[1] = top2; }
+            else if (p1 && typeof p1 === 'object') { p1.left = left2; p1.top = top2; }
+
+            if (Array.isArray(p2)) { p2[0] = left1; p2[1] = top1; }
+            else if (p2 && typeof p2 === 'object') { p2.left = left1; p2.top = top1; }
         }
 
         // Execute swap

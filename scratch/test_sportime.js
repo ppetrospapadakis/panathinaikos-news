@@ -1,40 +1,38 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-async function testSportime() {
+async function testSportimeArticle() {
+    const url = 'https://sportime.gr/podosfairo/panathinaikos-dipla-ston-nte-frai-o-fan-ntronghkelen-o-nistroyp-edeikse-tis-protheseis-toy/';
     try {
-        const res = await axios.get('https://sportime.gr/panathinaikos', {
+        console.log("Fetching Sportime article:", url);
+        const res = await axios.get(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-            },
-            timeout: 10000
-        });
-
-        const $ = cheerio.load(res.data);
-
-        // Find article elements
-        console.log('--- Article Selectors ---');
-        console.log('h2 a:', $('h2 a').length);
-        console.log('h3 a:', $('h3 a').length);
-        console.log('article a:', $('article a').length);
-        console.log('.post-title a:', $('.post-title a').length);
-        console.log('a[href*="/panathinaikos/"]:', $('a[href*="/panathinaikos/"]').length);
-        console.log('a[href*="/podosfairo/"]:', $('a[href*="/podosfairo/"]').length);
-        console.log('a[href*="/basket/"]:', $('a[href*="/basket/"]').length);
-
-        console.log('\n--- Sample Article Links Found ---');
-        $('a').each((i, el) => {
-            const href = $(el).attr('href') || '';
-            const text = $(el).text().trim();
-            if (href.includes('/panathinaikos/') || href.includes('/podosfairo/') || href.includes('/basket/') || href.includes('panathinaikos-')) {
-                console.log(`[${i}] ${text} -> ${href}`);
             }
         });
+        const $ = cheerio.load(res.data);
 
-    } catch (err) {
-        console.error('Error:', err.message);
+        console.log("Status:", res.status);
+        console.log("h1 Title:", $('h1').text().trim());
+        console.log("og:title:", $('meta[property="og:title"]').attr('content'));
+
+        console.log("Paragraphs count:", $('p').length);
+        $('p').slice(0, 10).each((i, el) => {
+            console.log(`p[${i}] (class: "${$(el).attr('class')||''}", parent: "${$(el).parent().get(0).tagName}.${$(el).parent().attr('class')||''}"):`, $(el).text().trim().substring(0, 100));
+        });
+
+        // Find main wrapper
+        const mainClasses = [];
+        $('[class*="content"], [class*="article"], [class*="post"], [class*="single"], [class*="body"]').each((i, el) => {
+            const cls = $(el).attr('class');
+            if (cls && !mainClasses.includes(cls)) mainClasses.push(cls);
+        });
+        console.log("\nPotential content container classes:", mainClasses.slice(0, 30));
+
+    } catch(e) {
+        console.error("Error fetching Sportime:", e.message);
     }
 }
 
-testSportime();
+testSportimeArticle();

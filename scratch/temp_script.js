@@ -149,6 +149,14 @@
         // INIT & DYNAMIC SUPABASE LOADING
         // ─────────────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
+            // Scroll active tab into view horizontally
+            const el = document.getElementById('tab-roster');
+            if (el && el.parentElement) {
+                const container = el.parentElement;
+                const scrollLeft = el.offsetLeft - (container.clientWidth / 2) + (el.clientWidth / 2);
+                container.scrollTo({ left: scrollLeft });
+            }
+
             // Load Supabase script dynamically
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -171,9 +179,6 @@
             document.head.appendChild(script);
         });
 
-        // Stores dynamic basketball data if fetched before tab is clicked
-        let pendingBasketballData = null;
-
         async function loadDynamicRoster(db) {
             try {
                 // Fetch Football Roster
@@ -191,7 +196,13 @@
                     renderPitchPlayers('pitch-starting', starting);
                     renderPitchPlayers('pitch-bench', bench);
                     renderSquadList('squad-rest-football', rest);
-                    document.getElementById('analysis-text-football').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                    const elFootballContainer = document.getElementById('analysis-container-football');
+                    if (analysis.trim() !== '') {
+                        document.getElementById('analysis-text-football').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                        if (elFootballContainer) elFootballContainer.style.display = 'block';
+                    } else {
+                        if (elFootballContainer) elFootballContainer.style.display = 'none';
+                    }
                 } else {
                     renderPitchPlayers('pitch-starting', footballStarting);
                     renderPitchPlayers('pitch-bench', footballBench);
@@ -199,27 +210,36 @@
                     document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή. Η προσθήκη των Τετέ και Πελίστρι δίνει ταχύτητα στα άκρα, ενώ ο Ιωαννίδης παραμένει η αιχμή του δόρατος στην επίθεση.</p>';
                 }
 
-                // Fetch Basketball Roster — store data, render on first tab click
+                // Fetch Basketball Roster
                 const { data: bData } = await db.from('articles')
                     .select('*')
                     .eq('source_url', 'opinion://system-roster-basketball')
                     .maybeSingle();
 
                 if (bData && bData.bullets && bData.bullets.length >= 3) {
-                    pendingBasketballData = {
-                        starting: JSON.parse(bData.bullets[0]),
-                        backup: JSON.parse(bData.bullets[1]),
-                        rest: JSON.parse(bData.bullets[2]),
-                        analysis: bData.content || ''
-                    };
+                    const starting = JSON.parse(bData.bullets[0]);
+                    const backup = JSON.parse(bData.bullets[1]);
+                    const rest = JSON.parse(bData.bullets[2]);
+                    const analysis = bData.content || '';
+
+                    renderCourtPlayers('court-starting', starting);
+                    renderCourtPlayers('court-backup', backup);
+                    renderSquadList('squad-rest-basketball', rest);
+                    const elBasketballContainer = document.getElementById('analysis-container-basketball');
+                    if (analysis.trim() !== '') {
+                        document.getElementById('analysis-text-basketball').innerHTML = analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
+                        if (elBasketballContainer) elBasketballContainer.style.display = 'block';
+                    } else {
+                        if (elBasketballContainer) elBasketballContainer.style.display = 'none';
+                    }
+                } else {
+                    renderCourtPlayers('court-starting', basketballStarting);
+                    renderCourtPlayers('court-backup', basketballBackup);
+                    renderSquadList('squad-rest-basketball', basketballRest);
+                    document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
                 }
 
-                // If basketball tab is already visible, render immediately
-                const bView = document.getElementById('view-basketball');
-                if (bView && !bView.classList.contains('hidden')) {
-                    applyBasketballData();
-                }
-
+                
             } catch (err) {
                 console.error('Error loading dynamic roster:', err);
                 // Football fallback
@@ -227,62 +247,99 @@
                 renderPitchPlayers('pitch-bench', footballBench);
                 renderSquadList('squad-rest-football', footballRest);
                 document.getElementById('analysis-text-football').innerHTML = '<p>Ο Παναθηναϊκός δείχνει να διαθέτει εξαιρετικό βάθος στο φετινό ρόστερ του, με ποιοτικές επιλογές σε κάθε γραμμή.</p>';
-            }
-        }
-
-        function applyBasketballData() {
-            if (pendingBasketballData) {
-                renderCourtPlayers('court-starting', pendingBasketballData.starting);
-                renderCourtPlayers('court-backup', pendingBasketballData.backup);
-                renderSquadList('squad-rest-basketball', pendingBasketballData.rest);
-                document.getElementById('analysis-text-basketball').innerHTML =
-                    pendingBasketballData.analysis.split(/\n+/).map(p => `<p class="mb-4">${p}</p>`).join('');
-            } else {
+                
+                // Basketball fallback
                 renderCourtPlayers('court-starting', basketballStarting);
                 renderCourtPlayers('court-backup', basketballBackup);
                 renderSquadList('squad-rest-basketball', basketballRest);
-                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη. Η παρουσία του Σλούκα ως ηγέτη και το βάθος στους ψηλούς προσφέρουν τεράστια τακτική ευελιξία.</p>';
+                document.getElementById('analysis-text-basketball').innerHTML = '<p>Με τον Εργκίν Αταμάν στο τιμόνι, ο Παναθηναϊκός AKTOR διαθέτει μια από τις ισχυρότερες περιφέρειες στην Ευρώπη.</p>';
             }
         }
 
         // ─────────────────────────────────────────────────────────────────
         // SPORT SWITCHER
         // ─────────────────────────────────────────────────────────────────
-        let basketballRendered = false;
-
         function switchSport(sport) {
             const isFootball = sport === 'football';
             document.getElementById('view-football').classList.toggle('hidden', !isFootball);
             document.getElementById('view-basketball').classList.toggle('hidden', isFootball);
 
             document.getElementById('tab-football').className = isFootball
-                ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all'
-                : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
+                ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all'
+                : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
             document.getElementById('tab-basketball').className = !isFootball
-                ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-primary text-on-primary transition-all'
-                : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
-
-            // Render basketball tokens AFTER the view is visible in the DOM
-            // requestAnimationFrame guarantees the browser has laid out the div
-            // so position:absolute tokens get correct coordinates
-            if (!isFootball && !basketballRendered) {
-                basketballRendered = true;
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        applyBasketballData();
-                    });
-                });
-            }
+                ? 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-primary bg-primary/10 text-primary transition-all'
+                : 'px-6 py-2.5 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
         }
         window.switchSport = switchSport;
 
         // ─────────────────────────────────────────────────────────────────
-        // INIT — render football immediately; basketball deferred to first tab click
+        // INIT
         // ─────────────────────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
-            renderPitchPlayers('pitch-starting', footballStarting);
-            renderPitchPlayers('pitch-bench', footballBench);
-            renderSquadList('squad-rest-football', footballRest);
-        });
+        // Initialization handled by Supabase loader above
+
+// Fetch latest news
+let streamPage = 1;
+let streamHasMore = true;
+let isFetchingMore = false;
+
+async function fetchMoreRosterNews() {
+    if (isFetchingMore || !streamHasMore) return;
+    isFetchingMore = true;
+    try {
+        const res = await fetch(`/api/articles?page=${streamPage}`);
+        const data = await res.json();
+        if (data.articles && data.articles.length > 0) {
+            const grid = document.getElementById('more-news-grid');
+            const html = data.articles.map(a => {
+                const date = new Date(a.created_at).toLocaleDateString('el-GR', {day:'2-digit', month:'2-digit', year:'numeric'});
+                const slug = (a.title || '').toLowerCase().replace(/[^a-z0-9\u0370-\u03ff]+/g, '-').replace(/(^-|-$)/g, '');
+                let cat = 'podosfairo';
+                if (a.category === '\u039C\u03C0\u03AC\u03C3\u03BA\u03B5\u03C4') cat = 'basket'; // Μπάσκετ
+                if (a.category === '\u0395\u03C1\u03B1\u03C3\u03B9\u03C4\u03AD\u03C7\u03BD\u03B7\u03C2') cat = 'erasitexnis'; // Ερασιτέχνης
+                const url = `/${cat}/${slug}-id=${a.id}`;
+                const img = a.image_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY';
+                return `
+                <a class="group cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container/30 flex flex-col overflow-hidden card-hover h-full" href="${url}">
+                    <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
+                        <img referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${a.title}" loading="lazy" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDMSNHvf5YF-W7L97CbaiKx5VJRD4gV0Hg4hF4QJSCrqJ8NRDKT2mlrcYM9-HeVPSFN1hVnIoxPXYMDPNA9MZrNmRakqPmQAux7v_bA3iFoShF9g6EU7kcRpDcXeidSSrY8OeI2ssBxitBmYyfDNjYXif_X0l2yHU-wLeYDUPFLq1a6yRhBP2W0ll-ZwL7GM0DTq3159q6_uDSqdy-hT99NVqtdu3pW82SXsf1d7ZLUfysmIvfYNJqOX2X9n5IZpEH51_snSOxd1CY'"/>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <span class="font-label text-label text-primary uppercase mb-1">${date}</span>
+                        <h3 class="font-h4 text-h4 leading-tight group-hover:text-primary transition-colors">${a.title}</h3>
+                    </div>
+                </a>`;
+            }).join('');
+            grid.insertAdjacentHTML('beforeend', html);
+            document.getElementById('more-news-section').classList.remove('hidden');
+            streamPage++;
+        }
+        if (!data.has_more) {
+            streamHasMore = false;
+            const sentinel = document.getElementById('roster-sentinel');
+            if (sentinel) sentinel.style.display = 'none';
+        }
+    } catch (err) {
+        console.error('Error fetching more news:', err);
+    } finally {
+        isFetchingMore = false;
+    }
+}
+
+fetchMoreRosterNews();
+const sentinelHTML = `<div id="roster-sentinel" class="py-12 flex justify-center hidden"><div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div></div>`;
+document.getElementById('more-news-section').insertAdjacentHTML('afterend', sentinelHTML);
+
+const sentinel = document.getElementById('roster-sentinel');
+if (sentinel && streamHasMore) {
+    sentinel.classList.remove('hidden');
+    const observer = new IntersectionObserver(async entries => {
+        if (entries[0].isIntersecting && !isFetchingMore && streamHasMore) {
+            await fetchMoreRosterNews();
+        }
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+}
+
     })();
     
