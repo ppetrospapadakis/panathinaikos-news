@@ -1675,7 +1675,7 @@ window.saveRoster = saveRoster;
 // ── Engagement & Resource Limits Dynamic Binding ───────────────────────────
 async function loadEngagementStats() {
     try {
-        const res = await fetch('/api/admin-stats?password=pao1908');
+        const res = await fetch('/api/admin-stats?password=1357');
         if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         

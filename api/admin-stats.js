@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
 
     // Verify authentication
     const password = req.query.password || req.headers['authorization'];
-    if (password !== 'pao1908') {
+    if (password !== '1357') {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
