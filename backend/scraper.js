@@ -1976,7 +1976,7 @@ async function main() {
             }
 
             existingUrls.add(articleUrl);
-            existingArticles.unshift({ id: inserted[0].id, title: scraped.title, source_url: articleUrl, group_id, created_at: scraped.created_at });
+            existingArticles.unshift({ id: inserted[0].id, title: scraped.title, summary: scraped.summary, source_url: articleUrl, image_url: scraped.imageUrl, group_id, created_at: scraped.created_at });
             totalNew++;
             sourceNewArticlesProcessed++;
             console.log(`    ✅ Inserted (id=${inserted[0].id})`);
