@@ -16,20 +16,20 @@
   },
   "headers": [
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=60, stale-while-revalidate=300"
-        }
-      ]
-    },
-    {
       "source": "/(login.html|analytics|dashboard|admin|api/admin-stats|api/scrape|api/comments|api/sys/.*|roster.html|roster_lineup.js|opinion_admin.js)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "no-store, no-cache, must-revalidate, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=60, stale-while-revalidate=300"
         }
       ]
     },
