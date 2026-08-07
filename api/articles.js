@@ -264,10 +264,24 @@ function getArticleDisplayDate(id, created_at) {
 }
 
 function applyMonotonicJitter(articles) {
-    if (!articles || !Array.isArray(articles)) return;
+    if (!articles || !Array.isArray(articles) || articles.length === 0) return;
+    
+    let lastDisplayMs = null;
+    
     articles.forEach(art => {
-        if (art && art.created_at && art.id) {
-            art.created_at = getArticleDisplayDate(art.id, art.created_at);
+        if (!art || !art.created_at) return;
+        
+        const rawJitteredIso = getArticleDisplayDate(art.id, art.created_at);
+        let currentMs = new Date(rawJitteredIso).getTime();
+        
+        if (lastDisplayMs !== null) {
+            // Ensure each article down the list has a display date strictly older than the previous article
+            if (currentMs >= lastDisplayMs) {
+                currentMs = lastDisplayMs - 60000; // 1 minute earlier
+            }
         }
+        
+        art.created_at = new Date(currentMs).toISOString();
+        lastDisplayMs = currentMs;
     });
 }
