@@ -2288,9 +2288,7 @@ function movePlayerToCategory(targetCategory) {
 
     // Update textareas & UI
     syncRosterStateToTextareas(sport);
-    adminRenderRosterSection(sport, 'starting');
-    adminRenderRosterSection(sport, 'backup');
-    adminRenderReserves(sport);
+    adminReRenderRoster(sport);
 
     closePopover();
 }
@@ -2318,19 +2316,25 @@ function moveReserveToLineup(sport, reserveIdx, targetCategory) {
 
     // Sync & Re-render
     syncRosterStateToTextareas(sport);
-    adminRenderRosterSection(sport, 'starting');
-    adminRenderRosterSection(sport, 'backup');
-    adminRenderReserves(sport);
+    adminReRenderRoster(sport);
 }
 window.moveReserveToLineup = moveReserveToLineup;
 
 function syncRosterStateToTextareas(sport) {
-    ['starting', 'backup', 'rest'].forEach(type => {
+    const secondType = sport === 'football' ? 'bench' : 'backup';
+    ['starting', secondType, 'rest'].forEach(type => {
         const textarea = document.getElementById(`roster-${sport}-${type}`);
-        if (textarea && currentRoster[sport][type]) {
+        if (textarea && currentRoster[sport] && currentRoster[sport][type]) {
             textarea.value = JSON.stringify(currentRoster[sport][type], null, 2);
         }
     });
+}
+
+function adminReRenderRoster(sport) {
+    const secondType = sport === 'football' ? 'bench' : 'backup';
+    adminRenderRosterSection(sport, 'starting');
+    adminRenderRosterSection(sport, secondType);
+    adminRenderReserves(sport);
 }
 
 
@@ -2496,17 +2500,6 @@ function executeAdminPlayerSwap(src, tgt) {
 
     // Sync all textareas & Re-render UI
     syncRosterStateToTextareas(sport);
-    adminRenderRosterSection(sport, 'starting');
-    adminRenderRosterSection(sport, 'backup');
-    adminRenderReserves(sport);
-}
-
-function syncRosterStateToTextareas(sport) {
-    ['starting', 'backup', 'rest'].forEach(type => {
-        const textarea = document.getElementById(`roster-${sport}-${type}`);
-        if (textarea && currentRoster[sport][type]) {
-            textarea.value = JSON.stringify(currentRoster[sport][type], null, 2);
-        }
-    });
+    adminReRenderRoster(sport);
 }
 
