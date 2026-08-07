@@ -94,6 +94,16 @@
       "source": "/sport-latest.html",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/metagrafes",
+      "destination": "/podosfairo",
+      "permanent": true
+    },
+    {
+      "source": "/metagrafes.html",
+      "destination": "/podosfairo",
+      "permanent": true
     }
   ],
   "rewrites": [
