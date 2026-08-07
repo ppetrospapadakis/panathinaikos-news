@@ -435,7 +435,7 @@
 
         function processImage(a) {
             let imageUrl = a.image_url || '';
-            if (!imageUrl) { a.image_url = DEFAULT_IMG; return a; }
+            if (!imageUrl) { a.image_url = DEFAULT_IMG; a.raw_image_url = DEFAULT_IMG; return a; }
             try {
                 if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
                 let u;
@@ -451,11 +451,17 @@
                 const isBranding = !isInternal && (BRANDING_FN.some(x => filename.includes(x)) || BRANDING_PATH.some(p => ('/'+u.pathname.toLowerCase()+'/').includes(p)));
                 if (isBranding) {
                     a.image_url = DEFAULT_IMG;
-                } else if (!isInternal && !u.hostname.includes('wsrv.nl')) {
-                    // Proxy external image to reduce network payload & serve optimized WebP
-                    a.image_url = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=480&output=webp&q=80`;
+                    a.raw_image_url = DEFAULT_IMG;
+                } else {
+                    a.raw_image_url = imageUrl;
+                    if (!isInternal && !u.hostname.includes('wsrv.nl')) {
+                        // Proxy external image to reduce network payload & serve optimized WebP (w=600 for sharp grid cards)
+                        a.image_url = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=600&output=webp&q=80`;
+                    }
                 }
-            } catch(_) {}
+            } catch(_) {
+                a.raw_image_url = a.image_url;
+            }
             return a;
         }
 
@@ -664,6 +670,11 @@
                 </div>`;
             }
 
+            let heroImageUrl = a.raw_image_url || a.image_url || DEFAULT_IMG;
+            if (heroImageUrl && !heroImageUrl.includes('logo.png') && !heroImageUrl.includes('favicon') && !heroImageUrl.startsWith('/') && !heroImageUrl.includes('localhost') && !heroImageUrl.includes('panathinaikosnews.gr') && !heroImageUrl.includes('wsrv.nl')) {
+                heroImageUrl = `https://wsrv.nl/?url=${encodeURIComponent(heroImageUrl)}&w=1200&output=webp&q=82`;
+            }
+
             const imageFit = isOwn ? 'object-contain bg-surface-container/50' : 'object-cover';
             const heroBadge = isOwn ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"><img src="/logo.png" alt="" class="h-3.5 w-auto object-contain" width="36" height="14"/></span>` : '';
 
@@ -676,7 +687,7 @@
             heroEl.innerHTML = `<a class="relative group cursor-pointer bg-surface-container rounded-none md:rounded-xl border-y border-x-0 md:border-x border-outline-variant/20 flex flex-col overflow-hidden card-hover" href="${url}" data-article-id="${a.id}">
                 ${pinButtonHtml(a.id, a.pinned_at)}
                 <div class="relative w-full shrink-0 overflow-hidden" style="padding-top: 56.25%;">
-                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${a.image_url||DEFAULT_IMG}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
+                    <img referrerpolicy="no-referrer" fetchpriority="high" loading="eager" class="absolute inset-0 w-full h-full ${imageFit} transition-transform duration-700 group-hover:scale-105" src="${heroImageUrl}" alt="${a.title}" onerror="this.src='${DEFAULT_IMG}'"/>
                     ${latestBadge}
                 </div>
                 <div class="p-6 flex flex-col flex-1">
