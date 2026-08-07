@@ -1,5 +1,6 @@
+<!-- VercelBuild: 1786088427509 -->
 <!DOCTYPE html>
-<html class="dark icons-loaded" lang="el">
+<html class="dark" lang="el">
 <head>
 
     
@@ -178,10 +179,12 @@
 </script>
 <script>
         function checkAdminNav() {
-            const el = document.getElementById('nav-item-fixtures');
-            if (el) el.classList.remove('hidden');
-            const tab = document.getElementById('tab-item-fixtures');
-            if (tab) tab.classList.remove('hidden');
+            if (sessionStorage.getItem('op_auth') === '1') {
+                const el = document.getElementById('nav-item-fixtures');
+                if (el) el.classList.remove('hidden');
+                const tab = document.getElementById('tab-item-fixtures');
+                if (tab) tab.classList.remove('hidden');
+            }
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', checkAdminNav);
@@ -189,6 +192,7 @@
             checkAdminNav();
         }
 </script>
+
 <script>
 (function() {
     function showGoogleModal() {
