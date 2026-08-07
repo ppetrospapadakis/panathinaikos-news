@@ -176,7 +176,7 @@ function escapeHtml(unsafe) {
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
     let categoryFilter = null;
     if (req.query.category) {

@@ -189,7 +189,7 @@ function applyMonotonicJitter(articles) {
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
     // Support ?id=XXXXXXXX, ?slug=..., and /category/slug-id=UUID
     let rawId = (req.query.id || '').trim();
