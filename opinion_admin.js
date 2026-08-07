@@ -2235,68 +2235,11 @@ function showAdminSwapToast(sourcePlayer) {
 
 function cancelAdminSwapMode() {
     adminSwapSource = null;
-    document.querySelectorAll('.draggable-player').forEach(el => el.classList.remove('swap-source-highlight'));
+    clearAdminSwapHighlights();
     const toast = document.getElementById('admin-swap-toast');
     if (toast) toast.classList.add('hidden');
 }
 window.cancelAdminSwapMode = cancelAdminSwapMode;
-
-function handleAdminPlayerClick(targetSport, targetRosterType, targetIdx) {
-    if (!adminSwapSource) return false;
-
-    const source = adminSwapSource;
-    if (source.sport !== targetSport) {
-        alert('Η αντιμετάθεση γίνεται μόνο μεταξύ παικτών του ίδιου αθλήματος!');
-        cancelAdminSwapMode();
-        return true;
-    }
-
-    if (source.rosterType === targetRosterType && source.idx === targetIdx) {
-        cancelAdminSwapMode();
-        return true;
-    }
-
-    // Perform Swap
-    const sourceList = currentRoster[source.sport][source.rosterType];
-    const targetList = currentRoster[targetSport][targetRosterType];
-
-    const sourceItem = sourceList[source.idx];
-    const targetItem = targetList[targetIdx];
-
-    if (!sourceItem || !targetItem) {
-        cancelAdminSwapMode();
-        return true;
-    }
-
-    // If both are array format (starting or backup), swap coordinates & items
-    if (Array.isArray(sourceItem) && Array.isArray(targetItem)) {
-        // Swap coordinates (left, top) so target takes source position and vice-versa
-        const tempLeft = sourceItem[0];
-        const tempTop = sourceItem[1];
-
-        sourceItem[0] = targetItem[0];
-        sourceItem[1] = targetItem[1];
-
-        targetItem[0] = tempLeft;
-        targetItem[1] = tempTop;
-    }
-
-    // Swap items in lists
-    sourceList[source.idx] = targetItem;
-    targetList[targetIdx] = sourceItem;
-
-    // Update textareas
-    syncRosterStateToTextareas(targetSport);
-
-    // Re-render
-    adminRenderRosterSection(targetSport, 'starting');
-    adminRenderRosterSection(targetSport, 'backup');
-    adminRenderReserves(targetSport);
-
-    cancelAdminSwapMode();
-    return true;
-}
-window.handleAdminPlayerClick = handleAdminPlayerClick;
 
 function movePlayerToCategory(targetCategory) {
     if (!selectedPlayerInfo) return;
@@ -2480,25 +2423,28 @@ function executeAdminPlayerSwap(src, tgt) {
 
     // CASE A: Both are Pitch/Court players (Arrays: [left, top, initials, name, num, pos])
     if (Array.isArray(p1) && Array.isArray(p2)) {
-        // Swap pitch positions (left, top) so Player 2 takes Player 1's position and vice-versa
-        const tempLeft = p1[0];
-        const tempTop = p1[1];
+        // Keep pitch coordinates of Slot 1 and Slot 2 fixed
+        const slot1_left = p1[0];
+        const slot1_top  = p1[1];
+        const slot2_left = p2[0];
+        const slot2_top  = p2[1];
 
-        p1[0] = p2[0];
-        p1[1] = p2[1];
+        // Extract player info details (initials, name, num, pos)
+        const p1_details = p1.slice(2);
+        const p2_details = p2.slice(2);
 
-        p2[0] = tempLeft;
-        p2[1] = tempTop;
-
-        // Swap items in lists
-        srcList[src.idx] = p2;
-        tgtList[tgt.idx] = p1;
+        // Slot 1 gets Player 2's details at Slot 1's position
+        srcList[src.idx] = [slot1_left, slot1_top, ...p2_details];
+        // Slot 2 gets Player 1's details at Slot 2's position
+        tgtList[tgt.idx] = [slot2_left, slot2_top, ...p1_details];
     }
-    // CASE B: One is Pitch/Court player (Array) and one is Reserve player (Object: {initials, name, pos, num, detail})
+    // CASE B: p1 is Pitch Array and p2 is Reserve Object
     else if (Array.isArray(p1) && !Array.isArray(p2)) {
-        // p1 is Pitch/Court Array, p2 is Reserve Object
+        const slot1_left = p1[0];
+        const slot1_top  = p1[1];
+
         const convertedP2 = [
-            p1[0], p1[1], // Inherit pitch coordinates
+            slot1_left, slot1_top,
             p2.initials || 'ΠΑΙ',
             p2.name || 'Παίκτης',
             p2.num || p2.pos || 10,
@@ -2516,10 +2462,13 @@ function executeAdminPlayerSwap(src, tgt) {
         srcList[src.idx] = convertedP2;
         tgtList[tgt.idx] = convertedP1;
     }
+    // CASE C: p1 is Reserve Object and p2 is Pitch Array
     else if (!Array.isArray(p1) && Array.isArray(p2)) {
-        // p1 is Reserve Object, p2 is Pitch/Court Array
+        const slot2_left = p2[0];
+        const slot2_top  = p2[1];
+
         const convertedP1 = [
-            p2[0], p2[1], // Inherit pitch coordinates
+            slot2_left, slot2_top,
             p1.initials || 'ΠΑΙ',
             p1.name || 'Παίκτης',
             p1.num || p1.pos || 10,
@@ -2534,13 +2483,15 @@ function executeAdminPlayerSwap(src, tgt) {
             detail: 'Εφεδρεία'
         };
 
-        srcList[src.idx] = convertedP2;
-        tgtList[tgt.idx] = convertedP1;
+        srcList[src.idx] = convertedP1;
+        tgtList[tgt.idx] = convertedP2;
     }
-    // CASE C: Both are Reserve Objects
+    // CASE D: Both are Reserve Objects
     else {
-        srcList[src.idx] = p2;
-        tgtList[tgt.idx] = p1;
+        const p1_copy = JSON.parse(JSON.stringify(p1));
+        const p2_copy = JSON.parse(JSON.stringify(p2));
+        srcList[src.idx] = p2_copy;
+        tgtList[tgt.idx] = p1_copy;
     }
 
     // Sync all textareas & Re-render UI
