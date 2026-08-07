@@ -235,7 +235,7 @@
     </script>
 
 </head>
-<body class="bg-background text-on-surface overflow-x-hidden">
+<body class="bg-background text-on-surface overflow-x-clip">
 
     <!-- ═══ TOP HEADER ═══ -->
     <header class="fixed top-0 left-0 w-full z-50 h-[80px] bg-background border-b border-outline-variant">
@@ -304,7 +304,7 @@
 
     <main class="mt-[80px]">
         <!-- Main Site Sticky Horizontal Navigation Bar -->
-        <div class="sticky top-[80px] z-30 bg-background border-b border-outline-variant/40">
+        <div class="sticky top-[80px] z-40 bg-background/95 backdrop-blur-md border-b border-outline-variant/40">
             <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
                 <a id="tab-all" href="/" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">Όλα</a>
                 <a id="tab-football" href="/podosfairo" class="cursor-pointer px-5 py-2 rounded-full font-label text-label uppercase tracking-wider border border-transparent bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all whitespace-nowrap lg:flex-1 text-center">⚽ Ποδόσφαιρο</a>
@@ -321,7 +321,7 @@
         <!-- Main Content Area -->
         <div class="max-w-[1140px] mx-auto px-4 sm:px-6 py-6 min-h-[60vh] flex flex-col lg:flex-row lg:items-start gap-6">
             <!-- Left Sidebar Controls / Filters (Sticky below top navbar during scroll) -->
-            <div class="w-full lg:w-64 shrink-0 sticky top-[136px] z-25 bg-background/95 backdrop-blur-md py-1 transition-all" id="filter-dropdown-wrapper">
+            <div class="w-full lg:w-64 shrink-0 sticky top-[135px] z-30 bg-background/95 backdrop-blur-md py-1 transition-all" id="filter-dropdown-wrapper">
                 <button id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" class="w-full inline-flex items-center justify-between gap-2.5 px-4 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium border border-outline-variant/30 shadow-md transition-all active:scale-95 cursor-pointer">
                     <div class="flex items-center gap-2.5">
                         <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
