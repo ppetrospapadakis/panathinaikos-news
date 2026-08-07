@@ -451,6 +451,16 @@
             return `<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[10px] font-medium uppercase tracking-wider border border-outline-variant/30">${comp}</span>`;
         }
 
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // Format Date: DD.MM. HH:mm
         function formatMatchDate(dateStr) {
             const d = new Date(dateStr);
