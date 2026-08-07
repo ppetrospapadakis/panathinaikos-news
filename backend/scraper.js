@@ -971,16 +971,22 @@ async function scrapeArticlePage(url, categoryHint) {
 
 // ─── Fallback bullets ──────────────────────────────────────────────────────────
 function generateFallbackBullets(title, content) {
-    const clean = (content || '').replace(/<[^>]*>/g, ' ').trim();
-    const sentences = clean.split(/[.;!]+/g)
+    const clean = (content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanTitle = (title || '').trim().toLowerCase();
+    const sentences = clean.split(/[.;!?]+/g)
         .map(s => s.trim())
-        .filter(s => s.length > 20 && !s.includes('http'));
-    const bullets = [`${title}`];
+        .filter(s => s.length > 20 && !s.includes('http') && s.toLowerCase() !== cleanTitle);
+
+    const bullets = [];
     for (const s of sentences) {
         if (bullets.length >= 2) break;
-        if (!bullets.some(b => b.includes(s.substring(0, 15)))) bullets.push(s);
+        if (!bullets.some(b => b.substring(0, 15) === s.substring(0, 15))) {
+            bullets.push(s);
+        }
     }
-    while (bullets.length < 2) bullets.push('Παρακολουθήστε την εξέλιξη στο Panathinaikos News.');
+    while (bullets.length < 2) {
+        bullets.push('Συνεχής ενημέρωση για όλες τις εξελίξεις στο Panathinaikos News.');
+    }
     return bullets.slice(0, 2);
 }
 

@@ -177,12 +177,25 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
-    // Support both ?id=XXXXXXXX (old) and ?slug=titlos-XXXXXXXX (new format)
+    // Support ?id=XXXXXXXX, ?slug=..., and /category/slug-id=UUID
     let rawId = (req.query.id || '').trim();
     if (!rawId && req.query.slug) {
-        // Extract trailing 8 hex chars from new-format slug: titlos-arthrou-67e7db6d
-        const slugMatch = (req.query.slug || '').match(/-([0-9a-f]{8})$/i);
-        if (slugMatch) rawId = slugMatch[1];
+        const slugStr = (req.query.slug || '').trim();
+        // 1. Match explicit -id=UUID or -id=SHORT_ID (e.g. arthro-id=5617ea9d-3441-4d7c-9d79-9e4862800e0e)
+        const idParamMatch = slugStr.match(/-id=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{8})/i);
+        if (idParamMatch) {
+            rawId = idParamMatch[1];
+        } else {
+            // 2. Match trailing 36-char UUID: -5617ea9d-3441-4d7c-9d79-9e4862800e0e
+            const uuidMatch = slugStr.match(/-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+            if (uuidMatch) {
+                rawId = uuidMatch[1];
+            } else {
+                // 3. Match trailing 8 hex chars: -67e7db6d
+                const hex8Match = slugStr.match(/-([0-9a-f]{8})$/i);
+                if (hex8Match) rawId = hex8Match[1];
+            }
+        }
     }
 
     if (!rawId) {

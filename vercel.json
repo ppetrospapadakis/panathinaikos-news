@@ -182,12 +182,12 @@
       "destination": "/api/webmanifest"
     },
     {
-      "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug",
-      "destination": "/api/render-article?slug=:slug"
-    },
-    {
       "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug-id=:id",
       "destination": "/api/render-article?id=:id"
+    },
+    {
+      "source": "/(podosfairo|basket|erasitexnis|erasitechnis|apopsi|genika|pao)/:slug",
+      "destination": "/api/render-article?slug=:slug"
     },
     {
       "source": "/",
