@@ -506,13 +506,18 @@
                     const awayScoreDisplay = m.away_score !== null && m.away_score !== undefined ? m.away_score : '-';
                     const isCurrent = !!m.is_current;
                     const rowId = `match-${m.id}`;
+                    const hasArticle = Boolean(m.article_url);
+                    const articleHref = hasArticle ? escapeHtml(m.article_url) : '';
 
                     if (isCurrent && !currentMatchElId) {
                         currentMatchElId = rowId;
                     }
 
+                    const clickAttr = hasArticle ? `onclick="window.open('${articleHref}', '_blank')"` : '';
+                    const cursorClass = hasArticle ? 'cursor-pointer hover:border-primary/60 active:scale-[0.995]' : '';
+
                     return `
-                    <div id="${rowId}" class="group relative flex items-center justify-between p-2.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5 scroll-mt-40' : 'border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-high/60'} transition-all duration-300 gap-2 sm:gap-4">
+                    <div id="${rowId}" ${clickAttr} class="group relative flex items-center justify-between p-2.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5 scroll-mt-36' : 'border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-high/60'} ${cursorClass} transition-all duration-300 gap-2 sm:gap-4">
                         ${isCurrent ? '<div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-primary rounded-r-full"></div>' : ''}
                         
                         <!-- Left: Date & Competition Badge -->
@@ -527,12 +532,11 @@
                             ${renderTeamName(m.away_team_name)}
                         </div>
 
-                        <!-- Optional Related Article Button -->
-                        ${m.article_url ? `
-                        <a href="${escapeHtml(m.article_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
-                            <span class="material-symbols-outlined text-[14px] sm:text-[16px]">newspaper</span>
-                            <span class="hidden sm:inline">Σχετικό άρθρο</span>
-                            <span class="sm:hidden">Άρθρο</span>
+                        <!-- Desktop Only: Related Article Button (Hidden on Mobile for max space) -->
+                        ${hasArticle ? `
+                        <a href="${articleHref}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
+                            <span class="material-symbols-outlined text-[16px]">newspaper</span>
+                            <span>Σχετικό άρθρο</span>
                         </a>
                         ` : ''}
 
@@ -547,20 +551,14 @@
                 list.innerHTML = html;
                 list.classList.remove('hidden');
 
-                // Scroll to current match inside the fixtures box (cross-browser, works on mobile)
+                // Smooth Scroll to current match (cross-browser, mobile & desktop)
                 if (currentMatchElId) {
-                    // Use two nested rAFs so the DOM layout is fully settled before measuring
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                        const box = document.getElementById('fixtures-box');
+                    setTimeout(() => {
                         const el = document.getElementById(currentMatchElId);
-                        if (box && el) {
-                            // Compute offset relative to the scrollable box (not document)
-                            const boxRect = box.getBoundingClientRect();
-                            const elRect  = el.getBoundingClientRect();
-                            const offset  = elRect.top - boxRect.top + box.scrollTop;
-                            box.scrollTop = Math.max(0, offset - box.clientHeight / 2 + el.offsetHeight / 2);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
-                    }));
+                    }, 150);
                 }
 
             } catch (err) {
