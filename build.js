@@ -7,11 +7,11 @@ if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Copy all .html files, opinion_admin.js, and static assets
+// Copy all .html files (except login.html which is served via api/render-admin), opinion_admin.js, and static assets
 const files = fs.readdirSync(__dirname);
 const buildTime = Date.now();
 for (const file of files) {
-    if (file.endsWith('.html')) {
+    if (file.endsWith('.html') && file !== 'login.html') {
         let content = fs.readFileSync(path.join(__dirname, file), 'utf8');
         content = `<!-- VercelBuild: ${buildTime} -->\n` + content;
         fs.writeFileSync(path.join(publicDir, file), content, 'utf8');
@@ -20,6 +20,13 @@ for (const file of files) {
         fs.copyFileSync(path.join(__dirname, file), path.join(publicDir, file));
         console.log(`Copied ${file} to public/`);
     }
+}
+
+// Ensure login.html is NOT present in public/ so Vercel rewrites /admin to /api/render-admin dynamically
+const publicLoginPath = path.join(publicDir, 'login.html');
+if (fs.existsSync(publicLoginPath)) {
+    fs.unlinkSync(publicLoginPath);
+    console.log("Removed public/login.html to force dynamic API rendering for admin panel.");
 }
 
 // Copy images/ folder to public/images/
