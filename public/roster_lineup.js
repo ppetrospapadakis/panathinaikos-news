@@ -58,7 +58,7 @@
         }
 
         const isFootball = activeSport === 'football';
-        const sportTitle = isFootball ? '⚽ Δημιουργία 11άδας' : '🏀 Δημιουργία 5άδας';
+        const sportTitle = isFootball ? 'Δημιουργία 11άδας' : 'Δημιουργία 5άδας';
         const isAuthedAdmin = sessionStorage.getItem('op_auth') === '1';
 
         modal.innerHTML = `
@@ -454,7 +454,7 @@
         }
 
         const isFootball = item.sport === 'football';
-        const sportTitle = isFootball ? '⚽ 11άδα Χρήστη' : '🏀 5άδα Χρήστη';
+        const sportTitle = isFootball ? '11άδα Χρήστη' : '5άδα Χρήστη';
         const lineup = item.lineup || {};
 
         const starting = lineup.starting || [];

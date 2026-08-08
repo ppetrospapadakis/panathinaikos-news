@@ -16,7 +16,7 @@ for (const file of files) {
         content = `<!-- VercelBuild: ${buildTime} -->\n` + content;
         fs.writeFileSync(path.join(publicDir, file), content, 'utf8');
         console.log(`Processed & copied ${file} to public/`);
-    } else if (file === 'opinion_admin.js' || file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.ico') || file.endsWith('.svg') || file.endsWith('.txt')) {
+    } else if (file.endsWith('.js') || file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.ico') || file.endsWith('.svg') || file.endsWith('.txt')) {
         fs.copyFileSync(path.join(__dirname, file), path.join(publicDir, file));
         console.log(`Copied ${file} to public/`);
     }
