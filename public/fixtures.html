@@ -1,4 +1,4 @@
-<!-- VercelBuild: 1786193131891 -->
+<!-- VercelBuild: 1786193384629 -->
 <!DOCTYPE html>
 <html class="dark" lang="el">
 <head>
@@ -507,11 +507,11 @@
                     ${renderTeamName(m.away_team_name)}
                 </div>
 
-                <!-- Related Article Button (Mobile: compact icon only, Desktop: full button) -->
+                <!-- Related Article Button (Mobile: ultra-micro icon, Desktop: full button) -->
                 ${hasArticle ? `
-                <a href="${articleHref}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="inline-flex items-center justify-center gap-1.5 p-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
-                    <span class="material-symbols-outlined text-[13px] sm:text-[16px]">newspaper</span>
-                    <span class="hidden sm:inline">Σχετικό άρθρο</span>
+                <a href="${articleHref}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="inline-flex items-center justify-center gap-1 p-0.5 sm:px-3 sm:py-1.5 rounded bg-primary/10 hover:bg-primary/20 border border-primary/20 sm:border-primary/30 text-primary hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 z-10" title="Διαβάστε το σχετικό άρθρο">
+                    <span class="material-symbols-outlined text-[11px] sm:text-[16px]">newspaper</span>
+                    <span class="hidden sm:inline text-[11px] font-bold">Σχετικό άρθρο</span>
                 </a>
                 ` : ''}
 
