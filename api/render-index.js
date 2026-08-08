@@ -312,6 +312,10 @@ module.exports = async (req, res) => {
 
         html = html.replace('<!-- HERO_PRELOAD_INJECT -->', preloadTag);
 
+        const currentCategory = req.query.category || '';
+        const catCanonical = currentCategory ? `https://www.panathinaikosnews.gr/${getCategoryCleanName(currentCategory)}` : 'https://www.panathinaikosnews.gr/';
+        html = html.replace(/<link rel="canonical" href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${catCanonical}"/>`);
+
         // Inject dynamic OG meta for homepage hero (important for Google Discover)
         const ogMeta = `
     <!-- Dynamic Hero OG Meta (SSR) -->
@@ -320,7 +324,7 @@ module.exports = async (req, res) => {
     <meta property="og:image" content="${imageUrl}"/>
     <meta property="og:image:width" content="1200"/>
     <meta property="og:image:height" content="628"/>
-    <meta property="og:url" content="https://www.panathinaikosnews.gr"/>
+    <meta property="og:url" content="${catCanonical}"/>
     <meta property="og:type" content="website"/>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:image" content="${imageUrl}"/>
