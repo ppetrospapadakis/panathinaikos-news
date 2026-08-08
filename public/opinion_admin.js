@@ -83,6 +83,9 @@ let currentRoster = {
 };
 
 function switchAdminTab(tab) {
+    if (typeof closeSidebar === 'function') closeSidebar();
+    else if (window.closeSidebar) window.closeSidebar();
+
     document.querySelectorAll('.admin-panel-content').forEach(el => el.classList.add('hidden'));
     document.getElementById(`panel-section-${tab}`).classList.remove('hidden');
 

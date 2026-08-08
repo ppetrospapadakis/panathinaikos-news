@@ -1677,6 +1677,17 @@ function toggleSidebar() {
 }
 window.toggleSidebar = toggleSidebar;
 
+function closeSidebar() {
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('drawer-overlay');
+    if (sidebar) sidebar.classList.add('-translate-x-full');
+    if (overlay) {
+        overlay.classList.add('opacity-0');
+        overlay.classList.add('pointer-events-none');
+    }
+}
+window.closeSidebar = closeSidebar;
+
 function adminLogout() {
     sessionStorage.removeItem('op_auth');
     window.location.reload();
