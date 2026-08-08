@@ -433,6 +433,9 @@ async function loadDeletedArticles() {
                             <button onclick="restoreDeletedArticle('${a.id}', '${inferredCategory}')" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm">
                                 <span class="material-symbols-outlined" style="font-size:16px">restore_from_trash</span> Επαναφορά
                             </button>
+                            <button onclick="permanentlyDeleteArticle('${a.id}')" class="px-2.5 py-1.5 rounded-xl bg-error/10 hover:bg-error/20 border border-error/30 text-xs font-semibold text-error flex items-center gap-1 transition-all cursor-pointer active:scale-95" title="Μόνιμη Διαγραφή">
+                                <span class="material-symbols-outlined" style="font-size:16px">delete_forever</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -563,11 +566,46 @@ async function restoreDeletedArticleFromModal(id) {
     await restoreDeletedArticle(id, selectedCategory);
 }
 
+async function permanentlyDeleteArticle(id) {
+    if (!db || !id) return;
+    if (!confirm('ΠΡΟΣΟΧΗ: Να διαγραφεί ΜΟΝΙΜΑ αυτό το άρθρο από τη βάση δεδομένων; Αυτή η ενέργεια δεν αναιρείται.')) return;
+    try {
+        const { error } = await db.from('articles').delete().eq('id', id);
+        if (error) throw error;
+        deletedArticlesCache = deletedArticlesCache.filter(a => a.id !== id);
+        loadDeletedArticles();
+    } catch (err) {
+        alert('Σφάλμα κατά τη μόνιμη διαγραφή: ' + err.message);
+    }
+}
+
+async function purgeAllDeletedArticles() {
+    if (!db) return;
+    const count = deletedArticlesCache.length;
+    if (count === 0) {
+        alert('Το καλάθι είναι ήδη άδειο.');
+        return;
+    }
+    if (!confirm(`ΠΡΟΣΟΧΗ! Είστε σίγουροι ότι θέλετε να διαγράψετε ΜΟΝΙΜΑ και τα ${count} διαγραμμένα άρθρα από τη βάση δεδομένων;\n\nΑυτή η ενέργεια δεν αναιρείται!`)) return;
+
+    try {
+        const { error } = await db.from('articles').delete().eq('category', 'DELETED');
+        if (error) throw error;
+        alert('Όλα τα διαγραμμένα άρθρα διαγράφηκαν μόνιμα!');
+        deletedArticlesCache = [];
+        loadDeletedArticles();
+    } catch (err) {
+        alert('Σφάλμα κατά την εκκαθάριση: ' + err.message);
+    }
+}
+
 window.loadDeletedArticles = loadDeletedArticles;
 window.previewDeletedArticle = previewDeletedArticle;
 window.closeDeletedPreviewModal = closeDeletedPreviewModal;
 window.restoreDeletedArticle = restoreDeletedArticle;
 window.restoreDeletedArticleFromModal = restoreDeletedArticleFromModal;
+window.permanentlyDeleteArticle = permanentlyDeleteArticle;
+window.purgeAllDeletedArticles = purgeAllDeletedArticles;
 window.switchAdminTab = switchAdminTab;
 
 // ── Ingestion Runs Fetching & Inspectors ───────────────────────────────────
