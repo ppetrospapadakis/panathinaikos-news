@@ -1,4 +1,4 @@
-<!-- VercelBuild: 1786193018359 -->
+<!-- VercelBuild: 1786193131891 -->
 <!DOCTYPE html>
 <html class="dark" lang="el">
 <head>
@@ -478,7 +478,7 @@
         let showAllOlderMatches = false;
         let showAllNewerMatches = false;
 
-        function renderFixtureCardHtml(m) {
+        function renderSingleMatchRow(m) {
             const compBadge = getCompetitionLogoHtml(m.competition);
             const formattedDate = formatMatchDate(m.match_date);
             const homeScoreDisplay = m.home_score !== null && m.home_score !== undefined ? m.home_score : '-';
