@@ -815,6 +815,11 @@ async function scrapeArticlePage(url, categoryHint) {
         const DEFAULT_STADIUM_IMG = '/logo.png';
 
         // ── Build image URL (Node-safe, no DOM dependencies) ───────────────────
+        const isAuthorDomElement = (el) => {
+            const parent = $(el).closest('.author-avatar, .author-box, .author-pic, .author-img, .columnist-avatar, .writer-avatar, .editor-avatar, .avatar, [class*="author-"], [class*="columnist-"]');
+            return parent.length > 0;
+        };
+
         const isBrandingOrAuthorImage = (imgUrl, articleUrl = '') => {
             if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.startsWith('http')) return true;
             try {
@@ -827,13 +832,7 @@ async function scrapeArticlePage(url, categoryHint) {
                     'site-logo', 'site_logo', 'default-image', 'default_image',
                     'noimage', 'no-image', 'blank', 'generic',
                     'author', 'writer', 'columnist', 'sintaktis', 'syntaktis', 'editor', 'reporter',
-                    'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic',
-                    'xatzi', 'xatzis', 'chatzi', 'chatzis', 'chatzigeorgiou', 'nikologiannis', 'athanasiou',
-                    'karpetopoulos', 'helakis', 'tsakiris', 'petrotos', 'ketsetzoglou', 'papatheodorou',
-                    'papatheodwroy', 'arnaoutoglou', 'zourntos', 'pagkakis', 'kolokotronis', 'spiliopoulos',
-                    'syriodis', 'psaras', 'gkountakos', 'kefalas', 'seitis', 'vagias', 'verves', 'katsaros',
-                    'stavrou', 'samprakos', 'samolis', 'tousis', 'tsoutsouras', 'baimakis', 'tsochos',
-                    'tsoukalas', 'karaminas', 'xristoforou', 'christoforou', 'arthrografos', 'stili', 'stiles'
+                    'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic'
                 ];
 
                 const brandingPaths = [
@@ -845,9 +844,7 @@ async function scrapeArticlePage(url, categoryHint) {
                 const hasKeyword = brandingAndAuthorKeywords.some(ind => filename.includes(ind));
                 const hasPath = brandingPaths.some(p => fullPath.includes(p));
 
-                const isOpinionArticle = /\/(opinion|apopsi|columns|stiles|stili)\//.test((articleUrl || '').toLowerCase());
-
-                return hasKeyword || hasPath || (isOpinionArticle && brandingAndAuthorKeywords.some(k => filename.includes(k)));
+                return hasKeyword || hasPath;
             } catch (_) {
                 return true;
             }
@@ -862,25 +859,43 @@ async function scrapeArticlePage(url, categoryHint) {
         let imageUrl = DEFAULT_STADIUM_IMG;
         const cleanedImg = sanitizeImageUrl(scrapedImg);
 
-        if (cleanedImg && !isBrandingOrAuthorImage(cleanedImg, url)) {
-            imageUrl = cleanedImg;
-        } else {
-            const candidateImages = [];
-            $('article img, .article-body img, #article-body img, main img').each((_, el) => {
-                const src = $(el).attr('src') || $(el).attr('data-src');
+        // 1. Try DOM lead/hero selectors first, ignoring any author avatar elements
+        const heroSelectors = [
+            '.main-image img',
+            '.hero-image img',
+            '.article-media img',
+            '.featured-image img',
+            '.article-main-image img',
+            '.entry-media img',
+            'figure.main-image img',
+            'figure.article-image img',
+            'figure img',
+            'article img',
+            '.article-body img'
+        ];
+
+        let domHeroImg = null;
+        for (const sel of heroSelectors) {
+            $(sel).each((_, el) => {
+                if (isAuthorDomElement(el)) return; // Skip author avatars
+                const src = $(el).attr('src') || $(el).attr('data-src') || $(el).attr('data-lazy-src') || $(el).attr('data-original');
                 if (src) {
                     const cleanCandidate = sanitizeImageUrl(src);
                     if (cleanCandidate && cleanCandidate.startsWith('http') && !isBrandingOrAuthorImage(cleanCandidate, url)) {
-                        candidateImages.push(cleanCandidate);
+                        domHeroImg = cleanCandidate;
+                        return false;
                     }
                 }
             });
+            if (domHeroImg) break;
+        }
 
-            if (candidateImages.length > 0) {
-                imageUrl = candidateImages[0];
-            } else if (cleanedImg && cleanedImg.startsWith('http')) {
-                imageUrl = cleanedImg;
-            }
+        if (domHeroImg) {
+            imageUrl = domHeroImg;
+        } else if (cleanedImg && !isBrandingOrAuthorImage(cleanedImg, url)) {
+            imageUrl = cleanedImg;
+        } else if (cleanedImg && cleanedImg.startsWith('http')) {
+            imageUrl = cleanedImg;
         }
         
         // ── Published date & Age Validation ────────────────────────────────────
