@@ -583,6 +583,36 @@ function sanitizeImageUrl(scrapedImg) {
     return cleaned;
 }
 
+function isBrandingOrAuthorImage(imgUrl, articleUrl = '') {
+    if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.startsWith('http')) return true;
+    try {
+        const u = new URL(imgUrl);
+        const fullPath = u.pathname.toLowerCase();
+        const filename = fullPath.split('/').pop() || '';
+
+        const brandingAndAuthorKeywords = [
+            'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
+            'site-logo', 'site_logo', 'default-image', 'default_image',
+            'noimage', 'no-image', 'blank', 'generic',
+            'author', 'writer', 'columnist', 'sintaktis', 'syntaktis', 'editor', 'reporter',
+            'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic'
+        ];
+
+        const brandingPaths = [
+            '/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/',
+            '/assets/images/', '/site-assets/', '/authors/', '/author/', '/users/', '/avatars/',
+            '/profiles/', '/columnists/', '/reporters/', '/editors/', '/sintaktes/', '/contributors/'
+        ];
+
+        const hasKeyword = brandingAndAuthorKeywords.some(ind => filename.includes(ind));
+        const hasPath = brandingPaths.some(p => fullPath.includes(p));
+
+        return hasKeyword || hasPath;
+    } catch (_) {
+        return true;
+    }
+}
+
 function stripJournalistFromTitle(title) {
     if (!title || typeof title !== 'string') return title;
     let t = title.trim();
@@ -818,36 +848,6 @@ async function scrapeArticlePage(url, categoryHint) {
         const isAuthorDomElement = (el) => {
             const parent = $(el).closest('.author-avatar, .author-box, .author-pic, .author-img, .columnist-avatar, .writer-avatar, .editor-avatar, .avatar, [class*="author-"], [class*="columnist-"]');
             return parent.length > 0;
-        };
-
-        const isBrandingOrAuthorImage = (imgUrl, articleUrl = '') => {
-            if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.startsWith('http')) return true;
-            try {
-                const u = new URL(imgUrl);
-                const fullPath = u.pathname.toLowerCase();
-                const filename = fullPath.split('/').pop() || '';
-
-                const brandingAndAuthorKeywords = [
-                    'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
-                    'site-logo', 'site_logo', 'default-image', 'default_image',
-                    'noimage', 'no-image', 'blank', 'generic',
-                    'author', 'writer', 'columnist', 'sintaktis', 'syntaktis', 'editor', 'reporter',
-                    'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic'
-                ];
-
-                const brandingPaths = [
-                    '/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/',
-                    '/assets/images/', '/site-assets/', '/authors/', '/author/', '/users/', '/avatars/',
-                    '/profiles/', '/columnists/', '/reporters/', '/editors/', '/sintaktes/', '/contributors/'
-                ];
-
-                const hasKeyword = brandingAndAuthorKeywords.some(ind => filename.includes(ind));
-                const hasPath = brandingPaths.some(p => fullPath.includes(p));
-
-                return hasKeyword || hasPath;
-            } catch (_) {
-                return true;
-            }
         };
 
         const scrapedImg = (
@@ -2088,6 +2088,7 @@ async function main() {
                 } catch (igErr) {
                     console.error('[Instagram] Publish error:', igErr.message);
                 }
+            }
             } catch (artLoopErr) {
                 console.error(`[ARTICLE ERROR] Exception processing ${articleUrl}: ${artLoopErr.message}`);
                 logRunError(target.name, articleUrl, 'article_processing', artLoopErr.message);
