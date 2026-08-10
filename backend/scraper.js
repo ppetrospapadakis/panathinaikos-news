@@ -567,6 +567,15 @@ function sanitizeImageUrl(scrapedImg) {
     if (cleaned.toLowerCase().includes('sdna.gr')) {
         cleaned = cleaned.replace('/styles/og_image/', '/styles/main/');
     }
+
+    // Clean OnSports watermark / og-branded overlay images
+    if (cleaned.toLowerCase().includes('onsmd.gr') || cleaned.toLowerCase().includes('onsports.gr')) {
+        cleaned = cleaned
+            .replace(/\/img\/\d+\/\d+\/90\//gi, '/img/1280/max/90/')
+            .replace(/-og\.jpg/gi, '.jpg')
+            .replace(/-og\./gi, '.');
+    }
+
     // Strip dynamic watermark folders: e.g. /thumbnails/, /wm/
     cleaned = cleaned.replace(/\/(wm|thumbnails)\//gi, '/');
     // Strip query parameters
@@ -1834,14 +1843,13 @@ async function main() {
                         // Prefer real article image over fallback logo, and prefer non-SDNA image
                         const isFallbackImage = (img) => !img || img === '/logo.png' || img.includes('logo.png') || img === DEFAULT_STADIUM_IMG;
 
-                        let newImageUrl = dbArt.image_url;
-                        const isDbWatermarked = (dbArt.source_url || '').toLowerCase().includes('sdna.gr') || (dbArt.source_url || '').toLowerCase().includes('sportime.gr');
-                        const isScrapedWatermarked = articleUrl.toLowerCase().includes('sdna.gr') || articleUrl.toLowerCase().includes('sportime.gr');
+                        const isDbWatermarked = (dbArt.source_url || '').toLowerCase().includes('sdna.gr') || (dbArt.source_url || '').toLowerCase().includes('sportime.gr') || (dbArt.source_url || '').toLowerCase().includes('onsports.gr');
+                        const isScrapedWatermarked = articleUrl.toLowerCase().includes('sdna.gr') || articleUrl.toLowerCase().includes('sportime.gr') || articleUrl.toLowerCase().includes('onsports.gr');
                         
                         if ((isFallbackImage(newImageUrl) || !newImageUrl) && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
                             newImageUrl = scraped.imageUrl;
                         } else if (isDbWatermarked && !isScrapedWatermarked && scraped.imageUrl && !isFallbackImage(scraped.imageUrl)) {
-                            newImageUrl = scraped.imageUrl; // Swap SDNA/Sportime image with clean external portal image
+                            newImageUrl = scraped.imageUrl; // Swap SDNA/Sportime/OnSports image with clean external portal image
                         }
 
                         // Category resolution: if any merged article belongs to a specific sport category, assign it to the merged article
