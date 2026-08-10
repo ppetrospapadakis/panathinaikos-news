@@ -587,8 +587,26 @@ function isBrandingOrAuthorImage(imgUrl, articleUrl = '') {
     if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.startsWith('http')) return true;
     try {
         const u = new URL(imgUrl);
+        const hostname = u.hostname.toLowerCase();
         const fullPath = u.pathname.toLowerCase();
         const filename = fullPath.split('/').pop() || '';
+        const ext = filename.split('.').pop() || '';
+
+        // Reject known ad tracker / pixel domains immediately
+        const adTrackerDomains = [
+            'doubleclick.net', 'googlesyndication.com', 'adnxs.com', 'adsrvr.org',
+            'rubiconproject.com', 'pubmatic.com', 'openx.net', 'smartadserver.com',
+            'adform.net', 'criteo.com', 'taboola.com', 'outbrain.com', 'revcontent.com',
+            'adsystem.com', 'amazon-adsystem.com', 'scorecardresearch.com'
+        ];
+        if (adTrackerDomains.some(d => hostname.endsWith(d))) return true;
+
+        // Reject SVG files (almost always logos/icons, never editorial photos)
+        if (ext === 'svg') return true;
+
+        // Reject hidden tracking pixels in 'is-hidden' DOM containers
+        // (can't detect DOM here, but trackimp/pixel paths are a giveaway)
+        if (fullPath.includes('trackimp') || fullPath.includes('track_imp') || fullPath.includes('/pixel/') || fullPath.includes('/beacon/')) return true;
 
         const brandingAndAuthorKeywords = [
             'logo', 'icon', 'avatar', 'branding', 'placeholder', 'fallback', 'watermark',
