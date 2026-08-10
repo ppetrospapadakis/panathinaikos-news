@@ -1533,11 +1533,17 @@ async function main() {
     // ── 1. Fetch listing index pages for all 14 targets in parallel ────────────
     console.log('[INDEX FETCH] Fetching listing index pages for all 14 targets in parallel...');
     const targetResults = await Promise.all(SCRAPE_TARGETS.map(async (target) => {
-        let links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
-        if (links && links.length > 5) {
-            links = links.slice(0, 5);
+        try {
+            let links = await scrapeArticleLinks(target, (msg) => logRunError(target.name, target.url, 'listing_fetch', msg));
+            if (links && links.length > 5) {
+                links = links.slice(0, 5);
+            }
+            return { target, links };
+        } catch (err) {
+            console.warn(`[INDEX FETCH WARNING] Failed to fetch listing index for ${target.name}: ${err.message}`);
+            logRunError(target.name, target.url, 'listing_fetch', err.message);
+            return { target, links: null };
         }
-        return { target, links };
     }));
 
     // ── 2. Process fetched articles sequentially with full safety ──────────────
@@ -1565,13 +1571,14 @@ async function main() {
         runStats.totals.scraped += links.length;
 
         for (const articleUrl of links) {
-            const canonicalArticleId = getCanonicalArticleId(articleUrl);
-            if (!isDryRun && (existingUrls.has(articleUrl) || (canonicalArticleId && existingUrls.has(canonicalArticleId)))) {
-                totalSkipped++;
-                runStats.sources[target.name].skipped_duplicate++;
-                runStats.totals.skipped_duplicate++;
-                continue;
-            }
+            try {
+                const canonicalArticleId = getCanonicalArticleId(articleUrl);
+                if (!isDryRun && (existingUrls.has(articleUrl) || (canonicalArticleId && existingUrls.has(canonicalArticleId)))) {
+                    totalSkipped++;
+                    runStats.sources[target.name].skipped_duplicate++;
+                    runStats.totals.skipped_duplicate++;
+                    continue;
+                }
 
             // Skip specific promotional/irrelevant articles by keyword in URL
             const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone', 'recommendations', '/recommendation/', 'protoselid', 'protoselida', 'πρωτοσελιδα', 'πρωτοσέλιδα'];
@@ -2081,6 +2088,9 @@ async function main() {
                 } catch (igErr) {
                     console.error('[Instagram] Publish error:', igErr.message);
                 }
+            } catch (artLoopErr) {
+                console.error(`[ARTICLE ERROR] Exception processing ${articleUrl}: ${artLoopErr.message}`);
+                logRunError(target.name, articleUrl, 'article_processing', artLoopErr.message);
             }
         }
         // Rate limit between article processing — only pause if new articles were processed
