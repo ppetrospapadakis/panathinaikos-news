@@ -713,8 +713,8 @@ async function scrapeArticlePage(url, categoryHint) {
         console.log(`[SCRAPE SKIPPED] Sportime papatheodwroy article URL skipped: ${url}`);
         return null;
     }
-    if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten')) {
-        console.log(`[SCRAPE SKIPPED] URL contains blacklisted galacticos/interwetten term: ${url}`);
+    if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten') || url.toLowerCase().includes('protoselid')) {
+        console.log(`[SCRAPE SKIPPED] URL contains blacklisted term: ${url}`);
         return null;
     }
     try {
@@ -961,7 +961,7 @@ async function scrapeArticlePage(url, categoryHint) {
         }
 
         const isOfficial = url.includes('pao.gr') || url.includes('paobc.gr') || url.includes('pao1908.com');
-        const minLength = isOfficial ? 100 : 380;
+        const minLength = isOfficial ? 100 : 480;
 
         if (!bodyText || bodyText.length < minLength) {
             console.log(`  [PARSING WARNING] Body text is too short or empty for ${url} (Length: ${bodyText.length}). Minimum is ${minLength}. Likely a video-only article. Skipping.`);
@@ -1519,7 +1519,7 @@ async function main() {
             }
 
             // Skip specific promotional/irrelevant articles by keyword in URL
-            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone', 'recommendations', '/recommendation/'];
+            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone', 'recommendations', '/recommendation/', 'protoselid', 'protoselida', 'πρωτοσελιδα', 'πρωτοσέλιδα'];
             const lowerUrl = articleUrl.toLowerCase();
             if (skipKeywords.some(kw => lowerUrl.includes(kw))) {
                 console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);

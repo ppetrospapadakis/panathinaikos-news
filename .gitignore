@@ -39,3 +39,5 @@ public/*
 .vercel
 .env*
 scratch/
+
+.env*
