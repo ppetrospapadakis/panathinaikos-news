@@ -331,7 +331,7 @@ function isPanathinaikosArticle(title, text) {
     
     // Core Panathinaikos identifiers (unaccented)
     const coreKeywords = [
-        'παναθηναικ', 'panathinaikos', 'pao fc', 'pao bc', 'καε παναθηναικος', 'παε παναθηναικος',
+        'παναθηναικ', 'panathinaikos', 'panathinaik', 'panathinaiko', 'pao fc', 'pao bc', 'καε παναθηναικος', 'παε παναθηναικος',
         'τριφυλλι', 'trifilli', 'οακα', 'oaka', 'λεωφορος', 'leoforos', 'βοτανικος', 'votanikos',
         'πρασιν', 'θυρα 13', 'gate 13', 'green heretics'
     ];
@@ -339,7 +339,7 @@ function isPanathinaikosArticle(title, text) {
     // Player and coach names (both Greek and English/transliterated, unaccented)
     const personnelKeywords = [
         'αταμαν', 'ataman', 'σλουκας', 'sloukas', 'ιωαννιδης', 'ioannidis', 'τετε', 'tete',
-        'μπακασετας', 'bakasetas', 'πελιστρι', 'pellistri', 'νιστρουπ', 'neestrup', 'μαξιμοβιτς',
+        'μπακασετας', 'bakasetas', 'πελιστρι', 'pellistri', 'νιστρουπ', 'nistroyp', 'neestrup', 'μαξιμοβιτς',
         'μπαλτσεροφσκι', 'balcerowski', 'ναν', 'nunn', 'lessort', 'λεσορ', 'grant', 'γκραντ',
         'γκριγκονις', 'grigonis', 'ερνανγκομεθ', 'hernangomez', 'χουαντσο', 'juancho', 'papapetrou',
         'παπαπετρου', 'μητογλου', 'mitoglou', 'καλαιτζακης', 'kalaitzakis', 'γιουρτσεβεν',
