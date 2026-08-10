@@ -2173,8 +2173,11 @@ async function main() {
 }
 
 if (require.main === module) {
-    main().catch(async (err) => {
-        console.error('[FATAL] Scraper crashed:', err.message);
+    main().then(() => {
+        console.log('[SCRAPER] Execution completed cleanly. Exiting with code 0.');
+        process.exit(0);
+    }).catch(async (err) => {
+        console.error('[FATAL] Scraper crashed:', err.message || err);
         process.exit(1);
     });
 }
