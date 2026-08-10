@@ -815,7 +815,7 @@ async function scrapeArticlePage(url, categoryHint) {
         const DEFAULT_STADIUM_IMG = '/logo.png';
 
         // ── Build image URL (Node-safe, no DOM dependencies) ───────────────────
-        const isBrandingOrAuthorImage = (imgUrl) => {
+        const isBrandingOrAuthorImage = (imgUrl, articleUrl = '') => {
             if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.startsWith('http')) return true;
             try {
                 const u = new URL(imgUrl);
@@ -827,18 +827,27 @@ async function scrapeArticlePage(url, categoryHint) {
                     'site-logo', 'site_logo', 'default-image', 'default_image',
                     'noimage', 'no-image', 'blank', 'generic',
                     'author', 'writer', 'columnist', 'sintaktis', 'syntaktis', 'editor', 'reporter',
-                    'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic'
+                    'headshot', 'profile-pic', 'profile_pic', 'user-pic', 'user_pic', 'bio-pic',
+                    'xatzi', 'xatzis', 'chatzi', 'chatzis', 'chatzigeorgiou', 'nikologiannis', 'athanasiou',
+                    'karpetopoulos', 'helakis', 'tsakiris', 'petrotos', 'ketsetzoglou', 'papatheodorou',
+                    'papatheodwroy', 'arnaoutoglou', 'zourntos', 'pagkakis', 'kolokotronis', 'spiliopoulos',
+                    'syriodis', 'psaras', 'gkountakos', 'kefalas', 'seitis', 'vagias', 'verves', 'katsaros',
+                    'stavrou', 'samprakos', 'samolis', 'tousis', 'tsoutsouras', 'baimakis', 'tsochos',
+                    'tsoukalas', 'karaminas', 'xristoforou', 'christoforou', 'arthrografos', 'stili', 'stiles'
                 ];
 
                 const brandingPaths = [
                     '/logos/', '/logo/', '/brand/', '/branding/', '/default_images/', '/default-images/',
                     '/assets/images/', '/site-assets/', '/authors/', '/author/', '/users/', '/avatars/',
-                    '/profiles/', '/columnists/', '/reporters/', '/editors/', '/sintaktes/'
+                    '/profiles/', '/columnists/', '/reporters/', '/editors/', '/sintaktes/', '/contributors/'
                 ];
 
                 const hasKeyword = brandingAndAuthorKeywords.some(ind => filename.includes(ind));
                 const hasPath = brandingPaths.some(p => fullPath.includes(p));
-                return hasKeyword || hasPath;
+
+                const isOpinionArticle = /\/(opinion|apopsi|columns|stiles|stili)\//.test((articleUrl || '').toLowerCase());
+
+                return hasKeyword || hasPath || (isOpinionArticle && brandingAndAuthorKeywords.some(k => filename.includes(k)));
             } catch (_) {
                 return true;
             }
@@ -853,7 +862,7 @@ async function scrapeArticlePage(url, categoryHint) {
         let imageUrl = DEFAULT_STADIUM_IMG;
         const cleanedImg = sanitizeImageUrl(scrapedImg);
 
-        if (cleanedImg && !isBrandingOrAuthorImage(cleanedImg)) {
+        if (cleanedImg && !isBrandingOrAuthorImage(cleanedImg, url)) {
             imageUrl = cleanedImg;
         } else {
             const candidateImages = [];
@@ -861,7 +870,7 @@ async function scrapeArticlePage(url, categoryHint) {
                 const src = $(el).attr('src') || $(el).attr('data-src');
                 if (src) {
                     const cleanCandidate = sanitizeImageUrl(src);
-                    if (cleanCandidate && cleanCandidate.startsWith('http') && !isBrandingOrAuthorImage(cleanCandidate)) {
+                    if (cleanCandidate && cleanCandidate.startsWith('http') && !isBrandingOrAuthorImage(cleanCandidate, url)) {
                         candidateImages.push(cleanCandidate);
                     }
                 }
@@ -1872,8 +1881,8 @@ async function main() {
                         }
                         const newSummary = newContent.substring(0, 300); // basic summary
 
-                        // Prefer real article image over fallback logo, and prefer non-SDNA image
-                        const isFallbackImage = (img) => !img || img === '/logo.png' || img.includes('logo.png') || img === DEFAULT_STADIUM_IMG;
+                        // Prefer real article image over fallback logo, and prefer non-SDNA/author headshots
+                        const isFallbackImage = (img, artUrl = '') => !img || img === '/logo.png' || img.includes('logo.png') || img === DEFAULT_STADIUM_IMG || isBrandingOrAuthorImage(img, artUrl);
 
                         const isDbWatermarked = (dbArt.source_url || '').toLowerCase().includes('sdna.gr') || (dbArt.source_url || '').toLowerCase().includes('sportime.gr') || (dbArt.source_url || '').toLowerCase().includes('onsports.gr');
                         const isScrapedWatermarked = articleUrl.toLowerCase().includes('sdna.gr') || articleUrl.toLowerCase().includes('sportime.gr') || articleUrl.toLowerCase().includes('onsports.gr');
