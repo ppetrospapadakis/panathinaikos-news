@@ -22,24 +22,30 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // 1. Fetch DB Totals
+        // 1. Fetch DB Totals (only valid published articles, excluding DELETED/SKIPPED placeholders)
         const { count: totalArticles } = await supabase
             .from('articles')
-            .select('id', { count: 'exact', head: true });
+            .select('id', { count: 'exact', head: true })
+            .neq('category', 'DELETED')
+            .not('title', 'ilike', '%[SKIPPED]%')
+            .not('summary', 'ilike', '%Skipped%');
 
         const { count: manualOpinions } = await supabase
             .from('articles')
             .select('id', { count: 'exact', head: true })
-            .like('source_url', 'opinion://manual%');
+            .like('source_url', 'opinion://manual%')
+            .neq('category', 'DELETED')
+            .not('title', 'ilike', '%[SKIPPED]%')
+            .not('summary', 'ilike', '%Skipped%');
 
         const { count: totalRuns } = await supabase
             .from('scraping_runs')
             .select('id', { count: 'exact', head: true });
 
         // Estimated database size: articles are ~5.2 KB each, runs are ~14.5 KB each (in raw JSONB payload)
-        const dbSizeEstimatedMb = Number(((totalArticles * 5.2 + totalRuns * 14.5) / 1024).toFixed(2));
+        const dbSizeEstimatedMb = Number((((totalArticles || 0) * 5.2 + (totalRuns || 0) * 14.5) / 1024).toFixed(2));
 
-        // 2. Fetch Post Frequency for 24h and 30d
+        // 2. Fetch Post Frequency for 24h and 30d (strictly valid published articles)
         const now = Date.now();
         const last24hIso = new Date(now - 24 * 60 * 60 * 1000).toISOString();
         const last30dIso = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -50,8 +56,11 @@ module.exports = async (req, res) => {
         while (true) {
             const { data, error } = await supabase
                 .from('articles')
-                .select('created_at, source_url')
+                .select('created_at, source_url, title, category, summary')
                 .gt('created_at', last30dIso)
+                .neq('category', 'DELETED')
+                .not('title', 'ilike', '%[SKIPPED]%')
+                .not('summary', 'ilike', '%Skipped%')
                 .order('created_at', { ascending: false })
                 .range(page * pageSize, (page + 1) * pageSize - 1);
 
@@ -133,6 +142,9 @@ module.exports = async (req, res) => {
         if (recentArticles) {
             recentArticles.forEach(art => {
                 if (!art.created_at) return;
+                if (art.category === 'DELETED') return;
+                if (art.title && art.title.toLowerCase().includes('[skipped]')) return;
+                if (art.summary && art.summary.toLowerCase().includes('skipped')) return;
                 const artDate = new Date(art.created_at);
                 const artMs = artDate.getTime();
                 const artYmd = athensYmdFormatter.format(artDate);
