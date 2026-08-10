@@ -1806,7 +1806,7 @@ function renderSourceDistributionChart(rangeKey) {
 
     const targetSources = [
         'Sport-FM', 'SDNA', 'Sportal', 'Sport24', 
-        'Gazzetta', 'Sportime', 'Monobala', 'Athletiko', 
+        'Gazzetta', 'Sportime', 'Monobala', 'OnSports', 'Athletiko', 
         'PAO Official', 'PAO1908 Official', 'Manual'
     ];
 
