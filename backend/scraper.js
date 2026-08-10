@@ -1849,6 +1849,7 @@ async function main() {
                         let newContent = dbArt.content;
                         let newTitle = dbArt.title;
                         let newBullets = dbArt.bullets;
+                        let newImageUrl = dbArt.image_url;
 
                         if (isDbArtOfficial) {
                             console.log(`  [DEDUPLICATION] Existing article is official. Keeping verbatim content.`);
