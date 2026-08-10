@@ -221,6 +221,18 @@ const SCRAPE_TARGETS = [
         ],
         baseUrl: 'https://monobala.gr',
     },
+    {
+        category: 'Γενικά',
+        name: 'OnSports',
+        url: 'https://www.onsports.gr/omades/panathinaikos',
+        articleLinkSelectors: [
+            'a[href*="/story/"]',
+            'a[href*="/panathinaikos/"]',
+            'a[href*="/podosfairo/"]',
+            'a[href*="/basket/"]'
+        ],
+        baseUrl: 'https://www.onsports.gr',
+    },
     // ── BASKETBALL ────────────────────────────────────────────────────────────
     {
         category: 'Μπάσκετ',
@@ -301,6 +313,7 @@ function getSourceNameFromUrl(url) {
         if (hostname.includes('gazzetta.gr')) return 'Gazzetta';
         if (hostname.includes('athletiko.gr')) return 'Athletiko';
         if (hostname.includes('sportdog.gr')) return 'Sportdog';
+        if (hostname.includes('onsports.gr')) return 'OnSports';
         if (hostname.includes('pao.gr')) return 'PAO Official';
         if (hostname.includes('pao1908.com')) return 'PAO1908 Official';
         if (hostname.includes('paobc.gr')) return 'PAO BC Official';

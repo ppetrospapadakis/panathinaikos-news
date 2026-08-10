@@ -116,6 +116,7 @@ module.exports = async (req, res) => {
                 else if (uLower.includes('gazzetta')) labels.add('Gazzetta');
                 else if (uLower.includes('athletiko')) labels.add('Athletiko');
                 else if (uLower.includes('monobala')) labels.add('Monobala');
+                else if (uLower.includes('onsports')) labels.add('OnSports');
                 else if (uLower.includes('opinion://manual') || uLower.includes('manual')) labels.add('Manual');
                 else {
                     try {
