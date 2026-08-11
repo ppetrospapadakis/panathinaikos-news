@@ -8,6 +8,9 @@ const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 const { createNewsCardBuffer } = require('./instagram_poster');
 
+// In-memory guard to strictly prevent more than 1 Facebook post per scraper execution
+let facebookPostedInCurrentRun = false;
+
 /**
  * Dynamic Page Access Token Resolver helper.
  * Automatically exchanges System User Token for Page Access Token if required by Meta API.
@@ -57,6 +60,11 @@ async function publishToFacebook(article) {
         return null;
     }
 
+    if (facebookPostedInCurrentRun) {
+        console.log('[Facebook Safety] Already published 1 post during this run. Skipping further posts to enforce spacing.');
+        return null;
+    }
+
     if (!article || !article.title) {
         console.warn('[Facebook] Invalid article object provided.');
         return null;
@@ -71,8 +79,6 @@ async function publishToFacebook(article) {
         console.log('[Facebook] Facebook Page ID or Access Token not found in environment secrets. Skipping auto-post.');
         return null;
     }
-
-    const accessToken = await getPageAccessToken(pageId, rawToken);
 
     // Filter: Do NOT post Amateur (Ερασιτέχνης) or Official sources/categories to Facebook
     const cat = (article.category || '').toLowerCase();
@@ -120,6 +126,8 @@ async function publishToFacebook(article) {
             }
         } catch (_) {}
     }
+
+    const accessToken = await getPageAccessToken(pageId, rawToken);
 
     try {
         console.log(`[Facebook] Preparing post for: "${article.title}"...`);
@@ -199,13 +207,15 @@ async function publishToFacebook(article) {
             postFbId = feedRes.data?.id;
         }
 
-        console.log(`[Facebook] Successfully published post to Facebook Page! Post ID: ${postFbId}`);
-
-        if (postFbId && supabaseUrl && supabaseKey && article.id) {
-            try {
-                const supabase = createClient(supabaseUrl, supabaseKey);
-                await supabase.from('articles').update({ facebook_posted: true }).eq('id', article.id);
-            } catch (_) {}
+        if (postFbId) {
+            facebookPostedInCurrentRun = true;
+            console.log(`[Facebook] Successfully published post to Facebook Page! Post ID: ${postFbId}`);
+            if (supabaseUrl && supabaseKey && article.id) {
+                try {
+                    const supabase = createClient(supabaseUrl, supabaseKey);
+                    await supabase.from('articles').update({ facebook_posted: true }).eq('id', article.id);
+                } catch (_) {}
+            }
         }
 
         return postFbId;
