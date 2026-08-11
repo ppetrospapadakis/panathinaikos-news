@@ -231,8 +231,8 @@ async function publishToInstagram(article) {
             if (lastPosted && lastPosted.length > 0) {
                 const lastPostTime = new Date(lastPosted[0].updated_at || lastPosted[0].created_at).getTime();
                 const hoursSinceLastPost = (Date.now() - lastPostTime) / (1000 * 60 * 60);
-                if (hoursSinceLastPost < 2.0) {
-                    console.log(`[Instagram Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last post (min 2.0h required). Skipping to avoid Meta spam flags.`);
+                if (hoursSinceLastPost < 3.5) {
+                    console.log(`[Instagram Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last post (min 3.5h required). Skipping to avoid Meta spam flags.`);
                     return null;
                 }
             }
