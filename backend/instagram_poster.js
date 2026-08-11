@@ -71,10 +71,10 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
         }).png().toBuffer();
     }
 
-    // 2. Process background: Resize to 1080x1350, crop, and apply heavy blur
+    // 2. Process background: Resize to 1080x1350, crop, and apply subtle blur
     const processedBg = await sharp(bgBuffer)
         .resize(width, height, { fit: 'cover', position: 'center' })
-        .blur(18)
+        .blur(8)
         .toBuffer();
 
     // 3. Prepare Logo Overlay
