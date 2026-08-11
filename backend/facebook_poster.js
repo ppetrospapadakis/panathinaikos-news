@@ -91,22 +91,31 @@ async function publishToFacebook(article) {
         return null;
     }
 
-    // SAFETY GUARD 1: Persistent Rate Limiting — Ensure at least 2 hours have passed since the LAST Facebook post
+    // SAFETY GUARD 1: Persistent Rate Limiting & Title Deduplication via Storage
     if (supabaseUrl && supabaseKey) {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
             const { data: fileData, error: fileErr } = await supabase.storage
                 .from('instagram-cards')
-                .download('fb_last_post.json');
+                .download('fb_last_post_meta.jpg');
 
             if (!fileErr && fileData) {
                 const text = await fileData.text();
                 const json = JSON.parse(text);
-                if (json && json.lastPostTime) {
-                    const hoursSinceLastPost = (Date.now() - json.lastPostTime) / (1000 * 60 * 60);
-                    if (hoursSinceLastPost < 2.0) {
-                        console.log(`[Facebook Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last Facebook post (min 2.0h required). Skipping.`);
+                if (json) {
+                    // Check 1: Title & ID Deduplication — exact same title or ID as previous post
+                    if ((json.lastTitle && json.lastTitle === article.title) || (json.lastId && json.lastId === article.id)) {
+                        console.log(`[Facebook Safety] Article "${article.title}" was ALREADY posted to Facebook. Skipping.`);
                         return null;
+                    }
+
+                    // Check 2: 2-Hour Rate Limiting
+                    if (json.lastPostTime) {
+                        const hoursSinceLastPost = (Date.now() - json.lastPostTime) / (1000 * 60 * 60);
+                        if (hoursSinceLastPost < 2.0) {
+                            console.log(`[Facebook Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last Facebook post (min 2.0h required). Skipping.`);
+                            return null;
+                        }
                     }
                 }
             }
@@ -115,7 +124,7 @@ async function publishToFacebook(article) {
         }
     }
 
-    // SAFETY GUARD 2: Deduplication — Check if THIS article was already posted
+    // SAFETY GUARD 2: Deduplication — Check if THIS article was already posted in DB
     if (supabaseUrl && supabaseKey && article.id) {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
@@ -222,16 +231,23 @@ async function publishToFacebook(article) {
             facebookPostedInCurrentRun = true;
             console.log(`[Facebook] Successfully published post to Facebook Page! Post ID: ${postFbId}`);
 
-            // Save persistent 2-hour rate-limit timestamp to Supabase Storage
+            // Save persistent 2-hour rate-limit timestamp + title deduplication to Supabase Storage
             if (supabaseUrl && supabaseKey) {
                 try {
                     const supabase = createClient(supabaseUrl, supabaseKey);
-                    const metaPayload = JSON.stringify({ lastPostTime: Date.now(), articleId: article.id, postId: postFbId });
+                    const metaPayload = JSON.stringify({
+                        lastPostTime: Date.now(),
+                        lastTitle: article.title,
+                        lastId: article.id,
+                        postId: postFbId
+                    });
                     await supabase.storage
                         .from('instagram-cards')
-                        .upload('fb_last_post.json', Buffer.from(metaPayload), { contentType: 'application/json', upsert: true });
-                    console.log('[Facebook Safety] Saved persistent rate-limit timestamp to Storage.');
-                } catch (_) {}
+                        .upload('fb_last_post_meta.jpg', Buffer.from(metaPayload), { contentType: 'image/jpeg', upsert: true });
+                    console.log('[Facebook Safety] Saved persistent rate-limit timestamp & deduplication metadata to Storage.');
+                } catch (saveErr) {
+                    console.warn('[Facebook Safety] Could not save timestamp to Storage:', saveErr.message);
+                }
 
                 try {
                     const supabase = createClient(supabaseUrl, supabaseKey);
