@@ -11,7 +11,31 @@
         }
     }
 
-    // 2. Create Banner container element
+    // 2. Check for explicit target container specified via attribute or URL param
+    var targetContainer = null;
+    var containerId = null;
+
+    if (currentScript) {
+        containerId = currentScript.getAttribute('data-container') || currentScript.getAttribute('data-id');
+        if (!containerId && currentScript.src && currentScript.src.indexOf('?') !== -1) {
+            var match = currentScript.src.match(/[?&](?:container|id)=([^&]+)/);
+            if (match) containerId = decodeURIComponent(match[1]);
+        }
+    }
+
+    if (containerId) {
+        targetContainer = document.getElementById(containerId);
+    }
+
+    // Standard container IDs fallback
+    if (!targetContainer) {
+        targetContainer = document.getElementById('pao-banner') || 
+                          document.getElementById('pao-banner-slot') || 
+                          document.getElementById('panathinaikos-banner') ||
+                          document.getElementById('panathinaikos-banner-container');
+    }
+
+    // 3. Create Banner container element
     var a = document.createElement('a');
     a.href = 'https://www.panathinaikosnews.gr';
     a.target = '_blank';
@@ -38,11 +62,14 @@
 
     a.appendChild(img);
 
-    // 3. Insert banner directly at the script location or fallback
-    if (currentScript && currentScript.parentNode) {
+    // 4. Insert banner directly into target container or at script location
+    if (targetContainer) {
+        targetContainer.appendChild(a);
+    } else if (currentScript && currentScript.parentNode && currentScript.parentNode !== document.body && currentScript.parentNode !== document.documentElement) {
+        currentScript.parentNode.insertBefore(a, currentScript);
+    } else if (currentScript && currentScript.parentNode) {
         currentScript.parentNode.insertBefore(a, currentScript);
     } else {
-        var container = document.getElementById('pao-banner-slot') || document.body;
-        container.appendChild(a);
+        document.body.appendChild(a);
     }
 })();
