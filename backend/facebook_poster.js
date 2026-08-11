@@ -91,27 +91,27 @@ async function publishToFacebook(article) {
         return null;
     }
 
-    // SAFETY GUARD 1: Rate Limiting — Ensure at least 2 hours have passed since the LAST Facebook post
+    // SAFETY GUARD 1: Persistent Rate Limiting — Ensure at least 2 hours have passed since the LAST Facebook post
     if (supabaseUrl && supabaseKey) {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
-            const { data: lastPosted, error: lpErr } = await supabase
-                .from('articles')
-                .select('updated_at, created_at')
-                .eq('facebook_posted', true)
-                .order('updated_at', { ascending: false })
-                .limit(1);
+            const { data: fileData, error: fileErr } = await supabase.storage
+                .from('instagram-cards')
+                .download('fb_last_post.json');
 
-            if (!lpErr && lastPosted && lastPosted.length > 0) {
-                const lastPostTime = new Date(lastPosted[0].updated_at || lastPosted[0].created_at).getTime();
-                const hoursSinceLastPost = (Date.now() - lastPostTime) / (1000 * 60 * 60);
-                if (hoursSinceLastPost < 2.0) {
-                    console.log(`[Facebook Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last post (min 2.0h required). Skipping to avoid Meta rate-limits.`);
-                    return null;
+            if (!fileErr && fileData) {
+                const text = await fileData.text();
+                const json = JSON.parse(text);
+                if (json && json.lastPostTime) {
+                    const hoursSinceLastPost = (Date.now() - json.lastPostTime) / (1000 * 60 * 60);
+                    if (hoursSinceLastPost < 2.0) {
+                        console.log(`[Facebook Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last Facebook post (min 2.0h required). Skipping.`);
+                        return null;
+                    }
                 }
             }
         } catch (rateErr) {
-            console.warn('[Facebook Safety Warning]: Could not verify rate limit:', rateErr.message);
+            console.warn('[Facebook Safety Warning]: Could not verify rate limit timestamp:', rateErr.message);
         }
     }
 
@@ -221,7 +221,18 @@ async function publishToFacebook(article) {
         if (postFbId) {
             facebookPostedInCurrentRun = true;
             console.log(`[Facebook] Successfully published post to Facebook Page! Post ID: ${postFbId}`);
-            if (supabaseUrl && supabaseKey && article.id) {
+
+            // Save persistent 2-hour rate-limit timestamp to Supabase Storage
+            if (supabaseUrl && supabaseKey) {
+                try {
+                    const supabase = createClient(supabaseUrl, supabaseKey);
+                    const metaPayload = JSON.stringify({ lastPostTime: Date.now(), articleId: article.id, postId: postFbId });
+                    await supabase.storage
+                        .from('instagram-cards')
+                        .upload('fb_last_post.json', Buffer.from(metaPayload), { contentType: 'application/json', upsert: true });
+                    console.log('[Facebook Safety] Saved persistent rate-limit timestamp to Storage.');
+                } catch (_) {}
+
                 try {
                     const supabase = createClient(supabaseUrl, supabaseKey);
                     await supabase.from('articles').update({ facebook_posted: true }).eq('id', article.id);
