@@ -160,7 +160,7 @@ async function createNewsCardBuffer(title, sourceImageUrl) {
         <g filter="url(#shadow)">
             <!-- Category Tag line -->
             <text x="90" y="${startY - 45}" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="24" fill="#10b981" letter-spacing="3">
-                ΠΑΝΑΘΗΝΑΪΚΟΣ NEWS
+                PANATHINAIKOS NEWS
             </text>
 
             <text font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="${fontSize}" fill="#ffffff" letter-spacing="-1.5">
