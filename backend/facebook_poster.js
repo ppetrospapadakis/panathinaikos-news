@@ -1,12 +1,12 @@
 /**
- * Facebook Auto-Poster for PanathinaikosNews.gr
- * Publishes news articles to the official Facebook Page via Meta Graph API.
- * Required because Meta Graph API does NOT auto-crosspost API-generated Instagram posts.
+ * Facebook Auto-Poster & News Card Generator for PanathinaikosNews.gr
+ * Publishes news cards to the official Facebook Page via Meta Graph API.
  */
 const FACEBOOK_AUTOPOST_ENABLED = true;
 
 const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
+const { createNewsCardBuffer } = require('./instagram_poster');
 
 /**
  * Publishes an article to the Facebook Page.
@@ -102,18 +102,63 @@ async function publishToFacebook(article) {
         if (catLower.includes('ποδόσφαιρο') || catLower.includes('football')) sportTags = '#PAOFC';
         else if (catLower.includes('μπάσκετ') || catLower.includes('basket')) sportTags = '#PAOBC';
 
-        const message = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο στο PanathinaikosNews.gr:\n${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
+        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο στο PanathinaikosNews.gr:\n${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
 
-        console.log(`[Facebook] Publishing post to Page ID ${pageId}...`);
-        const postRes = await axios.post(`https://graph.facebook.com/v19.0/${pageId}/feed`, null, {
-            params: {
-                message: message,
-                link: articleLink,
-                access_token: accessToken
+        // Generate News Card Image Buffer & Upload to Supabase Storage
+        let imageUrl = article.image_url || article.image;
+        try {
+            console.log(`[Facebook] Generating News Card image...`);
+            const cardBuffer = await createNewsCardBuffer(article.title, imageUrl);
+            if (supabaseUrl && supabaseKey) {
+                const supabase = createClient(supabaseUrl, supabaseKey);
+                const fileName = `fb_card_${article.id || Date.now()}.jpg`;
+                const { data, error } = await supabase.storage
+                    .from('instagram-cards')
+                    .upload(fileName, cardBuffer, { contentType: 'image/jpeg', upsert: true });
+
+                if (!error && data) {
+                    const { data: publicUrlData } = supabase.storage.from('instagram-cards').getPublicUrl(fileName);
+                    if (publicUrlData?.publicUrl) {
+                        imageUrl = publicUrlData.publicUrl;
+                    }
+                }
             }
-        });
+        } catch (cardErr) {
+            console.warn('[Facebook] News Card generation warning:', cardErr.message);
+        }
 
-        const postFbId = postRes.data?.id;
+        let postFbId = null;
+
+        // Method 1: Publish as Photo Post (with News Card image)
+        if (imageUrl && imageUrl.startsWith('http')) {
+            try {
+                console.log(`[Facebook] Publishing Photo post to Page ID ${pageId}...`);
+                const photoRes = await axios.post(`https://graph.facebook.com/v19.0/${pageId}/photos`, null, {
+                    params: {
+                        url: imageUrl,
+                        caption: caption,
+                        access_token: accessToken
+                    }
+                });
+                postFbId = photoRes.data?.post_id || photoRes.data?.id;
+            } catch (photoErr) {
+                console.warn('[Facebook] Photo post failed, trying link post fallback:', photoErr.response?.data?.error?.message || photoErr.message);
+            }
+        }
+
+        // Method 2: Fallback to Link Post if photo post did not run or failed
+        if (!postFbId) {
+            console.log(`[Facebook] Publishing Link post fallback to Page ID ${pageId}...`);
+            const feedRes = await axios.post(`https://graph.facebook.com/v19.0/${pageId}/feed`, null, {
+                params: {
+                    message: caption,
+                    link: articleLink,
+                    access_token: accessToken
+                }
+            });
+            postFbId = feedRes.data?.id;
+        }
+
         console.log(`[Facebook] Successfully published post to Facebook Page! Post ID: ${postFbId}`);
 
         if (postFbId && supabaseUrl && supabaseKey && article.id) {
