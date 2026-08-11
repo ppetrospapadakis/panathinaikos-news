@@ -6,7 +6,7 @@
  * ║  MASTER TOGGLE — change false → true to re-enable       ║
  * ╚══════════════════════════════════════════════════════════╝
  */
-const INSTAGRAM_AUTOPOST_ENABLED = false;
+const INSTAGRAM_AUTOPOST_ENABLED = true;
 
 const sharp = require('sharp');
 const axios = require('axios');
@@ -216,7 +216,32 @@ async function publishToInstagram(article) {
         return null;
     }
 
-    // Deduplication Guard: Check if article was already posted to Instagram
+    // SAFETY GUARD 1: Rate Limiting — Ensure at least 2 hours have passed since the LAST Instagram post
+    // This protects against Meta's "unusual activity" bot flags and spam rate-limits.
+    if (supabaseUrl && supabaseKey) {
+        try {
+            const supabase = createClient(supabaseUrl, supabaseKey);
+            const { data: lastPosted } = await supabase
+                .from('articles')
+                .select('updated_at, created_at')
+                .eq('instagram_posted', true)
+                .order('updated_at', { ascending: false })
+                .limit(1);
+
+            if (lastPosted && lastPosted.length > 0) {
+                const lastPostTime = new Date(lastPosted[0].updated_at || lastPosted[0].created_at).getTime();
+                const hoursSinceLastPost = (Date.now() - lastPostTime) / (1000 * 60 * 60);
+                if (hoursSinceLastPost < 2.0) {
+                    console.log(`[Instagram Safety] Only ${hoursSinceLastPost.toFixed(1)}h passed since last post (min 2.0h required). Skipping to avoid Meta spam flags.`);
+                    return null;
+                }
+            }
+        } catch (rateErr) {
+            console.warn('[Instagram Safety Warning]: Could not verify rate limit:', rateErr.message);
+        }
+    }
+
+    // SAFETY GUARD 2: Deduplication — Check if THIS article was already posted
     if (supabaseUrl && supabaseKey && article.id) {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
@@ -273,7 +298,7 @@ async function publishToInstagram(article) {
         if (catLower.includes('ποδόσφαιρο') || catLower.includes('football')) sportTags = '#PAOFC';
         else if (catLower.includes('μπάσκετ') || catLower.includes('basket')) sportTags = '#PAOBC';
 
-        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο: ${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
+        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο στο bio & στο panathinaikosnews.gr\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
 
         console.log(`[Instagram] Creating container on Meta Graph API...`);
         const containerRes = await axios.post(`https://graph.facebook.com/v19.0/${igUserId}/media`, null, {
