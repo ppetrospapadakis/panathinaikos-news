@@ -142,6 +142,8 @@ module.exports = async (req, res) => {
             xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
 
             for (const art of (articles || [])) {
+                // Skip placeholder/error articles — they must never appear in Google News sitemap
+                if (!art.title || art.title.startsWith('[SKIPPED]') || art.title.startsWith('[DELETED]') || art.title.startsWith('[ERROR]')) continue;
                 const cleanCat = getCategoryCleanName(art.category);
                 const cleanSlug = slugify(art.title);
                 const shortId = (art.id || '').substring(0, 8);
@@ -215,6 +217,8 @@ module.exports = async (req, res) => {
         }
 
         for (const art of (articles || [])) {
+            // Skip placeholder/error articles — they must never appear in the sitemap
+            if (!art.title || art.title.startsWith('[SKIPPED]') || art.title.startsWith('[DELETED]') || art.title.startsWith('[ERROR]')) continue;
             const cleanCat = getCategoryCleanName(art.category);
             const cleanSlug = slugify(art.title);
             const shortId = (art.id || '').substring(0, 8);
