@@ -2096,6 +2096,7 @@ async function main() {
                     id: inserted[0].id,
                     title: dbPayload.title,
                     summary: dbPayload.summary,
+                    bullets: dbPayload.bullets,
                     category: dbPayload.category,
                     source: target.name,
                     is_official: target.name.toLowerCase().includes('official') || target.name.toLowerCase().includes('επίσημ'),
@@ -2130,7 +2131,7 @@ async function main() {
     if (!isDryRun && db) {
         try {
             const { data: unposted } = await db.from('articles')
-                .select('id, title, summary, category, image_url, source_url, created_at')
+                .select('id, title, summary, bullets, category, image_url, source_url, created_at')
                 .eq('instagram_posted', false)
                 .order('created_at', { ascending: false })
                 .limit(5);
@@ -2146,6 +2147,7 @@ async function main() {
                         id: eligible.id,
                         title: eligible.title,
                         summary: eligible.summary,
+                        bullets: eligible.bullets,
                         category: eligible.category,
                         source: 'CatchUp',
                         is_official: false,
@@ -2164,7 +2166,7 @@ async function main() {
             let unpostedFb = null;
             try {
                 const { data, error } = await db.from('articles')
-                    .select('id, title, summary, category, image_url, source_url, created_at')
+                    .select('id, title, summary, bullets, category, image_url, source_url, created_at')
                     .or('facebook_posted.eq.false,facebook_posted.is.null')
                     .order('created_at', { ascending: false })
                     .limit(5);
@@ -2175,7 +2177,7 @@ async function main() {
 
             if (!unpostedFb || unpostedFb.length === 0) {
                 const { data } = await db.from('articles')
-                    .select('id, title, summary, category, image_url, source_url, created_at')
+                    .select('id, title, summary, bullets, category, image_url, source_url, created_at')
                     .order('created_at', { ascending: false })
                     .limit(5);
                 unpostedFb = data;
@@ -2192,6 +2194,7 @@ async function main() {
                         id: eligibleFb.id,
                         title: eligibleFb.title,
                         summary: eligibleFb.summary,
+                        bullets: eligibleFb.bullets,
                         category: eligibleFb.category,
                         source: 'CatchUp',
                         is_official: false,

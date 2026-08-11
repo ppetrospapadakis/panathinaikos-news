@@ -136,13 +136,24 @@ async function publishToFacebook(article) {
             ? (article.url.startsWith('http') ? article.url : `https://www.panathinaikosnews.gr${article.url}`)
             : 'https://www.panathinaikosnews.gr';
 
-        let fullSummary = article.summary ? article.summary.trim() : '';
-        if (fullSummary.length > 400) {
-            const truncated = fullSummary.substring(0, 400);
-            const lastSpace = truncated.lastIndexOf(' ');
-            fullSummary = (lastSpace > 100 ? truncated.substring(0, lastSpace) : truncated) + '...';
-        } else if (fullSummary && !/[.!?…]$/.test(fullSummary)) {
-            fullSummary += '...';
+        let summaryText = '';
+        let parsedBullets = Array.isArray(article.bullets) ? article.bullets : [];
+        if (typeof article.bullets === 'string') {
+            try { parsedBullets = JSON.parse(article.bullets); } catch (_) {}
+        }
+
+        if (Array.isArray(parsedBullets) && parsedBullets.length > 0) {
+            summaryText = parsedBullets.map(b => `• ${b.trim()}`).join('\n\n');
+        } else if (article.summary) {
+            let s = article.summary.trim();
+            if (s.length > 450) {
+                const truncated = s.substring(0, 450);
+                const lastSpace = truncated.lastIndexOf(' ');
+                s = (lastSpace > 100 ? truncated.substring(0, lastSpace) : truncated) + '...';
+            } else if (s && !/[.!?…]$/.test(s)) {
+                s += '...';
+            }
+            summaryText = s;
         }
 
         const catLower = (article.category || '').toLowerCase();
@@ -150,7 +161,7 @@ async function publishToFacebook(article) {
         if (catLower.includes('ποδόσφαιρο') || catLower.includes('football')) sportTags = '#PAOFC';
         else if (catLower.includes('μπάσκετ') || catLower.includes('basket')) sportTags = '#PAOBC';
 
-        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο στο PanathinaikosNews.gr:\n${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
+        const caption = `☘️ ${article.title}\n\n${summaryText}\n\n🔗 Διαβάστε το πλήρες άρθρο στο PanathinaikosNews.gr:\n${articleLink}\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
 
         // Generate News Card Image Buffer & Upload to Supabase Storage
         let imageUrl = article.image_url || article.image;
