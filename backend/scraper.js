@@ -42,6 +42,7 @@ const { createClient } = require('@supabase/supabase-js');
 const crypto  = require('crypto');
 require('dotenv').config();
 const { publishToInstagram } = require('./instagram_poster');
+const { publishToFacebook } = require('./facebook_poster');
 
 // ─── HTTP client ───────────────────────────────────────────────────────────────
 // Uses full Chrome 136 browser fingerprint to avoid anti-bot detection.
@@ -2106,6 +2107,11 @@ async function main() {
                 } catch (igErr) {
                     console.error('[Instagram] Publish error:', igErr.message);
                 }
+                try {
+                    await publishToFacebook(articleForIg);
+                } catch (fbErr) {
+                    console.error('[Facebook] Publish error:', fbErr.message);
+                }
             }
             } catch (artLoopErr) {
                 console.error(`[ARTICLE ERROR] Exception processing ${articleUrl}: ${artLoopErr.message}`);
@@ -2120,7 +2126,7 @@ async function main() {
         }
     }
 
-    // Instagram Catch-Up Check: Try to publish any unposted eligible article from the last 24 hours
+    // Social Media Catch-Up Check: Try to publish any unposted eligible article from the last 24 hours
     if (!isDryRun && db) {
         try {
             const { data: unposted } = await db.from('articles')
@@ -2151,6 +2157,52 @@ async function main() {
             }
         } catch (igErr) {
             console.warn('[Instagram Catch-Up Warning]:', igErr.message);
+        }
+
+        // Facebook Catch-Up Check
+        try {
+            let unpostedFb = null;
+            try {
+                const { data, error } = await db.from('articles')
+                    .select('id, title, summary, category, image_url, source_url, created_at')
+                    .or('facebook_posted.eq.false,facebook_posted.is.null')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                if (!error && data && data.length > 0) {
+                    unpostedFb = data;
+                }
+            } catch (_) {}
+
+            if (!unpostedFb || unpostedFb.length === 0) {
+                const { data } = await db.from('articles')
+                    .select('id, title, summary, category, image_url, source_url, created_at')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                unpostedFb = data;
+            }
+
+            if (unpostedFb && unpostedFb.length > 0) {
+                const eligibleFb = unpostedFb.find(a => {
+                    const cat = (a.category || '').toLowerCase();
+                    return !cat.includes('ερασιτέχνης') && !cat.includes('official');
+                });
+                if (eligibleFb) {
+                    console.log(`[Facebook Catch-Up] Attempting auto-post for unposted article: "${eligibleFb.title}"`);
+                    const articleForFb = {
+                        id: eligibleFb.id,
+                        title: eligibleFb.title,
+                        summary: eligibleFb.summary,
+                        category: eligibleFb.category,
+                        source: 'CatchUp',
+                        is_official: false,
+                        image_url: eligibleFb.image_url,
+                        url: getArticleSlugUrl(eligibleFb.category, eligibleFb.title, eligibleFb.id)
+                    };
+                    await publishToFacebook(articleForFb);
+                }
+            }
+        } catch (fbErr) {
+            console.warn('[Facebook Catch-Up Warning]:', fbErr.message);
         }
     }
 

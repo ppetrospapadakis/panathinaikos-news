@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS public.articles (
 -- Ensure columns exist (for migrating existing database tables)
 ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS group_id UUID;
 ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS bullets TEXT[];
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS instagram_posted BOOLEAN DEFAULT false;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS facebook_posted BOOLEAN DEFAULT false;
 
 -- 2. Create indices for optimized query performance
 CREATE INDEX IF NOT EXISTS idx_articles_category ON public.articles(category);
