@@ -24,13 +24,13 @@ async function publishToFacebook(article) {
         return null;
     }
 
-    const pageId = process.env.FACEBOOK_PAGE_ID || '1298518146670029';
-    const accessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN || process.env.FACEBOOK_ACCESS_TOKEN;
+    const pageId = process.env.FACEBOOK_PAGE_ID || process.env.FB_PAGE_ID || '1298518146670029';
+    const accessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN || process.env.FACEBOOK_ACCESS_TOKEN || process.env.FB_PAGE_ACCESS_TOKEN || process.env.FB_ACCESS_TOKEN || process.env.FACEBOOK_TOKEN;
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 
     if (!pageId || !accessToken) {
-        console.log('[Facebook] FACEBOOK_PAGE_ID or FACEBOOK_PAGE_ACCESS_TOKEN / FACEBOOK_ACCESS_TOKEN not set in environment. Skipping auto-post.');
+        console.log('[Facebook] Facebook Page ID or Access Token not found in environment secrets. Skipping auto-post.');
         return null;
     }
 
@@ -49,14 +49,14 @@ async function publishToFacebook(article) {
     if (supabaseUrl && supabaseKey) {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
-            const { data: lastPosted } = await supabase
+            const { data: lastPosted, error: lpErr } = await supabase
                 .from('articles')
                 .select('updated_at, created_at')
                 .eq('facebook_posted', true)
                 .order('updated_at', { ascending: false })
                 .limit(1);
 
-            if (lastPosted && lastPosted.length > 0) {
+            if (!lpErr && lastPosted && lastPosted.length > 0) {
                 const lastPostTime = new Date(lastPosted[0].updated_at || lastPosted[0].created_at).getTime();
                 const hoursSinceLastPost = (Date.now() - lastPostTime) / (1000 * 60 * 60);
                 if (hoursSinceLastPost < 2.0) {
@@ -73,8 +73,8 @@ async function publishToFacebook(article) {
     if (supabaseUrl && supabaseKey && article.id) {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
-            const { data: dbArt } = await supabase.from('articles').select('facebook_posted').eq('id', article.id).single();
-            if (dbArt && dbArt.facebook_posted) {
+            const { data: dbArt, error: dedupErr } = await supabase.from('articles').select('facebook_posted').eq('id', article.id).single();
+            if (!dedupErr && dbArt && dbArt.facebook_posted) {
                 console.log(`[Facebook] Article id=${article.id} already posted to Facebook. Skipping.`);
                 return null;
             }
