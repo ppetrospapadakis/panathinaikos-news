@@ -298,7 +298,7 @@ async function publishToInstagram(article) {
         if (catLower.includes('ποδόσφαιρο') || catLower.includes('football')) sportTags = '#PAOFC';
         else if (catLower.includes('μπάσκετ') || catLower.includes('basket')) sportTags = '#PAOBC';
 
-        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο στο panathinaikosnews.gr\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
+        const caption = `☘️ ${article.title}\n\n${fullSummary}\n\n🔗 Διαβάστε το πλήρες άρθρο στο PanathinaikosNews.gr\n\n#Panathinaikos #PAO #PanathinaikosNews ${sportTags}`;
 
         console.log(`[Instagram] Creating container on Meta Graph API...`);
         const containerRes = await axios.post(`https://graph.facebook.com/v19.0/${igUserId}/media`, null, {
