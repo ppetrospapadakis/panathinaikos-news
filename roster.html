@@ -395,18 +395,83 @@
         ];
 
         // ─────────────────────────────────────────────────────────────────
-        // RENDER HELPERS
+        // RENDER HELPERS & POPUP MODAL
         // ─────────────────────────────────────────────────────────────────
+        window.openPlayerInfoModal = function(playerData, sport) {
+            if (!playerData) return;
+            
+            let name = '', num = '', pos = '', nationality = '', birthDate = '', height = '';
+            
+            if (Array.isArray(playerData)) {
+                name = playerData[3] || '';
+                num = playerData[4] !== undefined && playerData[4] !== null ? playerData[4] : '';
+                pos = playerData[5] || '';
+                nationality = playerData[6] || '';
+                birthDate = playerData[7] || '';
+                height = playerData[8] || '';
+            } else if (typeof playerData === 'object') {
+                name = playerData.name || playerData[3] || '';
+                num = playerData.num || playerData.number || playerData[4] || '';
+                pos = playerData.pos || playerData.position || playerData[5] || '';
+                nationality = playerData.nationality || playerData.national || playerData[6] || '';
+                birthDate = playerData.birthDate || playerData.dob || playerData[7] || '';
+                height = playerData.height || playerData[8] || '';
+            }
+            
+            let birthDateDisplay = birthDate.trim();
+            if (birthDateDisplay) {
+                const yearMatch = birthDateDisplay.match(/\b(19\d\d|20\d\d)\b/);
+                if (yearMatch) {
+                    const birthYear = parseInt(yearMatch[1], 10);
+                    const currentYear = new Date().getFullYear();
+                    const age = currentYear - birthYear;
+                    if (age > 12 && age < 55) {
+                        birthDateDisplay += ` (${age} ετών)`;
+                    }
+                }
+            }
+            
+            const isBasketball = sport === 'basketball';
+            
+            document.getElementById('pinfo-num').textContent = num !== '' ? num : '—';
+            document.getElementById('pinfo-pos').textContent = pos !== '' ? pos : '—';
+            document.getElementById('pinfo-name').textContent = name || 'Παίκτης';
+            document.getElementById('pinfo-sport-tag').textContent = isBasketball ? 'Καλαθοσφαιριστής' : 'Ποδοσφαιριστής';
+            
+            document.getElementById('pinfo-nationality').textContent = nationality.trim() || '—';
+            document.getElementById('pinfo-birthdate').textContent = birthDateDisplay || '—';
+            document.getElementById('pinfo-height').textContent = height.trim() || '—';
+            
+            const modal = document.getElementById('player-info-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        };
+
+        window.closePlayerInfoModal = function(e) {
+            if (e && e.target && e.target.id !== 'player-info-modal' && e.type === 'click' && !e.target.closest('#player-info-modal button')) {
+                return;
+            }
+            const modal = document.getElementById('player-info-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
         function renderPitchPlayers(containerId, players) {
             const container = document.getElementById(containerId);
             if (!container) return;
-            // Remove old tokens
             container.querySelectorAll('.player-token').forEach(el => el.remove());
-            players.forEach(([left, top, initials, name, num, pos]) => {
+            players.forEach((player) => {
+                const left = player[0];
+                const top = player[1];
+                const initials = player[2];
+                const name = player[3];
+                const num = player[4];
+                const pos = player[5];
                 const token = document.createElement('div');
-                token.className = 'player-token';
+                token.className = 'player-token cursor-pointer hover:scale-110 transition-transform';
                 token.style.left = left + '%';
                 token.style.top = top + '%';
+                token.onclick = () => openPlayerInfoModal(player, 'football');
                 token.innerHTML = `
                     <div class="avatar" style="position:relative;">
                         ${num}
@@ -441,9 +506,10 @@
                     }
                 }
                 const token = document.createElement('div');
-                token.className = 'bball-token';
+                token.className = 'bball-token cursor-pointer hover:scale-110 transition-transform';
                 token.style.left = left + '%';
                 token.style.top = top + '%';
+                token.onclick = () => openPlayerInfoModal(player, 'basketball');
                 token.innerHTML = `
                     <div class="avatar" style="position:relative;">
                         ${num}
@@ -457,15 +523,27 @@
         function renderSquadList(containerId, players) {
             const container = document.getElementById(containerId);
             if (!container) return;
-            container.innerHTML = players.map(p => `
-            <div class="card-hover flex items-center gap-3 p-2.5 bg-surface-container rounded-xl border border-outline-variant/20">
-                <div class="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary shrink-0 text-xs">${p.initials}</div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-sm leading-tight">${p.name}</p>
-                    <p class="text-xs text-on-surface-variant mt-0.5">${p.detail || p.pos}</p>
-                </div>
-                <span class="px-2 py-0.5 bg-surface-container-high rounded-full text-[10px] font-medium text-on-surface-variant uppercase">${p.pos || p.num || ''}</span>
-            </div>`).join('');
+            const sport = containerId.includes('basketball') ? 'basketball' : 'football';
+            window.squadListStorage = window.squadListStorage || {};
+            window.squadListStorage[containerId] = players;
+            
+            container.innerHTML = players.map((p, idx) => {
+                const name = p.name || p[3] || '';
+                const num = p.num || p.number || p[4] || '';
+                const pos = p.pos || p.position || p[5] || p.initials || '';
+                const initials = p.initials || (name ? name.substring(0, 3).toUpperCase() : 'PAO');
+                const detail = p.detail || pos;
+
+                return `
+                <div onclick="openPlayerInfoModal(window.squadListStorage['${containerId}'][${idx}], '${sport}')" class="card-hover flex items-center gap-3 p-2.5 bg-surface-container rounded-xl border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-all">
+                    <div class="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-primary shrink-0 text-xs">${num || initials}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm leading-tight text-on-surface truncate">${name}</p>
+                        <p class="text-xs text-on-surface-variant mt-0.5 truncate">${detail}</p>
+                    </div>
+                    <span class="px-2 py-0.5 bg-surface-container-high rounded-full text-[10px] font-medium text-on-surface-variant uppercase shrink-0">${pos}</span>
+                </div>`;
+            }).join('');
         }
 
 
@@ -1222,6 +1300,60 @@
     // Direct external Google News link active for all users (modal disabled)
 })();
 </script>
+
+<!-- ── PLAYER INFO POPUP MODAL ── -->
+<div id="player-info-modal" class="fixed inset-0 bg-black/80 z-[100] backdrop-blur-md flex items-center justify-center p-4 hidden animate-fade-in" onclick="closePlayerInfoModal(event)">
+    <div class="bg-surface-container border border-outline-variant/40 rounded-3xl max-w-sm w-full p-6 space-y-5 shadow-2xl relative" onclick="event.stopPropagation()">
+        <!-- Close Button -->
+        <button onclick="closePlayerInfoModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface-variant flex items-center justify-center hover:text-primary transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+
+        <!-- Player Header -->
+        <div class="flex items-center gap-4 pt-1">
+            <div class="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-xl shadow-lg relative shrink-0">
+                <span id="pinfo-num">77</span>
+                <span id="pinfo-pos" class="absolute -bottom-1 -right-1 bg-primary text-on-primary text-[10px] font-extrabold px-1.5 py-0.5 rounded-md uppercase shadow">LB</span>
+            </div>
+            <div class="min-w-0">
+                <h3 id="pinfo-name" class="font-extrabold text-lg sm:text-xl text-on-surface truncate">Kyriakopoulos G.</h3>
+                <span id="pinfo-sport-tag" class="text-[11px] font-bold text-primary uppercase tracking-widest">Ποδοσφαιριστής</span>
+            </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 gap-2.5 pt-2 border-t border-outline-variant/20">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+                <div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
+                    <span class="material-symbols-outlined text-primary text-[18px]">flag</span>
+                    <span>Εθνικότητα</span>
+                </div>
+                <span id="pinfo-nationality" class="text-xs font-extrabold text-on-surface">Ελλάδα</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+                <div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
+                    <span class="material-symbols-outlined text-primary text-[18px]">cake</span>
+                    <span>Ημερομηνία Γέννησης</span>
+                </div>
+                <span id="pinfo-birthdate" class="text-xs font-extrabold text-on-surface">12/05/1996</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+                <div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
+                    <span class="material-symbols-outlined text-primary text-[18px]">height</span>
+                    <span>Ύψος</span>
+                </div>
+                <span id="pinfo-height" class="text-xs font-extrabold text-on-surface">1.85μ</span>
+            </div>
+        </div>
+
+        <button onclick="closePlayerInfoModal()" class="w-full py-2.5 bg-primary/20 hover:bg-primary/30 border border-primary/40 text-primary font-extrabold text-xs rounded-xl transition-all cursor-pointer">
+            Κλείσιμο
+        </button>
+    </div>
+</div>
+
 <script src="/roster_lineup.js?v=2"></script>
 </body>
 </html>

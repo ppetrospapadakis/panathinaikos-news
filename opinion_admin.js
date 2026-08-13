@@ -1416,13 +1416,22 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     const player = rosterList[idx];
     if (!player) return;
     
-    document.getElementById('popover-initials').value = player[2] || '';
+    const initEl = document.getElementById('popover-initials');
+    if (initEl) initEl.value = player[2] || '';
     document.getElementById('popover-name').value = player[3] || '';
     
     const labelEl = document.getElementById('popover-badge-label');
     const badgeInput = document.getElementById('popover-badge');
     const extraWrapper = document.getElementById('popover-extra-wrapper');
     const extraInput = document.getElementById('popover-extra-input');
+    
+    const natInput = document.getElementById('popover-nationality');
+    const dobInput = document.getElementById('popover-birthdate');
+    const hgtInput = document.getElementById('popover-height');
+    
+    if (natInput) natInput.value = player[6] || '';
+    if (dobInput) dobInput.value = player[7] || '';
+    if (hgtInput) hgtInput.value = player[8] || '';
     
     labelEl.textContent = 'Νούμερο';
     
@@ -1479,17 +1488,29 @@ function savePopoverChanges() {
     const rosterList = currentRoster[sport][rosterType];
     if (!rosterList[idx]) return;
     
-    const newInitials = document.getElementById('popover-initials').value.trim() || 'ΠΑΙ';
+    const initEl = document.getElementById('popover-initials');
+    const newInitials = initEl ? initEl.value.trim() : (rosterList[idx][2] || '');
     const newName = document.getElementById('popover-name').value.trim() || 'Παίκτης';
     const newBadge = document.getElementById('popover-badge').value.trim() || '';
     
     const extraInput = document.getElementById('popover-extra-input');
     const newPos = extraInput ? extraInput.value.trim() : '';
 
+    const natInput = document.getElementById('popover-nationality');
+    const dobInput = document.getElementById('popover-birthdate');
+    const hgtInput = document.getElementById('popover-height');
+
+    const newNat = natInput ? natInput.value.trim() : '';
+    const newDob = dobInput ? dobInput.value.trim() : '';
+    const newHgt = hgtInput ? hgtInput.value.trim() : '';
+
     rosterList[idx][2] = newInitials;
     rosterList[idx][3] = newName;
     rosterList[idx][4] = newBadge;
     rosterList[idx][5] = newPos;
+    rosterList[idx][6] = newNat;
+    rosterList[idx][7] = newDob;
+    rosterList[idx][8] = newHgt;
     
     const rawId = `roster-${sport}-${rosterType}`;
     const textarea = document.getElementById(rawId);
