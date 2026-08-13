@@ -430,41 +430,52 @@
         loadPhotoMap(); // preload on page init
 
 
-        function normalizeForPhoto(str) {
-            return (str || '')
-                .toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
+        function getPlayerKeyCandidates(name) {
+            if (!name) return [];
+            let cleaned = String(name).replace(/\(.*?\)/g, '');
+            cleaned = cleaned.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            cleaned = cleaned.replace(/[^a-z0-9\s-]/g, '').trim();
+            if (!cleaned) return [];
+
+            const words = cleaned.split(/\s+/).filter(Boolean);
+            const multiCharWords = words.filter(w => w.length > 1);
+            const validWords = multiCharWords.length > 0 ? multiCharWords : words;
+
+            const candidates = [];
+            const surname = validWords[validWords.length - 1];
+            if (surname && !candidates.includes(surname)) candidates.push(surname);
+
+            const fullHyphen = validWords.join('-');
+            if (fullHyphen && !candidates.includes(fullHyphen)) candidates.push(fullHyphen);
+
+            validWords.forEach(w => {
+                if (!candidates.includes(w)) candidates.push(w);
+            });
+
+            if (validWords.length >= 2) {
+                const last2 = validWords.slice(-2).join('-');
+                if (!candidates.includes(last2)) candidates.push(last2);
+            }
+
+            return candidates;
         }
 
         function resolvePlayerPhoto(name, sport) {
             if (!name) return null;
             const sp = sport || 'football';
-            const norm = normalizeForPhoto(name);
-            const parts = norm.split(' ').filter(p => p.length > 1);
-            const surname = parts.length ? parts[parts.length - 1] : norm;
+            const candidates = getPlayerKeyCandidates(name);
 
             // 1. Check Supabase uploaded photos first
-            const supaKey = `${sp}/${surname}`;
-            if (_supaPhotos[supaKey]) return _supaPhotos[supaKey];
-            if (_supaPhotos[`${sp}/${norm}`]) return _supaPhotos[`${sp}/${norm}`];
+            for (const c of candidates) {
+                const supaKey = `${sp}/${c}`;
+                if (_supaPhotos[supaKey]) return _supaPhotos[supaKey];
+            }
 
             // 2. Fallback to local JSON map
             if (_photoMap) {
                 const folder = sp === 'basketball' ? '/images/roster/basketball/' : '/images/roster/football/';
-                if (_photoMap[norm]) return folder + _photoMap[norm];
-                for (let i = parts.length - 1; i >= 0; i--) {
-                    if (_photoMap[parts[i]]) return folder + _photoMap[parts[i]];
-                }
-                const hyphenated = parts.join('-');
-                if (_photoMap[hyphenated]) return folder + _photoMap[hyphenated];
-                if (parts.length >= 2) {
-                    const last2 = parts.slice(-2).join('-');
-                    if (_photoMap[last2]) return folder + _photoMap[last2];
-                    const last2s = parts.slice(-2).join(' ');
-                    if (_photoMap[last2s]) return folder + _photoMap[last2s];
+                for (const c of candidates) {
+                    if (_photoMap[c]) return folder + _photoMap[c];
                 }
             }
             return null;

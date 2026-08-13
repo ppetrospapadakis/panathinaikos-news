@@ -1412,14 +1412,34 @@ let selectedPlayerInfo = null;
 const _adminPhotoCache = {}; // key: "sport/normalizedName" → dataURL
 let _adminPhotosLoaded = false;
 
-function normalizePlayerKey(name) {
-    return (name || '')
-        .toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9\s]/g, '')
-        .trim()
-        .split(/\s+/)
-        .pop(); // use last word (surname)
+function getPlayerKeyCandidates(name) {
+    if (!name) return [];
+    let cleaned = String(name).replace(/\(.*?\)/g, '');
+    cleaned = cleaned.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    cleaned = cleaned.replace(/[^a-z0-9\s-]/g, '').trim();
+    if (!cleaned) return [];
+
+    const words = cleaned.split(/\s+/).filter(Boolean);
+    const multiCharWords = words.filter(w => w.length > 1);
+    const validWords = multiCharWords.length > 0 ? multiCharWords : words;
+
+    const candidates = [];
+    const surname = validWords[validWords.length - 1];
+    if (surname && !candidates.includes(surname)) candidates.push(surname);
+
+    const fullHyphen = validWords.join('-');
+    if (fullHyphen && !candidates.includes(fullHyphen)) candidates.push(fullHyphen);
+
+    validWords.forEach(w => {
+        if (!candidates.includes(w)) candidates.push(w);
+    });
+
+    if (validWords.length >= 2) {
+        const last2 = validWords.slice(-2).join('-');
+        if (!candidates.includes(last2)) candidates.push(last2);
+    }
+
+    return candidates;
 }
 
 async function loadAllPlayerPhotos() {
@@ -1443,9 +1463,9 @@ async function loadAllPlayerPhotos() {
 }
 
 async function savePlayerPhoto(sport, playerName, dataUrl) {
-    const key = normalizePlayerKey(playerName);
-    const sourceUrl = `photo://${sport}/${key}`;
-    const cacheKey = `${sport}/${key}`;
+    const candidates = getPlayerKeyCandidates(playerName);
+    const primaryKey = candidates[0] || 'player';
+    const sourceUrl = `photo://${sport}/${primaryKey}`;
 
     const { error } = await db.from('articles').upsert({
         source_url: sourceUrl,
@@ -1459,13 +1479,21 @@ async function savePlayerPhoto(sport, playerName, dataUrl) {
     }, { onConflict: 'source_url' });
 
     if (error) throw error;
-    _adminPhotoCache[cacheKey] = dataUrl;
-    return cacheKey;
+
+    candidates.forEach(c => {
+        _adminPhotoCache[`${sport}/${c}`] = dataUrl;
+    });
+    return primaryKey;
 }
 
 function getPlayerPhotoUrl(sport, playerName) {
-    const key = normalizePlayerKey(playerName);
-    return _adminPhotoCache[`${sport}/${key}`] || null;
+    const candidates = getPlayerKeyCandidates(playerName);
+    for (const c of candidates) {
+        if (_adminPhotoCache[`${sport}/${c}`]) {
+            return _adminPhotoCache[`${sport}/${c}`];
+        }
+    }
+    return null;
 }
 
 function compressImageToDataUrl(file, maxSize = 300) {
