@@ -450,10 +450,7 @@
             }
         };
 
-        window.closePlayerInfoModal = function(e) {
-            if (e && e.target && e.target.id !== 'player-info-modal' && e.type === 'click' && !e.target.closest('#player-info-modal button')) {
-                return;
-            }
+        window.closePlayerInfoModal = function() {
             const modal = document.getElementById('player-info-modal');
             if (modal) modal.classList.add('hidden');
         };
@@ -1312,56 +1309,53 @@
 })();
 </script>
 
-<!-- ── PLAYER INFO POPUP MODAL ── -->
-<div id="player-info-modal" class="fixed inset-0 bg-black/80 z-[100] backdrop-blur-md flex items-center justify-center p-4 hidden animate-fade-in" onclick="closePlayerInfoModal(event)">
-    <div class="bg-surface-container border border-outline-variant/40 rounded-3xl max-w-sm w-full p-6 space-y-5 shadow-2xl relative" onclick="event.stopPropagation()">
-        <!-- Close Button -->
-        <button onclick="closePlayerInfoModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface-variant flex items-center justify-center hover:text-primary transition-all cursor-pointer">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-        </button>
-
-        <!-- Player Header -->
-        <div class="flex items-center gap-4 pt-1">
-            <div class="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-xl shadow-lg relative shrink-0">
+<!-- ── PLAYER INFO POPUP ── -->
+<div id="player-info-modal" class="hidden" style="position:fixed;bottom:20px;right:20px;z-index:200;width:272px;">
+    <div style="background:rgba(16,20,26,0.94);border:1px solid rgba(74,222,128,0.22);border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(74,222,128,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden;animation:pinfo-slide-in 0.22s cubic-bezier(.22,1,.36,1);">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:11px;padding:13px 13px 11px;border-bottom:1px solid rgba(255,255,255,0.07);">
+            <div style="width:42px;height:42px;border-radius:11px;background:rgba(74,222,128,0.14);border:1px solid rgba(74,222,128,0.32);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#4ade80;flex-shrink:0;">
                 <span id="pinfo-num">77</span>
             </div>
-            <div class="min-w-0">
-                <h3 id="pinfo-name" class="font-extrabold text-lg sm:text-xl text-on-surface truncate">Kyriakopoulos G.</h3>
+            <div style="flex:1;min-width:0;">
+                <div id="pinfo-name" style="font-weight:800;font-size:14px;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Kyriakopoulos G.</div>
+            </div>
+            <button onclick="closePlayerInfoModal()" style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color 0.15s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='#64748b'">
+                <span class="material-symbols-outlined" style="font-size:15px;">close</span>
+            </button>
+        </div>
+        <!-- Info rows -->
+        <div style="padding:10px 13px 13px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:11px;font-weight:600;">
+                    <span class="material-symbols-outlined" style="font-size:14px;color:#4ade80;">flag</span>
+                    Εθνικότητα
+                </div>
+                <span id="pinfo-nationality" style="font-size:12px;font-weight:700;color:#e2e8f0;">—</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:11px;font-weight:600;">
+                    <span class="material-symbols-outlined" style="font-size:14px;color:#4ade80;">cake</span>
+                    Ημ. Γέννησης
+                </div>
+                <span id="pinfo-birthdate" style="font-size:12px;font-weight:700;color:#e2e8f0;">—</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:11px;font-weight:600;">
+                    <span class="material-symbols-outlined" style="font-size:14px;color:#4ade80;">height</span>
+                    Ύψος
+                </div>
+                <span id="pinfo-height" style="font-size:12px;font-weight:700;color:#e2e8f0;">—</span>
             </div>
         </div>
-
-        <!-- Info Grid -->
-        <div class="grid grid-cols-1 gap-2.5 pt-2 border-t border-outline-variant/20">
-            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
-                <div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
-                    <span class="material-symbols-outlined text-primary text-[18px]">flag</span>
-                    <span>Εθνικότητα</span>
-                </div>
-                <span id="pinfo-nationality" class="text-xs font-extrabold text-on-surface">Ελλάδα</span>
-            </div>
-
-            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
-                <div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
-                    <span class="material-symbols-outlined text-primary text-[18px]">cake</span>
-                    <span>Ημερομηνία Γέννησης</span>
-                </div>
-                <span id="pinfo-birthdate" class="text-xs font-extrabold text-on-surface">12/05/1996</span>
-            </div>
-
-            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
-                <div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
-                    <span class="material-symbols-outlined text-primary text-[18px]">height</span>
-                    <span>Ύψος</span>
-                </div>
-                <span id="pinfo-height" class="text-xs font-extrabold text-on-surface">1.85μ</span>
-            </div>
-        </div>
-
-        <button onclick="closePlayerInfoModal()" class="w-full py-2.5 bg-primary/20 hover:bg-primary/30 border border-primary/40 text-primary font-extrabold text-xs rounded-xl transition-all cursor-pointer">
-            Κλείσιμο
-        </button>
     </div>
 </div>
+<style>
+@keyframes pinfo-slide-in {
+    from { opacity:0; transform:translateY(10px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0)    scale(1);    }
+}
+</style>
 
 <script src="/roster_lineup.js?v=2"></script>
 </body>
