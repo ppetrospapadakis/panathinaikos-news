@@ -902,6 +902,24 @@
             <input type="text" id="popover-height" class="editor-input py-1.5 px-3 text-sm" placeholder="π.χ. 1.85μ ή 2.06m"/>
         </div>
 
+        <!-- ── PHOTO UPLOAD ── -->
+        <div class="flex flex-col gap-1.5 mt-1">
+            <label class="text-[11px] text-on-surface-variant uppercase font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">photo_camera</span>
+                Φωτογραφία
+            </label>
+            <div id="photo-drop-zone" class="relative flex items-center gap-2 p-2 bg-surface-container-high rounded-xl border border-dashed border-outline-variant hover:border-primary cursor-pointer transition-colors group">
+                <!-- Preview (hidden until photo loaded) -->
+                <img id="photo-preview" src="" alt="" class="hidden w-10 h-10 rounded-lg object-cover object-top flex-shrink-0 border border-primary/30" />
+                <!-- Placeholder -->
+                <div class="photo-placeholder flex flex-col items-start gap-0.5">
+                    <span class="text-[11px] text-on-surface-variant group-hover:text-primary transition-colors font-semibold">📂 Επιλογή αρχείου</span>
+                    <span class="text-[10px] text-on-surface-variant/60">ή <kbd class="bg-surface-container px-1 rounded text-[9px] font-mono">Ctrl+V</kbd> για επικόλληση</span>
+                </div>
+                <input type="file" id="photo-file-input" accept="image/*" class="hidden" />
+            </div>
+            <p id="photo-upload-status" class="text-[10px] text-on-surface-variant mt-0.5 text-center">Δεν υπάρχει φωτογραφία</p>
+        </div>
 
         <!-- 2-Click Swap Mode Trigger -->
         <button onclick="startAdminSwapMode()" class="w-full mt-1.5 py-2 px-3 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95">
@@ -1324,6 +1342,10 @@ function initEditor() {
     // Load roster datasets and switch to default editor tab
     loadRostersForEditing();
     switchAdminTab('opinion');
+
+    // Initialize player photo upload widget
+    setupPhotoUploadWidget();
+    loadAllPlayerPhotos();
 
     loadOpinionArticles();
     updateWordCount();

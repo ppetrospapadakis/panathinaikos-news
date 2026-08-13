@@ -398,18 +398,40 @@
         // RENDER HELPERS & POPUP MODAL
         // ─────────────────────────────────────────────────────────────────
         // ─────────────────────────────────────────────────────────────────
-        // PLAYER PHOTO SYSTEM
+        // PLAYER PHOTO SYSTEM  (Supabase-first, local JSON fallback)
         // ─────────────────────────────────────────────────────────────────
-        let _photoMap = null;
+        const SUPABASE_URL = 'https://rctltbuiitdnqlxizlym.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjdGx0YnVpaXRkbnFseGl6bHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDc4MjMsImV4cCI6MjA5ODkyMzgyM30.DVTtDjeh1TM2HsmMhEsVVxtJ7CKBfy-2iHsWRX8oumI';
+
+        let _photoMap = null;        // local JSON map (fallback)
+        const _supaPhotos = {};      // key: "sport/surname" → dataURL from Supabase
+
         async function loadPhotoMap() {
-            if (_photoMap) return _photoMap;
+            // 1. Load local JSON fallback map
+            if (!_photoMap) {
+                try {
+                    const r = await fetch('/player_photos.json?v=' + Date.now());
+                    _photoMap = await r.json();
+                } catch(e) { _photoMap = {}; }
+            }
+            // 2. Load Supabase photos (admin uploads — these take priority)
             try {
-                const r = await fetch('/player_photos.json?v=' + Date.now());
-                _photoMap = await r.json();
-            } catch(e) { _photoMap = {}; }
-            return _photoMap;
+                const res = await fetch(
+                    `${SUPABASE_URL}/rest/v1/articles?category=eq.PlayerPhoto&select=source_url,content`,
+                    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+                );
+                if (res.ok) {
+                    const rows = await res.json();
+                    rows.forEach(row => {
+                        // source_url: "photo://football/pena"
+                        const key = row.source_url.replace('photo://', '');
+                        _supaPhotos[key] = row.content;
+                    });
+                }
+            } catch(e) { /* silent fallback */ }
         }
         loadPhotoMap(); // preload on page init
+
 
         function normalizeForPhoto(str) {
             return (str || '')
@@ -420,21 +442,33 @@
                 .trim();
         }
 
-        function resolvePlayerPhoto(name) {
-            if (!_photoMap || !name) return null;
+        function resolvePlayerPhoto(name, sport) {
+            if (!name) return null;
+            const sp = sport || 'football';
             const norm = normalizeForPhoto(name);
             const parts = norm.split(' ').filter(p => p.length > 1);
-            if (_photoMap[norm]) return '/images/roster/football/' + _photoMap[norm];
-            for (let i = parts.length - 1; i >= 0; i--) {
-                if (_photoMap[parts[i]]) return '/images/roster/football/' + _photoMap[parts[i]];
-            }
-            const hyphenated = parts.join('-');
-            if (_photoMap[hyphenated]) return '/images/roster/football/' + _photoMap[hyphenated];
-            if (parts.length >= 2) {
-                const last2 = parts.slice(-2).join('-');
-                if (_photoMap[last2]) return '/images/roster/football/' + _photoMap[last2];
-                const last2s = parts.slice(-2).join(' ');
-                if (_photoMap[last2s]) return '/images/roster/football/' + _photoMap[last2s];
+            const surname = parts.length ? parts[parts.length - 1] : norm;
+
+            // 1. Check Supabase uploaded photos first
+            const supaKey = `${sp}/${surname}`;
+            if (_supaPhotos[supaKey]) return _supaPhotos[supaKey];
+            if (_supaPhotos[`${sp}/${norm}`]) return _supaPhotos[`${sp}/${norm}`];
+
+            // 2. Fallback to local JSON map
+            if (_photoMap) {
+                const folder = sp === 'basketball' ? '/images/roster/basketball/' : '/images/roster/football/';
+                if (_photoMap[norm]) return folder + _photoMap[norm];
+                for (let i = parts.length - 1; i >= 0; i--) {
+                    if (_photoMap[parts[i]]) return folder + _photoMap[parts[i]];
+                }
+                const hyphenated = parts.join('-');
+                if (_photoMap[hyphenated]) return folder + _photoMap[hyphenated];
+                if (parts.length >= 2) {
+                    const last2 = parts.slice(-2).join('-');
+                    if (_photoMap[last2]) return folder + _photoMap[last2];
+                    const last2s = parts.slice(-2).join(' ');
+                    if (_photoMap[last2s]) return folder + _photoMap[last2s];
+                }
             }
             return null;
         }
@@ -476,7 +510,7 @@
             const isBasketball = sport === 'basketball';
             
             // Photo or jersey number
-            const photoUrl = resolvePlayerPhoto(name);
+            const photoUrl = resolvePlayerPhoto(name, sport);
             const numContainer = document.getElementById('pinfo-num-container');
             const photoCont    = document.getElementById('pinfo-photo-container');
             const photoImg     = document.getElementById('pinfo-photo');

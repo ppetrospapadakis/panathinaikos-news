@@ -1406,6 +1406,152 @@ function setupDraggableToken(token, sport, rosterType, idx) {
 
 let selectedPlayerInfo = null;
 
+// ══════════════════════════════════════════════════════════════
+// PLAYER PHOTO SYSTEM
+// ══════════════════════════════════════════════════════════════
+const _adminPhotoCache = {}; // key: "sport/normalizedName" → dataURL
+let _adminPhotosLoaded = false;
+
+function normalizePlayerKey(name) {
+    return (name || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .split(/\s+/)
+        .pop(); // use last word (surname)
+}
+
+async function loadAllPlayerPhotos() {
+    if (!window.db || _adminPhotosLoaded) return;
+    try {
+        const { data, error } = await db
+            .from('articles')
+            .select('source_url, content')
+            .eq('category', 'PlayerPhoto');
+        if (error) throw error;
+        (data || []).forEach(row => {
+            // source_url format: "photo://football/pena"
+            const key = row.source_url.replace('photo://', '');
+            _adminPhotoCache[key] = row.content;
+        });
+        _adminPhotosLoaded = true;
+        console.log(`[Photos] Loaded ${Object.keys(_adminPhotoCache).length} player photos`);
+    } catch (e) {
+        console.warn('[Photos] Could not load photos:', e.message);
+    }
+}
+
+async function savePlayerPhoto(sport, playerName, dataUrl) {
+    const key = normalizePlayerKey(playerName);
+    const sourceUrl = `photo://${sport}/${key}`;
+    const cacheKey = `${sport}/${key}`;
+
+    const { error } = await db.from('articles').upsert({
+        source_url: sourceUrl,
+        title: `Player Photo: ${playerName}`,
+        summary: `${sport} player photo`,
+        content: dataUrl,
+        bullets: [],
+        category: 'PlayerPhoto',
+        created_at: '1970-01-01T00:00:00.000Z',
+        updated_at: new Date().toISOString()
+    }, { onConflict: 'source_url' });
+
+    if (error) throw error;
+    _adminPhotoCache[cacheKey] = dataUrl;
+    return cacheKey;
+}
+
+function getPlayerPhotoUrl(sport, playerName) {
+    const key = normalizePlayerKey(playerName);
+    return _adminPhotoCache[`${sport}/${key}`] || null;
+}
+
+function compressImageToDataUrl(file, maxSize = 300) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+function compressBlobToDataUrl(blob, maxSize = 300) {
+    return compressImageToDataUrl(blob, maxSize);
+}
+
+function setupPhotoUploadWidget() {
+    const dropZone = document.getElementById('photo-drop-zone');
+    const fileInput = document.getElementById('photo-file-input');
+    const preview = document.getElementById('photo-preview');
+    const statusEl = document.getElementById('photo-upload-status');
+    if (!dropZone) return;
+
+    let stagedDataUrl = null;
+
+    function setPreview(dataUrl) {
+        stagedDataUrl = dataUrl;
+        preview.src = dataUrl;
+        preview.classList.remove('hidden');
+        dropZone.querySelector('.photo-placeholder').classList.add('hidden');
+        if (statusEl) { statusEl.textContent = '✅ Έτοιμο — πάτα Ενημέρωση για αποθήκευση'; statusEl.className = 'text-[10px] text-green-400 mt-1 text-center'; }
+        window._stagedPlayerPhoto = dataUrl;
+    }
+
+    // Click to browse
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // File input change
+    fileInput.addEventListener('change', async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const dataUrl = await compressImageToDataUrl(file);
+        setPreview(dataUrl);
+        fileInput.value = '';
+    });
+
+    // Drag & drop
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('ring-2', 'ring-primary'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('ring-2', 'ring-primary'));
+    dropZone.addEventListener('drop', async e => {
+        e.preventDefault();
+        dropZone.classList.remove('ring-2', 'ring-primary');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const dataUrl = await compressImageToDataUrl(file);
+            setPreview(dataUrl);
+        }
+    });
+
+    // Global paste listener (active when popover is open)
+    document.addEventListener('paste', async e => {
+        const popover = document.getElementById('player-edit-popover');
+        if (!popover || popover.classList.contains('hidden')) return;
+        const items = e.clipboardData?.items || [];
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                const file = item.getAsFile();
+                const dataUrl = await compressBlobToDataUrl(file);
+                setPreview(dataUrl);
+                break;
+            }
+        }
+    });
+}
+
+window._stagedPlayerPhoto = null;
+
 function showPopoverForPlayer(sport, rosterType, idx, token) {
     if (adminSwapSource) {
         if (handleAdminPlayerClick(sport, rosterType, idx)) return;
@@ -1462,6 +1608,26 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
         extraInput.value = pos;
     }
     
+    // ── Load existing photo into widget ──
+    window._stagedPlayerPhoto = null;
+    const existingPhoto = getPlayerPhotoUrl(sport, name);
+    const previewEl = document.getElementById('photo-preview');
+    const placeholderEl = document.querySelector('#photo-drop-zone .photo-placeholder');
+    const photoStatus = document.getElementById('photo-upload-status');
+    if (previewEl) {
+        if (existingPhoto) {
+            previewEl.src = existingPhoto;
+            previewEl.classList.remove('hidden');
+            if (placeholderEl) placeholderEl.classList.add('hidden');
+            if (photoStatus) { photoStatus.textContent = '📷 Υπάρχει φωτογραφία'; photoStatus.className = 'text-[10px] text-primary mt-1 text-center'; }
+        } else {
+            previewEl.src = '';
+            previewEl.classList.add('hidden');
+            if (placeholderEl) placeholderEl.classList.remove('hidden');
+            if (photoStatus) { photoStatus.textContent = 'Δεν υπάρχει φωτογραφία'; photoStatus.className = 'text-[10px] text-on-surface-variant mt-1 text-center'; }
+        }
+    }
+
     const popover = document.getElementById('player-edit-popover');
     popover.classList.remove('hidden');
     
@@ -1482,9 +1648,10 @@ function closePopover() {
     document.getElementById('player-edit-popover').classList.add('hidden');
     document.querySelectorAll('.draggable-player, .reserve-card-item').forEach(el => el.classList.remove('selected'));
     selectedPlayerInfo = null;
+    window._stagedPlayerPhoto = null;
 }
 
-function savePopoverChanges() {
+async function savePopoverChanges() {
     if (!selectedPlayerInfo) return;
     const { sport, rosterType, idx } = selectedPlayerInfo;
     const rosterList = currentRoster[sport][rosterType];
@@ -1526,6 +1693,19 @@ function savePopoverChanges() {
         rosterList[idx].height = newHgt;
     }
     
+    // ── Save staged photo if any ──
+    if (window._stagedPlayerPhoto) {
+        const photoStatus = document.getElementById('photo-upload-status');
+        if (photoStatus) { photoStatus.textContent = '⬆ Ανέβασμα...'; photoStatus.className = 'text-[10px] text-amber-400 mt-1 text-center animate-pulse'; }
+        try {
+            await savePlayerPhoto(sport, newName, window._stagedPlayerPhoto);
+            if (photoStatus) { photoStatus.textContent = '✅ Φωτογραφία αποθηκεύτηκε!'; photoStatus.className = 'text-[10px] text-green-400 mt-1 text-center'; }
+        } catch (e) {
+            console.error('[Photos] Save failed:', e);
+            if (photoStatus) { photoStatus.textContent = '❌ Σφάλμα αποθήκευσης φωτό'; photoStatus.className = 'text-[10px] text-red-400 mt-1 text-center'; }
+        }
+    }
+
     const rawId = `roster-${sport}-${rosterType}`;
     const textarea = document.getElementById(rawId);
     if (textarea) {
