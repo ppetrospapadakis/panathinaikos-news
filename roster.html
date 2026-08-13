@@ -437,7 +437,8 @@
             const posEl = document.getElementById('pinfo-pos');
             if (posEl) posEl.textContent = pos !== '' ? pos : '—';
             document.getElementById('pinfo-name').textContent = name || 'Παίκτης';
-            document.getElementById('pinfo-sport-tag').textContent = isBasketball ? 'Καλαθοσφαιριστής' : 'Ποδοσφαιριστής';
+            const sportTagEl = document.getElementById('pinfo-sport-tag');
+            if (sportTagEl) sportTagEl.textContent = isBasketball ? 'Καλαθοσφαιριστής' : 'Ποδοσφαιριστής';
             
             document.getElementById('pinfo-nationality').textContent = nationality.trim() || '—';
             document.getElementById('pinfo-birthdate').textContent = birthDateDisplay || '—';
@@ -1317,7 +1318,6 @@
             </div>
             <div class="min-w-0">
                 <h3 id="pinfo-name" class="font-extrabold text-lg sm:text-xl text-on-surface truncate">Kyriakopoulos G.</h3>
-                <span id="pinfo-sport-tag" class="text-[11px] font-bold text-primary uppercase tracking-widest">Ποδοσφαιριστής</span>
             </div>
         </div>
 
