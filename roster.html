@@ -434,7 +434,8 @@
             const isBasketball = sport === 'basketball';
             
             document.getElementById('pinfo-num').textContent = num !== '' ? num : '—';
-            document.getElementById('pinfo-pos').textContent = pos !== '' ? pos : '—';
+            const posEl = document.getElementById('pinfo-pos');
+            if (posEl) posEl.textContent = pos !== '' ? pos : '—';
             document.getElementById('pinfo-name').textContent = name || 'Παίκτης';
             document.getElementById('pinfo-sport-tag').textContent = isBasketball ? 'Καλαθοσφαιριστής' : 'Ποδοσφαιριστής';
             
@@ -1313,7 +1314,6 @@
         <div class="flex items-center gap-4 pt-1">
             <div class="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-xl shadow-lg relative shrink-0">
                 <span id="pinfo-num">77</span>
-                <span id="pinfo-pos" class="absolute -bottom-1 -right-1 bg-primary text-on-primary text-[10px] font-extrabold px-1.5 py-0.5 rounded-md uppercase shadow">LB</span>
             </div>
             <div class="min-w-0">
                 <h3 id="pinfo-name" class="font-extrabold text-lg sm:text-xl text-on-surface truncate">Kyriakopoulos G.</h3>
