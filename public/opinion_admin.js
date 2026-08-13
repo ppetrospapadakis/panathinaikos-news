@@ -3038,6 +3038,41 @@ function cancelAdminSwapMode() {
 }
 window.cancelAdminSwapMode = cancelAdminSwapMode;
 
+function objectToPitchArray(left, top, obj) {
+    const name = obj.name || 'Παίκτης';
+    const initials = obj.initials || (name ? name.substring(0, 3).toUpperCase() : 'PAO');
+    const num = (obj.num !== undefined && obj.num !== null && obj.num !== '') ? obj.num : ((obj.number !== undefined && obj.number !== null) ? obj.number : '');
+    const pos = obj.pos || obj.position || '';
+    const nat = obj.nationality || obj.national || '';
+    const dob = obj.birthDate || obj.dob || '';
+    const hgt = obj.height || '';
+
+    return [left, top, initials, name, num, pos, nat, dob, hgt];
+}
+
+function pitchArrayToObject(arr, fallbackDetail = 'Εφεδρεία') {
+    const name = arr[3] || 'Παίκτης';
+    const initials = arr[2] || (name ? name.substring(0, 3).toUpperCase() : 'PAO');
+    const num = (arr[4] !== undefined && arr[4] !== null) ? arr[4] : '';
+    const pos = arr[5] || '';
+    const nat = arr[6] || '';
+    const dob = arr[7] || '';
+    const hgt = arr[8] || '';
+
+    return {
+        initials: initials,
+        name: name,
+        num: num,
+        number: num,
+        pos: pos,
+        position: pos,
+        detail: fallbackDetail,
+        nationality: nat,
+        birthDate: dob,
+        height: hgt
+    };
+}
+
 function executeAdminPlayerSwap(src, tgt) {
     const sport = src.sport;
     const srcList = currentRoster[sport][src.rosterType];
@@ -3048,7 +3083,7 @@ function executeAdminPlayerSwap(src, tgt) {
 
     if (!p1 || !p2) return;
 
-    // CASE A: Both are Pitch/Court players (Arrays: [left, top, initials, name, num, pos])
+    // CASE A: Both are Pitch/Court players (Arrays: [left, top, initials, name, num, pos, nat, dob, hgt])
     if (Array.isArray(p1) && Array.isArray(p2)) {
         // Keep pitch coordinates of Slot 1 and Slot 2 fixed
         const slot1_left = p1[0];
@@ -3056,7 +3091,7 @@ function executeAdminPlayerSwap(src, tgt) {
         const slot2_left = p2[0];
         const slot2_top  = p2[1];
 
-        // Extract player info details (initials, name, num, pos)
+        // Extract player info details (initials, name, num, pos, nat, dob, hgt)
         const p1_details = p1.slice(2);
         const p2_details = p2.slice(2);
 
@@ -3070,48 +3105,16 @@ function executeAdminPlayerSwap(src, tgt) {
         const slot1_left = p1[0];
         const slot1_top  = p1[1];
 
-        const convertedP2 = [
-            slot1_left, slot1_top,
-            p2.initials || 'ΠΑΙ',
-            p2.name || 'Παίκτης',
-            p2.num || p2.pos || 10,
-            p2.pos || ''
-        ];
-
-        const convertedP1 = {
-            initials: p1[2] || 'ΠΑΙ',
-            name: p1[3] || 'Παίκτης',
-            num: p1[4] || '',
-            pos: p1[5] || p1[4] || '',
-            detail: 'Εφεδρεία'
-        };
-
-        srcList[src.idx] = convertedP2;
-        tgtList[tgt.idx] = convertedP1;
+        srcList[src.idx] = objectToPitchArray(slot1_left, slot1_top, p2);
+        tgtList[tgt.idx] = pitchArrayToObject(p1, p2.detail || 'Εφεδρεία');
     }
     // CASE C: p1 is Reserve Object and p2 is Pitch Array
     else if (!Array.isArray(p1) && Array.isArray(p2)) {
         const slot2_left = p2[0];
         const slot2_top  = p2[1];
 
-        const convertedP1 = [
-            slot2_left, slot2_top,
-            p1.initials || 'ΠΑΙ',
-            p1.name || 'Παίκτης',
-            p1.num || p1.pos || 10,
-            p1.pos || ''
-        ];
-
-        const convertedP2 = {
-            initials: p2[2] || 'ΠΑΙ',
-            name: p2[3] || 'Παίκτης',
-            num: p2[4] || '',
-            pos: p2[5] || p2[4] || '',
-            detail: 'Εφεδρεία'
-        };
-
-        srcList[src.idx] = convertedP1;
-        tgtList[tgt.idx] = convertedP2;
+        tgtList[tgt.idx] = objectToPitchArray(slot2_left, slot2_top, p1);
+        srcList[src.idx] = pitchArrayToObject(p2, p1.detail || 'Εφεδρεία');
     }
     // CASE D: Both are Reserve Objects
     else {
