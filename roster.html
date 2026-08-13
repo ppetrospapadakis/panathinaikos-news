@@ -1410,55 +1410,255 @@
 </script>
 
 <!-- ── PLAYER INFO POPUP ── -->
-<div id="player-info-modal" class="hidden" style="position:fixed;bottom:24px;right:24px;z-index:200;width:min(450px, calc(100vw - 32px));">
-    <div style="background:rgba(16,20,26,0.95);border:1.5px solid rgba(74,222,128,0.28);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(74,222,128,0.08);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);overflow:hidden;animation:pinfo-slide-in 0.22s cubic-bezier(.22,1,.36,1);">
+<div id="player-info-modal" class="hidden pinfo-modal-wrapper">
+    <div class="pinfo-card-container">
         <!-- Header -->
-        <div style="display:flex;align-items:center;gap:16px;padding:18px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="pinfo-header">
             <!-- Jersey number (shown when no photo) -->
-            <div id="pinfo-num-container" style="width:76px;height:76px;border-radius:18px;background:rgba(74,222,128,0.14);border:1.5px solid rgba(74,222,128,0.36);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;color:#4ade80;flex-shrink:0;">
+            <div id="pinfo-num-container" class="pinfo-avatar">
                 <span id="pinfo-num">77</span>
             </div>
             <!-- Player photo (shown when photo exists) -->
-            <div id="pinfo-photo-container" class="hidden" style="width:76px;height:76px;border-radius:18px;overflow:hidden;border:1.5px solid rgba(74,222,128,0.36);flex-shrink:0;background:#0d1117;">
-                <img id="pinfo-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;" />
+            <div id="pinfo-photo-container" class="hidden pinfo-avatar pinfo-avatar-photo">
+                <img id="pinfo-photo" src="" alt="" />
             </div>
-            <div style="flex:1;min-width:0;">
-                <div id="pinfo-name" style="font-weight:800;font-size:20px;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;">Kyriakopoulos G.</div>
+            <div class="pinfo-name-wrap">
+                <div id="pinfo-name">Kyriakopoulos G.</div>
             </div>
-            <button onclick="closePlayerInfoModal()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.color='#4ade80';this.style.background='rgba(74,222,128,0.15)'" onmouseout="this.style.color='#94a3b8';this.style.background='rgba(255,255,255,0.07)'">
-                <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+            <button onclick="closePlayerInfoModal()" class="pinfo-close-btn" title="Κλείσιμο">
+                <span class="material-symbols-outlined">close</span>
             </button>
         </div>
         <!-- Info rows -->
-        <div style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:12px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04);">
-                <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:14px;font-weight:600;">
-                    <span class="material-symbols-outlined" style="font-size:19px;color:#4ade80;">flag</span>
+        <div class="pinfo-body">
+            <div class="pinfo-row">
+                <div class="pinfo-label">
+                    <span class="material-symbols-outlined icon">flag</span>
                     Εθνικότητα
                 </div>
-                <span id="pinfo-nationality" style="font-size:15px;font-weight:700;color:#f1f5f9;">—</span>
+                <span id="pinfo-nationality" class="pinfo-val">—</span>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04);">
-                <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:14px;font-weight:600;">
-                    <span class="material-symbols-outlined" style="font-size:19px;color:#4ade80;">cake</span>
+            <div class="pinfo-row">
+                <div class="pinfo-label">
+                    <span class="material-symbols-outlined icon">cake</span>
                     Ημ. Γέννησης
                 </div>
-                <span id="pinfo-birthdate" style="font-size:15px;font-weight:700;color:#f1f5f9;">—</span>
+                <span id="pinfo-birthdate" class="pinfo-val">—</span>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:14px;font-weight:600;">
-                    <span class="material-symbols-outlined" style="font-size:19px;color:#4ade80;">height</span>
+            <div class="pinfo-row pinfo-row-last">
+                <div class="pinfo-label">
+                    <span class="material-symbols-outlined icon">height</span>
                     Ύψος
                 </div>
-                <span id="pinfo-height" style="font-size:15px;font-weight:700;color:#f1f5f9;">—</span>
+                <span id="pinfo-height" class="pinfo-val">—</span>
             </div>
         </div>
     </div>
 </div>
+
 <style>
 @keyframes pinfo-slide-in {
-    from { opacity:0; transform:translateY(10px) scale(0.97); }
+    from { opacity:0; transform:translateY(12px) scale(0.96); }
     to   { opacity:1; transform:translateY(0)    scale(1);    }
+}
+
+/* Base / Mobile (<640px): 30%+ larger width than original (~370px) */
+.pinfo-modal-wrapper {
+    position: fixed;
+    bottom: 16px;
+    right: 12px;
+    left: 12px;
+    margin: 0 auto;
+    z-index: 200;
+    width: min(370px, calc(100vw - 24px));
+}
+
+.pinfo-card-container {
+    background: rgba(16, 20, 26, 0.96);
+    border: 1.5px solid rgba(74, 222, 128, 0.28);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.75), 0 0 0 1px rgba(74, 222, 128, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    overflow: hidden;
+    animation: pinfo-slide-in 0.22s cubic-bezier(.22,1,.36,1);
+}
+
+.pinfo-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pinfo-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: rgba(74, 222, 128, 0.14);
+    border: 1.5px solid rgba(74, 222, 128, 0.36);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 24px;
+    color: #4ade80;
+    flex-shrink: 0;
+}
+
+.pinfo-avatar-photo {
+    overflow: hidden;
+    background: #0d1117;
+}
+
+.pinfo-avatar-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+.pinfo-name-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+#pinfo-name {
+    font-weight: 800;
+    font-size: 17px;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.pinfo-close-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.pinfo-close-btn:hover {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.15);
+}
+
+.pinfo-close-btn .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.pinfo-body {
+    padding: 12px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pinfo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 7px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pinfo-row-last {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.pinfo-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pinfo-label .icon {
+    font-size: 16px;
+    color: #4ade80;
+}
+
+.pinfo-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+/* Tablet & Desktop (>= 640px): 2x size (~520px width, 82px avatar) */
+@media (min-width: 640px) {
+    .pinfo-modal-wrapper {
+        bottom: 24px;
+        right: 24px;
+        left: auto;
+        margin: 0;
+        width: min(520px, calc(100vw - 48px));
+    }
+    
+    .pinfo-card-container {
+        border-radius: 24px;
+    }
+    
+    .pinfo-header {
+        gap: 18px;
+        padding: 18px 22px 16px;
+    }
+    
+    .pinfo-avatar {
+        width: 82px;
+        height: 82px;
+        border-radius: 20px;
+        font-size: 32px;
+    }
+    
+    #pinfo-name {
+        font-size: 21px;
+    }
+    
+    .pinfo-close-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .pinfo-close-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+    
+    .pinfo-body {
+        padding: 16px 22px 22px;
+        gap: 13px;
+    }
+    
+    .pinfo-row {
+        padding-bottom: 9px;
+    }
+    
+    .pinfo-label {
+        gap: 8px;
+        font-size: 14px;
+    }
+    
+    .pinfo-label .icon {
+        font-size: 20px;
+    }
+    
+    .pinfo-val {
+        font-size: 16px;
+    }
 }
 </style>
 
