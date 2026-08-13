@@ -397,6 +397,48 @@
         // ─────────────────────────────────────────────────────────────────
         // RENDER HELPERS & POPUP MODAL
         // ─────────────────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────────
+        // PLAYER PHOTO SYSTEM
+        // ─────────────────────────────────────────────────────────────────
+        let _photoMap = null;
+        async function loadPhotoMap() {
+            if (_photoMap) return _photoMap;
+            try {
+                const r = await fetch('/player_photos.json?v=' + Date.now());
+                _photoMap = await r.json();
+            } catch(e) { _photoMap = {}; }
+            return _photoMap;
+        }
+        loadPhotoMap(); // preload on page init
+
+        function normalizeForPhoto(str) {
+            return (str || '')
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function resolvePlayerPhoto(name) {
+            if (!_photoMap || !name) return null;
+            const norm = normalizeForPhoto(name);
+            const parts = norm.split(' ').filter(p => p.length > 1);
+            if (_photoMap[norm]) return '/images/players/' + _photoMap[norm];
+            for (let i = parts.length - 1; i >= 0; i--) {
+                if (_photoMap[parts[i]]) return '/images/players/' + _photoMap[parts[i]];
+            }
+            const hyphenated = parts.join('-');
+            if (_photoMap[hyphenated]) return '/images/players/' + _photoMap[hyphenated];
+            if (parts.length >= 2) {
+                const last2 = parts.slice(-2).join('-');
+                if (_photoMap[last2]) return '/images/players/' + _photoMap[last2];
+                const last2s = parts.slice(-2).join(' ');
+                if (_photoMap[last2s]) return '/images/players/' + _photoMap[last2s];
+            }
+            return null;
+        }
+
         window.openPlayerInfoModal = function(playerData, sport) {
             if (!playerData) return;
             
@@ -433,7 +475,23 @@
             
             const isBasketball = sport === 'basketball';
             
-            document.getElementById('pinfo-num').textContent = num !== '' ? num : '—';
+            // Photo or jersey number
+            const photoUrl = resolvePlayerPhoto(name);
+            const numContainer = document.getElementById('pinfo-num-container');
+            const photoCont    = document.getElementById('pinfo-photo-container');
+            const photoImg     = document.getElementById('pinfo-photo');
+            const numSpan      = document.getElementById('pinfo-num');
+            if (photoUrl && photoCont && photoImg) {
+                photoImg.src = photoUrl;
+                photoImg.classList.remove('hidden');
+                photoCont.classList.remove('hidden');
+                if (numContainer) numContainer.style.display = 'none';
+            } else {
+                if (photoCont) photoCont.classList.add('hidden');
+                if (photoImg) photoImg.classList.add('hidden');
+                if (numContainer) numContainer.style.display = '';
+                if (numSpan) numSpan.textContent = num !== '' ? num : '—';
+            }
             const posEl = document.getElementById('pinfo-pos');
             if (posEl) posEl.textContent = pos !== '' ? pos : '—';
             document.getElementById('pinfo-name').textContent = name || 'Παίκτης';
@@ -1314,8 +1372,13 @@
     <div style="background:rgba(16,20,26,0.94);border:1px solid rgba(74,222,128,0.22);border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(74,222,128,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden;animation:pinfo-slide-in 0.22s cubic-bezier(.22,1,.36,1);">
         <!-- Header -->
         <div style="display:flex;align-items:center;gap:11px;padding:13px 13px 11px;border-bottom:1px solid rgba(255,255,255,0.07);">
-            <div style="width:42px;height:42px;border-radius:11px;background:rgba(74,222,128,0.14);border:1px solid rgba(74,222,128,0.32);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#4ade80;flex-shrink:0;">
+            <!-- Jersey number (shown when no photo) -->
+            <div id="pinfo-num-container" style="width:42px;height:42px;border-radius:11px;background:rgba(74,222,128,0.14);border:1px solid rgba(74,222,128,0.32);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#4ade80;flex-shrink:0;">
                 <span id="pinfo-num">77</span>
+            </div>
+            <!-- Player photo (shown when photo exists) -->
+            <div id="pinfo-photo-container" class="hidden" style="width:42px;height:42px;border-radius:11px;overflow:hidden;border:1px solid rgba(74,222,128,0.32);flex-shrink:0;">
+                <img id="pinfo-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;" />
             </div>
             <div style="flex:1;min-width:0;">
                 <div id="pinfo-name" style="font-weight:800;font-size:14px;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Kyriakopoulos G.</div>
