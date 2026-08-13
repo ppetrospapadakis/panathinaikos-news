@@ -1416,9 +1416,29 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     const player = rosterList[idx];
     if (!player) return;
     
+    let name = '', num = '', pos = '', initials = '', nationality = '', birthDate = '', height = '';
+    
+    if (Array.isArray(player)) {
+        initials = player[2] || '';
+        name = player[3] || '';
+        num = (player[4] !== undefined && player[4] !== null) ? player[4] : '';
+        pos = player[5] || '';
+        nationality = player[6] || '';
+        birthDate = player[7] || '';
+        height = player[8] || '';
+    } else if (typeof player === 'object') {
+        initials = player.initials || '';
+        name = player.name || '';
+        num = player.num !== undefined && player.num !== null ? player.num : (player.number || '');
+        pos = player.pos || player.position || '';
+        nationality = player.nationality || player.national || player[6] || '';
+        birthDate = player.birthDate || player.dob || player[7] || '';
+        height = player.height || player[8] || '';
+    }
+    
     const initEl = document.getElementById('popover-initials');
-    if (initEl) initEl.value = player[2] || '';
-    document.getElementById('popover-name').value = player[3] || '';
+    if (initEl) initEl.value = initials;
+    document.getElementById('popover-name').value = name;
     
     const labelEl = document.getElementById('popover-badge-label');
     const badgeInput = document.getElementById('popover-badge');
@@ -1429,35 +1449,17 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     const dobInput = document.getElementById('popover-birthdate');
     const hgtInput = document.getElementById('popover-height');
     
-    if (natInput) natInput.value = player[6] || '';
-    if (dobInput) dobInput.value = player[7] || '';
-    if (hgtInput) hgtInput.value = player[8] || '';
+    if (natInput) natInput.value = nationality;
+    if (dobInput) dobInput.value = birthDate;
+    if (hgtInput) hgtInput.value = height;
     
     labelEl.textContent = 'Νούμερο';
-    
-    let playerNum = '';
-    let playerPos = '';
-    
-    if (player.length >= 6) {
-        playerNum = (player[4] !== undefined && player[4] !== null) ? player[4] : '';
-        playerPos = player[5] || '';
-    } else {
-        const val = player[4];
-        if (val !== undefined && val !== null && val !== '' && !isNaN(val)) {
-            playerNum = val;
-            playerPos = player[5] || '';
-        } else {
-            playerNum = '';
-            playerPos = val || '';
-        }
-    }
-    
-    badgeInput.value = playerNum;
+    badgeInput.value = num;
     
     if (extraWrapper && extraInput) {
         extraWrapper.classList.remove('hidden');
         document.getElementById('popover-extra-label').textContent = 'Θέση';
-        extraInput.value = playerPos;
+        extraInput.value = pos;
     }
     
     const popover = document.getElementById('player-edit-popover');
@@ -1472,13 +1474,13 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     popover.style.left = popoverLeft + 'px';
     popover.style.top = popoverTop + 'px';
     
-    document.querySelectorAll('.draggable-player').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.draggable-player, .reserve-card-item').forEach(el => el.classList.remove('selected'));
     token.classList.add('selected');
 }
 
 function closePopover() {
     document.getElementById('player-edit-popover').classList.add('hidden');
-    document.querySelectorAll('.draggable-player').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.draggable-player, .reserve-card-item').forEach(el => el.classList.remove('selected'));
     selectedPlayerInfo = null;
 }
 
@@ -1489,7 +1491,7 @@ function savePopoverChanges() {
     if (!rosterList[idx]) return;
     
     const initEl = document.getElementById('popover-initials');
-    const newInitials = initEl ? initEl.value.trim() : (rosterList[idx][2] || '');
+    const newInitials = initEl ? initEl.value.trim() : 'PAO';
     const newName = document.getElementById('popover-name').value.trim() || 'Παίκτης';
     const newBadge = document.getElementById('popover-badge').value.trim() || '';
     
@@ -1504,13 +1506,25 @@ function savePopoverChanges() {
     const newDob = dobInput ? dobInput.value.trim() : '';
     const newHgt = hgtInput ? hgtInput.value.trim() : '';
 
-    rosterList[idx][2] = newInitials;
-    rosterList[idx][3] = newName;
-    rosterList[idx][4] = newBadge;
-    rosterList[idx][5] = newPos;
-    rosterList[idx][6] = newNat;
-    rosterList[idx][7] = newDob;
-    rosterList[idx][8] = newHgt;
+    if (Array.isArray(rosterList[idx])) {
+        rosterList[idx][2] = newInitials;
+        rosterList[idx][3] = newName;
+        rosterList[idx][4] = newBadge;
+        rosterList[idx][5] = newPos;
+        rosterList[idx][6] = newNat;
+        rosterList[idx][7] = newDob;
+        rosterList[idx][8] = newHgt;
+    } else if (typeof rosterList[idx] === 'object') {
+        rosterList[idx].initials = newInitials;
+        rosterList[idx].name = newName;
+        rosterList[idx].num = newBadge;
+        rosterList[idx].number = newBadge;
+        rosterList[idx].pos = newPos;
+        rosterList[idx].position = newPos;
+        rosterList[idx].nationality = newNat;
+        rosterList[idx].birthDate = newDob;
+        rosterList[idx].height = newHgt;
+    }
     
     const rawId = `roster-${sport}-${rosterType}`;
     const textarea = document.getElementById(rawId);
@@ -1518,7 +1532,11 @@ function savePopoverChanges() {
         textarea.value = JSON.stringify(rosterList, null, 2);
     }
     
-    adminRenderRosterSection(sport, rosterType);
+    if (rosterType === 'rest') {
+        adminRenderReserves(sport);
+    } else {
+        adminRenderRosterSection(sport, rosterType);
+    }
     closePopover();
 }
 
@@ -1535,7 +1553,11 @@ function deleteSelectedPlayer() {
         textarea.value = JSON.stringify(rosterList, null, 2);
     }
     
-    adminRenderRosterSection(sport, rosterType);
+    if (rosterType === 'rest') {
+        adminRenderReserves(sport);
+    } else {
+        adminRenderRosterSection(sport, rosterType);
+    }
     closePopover();
 }
 
@@ -1570,8 +1592,6 @@ function addPlayer(sport, rosterType) {
 
 // Reserves
 
-
-
 function adminRenderReserves(sport) {
     const container = document.getElementById(`admin-reserves-${sport}`);
     if (!container) return;
@@ -1591,6 +1611,11 @@ function adminRenderReserves(sport) {
             if (['INPUT', 'BUTTON', 'SPAN'].includes(e.target.tagName)) return;
             handleAdminPlayerClick(sport, 'rest', idx, e, card);
         };
+        card.ondblclick = (e) => {
+            e.stopPropagation();
+            cancelAdminSwapMode();
+            showPopoverForPlayer(sport, 'rest', idx, card);
+        };
         
         let moveButtons = `
             <div class="flex flex-col gap-0.5 shrink-0">
@@ -1599,11 +1624,17 @@ function adminRenderReserves(sport) {
             </div>
         `;
         
+        const pName = Array.isArray(player) ? (player[3] || '') : (player.name || '');
+        const pPos = Array.isArray(player) ? (player[5] || '') : (player.pos || player.position || '');
+        const pNum = Array.isArray(player) ? (player[4] || '') : (player.num || player.number || '');
+
         card.innerHTML = `
             ${moveButtons}
-            <input type="text" value="${player.initials || ''}" placeholder="Αρχ" class="editor-input py-1 px-1 sm:px-2 text-center text-[10px] sm:text-xs font-bold w-9 sm:w-12 text-primary shrink-0" style="background:#111317;" maxlength="3" oninput="updateReserveField('${sport}', ${idx}, 'initials', this.value)"/>
-            <input type="text" value="${player.name || ''}" placeholder="Όνομα Παίκτη" class="editor-input py-1 px-1.5 sm:px-3 text-xs sm:text-sm font-semibold flex-1 min-w-0" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
-            <input type="text" value="${player.pos || player.num || ''}" placeholder="Θέση" class="editor-input py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-center font-mono w-11 sm:w-16 shrink-0" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
+            <input type="text" value="${pName}" placeholder="Όνομα Παίκτη" class="editor-input py-1 px-1.5 sm:px-3 text-xs sm:text-sm font-semibold flex-1 min-w-0" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'name', this.value)"/>
+            <input type="text" value="${pPos || pNum}" placeholder="Θέση" class="editor-input py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-center font-mono w-12 sm:w-16 shrink-0" style="background:#111317;" oninput="updateReserveField('${sport}', ${idx}, 'pos', this.value)"/>
+            <button onclick="showPopoverForPlayer('${sport}', 'rest', ${idx}, this.parentElement); event.stopPropagation();" class="p-1 sm:p-2 bg-primary/15 hover:bg-primary/25 border border-primary/40 text-primary rounded-lg sm:rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-1" title="Επεξεργασία (Εθνικότητα, Ημερομηνία, Ύψος)">
+                <span class="material-symbols-outlined text-[14px] sm:text-[18px] block">manage_accounts</span>
+            </button>
             <button onclick="handleAdminPlayerClick('${sport}', 'rest', ${idx}, event, this.parentElement)" class="p-1 sm:p-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 rounded-lg sm:rounded-xl transition-all cursor-pointer shrink-0" title="Αντικατάσταση (Swap)">
                 <span class="material-symbols-outlined text-[14px] sm:text-[18px] block">sync</span>
             </button>
@@ -1616,8 +1647,13 @@ function adminRenderReserves(sport) {
 function updateReserveField(sport, idx, field, val) {
     const restList = currentRoster[sport].rest;
     if (restList[idx]) {
-        restList[idx][field] = val;
-        if (field === 'pos') restList[idx]['num'] = val;
+        if (Array.isArray(restList[idx])) {
+            if (field === 'name') restList[idx][3] = val;
+            if (field === 'pos') restList[idx][5] = val;
+        } else {
+            restList[idx][field] = val;
+            if (field === 'pos') restList[idx]['num'] = val;
+        }
         
         const textarea = document.getElementById(`roster-${sport}-rest`);
         if (textarea) {
@@ -1649,7 +1685,10 @@ function addReserve(sport) {
         name: 'Νέος Παίκτης',
         pos: sport === 'football' ? 'GK' : 'C',
         num: sport === 'football' ? 'GK' : 'C',
-        detail: 'Περιγραφή'
+        detail: 'Περιγραφή',
+        nationality: '',
+        birthDate: '',
+        height: ''
     });
     
     const textarea = document.getElementById(`roster-${sport}-rest`);
@@ -1658,6 +1697,17 @@ function addReserve(sport) {
     }
     
     adminRenderReserves(sport);
+
+    setTimeout(() => {
+        const container = document.getElementById(`admin-reserves-${sport}`);
+        if (container) {
+            const cards = container.querySelectorAll('.reserve-card-item');
+            const lastCard = cards[cards.length - 1];
+            if (lastCard) {
+                showPopoverForPlayer(sport, 'rest', restList.length - 1, lastCard);
+            }
+        }
+    }, 100);
 }
 
 function deleteReserve(sport, idx) {
