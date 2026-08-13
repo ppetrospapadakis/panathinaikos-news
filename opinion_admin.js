@@ -1746,21 +1746,55 @@ async function showPopoverForPlayer(sport, rosterType, idx, token) {
     const popover = document.getElementById('player-edit-popover');
     popover.classList.remove('hidden');
     
-    const tokenRect = token.getBoundingClientRect();
-    const bodyRect = document.body.getBoundingClientRect();
-    
-    let popoverLeft = tokenRect.left - bodyRect.left + 50;
-    let popoverTop = tokenRect.top - bodyRect.top - 80;
-    
-    popover.style.left = popoverLeft + 'px';
-    popover.style.top = popoverTop + 'px';
+    const isMobile = window.innerWidth < 640;
+
+    if (isMobile) {
+        popover.style.position = 'fixed';
+        popover.style.left = '50%';
+        popover.style.top = '50%';
+        popover.style.transform = 'translate(-50%, -50%)';
+        popover.style.width = 'calc(100vw - 32px)';
+        popover.style.maxWidth = '340px';
+        popover.style.maxHeight = '85vh';
+        popover.style.overflowY = 'auto';
+        popover.style.zIndex = '999';
+    } else {
+        popover.style.position = 'absolute';
+        popover.style.transform = 'none';
+        popover.style.width = '';
+        popover.style.maxWidth = '';
+        popover.style.maxHeight = '';
+        popover.style.overflowY = '';
+        popover.style.zIndex = '150';
+
+        const tokenRect = token.getBoundingClientRect();
+        const bodyRect = document.body.getBoundingClientRect();
+        const popoverWidth = popover.offsetWidth || 260;
+
+        let popoverLeft = tokenRect.left - bodyRect.left + 50;
+        let popoverTop = tokenRect.top - bodyRect.top - 80;
+
+        if (popoverLeft + popoverWidth > window.innerWidth - 16) {
+            popoverLeft = window.innerWidth - popoverWidth - 16;
+        }
+        if (popoverLeft < 16) {
+            popoverLeft = 16;
+        }
+
+        popover.style.left = popoverLeft + 'px';
+        popover.style.top = popoverTop + 'px';
+    }
     
     document.querySelectorAll('.draggable-player, .reserve-card-item').forEach(el => el.classList.remove('selected'));
     token.classList.add('selected');
 }
 
 function closePopover() {
-    document.getElementById('player-edit-popover').classList.add('hidden');
+    const popover = document.getElementById('player-edit-popover');
+    if (popover) {
+        popover.classList.add('hidden');
+        popover.style.transform = '';
+    }
     document.querySelectorAll('.draggable-player, .reserve-card-item').forEach(el => el.classList.remove('selected'));
     selectedPlayerInfo = null;
     window._stagedPlayerPhoto = null;
