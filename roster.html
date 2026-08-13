@@ -424,17 +424,17 @@
             if (!_photoMap || !name) return null;
             const norm = normalizeForPhoto(name);
             const parts = norm.split(' ').filter(p => p.length > 1);
-            if (_photoMap[norm]) return '/images/players/' + _photoMap[norm];
+            if (_photoMap[norm]) return '/images/roster/football/' + _photoMap[norm];
             for (let i = parts.length - 1; i >= 0; i--) {
-                if (_photoMap[parts[i]]) return '/images/players/' + _photoMap[parts[i]];
+                if (_photoMap[parts[i]]) return '/images/roster/football/' + _photoMap[parts[i]];
             }
             const hyphenated = parts.join('-');
-            if (_photoMap[hyphenated]) return '/images/players/' + _photoMap[hyphenated];
+            if (_photoMap[hyphenated]) return '/images/roster/football/' + _photoMap[hyphenated];
             if (parts.length >= 2) {
                 const last2 = parts.slice(-2).join('-');
-                if (_photoMap[last2]) return '/images/players/' + _photoMap[last2];
+                if (_photoMap[last2]) return '/images/roster/football/' + _photoMap[last2];
                 const last2s = parts.slice(-2).join(' ');
-                if (_photoMap[last2s]) return '/images/players/' + _photoMap[last2s];
+                if (_photoMap[last2s]) return '/images/roster/football/' + _photoMap[last2s];
             }
             return null;
         }
