@@ -1410,47 +1410,47 @@
 </script>
 
 <!-- ── PLAYER INFO POPUP ── -->
-<div id="player-info-modal" class="hidden" style="position:fixed;bottom:20px;right:20px;z-index:200;width:272px;">
-    <div style="background:rgba(16,20,26,0.94);border:1px solid rgba(74,222,128,0.22);border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(74,222,128,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden;animation:pinfo-slide-in 0.22s cubic-bezier(.22,1,.36,1);">
+<div id="player-info-modal" class="hidden" style="position:fixed;bottom:24px;right:24px;z-index:200;width:min(450px, calc(100vw - 32px));">
+    <div style="background:rgba(16,20,26,0.95);border:1.5px solid rgba(74,222,128,0.28);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(74,222,128,0.08);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);overflow:hidden;animation:pinfo-slide-in 0.22s cubic-bezier(.22,1,.36,1);">
         <!-- Header -->
-        <div style="display:flex;align-items:center;gap:11px;padding:13px 13px 11px;border-bottom:1px solid rgba(255,255,255,0.07);">
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
             <!-- Jersey number (shown when no photo) -->
-            <div id="pinfo-num-container" style="width:42px;height:42px;border-radius:11px;background:rgba(74,222,128,0.14);border:1px solid rgba(74,222,128,0.32);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#4ade80;flex-shrink:0;">
+            <div id="pinfo-num-container" style="width:76px;height:76px;border-radius:18px;background:rgba(74,222,128,0.14);border:1.5px solid rgba(74,222,128,0.36);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;color:#4ade80;flex-shrink:0;">
                 <span id="pinfo-num">77</span>
             </div>
             <!-- Player photo (shown when photo exists) -->
-            <div id="pinfo-photo-container" class="hidden" style="width:42px;height:42px;border-radius:11px;overflow:hidden;border:1px solid rgba(74,222,128,0.32);flex-shrink:0;">
+            <div id="pinfo-photo-container" class="hidden" style="width:76px;height:76px;border-radius:18px;overflow:hidden;border:1.5px solid rgba(74,222,128,0.36);flex-shrink:0;background:#0d1117;">
                 <img id="pinfo-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;" />
             </div>
             <div style="flex:1;min-width:0;">
-                <div id="pinfo-name" style="font-weight:800;font-size:14px;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Kyriakopoulos G.</div>
+                <div id="pinfo-name" style="font-weight:800;font-size:20px;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;">Kyriakopoulos G.</div>
             </div>
-            <button onclick="closePlayerInfoModal()" style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color 0.15s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='#64748b'">
-                <span class="material-symbols-outlined" style="font-size:15px;">close</span>
+            <button onclick="closePlayerInfoModal()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.color='#4ade80';this.style.background='rgba(74,222,128,0.15)'" onmouseout="this.style.color='#94a3b8';this.style.background='rgba(255,255,255,0.07)'">
+                <span class="material-symbols-outlined" style="font-size:18px;">close</span>
             </button>
         </div>
         <!-- Info rows -->
-        <div style="padding:10px 13px 13px;display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:11px;font-weight:600;">
-                    <span class="material-symbols-outlined" style="font-size:14px;color:#4ade80;">flag</span>
+        <div style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:14px;font-weight:600;">
+                    <span class="material-symbols-outlined" style="font-size:19px;color:#4ade80;">flag</span>
                     Εθνικότητα
                 </div>
-                <span id="pinfo-nationality" style="font-size:12px;font-weight:700;color:#e2e8f0;">—</span>
+                <span id="pinfo-nationality" style="font-size:15px;font-weight:700;color:#f1f5f9;">—</span>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:11px;font-weight:600;">
-                    <span class="material-symbols-outlined" style="font-size:14px;color:#4ade80;">cake</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:14px;font-weight:600;">
+                    <span class="material-symbols-outlined" style="font-size:19px;color:#4ade80;">cake</span>
                     Ημ. Γέννησης
                 </div>
-                <span id="pinfo-birthdate" style="font-size:12px;font-weight:700;color:#e2e8f0;">—</span>
+                <span id="pinfo-birthdate" style="font-size:15px;font-weight:700;color:#f1f5f9;">—</span>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:11px;font-weight:600;">
-                    <span class="material-symbols-outlined" style="font-size:14px;color:#4ade80;">height</span>
+                <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:14px;font-weight:600;">
+                    <span class="material-symbols-outlined" style="font-size:19px;color:#4ade80;">height</span>
                     Ύψος
                 </div>
-                <span id="pinfo-height" style="font-size:12px;font-weight:700;color:#e2e8f0;">—</span>
+                <span id="pinfo-height" style="font-size:15px;font-weight:700;color:#f1f5f9;">—</span>
             </div>
         </div>
     </div>
