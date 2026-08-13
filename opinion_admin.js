@@ -1410,42 +1410,103 @@ let selectedPlayerInfo = null;
 // PLAYER PHOTO SYSTEM
 // ══════════════════════════════════════════════════════════════
 const _adminPhotoCache = {}; // key: "sport/normalizedName" → dataURL
+let _adminPhotoMap = null;   // key: "candidate" → filename in /images/roster/
 let _adminPhotosLoaded = false;
+
+function greekToLatin(text) {
+    if (!text) return "";
+    let str = String(text).toLowerCase();
+    str = str
+        .replace(/αι|αί/g, 'ai')
+        .replace(/ει|εί/g, 'ei')
+        .replace(/οι|οί/g, 'oi')
+        .replace(/ου|ού/g, 'ou')
+        .replace(/αυ|αύ/g, 'av')
+        .replace(/ευ|εύ/g, 'ev')
+        .replace(/μπ/g, 'b')
+        .replace(/ντ/g, 'nt')
+        .replace(/γκ/g, 'gk')
+        .replace(/γγ/g, 'ng')
+        .replace(/τζ/g, 'tz')
+        .replace(/τσ/g, 'ts')
+        .replace(/θ/g, 'th')
+        .replace(/χ/g, 'ch')
+        .replace(/ψ/g, 'ps')
+        .replace(/ξ/g, 'x');
+
+    const singleMap = {
+        'α': 'a', 'ά': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'έ': 'e',
+        'ζ': 'z', 'η': 'i', 'ή': 'i', 'ι': 'i', 'ί': 'i', 'ϊ': 'i', 'ΐ': 'i',
+        'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ο': 'o', 'ό': 'o', 'π': 'p',
+        'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'ύ': 'y', 'ϋ': 'y',
+        'ΰ': 'y', 'φ': 'f', 'ω': 'o', 'ώ': 'o'
+    };
+
+    let res = '';
+    for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        res += singleMap[c] !== undefined ? singleMap[c] : c;
+    }
+    return res;
+}
 
 function getPlayerKeyCandidates(name) {
     if (!name) return [];
-    let cleaned = String(name).replace(/\(.*?\)/g, '');
-    cleaned = cleaned.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    cleaned = cleaned.replace(/[^a-z0-9\s-]/g, '').trim();
-    if (!cleaned) return [];
-
-    const words = cleaned.split(/\s+/).filter(Boolean);
-    const multiCharWords = words.filter(w => w.length > 1);
-    const validWords = multiCharWords.length > 0 ? multiCharWords : words;
+    
+    const rawNames = [name];
+    const latin = greekToLatin(name);
+    if (latin && latin !== name) rawNames.push(latin);
 
     const candidates = [];
-    const surname = validWords[validWords.length - 1];
-    if (surname && !candidates.includes(surname)) candidates.push(surname);
 
-    const fullHyphen = validWords.join('-');
-    if (fullHyphen && !candidates.includes(fullHyphen)) candidates.push(fullHyphen);
+    rawNames.forEach(n => {
+        let cleaned = String(n).replace(/\(.*?\)/g, '');
+        cleaned = cleaned.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        cleaned = cleaned.replace(/[^a-z0-9\u0370-\u03ff\s-]/g, '').trim();
+        if (!cleaned) return;
 
-    validWords.forEach(w => {
-        if (!candidates.includes(w)) candidates.push(w);
+        const words = cleaned.split(/\s+/).filter(Boolean);
+        const multiCharWords = words.filter(w => w.length > 1);
+        const validWords = multiCharWords.length > 0 ? multiCharWords : words;
+
+        const surname = validWords[validWords.length - 1];
+        if (surname && !candidates.includes(surname)) candidates.push(surname);
+
+        const fullHyphen = validWords.join('-');
+        if (fullHyphen && !candidates.includes(fullHyphen)) candidates.push(fullHyphen);
+
+        validWords.forEach(w => {
+            if (!candidates.includes(w)) candidates.push(w);
+        });
+
+        if (validWords.length >= 2) {
+            const last2 = validWords.slice(-2).join('-');
+            if (!candidates.includes(last2)) candidates.push(last2);
+        }
     });
 
-    if (validWords.length >= 2) {
-        const last2 = validWords.slice(-2).join('-');
-        if (!candidates.includes(last2)) candidates.push(last2);
+    if (candidates.length === 0) {
+        candidates.push('player');
     }
 
     return candidates;
 }
 
 async function loadAllPlayerPhotos() {
-    if (!window.db || _adminPhotosLoaded) return;
+    if (!_adminPhotoMap) {
+        try {
+            const r = await fetch('/player_photos.json?v=' + Date.now());
+            if (r.ok) {
+                _adminPhotoMap = await r.json();
+            }
+        } catch(e) { _adminPhotoMap = {}; }
+    }
+
+    const client = (typeof db !== 'undefined' && db) || (typeof window !== 'undefined' && window.db) || (window.supabase && window.supabase.createClient && window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+    if (!client || _adminPhotosLoaded) return;
+
     try {
-        const { data, error } = await db
+        const { data, error } = await client
             .from('articles')
             .select('source_url, content')
             .eq('category', 'PlayerPhoto');
@@ -1456,7 +1517,7 @@ async function loadAllPlayerPhotos() {
             _adminPhotoCache[key] = row.content;
         });
         _adminPhotosLoaded = true;
-        console.log(`[Photos] Loaded ${Object.keys(_adminPhotoCache).length} player photos`);
+        console.log(`[Photos] Loaded ${Object.keys(_adminPhotoCache).length} player photos from Supabase`);
     } catch (e) {
         console.warn('[Photos] Could not load photos:', e.message);
     }
@@ -1464,10 +1525,17 @@ async function loadAllPlayerPhotos() {
 
 async function savePlayerPhoto(sport, playerName, dataUrl) {
     const candidates = getPlayerKeyCandidates(playerName);
-    const primaryKey = candidates[0] || 'player';
+    let primaryKey = candidates[0];
+    if (!primaryKey) {
+        let cleanFallback = String(playerName || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        primaryKey = cleanFallback || 'player';
+    }
     const sourceUrl = `photo://${sport}/${primaryKey}`;
 
-    const { error } = await db.from('articles').upsert({
+    const client = (typeof db !== 'undefined' && db) || (typeof window !== 'undefined' && window.db) || (window.supabase && window.supabase.createClient && window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+    if (!client) throw new Error('Supabase client not initialized');
+
+    const { error } = await client.from('articles').upsert({
         source_url: sourceUrl,
         title: `Player Photo: ${playerName}`,
         summary: `${sport} player photo`,
@@ -1483,16 +1551,32 @@ async function savePlayerPhoto(sport, playerName, dataUrl) {
     candidates.forEach(c => {
         _adminPhotoCache[`${sport}/${c}`] = dataUrl;
     });
+    _adminPhotoCache[`${sport}/${primaryKey}`] = dataUrl;
     return primaryKey;
 }
 
 function getPlayerPhotoUrl(sport, playerName) {
+    if (!playerName) return null;
+    const sp = sport || 'football';
     const candidates = getPlayerKeyCandidates(playerName);
+
+    // 1. Check Supabase uploaded photos first
     for (const c of candidates) {
-        if (_adminPhotoCache[`${sport}/${c}`]) {
-            return _adminPhotoCache[`${sport}/${c}`];
+        if (_adminPhotoCache[`${sp}/${c}`]) {
+            return _adminPhotoCache[`${sp}/${c}`];
         }
     }
+
+    // 2. Fallback to local JSON map
+    if (_adminPhotoMap) {
+        const folder = sp === 'basketball' ? '/images/roster/basketball/' : '/images/roster/football/';
+        for (const c of candidates) {
+            if (_adminPhotoMap[c]) {
+                return folder + _adminPhotoMap[c];
+            }
+        }
+    }
+
     return null;
 }
 
@@ -1580,7 +1664,7 @@ function setupPhotoUploadWidget() {
 
 window._stagedPlayerPhoto = null;
 
-function showPopoverForPlayer(sport, rosterType, idx, token) {
+async function showPopoverForPlayer(sport, rosterType, idx, token) {
     if (adminSwapSource) {
         if (handleAdminPlayerClick(sport, rosterType, idx)) return;
     }
@@ -1638,6 +1722,9 @@ function showPopoverForPlayer(sport, rosterType, idx, token) {
     
     // ── Load existing photo into widget ──
     window._stagedPlayerPhoto = null;
+    if (!_adminPhotosLoaded && typeof loadAllPlayerPhotos === 'function') {
+        await loadAllPlayerPhotos();
+    }
     const existingPhoto = getPlayerPhotoUrl(sport, name);
     const previewEl = document.getElementById('photo-preview');
     const placeholderEl = document.querySelector('#photo-drop-zone .photo-placeholder');

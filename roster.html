@@ -432,29 +432,41 @@
 
         function getPlayerKeyCandidates(name) {
             if (!name) return [];
-            let cleaned = String(name).replace(/\(.*?\)/g, '');
-            cleaned = cleaned.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            cleaned = cleaned.replace(/[^a-z0-9\s-]/g, '').trim();
-            if (!cleaned) return [];
-
-            const words = cleaned.split(/\s+/).filter(Boolean);
-            const multiCharWords = words.filter(w => w.length > 1);
-            const validWords = multiCharWords.length > 0 ? multiCharWords : words;
+            
+            const rawNames = [name];
+            const latin = typeof greekToLatin === 'function' ? greekToLatin(name) : '';
+            if (latin && latin !== name) rawNames.push(latin);
 
             const candidates = [];
-            const surname = validWords[validWords.length - 1];
-            if (surname && !candidates.includes(surname)) candidates.push(surname);
 
-            const fullHyphen = validWords.join('-');
-            if (fullHyphen && !candidates.includes(fullHyphen)) candidates.push(fullHyphen);
+            rawNames.forEach(n => {
+                let cleaned = String(n).replace(/\(.*?\)/g, '');
+                cleaned = cleaned.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                cleaned = cleaned.replace(/[^a-z0-9\u0370-\u03ff\s-]/g, '').trim();
+                if (!cleaned) return;
 
-            validWords.forEach(w => {
-                if (!candidates.includes(w)) candidates.push(w);
+                const words = cleaned.split(/\s+/).filter(Boolean);
+                const multiCharWords = words.filter(w => w.length > 1);
+                const validWords = multiCharWords.length > 0 ? multiCharWords : words;
+
+                const surname = validWords[validWords.length - 1];
+                if (surname && !candidates.includes(surname)) candidates.push(surname);
+
+                const fullHyphen = validWords.join('-');
+                if (fullHyphen && !candidates.includes(fullHyphen)) candidates.push(fullHyphen);
+
+                validWords.forEach(w => {
+                    if (!candidates.includes(w)) candidates.push(w);
+                });
+
+                if (validWords.length >= 2) {
+                    const last2 = validWords.slice(-2).join('-');
+                    if (!candidates.includes(last2)) candidates.push(last2);
+                }
             });
 
-            if (validWords.length >= 2) {
-                const last2 = validWords.slice(-2).join('-');
-                if (!candidates.includes(last2)) candidates.push(last2);
+            if (candidates.length === 0) {
+                candidates.push('player');
             }
 
             return candidates;
@@ -481,8 +493,11 @@
             return null;
         }
 
-        window.openPlayerInfoModal = function(playerData, sport) {
+        window.openPlayerInfoModal = async function(playerData, sport) {
             if (!playerData) return;
+            if (!_photoMap || Object.keys(_supaPhotos).length === 0) {
+                await loadPhotoMap();
+            }
             
             let name = '', num = '', pos = '', nationality = '', birthDate = '', height = '';
             
@@ -524,6 +539,13 @@
             const photoImg     = document.getElementById('pinfo-photo');
             const numSpan      = document.getElementById('pinfo-num');
             if (photoUrl && photoCont && photoImg) {
+                photoImg.onerror = function() {
+                    this.onerror = null;
+                    if (photoCont) photoCont.classList.add('hidden');
+                    if (photoImg) photoImg.classList.add('hidden');
+                    if (numContainer) numContainer.style.display = '';
+                    if (numSpan) numSpan.textContent = num !== '' ? num : '—';
+                };
                 photoImg.src = photoUrl;
                 photoImg.classList.remove('hidden');
                 photoCont.classList.remove('hidden');
