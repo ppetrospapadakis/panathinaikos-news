@@ -1608,16 +1608,6 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Excluded by URL)', 'promo', 'Φίλτρο διεύθυνσης URL (Promo/Live show)');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${articleUrl.substring(0, 40)}`,
-                        summary: 'Skipped - Promo URL',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
 
@@ -1642,16 +1632,6 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Too Old)', 'promo', 'Παλαιότερο των 4 ωρών');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${articleUrl.substring(0, 40)}`,
-                        summary: 'Skipped - Too Old',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: scraped.created_at || new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
             if (scraped.status === 'skipped_video') {
@@ -1659,16 +1639,6 @@ async function main() {
                 runStats.totals.skipped_size++;
                 logSkippedArticle(target.name, articleUrl, 'Unknown Title (Video)', 'size', 'Βίντεο/Media άρθρο');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${articleUrl.substring(0, 40)}`,
-                        summary: 'Skipped - Video',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: scraped.created_at || new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
             if (scraped.status === 'skipped_size') {
@@ -1682,16 +1652,6 @@ async function main() {
                 const articleAgeMins = scraped.created_at ? (Date.now() - new Date(scraped.created_at).getTime()) / (1000 * 60) : 999;
                 if (articleAgeMins > 25) {
                     existingUrls.add(articleUrl);
-                    if (!isDryRun) {
-                        db.from('articles').insert({
-                            title: `[SKIPPED] ${scraped.title ? scraped.title.substring(0, 40) : 'Too Short'}`,
-                            summary: 'Skipped - Too Short',
-                            content: 'Skipped',
-                            source_url: articleUrl,
-                            category: 'DELETED',
-                            created_at: scraped.created_at || new Date().toISOString()
-                        }).then(() => {}).catch(() => {});
-                    }
                 } else {
                     console.log(`    [SMART RETRY] Fresh short stub (${articleAgeMins.toFixed(0)}m old). Will re-check on next run if expanded.`);
                 }
@@ -1709,16 +1669,6 @@ async function main() {
                 runStats.totals.skipped_relevance++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'relevance', 'Τοπικό φίλτρο λέξεων (Not PAO-relevant)');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
-                        summary: 'Skipped - Irrelevant',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: scraped.created_at || new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
 
@@ -1730,16 +1680,6 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο τίτλου (Promo/Live show)');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
-                        summary: 'Skipped - Promo Title',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: scraped.created_at || new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
 
@@ -1753,16 +1693,6 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Μπάσκετ σε Ποδόσφαιρο)');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
-                        summary: 'Skipped - Cross Category',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: scraped.created_at || new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
             if (target.category === 'Μπάσκετ' && isFootballUrl) {
@@ -1771,16 +1701,6 @@ async function main() {
                 runStats.totals.skipped_other++;
                 logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Διαχωρισμός κατηγορίας (Ποδόσφαιρο σε Μπάσκετ)');
                 existingUrls.add(articleUrl);
-                if (!isDryRun) {
-                    db.from('articles').insert({
-                        title: `[SKIPPED] ${scraped.title.substring(0, 40)}`,
-                        summary: 'Skipped - Cross Category',
-                        content: 'Skipped',
-                        source_url: articleUrl,
-                        category: 'DELETED',
-                        created_at: scraped.created_at || new Date().toISOString()
-                    }).then(() => {}).catch(() => {});
-                }
                 continue;
             }
 
@@ -2127,20 +2047,28 @@ async function main() {
         }
     }
 
+    // Helper to verify if an article is valid and eligible for social posting
+    const isEligibleForSocial = (a) => {
+        if (!a || !a.title) return false;
+        const t = a.title.toLowerCase();
+        const cat = (a.category || '').toLowerCase();
+        if (t.includes('skipped') || t.includes('[skip]') || cat === 'deleted' || cat.includes('deleted')) return false;
+        if (cat.includes('ερασιτέχνης') || cat.includes('official')) return false;
+        return true;
+    };
+
     // Social Media Catch-Up Check: Try to publish any unposted eligible article from the last 24 hours
     if (!isDryRun && db) {
         try {
             const { data: unposted } = await db.from('articles')
                 .select('id, title, summary, bullets, category, image_url, source_url, created_at')
                 .eq('instagram_posted', false)
+                .neq('category', 'DELETED')
                 .order('created_at', { ascending: false })
-                .limit(5);
+                .limit(10);
 
             if (unposted && unposted.length > 0) {
-                const eligible = unposted.find(a => {
-                    const cat = (a.category || '').toLowerCase();
-                    return !cat.includes('ερασιτέχνης') && !cat.includes('official');
-                });
+                const eligible = unposted.find(isEligibleForSocial);
                 if (eligible) {
                     console.log(`[Instagram Catch-Up] Attempting auto-post for unposted article: "${eligible.title}"`);
                     const articleForIg = {
@@ -2168,8 +2096,9 @@ async function main() {
                 const { data, error } = await db.from('articles')
                     .select('id, title, summary, bullets, category, image_url, source_url, created_at')
                     .or('facebook_posted.eq.false,facebook_posted.is.null')
+                    .neq('category', 'DELETED')
                     .order('created_at', { ascending: false })
-                    .limit(5);
+                    .limit(10);
                 if (!error && data && data.length > 0) {
                     unpostedFb = data;
                 }
@@ -2178,16 +2107,14 @@ async function main() {
             if (!unpostedFb || unpostedFb.length === 0) {
                 const { data } = await db.from('articles')
                     .select('id, title, summary, bullets, category, image_url, source_url, created_at')
+                    .neq('category', 'DELETED')
                     .order('created_at', { ascending: false })
-                    .limit(5);
+                    .limit(10);
                 unpostedFb = data;
             }
 
             if (unpostedFb && unpostedFb.length > 0) {
-                const eligibleFb = unpostedFb.find(a => {
-                    const cat = (a.category || '').toLowerCase();
-                    return !cat.includes('ερασιτέχνης') && !cat.includes('official');
-                });
+                const eligibleFb = unpostedFb.find(isEligibleForSocial);
                 if (eligibleFb) {
                     console.log(`[Facebook Catch-Up] Attempting auto-post for unposted article: "${eligibleFb.title}"`);
                     const articleForFb = {
