@@ -1065,16 +1065,39 @@ async function scrapeArticlePage(url, categoryHint) {
     }
 }
 
+function splitGreekSentences(text) {
+    if (!text) return [];
+    let clean = (text || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    // Protect single-letter initials (Greek & Latin): "Γ." -> "Γ__DOT__", "A." -> "A__DOT__"
+    let protectedText = clean
+        .replace(/([Α-Ωα-ωA-Za-z])\./g, (match, p1) => {
+            if (p1.length === 1 && p1 === p1.toUpperCase()) {
+                return p1 + '__DOT__';
+            }
+            return match;
+        })
+        .replace(/\b(κλπ|π\.χ|δλδ|μ\.μ|π\.μ|κ\.ά|κ\.ο\.κ|τ\.μ|ε\.ά|α\.α|κ\.α)\./gi, '$1__DOT__');
+
+    // Split on actual sentence endings: ; ! ? or . followed by space and uppercase
+    const rawSentences = protectedText.split(/(?:[;!?]|\.(?=\s+[Α-ΩA-Z]|\s*$|\n))/g);
+
+    return rawSentences
+        .map(s => s.replace(/__DOT__/g, '.').trim())
+        .filter(s => s.length > 20);
+}
+
 // ─── Fallback bullets ──────────────────────────────────────────────────────────
 function generateFallbackBullets(title, content) {
-    const clean = (content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const sentences = splitGreekSentences(content || '');
     const cleanTitle = (title || '').trim().toLowerCase();
-    const sentences = clean.split(/[.;!?]+/g)
-        .map(s => s.trim())
-        .filter(s => s.length > 20 && !s.includes('http') && s.toLowerCase() !== cleanTitle);
+    const filtered = sentences.filter(s => s.toLowerCase() !== cleanTitle && !s.includes('http'));
 
     const bullets = [];
-    for (const s of sentences) {
+    for (const s of filtered) {
         if (bullets.length >= 2) break;
         if (!bullets.some(b => b.substring(0, 15) === s.substring(0, 15))) {
             bullets.push(s);
