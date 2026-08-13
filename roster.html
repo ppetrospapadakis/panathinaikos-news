@@ -468,7 +468,7 @@
                 const num = player[4];
                 const pos = player[5];
                 const token = document.createElement('div');
-                token.className = 'player-token cursor-pointer hover:scale-110 transition-transform';
+                token.className = 'player-token cursor-pointer';
                 token.style.left = left + '%';
                 token.style.top = top + '%';
                 token.onclick = () => openPlayerInfoModal(player, 'football');
@@ -506,7 +506,7 @@
                     }
                 }
                 const token = document.createElement('div');
-                token.className = 'bball-token cursor-pointer hover:scale-110 transition-transform';
+                token.className = 'bball-token cursor-pointer';
                 token.style.left = left + '%';
                 token.style.top = top + '%';
                 token.onclick = () => openPlayerInfoModal(player, 'basketball');
