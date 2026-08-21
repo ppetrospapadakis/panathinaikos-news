@@ -379,6 +379,93 @@ function stemGreekWord(word) {
     return word.replace(/(εισ|εων|ουσ|ους|ιασ|ιας|ικος|ικη|ικης|ικου|ικων|ικα|ικο|ιο|ια|ιου|ιων|ησ|ης|ου|ων|οσ|ος|ασ|ας|εσ|ες|α|η|ο|υ|ε)$/, '');
 }
 
+// ─── Live Match & Interim Score Filter ─────────────────────────────────────────
+function isLiveOrInterimMatchArticle(title, text, url) {
+    const strTitle = title || '';
+    const strText = text || '';
+    const strUrl = url || '';
+
+    const removeAccents = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const cleanTitle = removeAccents(strTitle);
+    const cleanText = removeAccents(strText);
+    const cleanUrl = removeAccents(strUrl);
+
+    // 1. Direct live / stream / description indicators in URL or Title
+    const liveKeywords = [
+        'live-blog', 'liveblog', 'live-stream', 'livestream',
+        'σε εξελιξη', 'λεπτο προς λεπτο', 'live coverage', 'live description',
+        'live update', 'live scores', 'ημιχρονο', 'α ημιχρονο', 'β ημιχρονο',
+        'live streaming', 'περιγραφη', 'live-stis', 'back2mpak'
+    ];
+
+    const hasLivePhrase = liveKeywords.some(kw => cleanTitle.includes(kw) || cleanUrl.includes(kw)) ||
+                          /\blive\b/.test(cleanTitle) || /\blive\b/.test(cleanUrl);
+
+    if (hasLivePhrase) return true;
+
+    // 2. Minute indicators in title (e.g. 45', 60', 90+3')
+    if (/\b\d{1,2}['’]/.test(strTitle) || /\b90\+\d{1,2}['’]/.test(strTitle)) {
+        return true;
+    }
+
+    // 3. Check if the text explicitly states the match is finished / completed
+    const completionKeywords = [
+        'τελικο', 'τελικα', 'ληξη', 'σφυριγμα ληξης', 'τελειωσε', 'full time', 'ft',
+        'τελικο αποτελεσμα', 'τελικου αποτελεσματος'
+    ];
+    const isCompletedMatch = completionKeywords.some(kw => cleanTitle.includes(kw) || cleanText.includes(kw));
+
+    if (isCompletedMatch) {
+        return false; // Verified completed match report
+    }
+
+    // 4. Score pattern in title (e.g. "2-0", "1-0", "0-1", "2-1") without match completion confirmation
+    const hasScoreInTitle = /\b[0-9]\s*[-–:]\s*[0-9]\b/.test(cleanTitle);
+
+    if (hasScoreInTitle) {
+        return true; // Live or interim score update without match completion proof
+    }
+
+    return false;
+}
+
+// ─── Match Report vs Pre-Match Helpers ───────────────────────────────────────
+function isFinalMatchReport(title, text) {
+    const strTitle = title || '';
+    const strText = text || '';
+    const removeAccents = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const cleanTitle = removeAccents(strTitle);
+    const cleanText = removeAccents(strText);
+
+    const completionKeywords = [
+        'τελικο', 'τελικα', 'ληξη', 'σφυριγμα ληξης', 'τελειωσε', 'full time', 'ft',
+        'τελικο αποτελεσμα', 'τελικου αποτελεσματος', 'ισοπαλος', 'ισοπαλια', 'νικησε', 'επικρατησε', 'ηττηθηκε'
+    ];
+    const hasCompletionWord = completionKeywords.some(kw => cleanTitle.includes(kw) || cleanText.includes(kw));
+    const hasScoreInTitle = /\b[0-9]\s*[-–:]\s*[0-9]\b/.test(cleanTitle);
+
+    return hasCompletionWord || (hasScoreInTitle && !cleanTitle.includes('προαναγγελια'));
+}
+
+function isPreMatchOrLiveArticle(title, text) {
+    const strTitle = title || '';
+    const strText = text || '';
+    const removeAccents = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const cleanTitle = removeAccents(strTitle);
+    const cleanText = removeAccents(strText);
+
+    const preMatchKeywords = [
+        'πλανα', 'ενδεκαδα', 'αποστολη', 'προαναγγελια', 'προιστορια', 'διαιτητης',
+        'ωρα και καναλι', 'καναλι', 'τηλεοπτικη μεταδοση', 'προετοιμασια', 'πριν το ματς',
+        'σεναρια', 'ρετρο', 'live:', 'live stream', 'λεπτο προς λεπτο'
+    ];
+
+    const hasPreMatchWord = preMatchKeywords.some(kw => cleanTitle.includes(kw) || cleanText.includes(kw));
+    const isReport = isFinalMatchReport(title, text);
+
+    return hasPreMatchWord || !isReport;
+}
+
 function getCanonicalArticleId(urlStr) {
     if (!urlStr) return '';
     try {
@@ -762,7 +849,7 @@ async function scrapeArticlePage(url, categoryHint) {
         console.log(`[SCRAPE SKIPPED] Sportime papatheodwroy article URL skipped: ${url}`);
         return null;
     }
-    if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten') || url.toLowerCase().includes('protoselid')) {
+    if (url.toLowerCase().includes('galacticos') || url.toLowerCase().includes('interwetten') || url.toLowerCase().includes('protoselid') || url.toLowerCase().includes('athletiko-by-night') || url.toLowerCase().includes('athletiko_by_night') || url.toLowerCase().includes('athletikobynight')) {
         console.log(`[SCRAPE SKIPPED] URL contains blacklisted term: ${url}`);
         return null;
     }
@@ -1258,6 +1345,7 @@ async function generateArticleData(title, text, isOfficial = false) {
 ΑΠΑΝΤΗΣΕ ΑΠΟΚΛΕΙΣΤΙΚΑ σε μορφή JSON, με τα εξής keys (ΧΩΡΙΣ Markdown code blocks, ΧΩΡΙΣ "json"):
 {
   "is_panathinaikos_relevant": true ή false (βάλε false αν το άρθρο αφορά γενική διεθνή ειδησεογραφία, άλλα αθλήματα/ομάδες χωρίς καμία σύνδεση με τον Παναθηναϊκό, ή άσχετα παγκόσμια γεγονότα),
+  "is_live_or_ongoing_match": true ή false (θέσε true αν ο αγώνας βρίσκεται σε εξέλιξη, αν πρόκειται για live coverage/περιγραφή ή γκολ/σκορ χωρίς επιβεβαίωση λήξης),
   "title": "ο αναδιατυπωμένος τίτλος (ελαφρώς διαφορετικός από τον αρχικό, φυσικός, σοβαρός και δημοσιογραφικός. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ η χρήση ανύπαρκτων, παράδοξων, τεχνητών ή ακραίων σύνθετων λέξεων όπως «κεραυνόβραστη». Χρησιμοποίησε ΜΟΝΟ δόκιμες, καθαρά ελληνικές λέξεις της αθλητικής δημοσιογραφίας. ΠΟΤΕ μην χρησιμοποιείς τη λέξη «μπες» - χρησιμοποίησε «μπάσιμο» ή «κίνηση». ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ η συμπερίληψη ονομάτων δημοσιογράφων/συντακτών όπως Αθανασίου, Νικολογιάννης, Παπαθεοδώρου, κλπ στον τίτλο)",
   "content": "το αναδιατυπωμένο άρθρο (σύμφωνα με τους κανόνες παρακάτω)",
   "bullets": ["Bullet 1", "Bullet 2"]
@@ -1265,7 +1353,7 @@ async function generateArticleData(title, text, isOfficial = false) {
 
 ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΓΙΑ ΤΟ content:
 1. Μορφή & Μήκος: Γράψε ένα πλήρες, φυσικό άρθρο που να καλύπτει περίπου το 70% έως 90% των πληροφοριών, γεγονότων και λεπτομερειών της αρχικής πηγής. Χώρισε το κείμενο σε φυσικές παραγράφους (χωρίς περιορισμό στον αριθμό παραγράφων). Απόφυγε τη μονολεκτική συμπίεση αλλά και τις περιττές σάλτσες.
-2. Ακρίβεια: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά, ονόματα, νούμερα και δεδομένα. Απαγορεύεται η προσθήκη μη επιβεβαιωμένων πληροφοριών.
+2. Ακρίβεια & Πρόληψη Αυθαίρετης Νίκης: Διατήρησε 100% τα ακριβή πραγματικά περιστατικά. ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ η χρήση λέξεων όπως «νίκη», «επικράτησε», «κέρδισε», «θρίαμβος» ή «τελικό αποτέλεσμα» ΕΚΤΟΣ ΑΝ η αρχική πηγή αναφέρει ΡΗΤΑ και ΚΑΤΗΓΟΡΗΜΑΤΙΚΑ ότι ο αγώνας έχει ολοκληρωθεί (π.χ. «λήξη», «τελικό αποτέλεσμα», «σφύριγμα λήξης»).
 3. Αναδιατύπωση: Το άρθρο πρέπει να είναι πλήρως ξαναγραμμένο με δικές σου λέξεις. Απαγορεύεται το copy-paste.
 4. ${toneInstruction}
 5. Άμεση & Φακτουαλική Γραφή: Γράψε ΑΜΕΣΑ και ΑΝΤΙΚΕΙΜΕΝΙΚΑ, παρουσιάζοντας τα γεγονότα ως δεδομένα. ΑΠΑΓΟΡΕΥΟΝΤΑΙ αόριστες παθητικές διατυπώσεις ή ασαφείς αναφορές 3ου προσώπου όπως «διαψεύστηκαν σενάρια», «λέγεται ότι», «αναφέρθηκε πως», «κρίνεται αναγκαία», «ακούγεται ότι». Αντί για αόριστο «διαψεύστηκαν τα σενάρια για τον X», γράψε καθαρά και άμεσα «Δεν υφίσταται θέμα με τον X».
@@ -1305,6 +1393,11 @@ async function generateArticleData(title, text, isOfficial = false) {
         if (parsed.is_panathinaikos_relevant === false) {
             console.log(`  [AI EVALUATION] Article determined NOT relevant: "${title}"`);
             return { isRelevant: false, content: null, title: null, bullets: [] };
+        }
+
+        if (parsed.is_live_or_ongoing_match === true) {
+            console.log(`  [AI EVALUATION] Article identified as ongoing live match update: "${title}"`);
+            return { isRelevant: false, isLiveMatch: true, content: null, title: null, bullets: [] };
         }
 
         let newTitle = capitalizeTitle(sanitizeGreekText((parsed.title || title).trim()));
@@ -1351,6 +1444,7 @@ async function checkSemanticDuplicate(newTitle, newSummary, candidateArticles) {
 2. ΜΗΝ ΣΥΓΧΩΝΕΥΕΙΣ αν αναφέρονται στο **ίδιο πρόσωπο αλλά σε διαφορετικό γεγονός ή χρονική στιγμή**:
    - Ανακοίνωση μεταγραφής ΔΕΝ συγχωνεύεται με τακτική ανάλυση ή προφίλ καριέρας.
    - Οικονομικό ρεπορτάζ ΔΕΝ συγχωνεύεται με νέα συγκεκριμένου παίκτη.
+   - Αποτέλεσμα/Ρεπορτάζ λήξης αγώνα ΔΕΝ συγχωνεύεται ΠΟΤΕ με άρθρο προαναγγελίας, αρχικής ενδεκάδας, τηλεοπτικής μετάδοσης, προετοιμασίας ή ζωντανής περιγραφής πριν τη λήξη.
    - Αποτέλεσμα αγώνα ΔΕΝ συγχωνεύεται με ανάλυση επόμενου αγώνα.
 
 Αν ταυτίζεται στο ίδιο γεγονός, επίστρεψε ΑΠΟΚΛΕΙΣΤΙΚΑ το ID του υπάρχοντος άρθρου. Αν όχι, επίστρεψε "null". ΜΗΝ δικαιολογήσεις.
@@ -1623,7 +1717,7 @@ async function main() {
                 }
 
             // Skip specific promotional/irrelevant articles by keyword in URL
-            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone', 'recommendations', '/recommendation/', 'protoselid', 'protoselida', 'πρωτοσελιδα', 'πρωτοσέλιδα'];
+            const skipKeywords = ['back2mpak', 'live-stis', 'back2back', 'football-zone', 'recommendations', '/recommendation/', 'protoselid', 'protoselida', 'πρωτοσελιδα', 'πρωτοσέλιδα', 'athletiko-by-night', 'athletiko_by_night', 'athletiko by night', 'athletikobynight'];
             const lowerUrl = articleUrl.toLowerCase();
             if (skipKeywords.some(kw => lowerUrl.includes(kw))) {
                 console.log(`[SKIP] Promotional/Live show article ignored by URL: ${articleUrl}`);
@@ -1695,14 +1789,22 @@ async function main() {
                 continue;
             }
 
-            // Skip specific promotional/irrelevant articles by keyword in Title
+            // Skip specific promotional/irrelevant articles or live match updates by Title/Content/URL
             const lowerTitle = scraped.title.toLowerCase();
-            if (skipKeywords.some(kw => lowerTitle.includes(kw)) || /\blive\b/.test(lowerTitle) || /\bαναμονή\b/.test(lowerTitle)) {
-                console.log(`[SKIP] Promotional/Live show article ignored by Title: ${scraped.title}`);
+            if (skipKeywords.some(kw => lowerTitle.includes(kw)) || isLiveOrInterimMatchArticle(scraped.title, scraped.content || scraped.summary, articleUrl)) {
+                console.log(`[SKIP] Promotional/Live match article ignored: ${scraped.title}`);
                 runStats.sources[target.name].skipped_other++;
                 runStats.totals.skipped_other++;
-                logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο τίτλου (Promo/Live show)');
-                existingUrls.add(articleUrl);
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Φίλτρο ζωντανού αγώνα (Live/Ongoing match update)');
+
+                // Smart re-check: If live article is < 60 mins old, do NOT cache in existingUrls permanently,
+                // so subsequent runs can catch the final match report once the game finishes!
+                const articleAgeMins = scraped.created_at ? (Date.now() - new Date(scraped.created_at).getTime()) / (1000 * 60) : 999;
+                if (articleAgeMins > 60) {
+                    existingUrls.add(articleUrl);
+                } else {
+                    console.log(`    [SMART RETRY] Fresh live update (${articleAgeMins.toFixed(0)}m old). Will re-check on next run when match finishes.`);
+                }
                 continue;
             }
 
@@ -1740,6 +1842,12 @@ async function main() {
                 
                 const maxWindow = 240; // 4 hours (240 mins) candidate window
                 if (timeDiffMinutes > maxWindow) return false;
+
+                // Anti-Merge Rule: Do NOT merge a final match report into a pre-game or live match article!
+                if (isFinalMatchReport(scraped.title, scraped.content || scraped.summary) && isPreMatchOrLiveArticle(art.title, art.content || art.summary)) {
+                    console.log(`    [ANTI-MERGE GUARD] Refusing to merge final match report "${scraped.title.substring(0, 40)}" into pre-match/live article "${art.title.substring(0, 40)}"`);
+                    return false;
+                }
 
                 // If candidate already contains this URL or canonical ID, include as top candidate
                 const dbUrls = (art.source_url || '').split(',').map(u => u.trim());
@@ -1989,6 +2097,22 @@ async function main() {
             let finalContent = aiResult.content;
             let finalTitle = aiResult.title;
             let finalBullets = aiResult.bullets || [];
+
+            // ── Safety Guard: Prevent Premature Victory Claims ───────────────
+            const removeAccentsStr = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            const cleanFinal = removeAccentsStr(finalTitle + ' ' + (finalContent || ''));
+            const containsVictoryClaim = /\b(νικη|νικης|επικρατησε|κερδισε|πηρε τη νικη|θριαμβος|θριαμβευτικη|θριαμβευτικο|τριποντο)\b/.test(cleanFinal);
+            const sourceTextClean = removeAccentsStr(scraped.content || scraped.summary || '');
+            const sourceHasCompletion = /(τελικ|ληξ|σφυριγμ|full time|\bft\b|τελειωσ)/.test(sourceTextClean);
+            const isHistoricalArticle = /(σαν σημερα|παρελθον|αφιερωμα|ιστορια|θυμαται|τοτε|χρονια|ρετρο)/.test(sourceTextClean);
+
+            if (containsVictoryClaim && !sourceHasCompletion && !isHistoricalArticle && isLiveOrInterimMatchArticle(scraped.title, scraped.content, articleUrl)) {
+                console.log(`    [SAFETY GUARD BLOCKED] Refused to publish article claiming victory without match completion proof: "${finalTitle}"`);
+                runStats.sources[target.name].skipped_other++;
+                runStats.totals.skipped_other++;
+                logSkippedArticle(target.name, articleUrl, scraped.title, 'promo', 'Safety Guard: Πρόληψη ψευδούς νίκης χωρίς επιβεβαίωση λήξης');
+                continue;
+            }
 
             // ── Insert to DB ──────────────────────────────────────────────────
             const dbPayload = {
